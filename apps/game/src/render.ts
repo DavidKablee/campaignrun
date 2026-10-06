@@ -80,13 +80,14 @@ export class GameRenderer {
       
       let mesh = this.entityMeshes.get(ent.id);
       if (!mesh) {
-        // Spawn basic obstacle
+        // Spawn basic obstacle or pickup
         const eGeo = new THREE.BoxGeometry(
           ent.halfWidthMm * 2 * this.mmToUnits,
           ent.heightMm * this.mmToUnits || 1,
           ent.halfLenMm * 2 * this.mmToUnits
         );
-        const eMat = new THREE.MeshLambertMaterial({ color: '#e76f51' });
+        const color = ent.isPickup ? '#2a9d8f' : '#e76f51';
+        const eMat = new THREE.MeshLambertMaterial({ color });
         mesh = new THREE.Mesh(eGeo, eMat);
         this.scene.add(mesh);
         this.entityMeshes.set(ent.id, mesh);

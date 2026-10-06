@@ -79,18 +79,37 @@ export function step(state: SimState, input: number, config: SimConfig): void {
 
   // Spawning
   while (state.z + config.spawn.aheadMm > state.nextEntityZ) {
-    const obstacle = config.obstacles[rngIntRange(state.rng, 0, config.obstacles.length - 1)]!;
+    const isSupporter = rngIntRange(state.rng, 0, 100) < 40; // 40% chance of supporter group
+    
     const lane = rngIntRange(state.rng, 0, 2) as 0|1|2;
-    state.entities.push({
-      id: state.entityIdSeq++,
-      kind: obstacle.kind,
-      lane,
-      z: state.nextEntityZ,
-      halfWidthMm: obstacle.halfWidthMm,
-      halfLenMm: obstacle.halfLenMm,
-      heightMm: obstacle.heightMm,
-      active: true,
-    });
+    
+    if (isSupporter) {
+      state.entities.push({
+        id: state.entityIdSeq++,
+        kind: 'supporter',
+        lane,
+        z: state.nextEntityZ,
+        halfWidthMm: 500,
+        halfLenMm: 500,
+        heightMm: 1000,
+        active: true,
+        isPickup: true,
+        value: rngIntRange(state.rng, Math.floor(state.capacity * 0.45), Math.floor(state.capacity * 0.85)) || 1
+      });
+    } else {
+      const obstacle = config.obstacles[rngIntRange(state.rng, 0, config.obstacles.length - 1)]!;
+      state.entities.push({
+        id: state.entityIdSeq++,
+        kind: obstacle.kind,
+        lane,
+        z: state.nextEntityZ,
+        halfWidthMm: obstacle.halfWidthMm,
+        halfLenMm: obstacle.halfLenMm,
+        heightMm: obstacle.heightMm,
+        active: true,
+      });
+    }
+    
     const gap = rngIntRange(state.rng, config.spawn.gapMinMm, config.spawn.gapMaxMm);
     state.nextEntityZ += gap;
   }
@@ -102,21 +121,28 @@ export function step(state: SimState, input: number, config: SimConfig): void {
   const hitEnt = checkCollision(state, config);
   if (hitEnt) {
     hitEnt.active = false;
-    state.dents++;
-    state.invulnTicks = config.hit.invulnTicks;
-    state.speed = applyPermille(state.speed, config.hit.speedPermille);
-    state.momentum = config.momentum.min;
     
-    // Drop 25% of carried
-    const dropped = applyPermille(state.carried, 250);
-    state.carried -= dropped;
-    
-    if (state.dents >= config.hit.maxDents) {
-      state.events.push({ type: 'breakdown' });
+    if (hitEnt.isPickup) {
+      const amount = hitEnt.value || 1;
+      state.carried = clamp(state.carried + amount, 0, state.capacity);
+      state.events.push({ type: 'pickup', payload: amount });
     } else {
-      state.events.push({ type: 'dent' });
+      state.dents++;
+      state.invulnTicks = config.hit.invulnTicks;
+      state.speed = applyPermille(state.speed, config.hit.speedPermille);
+      state.momentum = config.momentum.min;
+      
+      // Drop 25% of carried
+      const dropped = applyPermille(state.carried, 250);
+      state.carried -= dropped;
+      
+      if (state.dents >= config.hit.maxDents) {
+        state.events.push({ type: 'breakdown' });
+      } else {
+        state.events.push({ type: 'dent' });
+      }
+      state.events.push({ type: 'hit', payload: hitEnt.id });
     }
-    state.events.push({ type: 'hit', payload: hitEnt.id });
   }
 
   state.tick++;

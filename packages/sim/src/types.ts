@@ -16,6 +16,8 @@ export interface Entity {
   halfLenMm: number;
   heightMm: number;
   active: boolean;
+  isPickup?: boolean;
+  value?: number;
 }
 
 export interface SimEvent {
