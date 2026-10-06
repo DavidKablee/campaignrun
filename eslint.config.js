@@ -4,7 +4,7 @@ import tseslint from 'typescript-eslint';
 const simBannedMath = ['random', 'sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'atan2', 'exp', 'log', 'log2', 'log10', 'pow', 'hypot', 'cbrt', 'sinh', 'cosh', 'tanh'];
 
 export default tseslint.config(
-  { ignores: ['**/dist/**', '**/node_modules/**', 'coverage/**'] },
+  { ignores: ['**/dist/**', '**/node_modules/**', 'coverage/**', 'tools/**/*.mjs'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {

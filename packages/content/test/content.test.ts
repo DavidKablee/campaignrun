@@ -4,8 +4,12 @@ import {
   calendar,
   contenders,
   copy,
+  isRidePlayable,
+  outfits,
   rides,
   simConfig,
+  stateIndex,
+  stations,
   stateSchema,
   venueTypeSchema,
 } from '../src/index';
@@ -23,6 +27,12 @@ describe('content packs', () => {
       expect(rides[i]!.followingGate).toBeGreaterThan(rides[i - 1]!.followingGate);
     }
     expect(rides.find((r) => r.id === 'okada')!.followingGate).toBe(150);
+    const okada = rides.find((r) => r.id === 'okada')!;
+    const keke = rides.find((r) => r.id === 'keke')!;
+    expect(isRidePlayable(okada, 149)).toBe(false);
+    expect(isRidePlayable(okada, 150)).toBe(true);
+    expect(isRidePlayable(keke, 1_000_000)).toBe(false);
+    expect(rides.filter((r) => r.playable).map((r) => r.id)).toEqual(['trek', 'okada']);
   });
 
   it('sim config sanity', () => {
@@ -35,6 +45,39 @@ describe('content packs', () => {
   it('disclosure is present and neutral', () => {
     expect(copy.disclosure).toMatch(/not polls/i);
     expect(copy.disclosure).toMatch(/Fictional game/);
+  });
+});
+
+describe('characters', () => {
+  it('every active Contender has a look and a valid default outfit', () => {
+    const { options, characters } = outfits;
+    for (const c of activeContenders) {
+      const ch = characters[c.id];
+      expect(ch, c.id).toBeDefined();
+      expect(options.tops.map((o) => o.id)).toContain(ch!.outfit.top);
+      expect(options.bottoms.map((o) => o.id)).toContain(ch!.outfit.bottom);
+      expect(options.footwear.map((o) => o.id)).toContain(ch!.outfit.footwear);
+      expect(options.headwear.map((o) => o.id)).toContain(ch!.outfit.headwear);
+    }
+  });
+  it('obstacles include hoppable and non-hoppable kinds', () => {
+    const low = simConfig.obstacles.filter((o) => o.heightMm < simConfig.hopHeightMm);
+    const high = simConfig.obstacles.filter((o) => o.heightMm >= simConfig.hopHeightMm);
+    expect(low.length).toBeGreaterThanOrEqual(4);
+    expect(high.length).toBeGreaterThanOrEqual(3);
+  });
+});
+
+describe('campaign map data', () => {
+  it('lists every calendar state once, with a station', () => {
+    const ids = calendar.unlocks.flatMap((u) => u.states);
+    expect(new Set(stateIndex.map((s) => s.id))).toEqual(new Set(ids));
+    expect(stateIndex).toHaveLength(ids.length);
+    expect(ids.filter((s) => s !== 'fct')).toHaveLength(36);
+    for (const row of stateIndex) {
+      expect(stations.some((st) => st.id === row.audioStem)).toBe(true);
+    }
+    expect(stateIndex.find((s) => s.id === 'lagos')!.audioStem).toBe('sw-fuji');
   });
 });
 

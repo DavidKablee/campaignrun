@@ -10,7 +10,9 @@
 - `packages/sim` is pure and deterministic: integers only in state, no `Math.random`, `Date`, `performance`, `DOM`, `Pixi`, `Three` or transcendental `Math.*` (lint-enforced).
 - The renderer reads sim state, never writes it.
 - All tunable numbers live in `packages/content` JSON, never inline.
-- Never write real politicians' names, party names/slogans, or any character→person mapping anywhere (code, content, commits, prompts, tests).
+- Parody names are allowed. They must be original jokes about a role (a market queen, a fixer, a teacher), not a person.
+- Never write a real politician's name, nickname, party name, party slogan, or any character→person mapping anywhere (code, content, commits, prompts, tests).
+- A Contender's name, face, outfit, and prop must not be close to a real person: no phonetic echo of a real name, no signature look, no face described so someone would name the same real person. If a name or face is that close, change it.
 - Contender choice never leaves the device before chunk C11 consent.
 - Every behaviour change ships with a test.
 

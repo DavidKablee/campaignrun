@@ -1,68 +1,68 @@
 [
   {
-    "id": "mama-ankara",
+    "id": "baba-bullabaa",
     "status": "active",
-    "name": "Mama Ankara",
-    "archetype": "The Market Queen",
+    "name": "Baba Bullabaa",
+    "archetype": "The Convener",
     "perk": { "id": "market-weave", "description": "Auto-weaves through the next hazard cluster.", "cooldownSec": 25, "durationSec": 4 },
     "tradeoff": { "stat": "laneChangeSpeed", "permille": 850, "description": "Slower lane change" },
     "palette": ["#E0902B", "#2B6E8E", "#F3E3C3"],
-    "barks": ["Pack your people, make we go!", "Oya, enter!", "No dull, my people!", "See crowd o!", "Na we dey lead!", "Small small, we reach."],
-    "catchphrase": "Pack your people, make we go!"
+    "barks": ["Make we gather!", "Everybody come!", "No stay for back!", "See crowd o!", "Na we dey call!", "Small small, we reach."],
+    "catchphrase": "Make we gather!"
   },
   {
-    "id": "engineer-spark",
+    "id": "mr-tiko",
     "status": "active",
-    "name": "Engineer Spark",
-    "archetype": "The Fixer",
+    "name": "Mr Tiko",
+    "archetype": "The Delegate",
     "perk": { "id": "reboot", "description": "One free revive with 3 seconds of invulnerability.", "cooldownSec": 40, "durationSec": 3 },
     "tradeoff": { "stat": "acceleration", "permille": 900, "description": "Gentler acceleration" },
-    "palette": ["#F2C230", "#3A4A5A", "#E8EEF2"],
-    "barks": ["If e spoil, we fix am.", "Tighten am!", "Small adjustment.", "Engine dey sweet!", "Wetin spoil? We go fix.", "Reboot done!"],
-    "catchphrase": "If e spoil, we fix am."
+    "palette": ["#1FA45B", "#3A4A5A", "#E8EEF2"],
+    "barks": ["We go settle am.", "Talk am finish.", "One seat, one voice.", "Hold your lane.", "Agreement don land.", "Move with the hall."],
+    "catchphrase": "We go settle am."
   },
   {
-    "id": "captain-kobo",
+    "id": "mr-obiliki",
     "status": "active",
-    "name": "Captain Kobo",
-    "archetype": "The Penny-Wise Skipper",
+    "name": "Mr Obiliki",
+    "archetype": "The Counter",
     "perk": { "id": "kobo-magnet", "description": "6 seconds of wide supporter and naira magnet.", "cooldownSec": 25, "durationSec": 6 },
     "tradeoff": { "stat": "topSpeed", "permille": 950, "description": "Slightly lower top speed" },
-    "palette": ["#1F5F8B", "#F0B429", "#E9E2D0"],
-    "barks": ["Every kobo must work.", "Steady as she goes!", "Count am well.", "No waste!", "Anchors aweigh!", "Small money, big crowd."],
-    "catchphrase": "Every kobo must work."
+    "palette": ["#F3E3C3", "#2A6F97", "#161616"],
+    "barks": ["Count the people.", "Write am down.", "No inflate the number.", "Every head counts.", "Check am twice.", "The tally dey talk."],
+    "catchphrase": "Count the people."
   },
   {
-    "id": "sister-beacon",
+    "id": "comrade-yale",
     "status": "active",
-    "name": "Sister Beacon",
-    "archetype": "The Lamp-Bearer",
+    "name": "Comrade Yale",
+    "archetype": "The Organiser",
     "perk": { "id": "beacon-horn", "description": "Horn cone is doubled.", "cooldownSec": 12, "durationSec": 2 },
     "tradeoff": { "stat": "hornCooldown", "permille": 1250, "description": "Longer horn cooldown" },
-    "palette": ["#F7D154", "#4C3A7A", "#FBF1D6"],
-    "barks": ["Shine your eye, make we shine road.", "Light dey show road!", "Follow the lamp!", "Fear no dark.", "Walk with light.", "We dey see far."],
-    "catchphrase": "Shine your eye, make we shine road."
+    "palette": ["#B3261E", "#161616", "#F4EFE6"],
+    "barks": ["The street get a say.", "Form a line!", "Pass the word.", "Nobody dey left behind.", "Hold the banner high.", "We move together."],
+    "catchphrase": "The street get a say."
   },
   {
-    "id": "uncle-boombox",
+    "id": "mr-don",
     "status": "active",
-    "name": "Uncle Boombox",
-    "archetype": "The Party Starter",
+    "name": "Mr. Don",
+    "archetype": "The Host",
     "perk": { "id": "street-party", "description": "8 seconds of confetti that turns hazards into crowd.", "cooldownSec": 35, "durationSec": 8 },
     "tradeoff": { "stat": "perkCharge", "permille": 1400, "description": "Perk meter takes longer to charge" },
-    "palette": ["#C23FA0", "#2EC4B6", "#FFE66D"],
-    "barks": ["Turn the volume up!", "DJ, play am!", "Everybody dance!", "Bass dey knock!", "Street party loading!", "Sound don land!"],
-    "catchphrase": "Turn the volume up!"
+    "palette": ["#E85D04", "#3A4A5A", "#FFE66D"],
+    "barks": ["Welcome to the rally.", "Come inside!", "Chair for everybody.", "The hall is open.", "Sit down, then we start.", "Guests don land."],
+    "catchphrase": "Welcome to the rally."
   },
   {
-    "id": "madam-metronome",
+    "id": "prof-sarah",
     "status": "active",
-    "name": "Madam Metronome",
-    "archetype": "The Teacher",
+    "name": "Prof. Sarah",
+    "archetype": "The Lecturer",
     "perk": { "id": "steady-beat", "description": "World slows 30% for 6 seconds.", "cooldownSec": 30, "durationSec": 6 },
     "tradeoff": { "stat": "firstVenueMultiplier", "permille": 900, "description": "Lower multiplier at the first venue" },
     "palette": ["#7B5EA7", "#E8A87C", "#F4EFE6"],
-    "barks": ["One, two, three: steady!", "Class, pay attention.", "Keep the beat.", "Slow and sure.", "Eyes on the road.", "Well done, class!"],
-    "catchphrase": "One, two, three: steady!"
+    "barks": ["Listen first. Then we move.", "One point at a time.", "Class, eyes front.", "Keep the beat.", "Question, then answer.", "Well done, class!"],
+    "catchphrase": "Listen first. Then we move."
   }
 ]

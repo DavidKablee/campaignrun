@@ -1,5 +1,3 @@
-
-
 export interface RngState {
   a: number;
   b: number;
@@ -7,9 +5,22 @@ export interface RngState {
   d: number;
 }
 
+export type EntityKind =
+  | 'supporter'
+  | 'loose-supporter'
+  | 'pothole'
+  | 'cones'
+  | 'car'
+  | 'trailer'
+  | 'pickup-zone'
+  | 'venue'
+  | 'grand-rally'
+  | 'finish'
+  | 'gate';
+
 export interface Entity {
   id: number;
-  kind: string;
+  kind: EntityKind | string;
   lane: 0 | 1 | 2;
   z: number;
   halfWidthMm: number;
@@ -17,33 +28,70 @@ export interface Entity {
   heightMm: number;
   active: boolean;
   isPickup?: boolean;
+  isZone?: boolean;
+  zoneKind?: 'pickup' | 'venue' | 'grand' | 'finish' | 'gate';
   value?: number;
+  /** Group size reserved for pickup zones (integer). */
+  groupSize?: number;
+  consumed?: boolean;
 }
 
+export type SimEventType =
+  | 'hit'
+  | 'pickup'
+  | 'dropoff'
+  | 'dent'
+  | 'breakdown'
+  | 'finish'
+  | 'fullHouse'
+  | 'onBeat'
+  | 'zoneEnter'
+  | 'zoneProgress'
+  | 'gate';
+
 export interface SimEvent {
-  type: 'hit' | 'pickup' | 'dropoff' | 'dent' | 'breakdown';
+  type: SimEventType;
   payload?: number;
 }
 
+export type RunPhase = 'running' | 'finished' | 'breakdown';
+
 export interface SimState {
-  tick: number;              // 60 per second
-  rng: RngState;             // sfc32 [a,b,c,d] uint32
-  laneX: number;             // 0..2000 (1000 = centre lane, 1/1000 lane units)
-  targetLane: 0 | 1 | 2;     // 0=Left, 1=Center, 2=Right
-  z: number;                 // distance travelled, mm
-  speed: number;             // mm per tick
-  hopT: number;              // ticks remaining in hop, 0 = grounded
-  dents: number;             // 0..3
-  invulnTicks: number;       // Ticks remaining of invulnerability
-  momentum: number;          // 1000..1500 (= x1.0..x1.5)
-  carried: number;           // current supporters
-  capacity: number;          // max supporters
-  skillCrowd: number;        
-  displayCrowd: number;      
-  entities: Entity[];        // spawned deterministically
-  events: SimEvent[];        // per-tick outputs for renderer/audio
-  nextEntityZ: number;       // mm marker for next spawn
-  entityIdSeq: number;       // counter
+  tick: number;
+  rng: RngState;
+  laneX: number;
+  targetLane: 0 | 1 | 2;
+  z: number;
+  speed: number;
+  hopT: number;
+  dents: number;
+  invulnTicks: number;
+  momentum: number;
+  carried: number;
+  capacity: number;
+  skillCrowd: number;
+  displayCrowd: number;
+  delivered: number;
+  entities: Entity[];
+  events: SimEvent[];
+  nextHazardZ: number;
+  entityIdSeq: number;
+  prevInput: number;
+  /** Zone interaction */
+  activeZoneId: number;
+  zoneProgress: number;
+  zoneNeeded: number;
+  beatTaps: number;
+  beatWindowTicks: number;
+  phase: RunPhase;
+  finishZ: number;
+  courseBuilt: boolean;
+  
+  // Contender / Perk state
+  activeContenderId: string;
+  perkActiveTicks: number;
+  perkCooldownTicks: number;
+  hornCooldownTicks: number;
 }
 
 export const Btn = {
@@ -54,4 +102,5 @@ export const Btn = {
   Brake: 16,
   Horn: 32,
   Perk: 64,
+  Tap: 128,
 } as const;

@@ -1,0 +1,44 @@
+[
+  {
+    "id": "sw-fuji",
+    "name": "Èkó Wave",
+    "zone": "SW",
+    "blurb": "Fuji and talking drums, generated in the game. On air for Lagos."
+  },
+  {
+    "id": "se-highlife",
+    "name": "Ogene Line",
+    "zone": "SE",
+    "blurb": "Highlife and wood drums. Opens when a South-East state unlocks."
+  },
+  {
+    "id": "ss-brass",
+    "name": "Creek Brass",
+    "zone": "SS",
+    "blurb": "Highlife and brass. Opens when a South-South state unlocks."
+  },
+  {
+    "id": "nw-kalangu",
+    "name": "Harmattan Air",
+    "zone": "NW",
+    "blurb": "Kalangu patterns. Opens when a North-West state unlocks."
+  },
+  {
+    "id": "ne-algaita",
+    "name": "Sahel Signal",
+    "zone": "NE",
+    "blurb": "Algaita and drums. Opens when a North-East state unlocks."
+  },
+  {
+    "id": "nc-drums",
+    "name": "Middle Belt Beat",
+    "zone": "NC",
+    "blurb": "Middle Belt drums. Opens when a North-Central state unlocks."
+  },
+  {
+    "id": "fct-mix",
+    "name": "Capital Mix",
+    "zone": "FCT",
+    "blurb": "The zone stems together. Opens with the finale."
+  }
+]

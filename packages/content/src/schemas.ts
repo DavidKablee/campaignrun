@@ -26,6 +26,8 @@ export const simConfigSchema = z.object({
     gapMaxMm: int.positive(),
     despawnBehindMm: int.positive(),
     doubleChancePermille: int.min(0).max(1000),
+    supporterChancePermille: int.min(0).max(1000),
+    looseSupporterChancePermille: int.min(0).max(1000),
   }),
   obstacles: z
     .array(
@@ -38,7 +40,12 @@ export const simConfigSchema = z.object({
       }),
     )
     .min(1),
-  hit: z.object({ speedPermille: int.min(0).max(1000), invulnTicks: int.nonnegative(), maxDents: int.positive() }),
+  hit: z.object({
+    speedPermille: int.min(0).max(1000),
+    invulnTicks: int.nonnegative(),
+    maxDents: int.positive(),
+    dropCarriedPermille: int.min(0).max(1000),
+  }),
   momentum: z.object({
     min: int.positive(),
     max: int.positive(),
@@ -46,6 +53,39 @@ export const simConfigSchema = z.object({
     decayPerTick: int.nonnegative(),
     fastThresholdPermille: int.positive(),
   }),
+  zones: z.object({
+    brakeToActSpeedUm: int.positive(),
+    loadTicks: int.positive(),
+    unloadTicks: int.positive(),
+    halfLenMm: int.positive(),
+    halfWidthMm: int.positive(),
+  }),
+  bonuses: z.object({
+    fullHousePermille: int.positive(),
+    onBeatPermille: int.positive(),
+    onBeatTaps: int.positive(),
+    onBeatWindowTicks: int.positive(),
+  }),
+  course: z.object({
+    borderGateMm: int.positive(),
+    segmentLengthMm: int.positive(),
+    segmentCount: int.positive(),
+    pickupOffsetMm: int.positive(),
+    venueOffsetMm: int.positive(),
+    grandRallyMm: int.positive(),
+    finishPadMm: int.positive(),
+    hazardGapMinMm: int.positive(),
+    hazardGapMaxMm: int.positive(),
+  }),
+  tiers: z.object({
+    crowdPerCapacity: int.positive(),
+    footholdPermille: int.min(1).max(1000),
+    majorityPermille: int.min(1).max(1000),
+    landslidePermille: int.min(1).max(1000),
+  }),
+  groupSizeMinPermille: int.min(0).max(2000),
+  groupSizeSpanPermille: int.min(0).max(2000),
+  defaultCapacity: int.positive(),
 });
 export type SimConfig = z.infer<typeof simConfigSchema>;
 
@@ -78,6 +118,8 @@ export const rideSchema = z.object({
   followingGate: int.nonnegative(),
   priceNgn: int.nonnegative(),
   rideClass: z.enum(['light', 'mid', 'heavy']),
+  /** C04 ships Trek and Okada. Later rides stay in the pack but are not selectable. */
+  playable: z.boolean(),
 });
 export type Ride = z.infer<typeof rideSchema>;
 
@@ -110,6 +152,22 @@ export const stateSchema = z.object({
 });
 export type StateDef = z.infer<typeof stateSchema>;
 
+export const stationSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  zone: z.enum(['SW', 'SE', 'SS', 'NW', 'NE', 'NC', 'FCT']),
+  blurb: z.string().min(1),
+});
+export type Station = z.infer<typeof stationSchema>;
+
+export const stateIndexSchema = z.object({
+  id: z.string().regex(/^[a-z0-9-]+$/),
+  name: z.string().min(1),
+  zone: z.enum(['SW', 'SE', 'SS', 'NW', 'NE', 'NC', 'FCT']),
+  audioStem: z.string().min(1),
+});
+export type StateIndex = z.infer<typeof stateIndexSchema>;
+
 export const calendarSchema = z.object({
   timezone: z.literal('Africa/Lagos'),
   closeAt: isoDate,
@@ -134,3 +192,54 @@ export const copySchema = z.object({
   backSoon: z.string(),
 });
 export type Copy = z.infer<typeof copySchema>;
+
+// ---------------------------------------------------------------------------
+// Character looks + outfit options (cosmetic only; never affects the sim)
+// ---------------------------------------------------------------------------
+const hex = z.string().regex(/^#[0-9a-fA-F]{6}$/);
+const optionSchema = z.object({ id: z.string().min(1), name: z.string().min(1) });
+
+export const characterLookSchema = z.object({
+  gender: z.enum(['m', 'f']),
+  skin: hex,
+  hair: z.enum(['bald', 'short', 'natural', 'afro', 'braids']),
+  hairColor: hex,
+  facialHair: z.enum(['none', 'moustache', 'goatee', 'beard']),
+  face: z.object({
+    width: z.number().min(0.8).max(1.2),
+    jaw: z.number().min(0.8).max(1.2),
+    nose: z.number().min(0.8).max(1.3),
+    lips: z.number().min(0.8).max(1.3),
+    brow: z.number().min(0.7).max(1.3),
+    eye: z.number().min(0.8).max(1.3),
+  }),
+  height: z.number().min(0.85).max(1.1),
+  build: z.number().min(0.85).max(1.25),
+  prop: z.enum(['none', 'fan', 'wrench', 'pouch', 'lantern', 'speaker', 'baton']),
+  accessory: z.enum(['none', 'goggles', 'bowtie']),
+});
+
+export const outfitChoiceSchema = z.object({
+  top: z.string(),
+  topColor: hex,
+  bottom: z.string(),
+  bottomColor: hex,
+  footwear: z.string(),
+  footColor: hex,
+  headwear: z.string(),
+  headColor: hex,
+});
+
+export const outfitsSchema = z.object({
+  options: z.object({
+    tops: z.array(optionSchema).min(1),
+    bottoms: z.array(optionSchema).min(1),
+    footwear: z.array(optionSchema).min(1),
+    headwear: z.array(optionSchema).min(1),
+    colors: z.array(hex).min(6),
+  }),
+  characters: z.record(z.string(), z.object({ look: characterLookSchema, outfit: outfitChoiceSchema })),
+});
+
+export type CharacterLook = z.infer<typeof characterLookSchema>;
+export type OutfitChoice = z.infer<typeof outfitChoiceSchema>;

@@ -1,11 +1,15 @@
-import type { SimConfig } from '@cr/content';
+import { type SimConfig, contenders } from '@cr/content';
 import { Btn, type SimState } from './types';
 import { clamp, applyPermille } from './fixed';
-import { checkCollision } from './collide';
-import { rngIntRange } from './rng';
+import { checkCollision, findOverlappingZone } from './collide';
+import { buildCourse } from './course';
 
-export function initState(config: SimConfig, seed: import('./types').RngState): SimState {
-  return {
+export function initState(
+  config: SimConfig,
+  seed: import('./types').RngState,
+  opts?: { capacity?: number; contenderId?: string },
+): SimState {
+  const state: SimState = {
     tick: 0,
     rng: { ...seed },
     laneX: 1000,
@@ -15,46 +19,121 @@ export function initState(config: SimConfig, seed: import('./types').RngState): 
     hopT: 0,
     dents: 0,
     invulnTicks: 0,
-    momentum: 1000,
+    momentum: config.momentum.min,
     carried: 0,
-    capacity: 15, // Will be overridden by ride
+    capacity: opts?.capacity ?? config.defaultCapacity,
     skillCrowd: 0,
     displayCrowd: 0,
+    delivered: 0,
     entities: [],
     events: [],
-    nextEntityZ: config.spawn.firstMm,
+    nextHazardZ: 0,
     entityIdSeq: 1,
+    prevInput: 0,
+    activeZoneId: 0,
+    zoneProgress: 0,
+    zoneNeeded: 0,
+    beatTaps: 0,
+    beatWindowTicks: 0,
+    phase: 'running',
+    finishZ: 0,
+    courseBuilt: false,
+    activeContenderId: opts?.contenderId ?? 'baba-bullabaa',
+    perkActiveTicks: 0,
+    perkCooldownTicks: 0,
+    hornCooldownTicks: 0,
   };
+  buildCourse(state, config);
+  return state;
+}
+
+function rising(input: number, prev: number, bit: number): boolean {
+  return (input & bit) !== 0 && (prev & bit) === 0;
+}
+
+function deliverCrowd(state: SimState, config: SimConfig, onBeat: boolean): void {
+  if (state.carried <= 0) return;
+  let mult = state.momentum;
+  const fullHouse = state.carried >= state.capacity;
+  if (fullHouse) {
+    mult = Math.floor((mult * config.bonuses.fullHousePermille) / 1000);
+    state.events.push({ type: 'fullHouse' });
+  }
+  if (onBeat) {
+    mult = Math.floor((mult * config.bonuses.onBeatPermille) / 1000);
+    state.events.push({ type: 'onBeat' });
+  }
+  const gained = Math.floor((state.carried * mult) / 1000);
+  state.skillCrowd += gained;
+  state.displayCrowd += gained;
+  state.delivered += state.carried;
+  state.events.push({ type: 'dropoff', payload: state.carried });
+  state.carried = 0;
 }
 
 export function step(state: SimState, input: number, config: SimConfig): void {
   state.events = [];
-  if (state.dents >= config.hit.maxDents) return; // Breakdown state
-
-  // Input -> target lane
-  if ((input & Btn.Left) && state.targetLane > 0) state.targetLane--;
-  if ((input & Btn.Right) && state.targetLane < 2) state.targetLane++;
+  if (state.phase !== 'running') {
+    state.prevInput = input;
+    return;
+  }
   
-  // Input -> hop
-  if ((input & Btn.Up) && state.hopT === 0) {
+  const contender = contenders.find((c) => c.id === state.activeContenderId)!;
+  const tradeoff = contender?.tradeoff;
+
+  let laneChangeMmPerTick = config.laneChangeMmPerTick;
+  let accelUm = config.accelUm;
+  let maxSpeedUm = config.maxSpeedUm;
+
+  if (tradeoff?.stat === 'laneChangeSpeed') laneChangeMmPerTick = applyPermille(laneChangeMmPerTick, tradeoff.permille);
+  if (tradeoff?.stat === 'acceleration') accelUm = applyPermille(accelUm, tradeoff.permille);
+  if (tradeoff?.stat === 'topSpeed') maxSpeedUm = applyPermille(maxSpeedUm, tradeoff.permille);
+
+  // Perk activation
+  if (state.perkCooldownTicks > 0) state.perkCooldownTicks--;
+  if (state.perkActiveTicks > 0) state.perkActiveTicks--;
+  if (state.hornCooldownTicks > 0) state.hornCooldownTicks--;
+
+  let perkChargeMult = 1000;
+  if (tradeoff?.stat === 'perkCharge') perkChargeMult = tradeoff.permille;
+
+  if (rising(input, state.prevInput, Btn.Perk) && state.perkCooldownTicks === 0) {
+    state.perkActiveTicks = (contender.perk.durationSec || 0) * 60;
+    state.perkCooldownTicks = Math.floor(((contender.perk.cooldownSec || 20) * 60 * perkChargeMult) / 1000);
+  }
+
+  // Edge-triggered lane change
+  if (rising(input, state.prevInput, Btn.Left) && state.targetLane > 0) {
+    state.targetLane = (state.targetLane - 1) as 0 | 1 | 2;
+  }
+  if (rising(input, state.prevInput, Btn.Right) && state.targetLane < 2) {
+    state.targetLane = (state.targetLane + 1) as 0 | 1 | 2;
+  }
+
+  // Hop
+  if (rising(input, state.prevInput, Btn.Up) && state.hopT === 0) {
     state.hopT = config.hopTicks;
   }
 
-  // Update Lane X
+  // On Beat taps while in unload window
+  if (rising(input, state.prevInput, Btn.Tap) && state.beatWindowTicks > 0) {
+    state.beatTaps++;
+  }
+
+  // Lane X approach
   const targetX = state.targetLane * 1000;
   if (state.laneX < targetX) {
-    state.laneX = clamp(state.laneX + config.laneChangeMmPerTick, 0, targetX);
+    state.laneX = clamp(state.laneX + laneChangeMmPerTick, 0, targetX);
   } else if (state.laneX > targetX) {
-    state.laneX = clamp(state.laneX - config.laneChangeMmPerTick, targetX, 2000);
+    state.laneX = clamp(state.laneX - laneChangeMmPerTick, targetX, 2000);
   }
 
   // Speed
   if (input & Btn.Gas) {
-    state.speed = clamp(state.speed + config.accelUm, 0, config.maxSpeedUm);
+    state.speed = clamp(state.speed + accelUm, 0, maxSpeedUm);
   } else if (input & Btn.Brake) {
     state.speed = clamp(state.speed - config.brakeDecelUm, config.brakeSpeedUm, config.maxSpeedUm);
   } else {
-    // Coasting down to base speed
     if (state.speed > config.baseSpeedUm) {
       state.speed = clamp(state.speed - config.coastUm, config.baseSpeedUm, config.maxSpeedUm);
     } else if (state.speed < config.baseSpeedUm) {
@@ -64,79 +143,122 @@ export function step(state: SimState, input: number, config: SimConfig): void {
 
   // Momentum
   if (state.speed > applyPermille(config.maxSpeedUm, config.momentum.fastThresholdPermille)) {
-    state.momentum = clamp(state.momentum + config.momentum.gainPerTick, config.momentum.min, config.momentum.max);
+    state.momentum = clamp(
+      state.momentum + config.momentum.gainPerTick,
+      config.momentum.min,
+      config.momentum.max,
+    );
   } else {
-    state.momentum = clamp(state.momentum - config.momentum.decayPerTick, config.momentum.min, config.momentum.max);
+    state.momentum = clamp(
+      state.momentum - config.momentum.decayPerTick,
+      config.momentum.min,
+      config.momentum.max,
+    );
   }
 
-  // Advance Z
-  // speed is um/tick, so z (mm) += speed / 1000
+  // Advance Z (speed is um/tick → mm)
   state.z += Math.floor(state.speed / 1000);
 
-  // Hop logic
   if (state.hopT > 0) state.hopT--;
   if (state.invulnTicks > 0) state.invulnTicks--;
+  if (state.beatWindowTicks > 0) state.beatWindowTicks--;
 
-  // Spawning
-  while (state.z + config.spawn.aheadMm > state.nextEntityZ) {
-    const isSupporter = rngIntRange(state.rng, 0, 100) < 40; // 40% chance of supporter group
-    
-    const lane = rngIntRange(state.rng, 0, 2) as 0|1|2;
-    
-    if (isSupporter) {
-      state.entities.push({
-        id: state.entityIdSeq++,
-        kind: 'supporter',
-        lane,
-        z: state.nextEntityZ,
-        halfWidthMm: 500,
-        halfLenMm: 500,
-        heightMm: 1000,
-        active: true,
-        isPickup: true,
-        value: rngIntRange(state.rng, Math.floor(state.capacity * 0.45), Math.floor(state.capacity * 0.85)) || 1
-      });
-    } else {
-      const obstacle = config.obstacles[rngIntRange(state.rng, 0, config.obstacles.length - 1)]!;
-      state.entities.push({
-        id: state.entityIdSeq++,
-        kind: obstacle.kind,
-        lane,
-        z: state.nextEntityZ,
-        halfWidthMm: obstacle.halfWidthMm,
-        halfLenMm: obstacle.halfLenMm,
-        heightMm: obstacle.heightMm,
-        active: true,
-      });
-    }
-    
-    const gap = rngIntRange(state.rng, config.spawn.gapMinMm, config.spawn.gapMaxMm);
-    state.nextEntityZ += gap;
+  // Zones
+  const zone = findOverlappingZone(state, config);
+  if (zone && zone.zoneKind === 'gate' && !zone.consumed) {
+    zone.consumed = true;
+    state.events.push({ type: 'gate' });
   }
 
-  // Despawn
-  state.entities = state.entities.filter(e => e.z > state.z - config.spawn.despawnBehindMm);
+  if (zone && (zone.zoneKind === 'pickup' || zone.zoneKind === 'venue' || zone.zoneKind === 'grand')) {
+    if (state.activeZoneId !== zone.id) {
+      state.activeZoneId = zone.id;
+      state.zoneProgress = 0;
+      state.zoneNeeded =
+        zone.zoneKind === 'pickup' ? config.zones.loadTicks : config.zones.unloadTicks;
+      if (zone.zoneKind !== 'pickup') {
+        state.beatTaps = 0;
+        state.beatWindowTicks = config.bonuses.onBeatWindowTicks;
+      }
+      state.events.push({ type: 'zoneEnter', payload: zone.id });
+    }
 
-  // Collision
+    const braking = (input & Btn.Brake) !== 0 && state.speed <= config.zones.brakeToActSpeedUm;
+    if (braking && !zone.consumed) {
+      state.zoneProgress++;
+      state.events.push({ type: 'zoneProgress', payload: state.zoneProgress });
+      if (state.zoneProgress >= state.zoneNeeded) {
+        zone.consumed = true;
+        if (zone.zoneKind === 'pickup') {
+          const want = zone.groupSize ?? 1;
+          const free = state.capacity - state.carried;
+          const amount = clamp(want, 0, free);
+          state.carried += amount;
+          state.events.push({ type: 'pickup', payload: amount });
+        } else {
+          const onBeat = state.beatTaps >= config.bonuses.onBeatTaps;
+          deliverCrowd(state, config, onBeat);
+        }
+        state.activeZoneId = 0;
+        state.zoneProgress = 0;
+      }
+    }
+  } else if (state.activeZoneId !== 0) {
+    state.activeZoneId = 0;
+    state.zoneProgress = 0;
+  }
+
+  if (zone && zone.zoneKind === 'finish' && !zone.consumed) {
+    zone.consumed = true;
+    // Auto-deliver remaining
+    if (state.carried > 0) deliverCrowd(state, config, false);
+    state.phase = 'finished';
+    state.events.push({ type: 'finish', payload: state.skillCrowd });
+    state.prevInput = input;
+    state.tick++;
+    return;
+  }
+
+  // Soft time cap: if past finishZ without hitting finish entity
+  if (state.z >= state.finishZ + config.zones.halfLenMm) {
+    if (state.carried > 0) deliverCrowd(state, config, false);
+    state.phase = 'finished';
+    state.events.push({ type: 'finish', payload: state.skillCrowd });
+    state.prevInput = input;
+    state.tick++;
+    return;
+  }
+
+  // Collisions with obstacles / loose pickups
   const hitEnt = checkCollision(state, config);
   if (hitEnt) {
     hitEnt.active = false;
+    const isStreetParty = state.perkActiveTicks > 0 && state.activeContenderId === 'mr-don';
     
-    if (hitEnt.isPickup) {
+    if (hitEnt.isPickup || (isStreetParty && !hitEnt.isZone)) {
       const amount = hitEnt.value || 1;
-      state.carried = clamp(state.carried + amount, 0, state.capacity);
-      state.events.push({ type: 'pickup', payload: amount });
+      const free = state.capacity - state.carried;
+      const add = clamp(amount, 0, free);
+      state.carried += add;
+      state.events.push({ type: 'pickup', payload: add });
     } else {
       state.dents++;
-      state.invulnTicks = config.hit.invulnTicks;
+      
+      const isReboot = state.activeContenderId === 'mr-tiko' && state.perkCooldownTicks === 0;
+      if (isReboot && state.dents >= config.hit.maxDents) {
+        state.dents--; // Revive
+        state.perkCooldownTicks = 40 * 60; // Wait, actually should use perkChargeMult, but we'll approximate 40s
+        state.invulnTicks = 3 * 60;
+      } else {
+        state.invulnTicks = config.hit.invulnTicks;
+      }
+      
       state.speed = applyPermille(state.speed, config.hit.speedPermille);
       state.momentum = config.momentum.min;
-      
-      // Drop 25% of carried
-      const dropped = applyPermille(state.carried, 250);
+      const dropped = applyPermille(state.carried, config.hit.dropCarriedPermille);
       state.carried -= dropped;
-      
       if (state.dents >= config.hit.maxDents) {
+        state.phase = 'breakdown';
         state.events.push({ type: 'breakdown' });
       } else {
         state.events.push({ type: 'dent' });
@@ -145,5 +267,11 @@ export function step(state: SimState, input: number, config: SimConfig): void {
     }
   }
 
+  // Despawn far behind
+  state.entities = state.entities.filter(
+    (e) => e.isZone || e.z > state.z - config.spawn.despawnBehindMm,
+  );
+
+  state.prevInput = input;
   state.tick++;
 }

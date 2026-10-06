@@ -11,21 +11,130 @@
   "brakeDecelUm": 9000,
   "coastUm": 2500,
   "runTicks": 5400,
-  "player": { "halfWidthMm": 450, "halfLenMm": 1100, "heightMm": 1700 },
+  "player": {
+    "halfWidthMm": 450,
+    "halfLenMm": 1100,
+    "heightMm": 1700
+  },
   "spawn": {
     "aheadMm": 110000,
     "firstMm": 45000,
     "gapMinMm": 15000,
     "gapMaxMm": 32000,
     "despawnBehindMm": 15000,
-    "doubleChancePermille": 250
+    "doubleChancePermille": 250,
+    "supporterChancePermille": 400,
+    "looseSupporterChancePermille": 200
   },
   "obstacles": [
-    { "kind": "pothole", "weight": 30, "halfWidthMm": 900, "halfLenMm": 700, "heightMm": 150 },
-    { "kind": "cones", "weight": 25, "halfWidthMm": 600, "halfLenMm": 400, "heightMm": 600 },
-    { "kind": "car", "weight": 30, "halfWidthMm": 900, "halfLenMm": 2200, "heightMm": 2200 },
-    { "kind": "trailer", "weight": 15, "halfWidthMm": 1100, "halfLenMm": 4000, "heightMm": 3000 }
+    {
+      "kind": "pothole",
+      "weight": 20,
+      "halfWidthMm": 900,
+      "halfLenMm": 700,
+      "heightMm": 150
+    },
+    {
+      "kind": "cones",
+      "weight": 14,
+      "halfWidthMm": 1100,
+      "halfLenMm": 400,
+      "heightMm": 600
+    },
+    {
+      "kind": "tyres",
+      "weight": 14,
+      "halfWidthMm": 800,
+      "halfLenMm": 700,
+      "heightMm": 900
+    },
+    {
+      "kind": "barricade",
+      "weight": 14,
+      "halfWidthMm": 1200,
+      "halfLenMm": 350,
+      "heightMm": 1000
+    },
+    {
+      "kind": "jersey",
+      "weight": 8,
+      "halfWidthMm": 1200,
+      "halfLenMm": 500,
+      "heightMm": 1100
+    },
+    {
+      "kind": "roadworks",
+      "weight": 8,
+      "halfWidthMm": 1250,
+      "halfLenMm": 1400,
+      "heightMm": 1800
+    },
+    {
+      "kind": "car",
+      "weight": 14,
+      "halfWidthMm": 900,
+      "halfLenMm": 2200,
+      "heightMm": 2000
+    },
+    {
+      "kind": "danfo",
+      "weight": 10,
+      "halfWidthMm": 1000,
+      "halfLenMm": 2700,
+      "heightMm": 2400
+    },
+    {
+      "kind": "trailer",
+      "weight": 6,
+      "halfWidthMm": 1150,
+      "halfLenMm": 4000,
+      "heightMm": 3000
+    }
   ],
-  "hit": { "speedPermille": 450, "invulnTicks": 90, "maxDents": 3 },
-  "momentum": { "min": 1000, "max": 1500, "gainPerTick": 3, "decayPerTick": 2, "fastThresholdPermille": 1050 }
+  "hit": {
+    "speedPermille": 450,
+    "invulnTicks": 90,
+    "maxDents": 3,
+    "dropCarriedPermille": 250
+  },
+  "momentum": {
+    "min": 1000,
+    "max": 1500,
+    "gainPerTick": 3,
+    "decayPerTick": 2,
+    "fastThresholdPermille": 1050
+  },
+  "zones": {
+    "brakeToActSpeedUm": 120000,
+    "loadTicks": 60,
+    "unloadTicks": 60,
+    "halfLenMm": 4000,
+    "halfWidthMm": 4200
+  },
+  "bonuses": {
+    "fullHousePermille": 1250,
+    "onBeatPermille": 1500,
+    "onBeatTaps": 4,
+    "onBeatWindowTicks": 90
+  },
+  "course": {
+    "borderGateMm": 20000,
+    "segmentLengthMm": 260000,
+    "segmentCount": 5,
+    "pickupOffsetMm": 30000,
+    "venueOffsetMm": 230000,
+    "grandRallyMm": 50000,
+    "finishPadMm": 15000,
+    "hazardGapMinMm": 16000,
+    "hazardGapMaxMm": 30000
+  },
+  "tiers": {
+    "crowdPerCapacity": 4,
+    "footholdPermille": 250,
+    "majorityPermille": 510,
+    "landslidePermille": 750
+  },
+  "groupSizeMinPermille": 600,
+  "groupSizeSpanPermille": 900,
+  "defaultCapacity": 8
 }
