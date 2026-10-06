@@ -1,0 +1,19 @@
+{
+  "id": "lagos",
+  "name": "Lagos",
+  "zone": "SW",
+  "biomeKit": "lagoon-metro",
+  "palette": { "sky": "#8FD3F4", "fog": "#CFE9F5", "ground": "#6B7280", "accent": "#F2B705" },
+  "landmarks": [
+    { "name": "Ojuelegba", "venueType": "square", "verified": false },
+    { "name": "Third Mainland Bridge", "venueType": "bridge", "verified": false },
+    { "name": "Lekki–Ikoyi Link Bridge", "venueType": "bridge", "verified": false },
+    { "name": "Balogun Market", "venueType": "market", "verified": false },
+    { "name": "Freedom Park", "venueType": "park", "verified": false }
+  ],
+  "scenery": [],
+  "hazards": ["go-slow", "keke-swerve", "flash-flood"],
+  "signatureRide": "danfo",
+  "welcomeLines": ["Ẹ káàbọ̀ sí Èkó!"],
+  "audioStem": "sw-fuji"
+}

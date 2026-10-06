@@ -1,0 +1,31 @@
+{
+  "tickHz": 60,
+  "laneSpacingMm": 2800,
+  "laneChangeMmPerTick": 200,
+  "hopTicks": 36,
+  "hopHeightMm": 1500,
+  "baseSpeedUm": 233000,
+  "maxSpeedUm": 333000,
+  "brakeSpeedUm": 70000,
+  "accelUm": 3500,
+  "brakeDecelUm": 9000,
+  "coastUm": 2500,
+  "runTicks": 5400,
+  "player": { "halfWidthMm": 450, "halfLenMm": 1100, "heightMm": 1700 },
+  "spawn": {
+    "aheadMm": 110000,
+    "firstMm": 45000,
+    "gapMinMm": 15000,
+    "gapMaxMm": 32000,
+    "despawnBehindMm": 15000,
+    "doubleChancePermille": 250
+  },
+  "obstacles": [
+    { "kind": "pothole", "weight": 30, "halfWidthMm": 900, "halfLenMm": 700, "heightMm": 150 },
+    { "kind": "cones", "weight": 25, "halfWidthMm": 600, "halfLenMm": 400, "heightMm": 600 },
+    { "kind": "car", "weight": 30, "halfWidthMm": 900, "halfLenMm": 2200, "heightMm": 2200 },
+    { "kind": "trailer", "weight": 15, "halfWidthMm": 1100, "halfLenMm": 4000, "heightMm": 3000 }
+  ],
+  "hit": { "speedPermille": 450, "invulnTicks": 90, "maxDents": 3 },
+  "momentum": { "min": 1000, "max": 1500, "gainPerTick": 3, "decayPerTick": 2, "fastThresholdPermille": 1050 }
+}

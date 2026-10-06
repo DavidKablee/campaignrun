@@ -1,0 +1,4 @@
+{
+  "note": "SHA-256 hashes of normalised blocked terms (see tools/hash-blocklist.mjs). Plain-text list lives outside the repo.",
+  "hashes": []
+}

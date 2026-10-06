@@ -1,0 +1,19 @@
+{
+  "id": "dummy",
+  "name": "Dummy State",
+  "zone": "NC",
+  "biomeKit": "farmland-river",
+  "palette": { "sky": "#A8DADC", "fog": "#E0F2F1", "ground": "#8D7B68", "accent": "#E76F51" },
+  "landmarks": [
+    { "name": "Test Market", "venueType": "market", "verified": false },
+    { "name": "Test Stadium", "venueType": "stadium", "verified": false },
+    { "name": "Test Square", "venueType": "square", "verified": false },
+    { "name": "Test Park", "venueType": "park", "verified": false },
+    { "name": "Test Bridge", "venueType": "bridge", "verified": false }
+  ],
+  "scenery": [],
+  "hazards": ["dust"],
+  "signatureRide": "keke",
+  "welcomeLines": ["Welcome o!"],
+  "audioStem": "nc-drums"
+}

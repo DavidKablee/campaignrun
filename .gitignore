@@ -1,0 +1,11 @@
+node_modules
+dist
+.DS_Store
+*.log
+.env
+.env.*
+.wrangler
+coverage
+# NEVER commit: any file mapping characters to real people, plain-text blocklists
+private/
+blocklist.plain.*

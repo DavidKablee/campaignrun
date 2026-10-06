@@ -1,0 +1,32 @@
+{
+  "name": "campaign-run",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "packageManager": "pnpm@10.30.3",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @cr/game dev",
+    "build": "pnpm --filter @cr/game build",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "test": "vitest run",
+    "content:lint": "tsx tools/content-lint.ts",
+    "size:check": "node tools/size-check.mjs",
+    "verify": "pnpm typecheck && pnpm lint && pnpm test && pnpm content:lint && pnpm build && pnpm size:check"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.6.4",
+    "eslint": "^10.12.0",
+    "prettier": "^3.9.9",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.71.1",
+    "vite": "^8.3.3",
+    "vitest": "^5.0.3"
+  }
+}

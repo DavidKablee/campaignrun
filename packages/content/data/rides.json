@@ -1,0 +1,9 @@
+[
+  { "id": "trek", "name": "Trek (on foot)", "tier": 0, "capacity": 8, "size": "S", "trait": "Very agile, squeezes narrow gaps", "followingGate": 0, "priceNgn": 0, "rideClass": "light" },
+  { "id": "okada", "name": "Okada", "tier": 1, "capacity": 15, "size": "S", "trait": "Fast, narrow hitbox", "followingGate": 150, "priceNgn": 3000, "rideClass": "light" },
+  { "id": "keke", "name": "Keke", "tier": 2, "capacity": 30, "size": "M", "trait": "Balanced", "followingGate": 1500, "priceNgn": 12000, "rideClass": "mid" },
+  { "id": "hilux", "name": "Sienna / Hilux", "tier": 3, "capacity": 50, "size": "M", "trait": "Absorbs 1 free hit per run", "followingGate": 6000, "priceNgn": 40000, "rideClass": "mid" },
+  { "id": "danfo", "name": "Danfo", "tier": 4, "capacity": 80, "size": "L", "trait": "Ploughs light barriers, slow lane change", "followingGate": 20000, "priceNgn": 120000, "rideClass": "heavy" },
+  { "id": "coaster", "name": "Coaster bus", "tier": 5, "capacity": 120, "size": "L", "trait": "Widest supporter magnet", "followingGate": 60000, "priceNgn": 300000, "rideClass": "heavy" },
+  { "id": "grand-convoy", "name": "Grand Convoy", "tier": 6, "capacity": 150, "size": "L", "trait": "Cosmetic flex; requires Spread badge", "followingGate": 120000, "priceNgn": 600000, "rideClass": "heavy" }
+]
