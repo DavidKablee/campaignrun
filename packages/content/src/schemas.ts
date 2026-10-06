@@ -28,6 +28,7 @@ export const simConfigSchema = z.object({
     doubleChancePermille: int.min(0).max(1000),
     supporterChancePermille: int.min(0).max(1000),
     looseSupporterChancePermille: int.min(0).max(1000),
+    integrityChancePermille: int.min(0).max(1000),
   }),
   obstacles: z
     .array(

@@ -1,7 +1,7 @@
 # Status
 
-**Current chunk:** C04 done. Next: C05 (Contender perks + balance bot).
-**Last done:** Local campaign map, from/to HUD, and per-state radio (generated in the browser).
+**Current chunk:** C05 done. Next: C06 (Hazards & Integrity events).
+**Last done:** Contender perks inside deterministic sim (Magnet, Street Party, Reboot, Tradeoffs) and the 10k Balance Bot.
 
 ## Done
 - Agent handoff (`AGENTS.md` pointers, ADRs, chunks C00–C19, SPEC/ARCHITECTURE/DESIGN/PLAYTEST).

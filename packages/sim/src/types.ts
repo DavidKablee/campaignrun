@@ -29,6 +29,7 @@ export interface Entity {
   active: boolean;
   isPickup?: boolean;
   isZone?: boolean;
+  isIntegrityHazard?: boolean;
   zoneKind?: 'pickup' | 'venue' | 'grand' | 'finish' | 'gate';
   value?: number;
   /** Group size reserved for pickup zones (integer). */
@@ -47,11 +48,13 @@ export type SimEventType =
   | 'onBeat'
   | 'zoneEnter'
   | 'zoneProgress'
-  | 'gate';
+  | 'gate'
+  | 'integrityFail'
+  | 'integritySuccess';
 
 export interface SimEvent {
   type: SimEventType;
-  payload?: number;
+  payload?: number | string;
 }
 
 export type RunPhase = 'running' | 'finished' | 'breakdown';
@@ -71,6 +74,7 @@ export interface SimState {
   capacity: number;
   skillCrowd: number;
   displayCrowd: number;
+  integrity: number;
   delivered: number;
   entities: Entity[];
   events: SimEvent[];

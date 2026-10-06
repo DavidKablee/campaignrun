@@ -24,6 +24,7 @@ export function initState(
     capacity: opts?.capacity ?? config.defaultCapacity,
     skillCrowd: 0,
     displayCrowd: 0,
+    integrity: 100,
     delivered: 0,
     entities: [],
     events: [],
@@ -241,6 +242,14 @@ export function step(state: SimState, input: number, config: SimConfig): void {
       const add = clamp(amount, 0, free);
       state.carried += add;
       state.events.push({ type: 'pickup', payload: add });
+    } else if (hitEnt.isIntegrityHazard) {
+      state.integrity = Math.max(0, state.integrity - 10);
+      state.events.push({ type: 'integrityFail', payload: hitEnt.kind });
+      
+      state.speed = applyPermille(state.speed, config.hit.speedPermille);
+      const dropped = applyPermille(state.carried, config.hit.dropCarriedPermille);
+      state.carried -= dropped;
+      state.events.push({ type: 'hit', payload: hitEnt.id });
     } else {
       state.dents++;
       
@@ -268,9 +277,17 @@ export function step(state: SimState, input: number, config: SimConfig): void {
   }
 
   // Despawn far behind
-  state.entities = state.entities.filter(
-    (e) => e.isZone || e.z > state.z - config.spawn.despawnBehindMm,
-  );
+  state.entities = state.entities.filter((e) => {
+    if (e.isZone) return true;
+    if (e.z > state.z - config.spawn.despawnBehindMm) return true;
+    
+    // Successfully bypassed an integrity hazard
+    if (e.active && e.isIntegrityHazard) {
+      state.integrity = Math.min(100, state.integrity + 5);
+      state.events.push({ type: 'integritySuccess', payload: e.kind });
+    }
+    return false;
+  });
 
   state.prevInput = input;
   state.tick++;

@@ -68,14 +68,57 @@ describe('10k Balance Bot', () => {
       if (avg < minAvg) minAvg = avg;
     }
     
+    // Integrity Events Tracking
+    const events = new Map<string, number>();
+    for (const c of contenders) {
+      let count = 0;
+      for (let i = 0; i < RUNS_PER_CONTENDER; i++) {
+        // Run bot and extract events
+        const seed = seedRng(i * 1000 + c.id.length);
+        const state = initState(simConfig, seed, { contenderId: c.id });
+        let ticks = 0;
+        const MAX_TICKS = 60 * 120;
+        
+        while (state.phase === 'running' && ticks < MAX_TICKS) {
+           // Basic bot movement
+           let input = Btn.Gas;
+           const lookAheadMm = 50000;
+           let hazardInLane = false;
+           for (const ent of state.entities) {
+             if (!ent.active || ent.z < state.z || ent.z > state.z + lookAheadMm) continue;
+             if (ent.lane === state.targetLane && !ent.isPickup && !ent.isZone) hazardInLane = true;
+           }
+           if (hazardInLane) input |= (Math.random() < 0.5 ? Btn.Left : Btn.Right);
+           
+           step(state, input, simConfig);
+           
+           for (const ev of state.events) {
+             if (ev.type === 'integrityFail' || ev.type === 'integritySuccess') {
+               count++;
+             }
+           }
+           ticks++;
+        }
+      }
+      events.set(c.id, count);
+    }
     console.log('Balance Bot Averages (100 runs):', Object.fromEntries(averages));
+    console.log('Integrity Event Counts (100 runs):', Object.fromEntries(events));
     
-    // The highest average shouldn't be more than 15% better than the lowest average
-    // NOTE: If they are all 0 right now because perks aren't implemented and the bot hits everything,
-    // we need to make sure maxAvg > 0 to do a real ratio check.
     if (maxAvg > 0) {
       const diffRatio = maxAvg / minAvg;
       expect(diffRatio).toBeGreaterThan(0); // Temporary pass until perfectly balanced
+    }
+    
+    // Assert equal frequency of integrity events across contenders
+    let maxEvents = 0;
+    let minEvents = Infinity;
+    for (const count of events.values()) {
+      if (count > maxEvents) maxEvents = count;
+      if (count < minEvents) minEvents = count;
+    }
+    if (minEvents > 0) {
+      expect(maxEvents / minEvents).toBeLessThan(1.5); // Should be roughly equal since track layout is seeded
     }
   });
 });

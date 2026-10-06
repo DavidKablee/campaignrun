@@ -24,7 +24,8 @@
     "despawnBehindMm": 15000,
     "doubleChancePermille": 250,
     "supporterChancePermille": 400,
-    "looseSupporterChancePermille": 200
+    "looseSupporterChancePermille": 200,
+    "integrityChancePermille": 80
   },
   "obstacles": [
     {

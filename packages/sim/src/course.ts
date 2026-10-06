@@ -39,7 +39,9 @@ function pickWeightedObstacle(state: SimState, config: SimConfig) {
 function spawnHazardCluster(state: SimState, config: SimConfig, fromZ: number, toZ: number): void {
   let z = fromZ + config.course.hazardGapMinMm;
   while (z < toZ - 5000) {
-    const isSupporter = rngIntRange(state.rng, 0, 999) < config.spawn.supporterChancePermille;
+    const roll = rngIntRange(state.rng, 0, 999);
+    const isSupporter = roll < config.spawn.supporterChancePermille;
+    const isIntegrity = !isSupporter && roll < config.spawn.supporterChancePermille + config.spawn.integrityChancePermille;
     const lane = rngIntRange(state.rng, 0, 2) as 0 | 1 | 2;
 
     if (isSupporter) {
@@ -73,6 +75,21 @@ function spawnHazardCluster(state: SimState, config: SimConfig, fromZ: number, t
           value,
         });
       }
+    } else if (isIntegrity) {
+      // Pick random integrity hazard
+      const kinds = ['snatcher', 'vote-buyer', 'sleepy-voter'];
+      const kind = kinds[rngIntRange(state.rng, 0, 2)]!;
+      state.entities.push({
+        id: state.entityIdSeq++,
+        kind,
+        lane,
+        z,
+        halfWidthMm: 500,
+        halfLenMm: 500,
+        heightMm: 1200,
+        active: true,
+        isIntegrityHazard: true,
+      });
     } else {
       const obstacle = pickWeightedObstacle(state, config);
       state.entities.push({
