@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-07 — C07 content pipeline
+
+- State packs now have a schema-checked dynamic loader, with JSON-only pack coverage and size budgets. The Contender fairness bot now uses deterministic bot inputs, so it reliably catches a real course-balance regression.
+
 ## 2026-10-06 — Roster names
 
 - The six Contenders are Baba Bullabaa, Mr Tiko, Mr Obiliki, Comrade Yale, Mr. Don, and Prof. Sarah. Each one is a role joke with a different face and clothes.

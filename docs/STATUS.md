@@ -1,7 +1,7 @@
 # Status
 
-**Current chunk:** C05 done. Next: C06 (Hazards & Integrity events).
-**Last done:** Contender perks inside deterministic sim (Magnet, Street Party, Reboot, Tradeoffs) and the 10k Balance Bot.
+**Current chunk:** C07 done. Next: C08 (Missions, streaks and the Convoy Yard).
+**Last done:** State-pack pipeline is schema-validated and dynamically loadable; Lagos pack is within its size budget; disclosure screens are present. The Contender fairness bot now uses deterministic courses and inputs.
 
 ## Done
 - Agent handoff (`AGENTS.md` pointers, ADRs, chunks C00–C19, SPEC/ARCHITECTURE/DESIGN/PLAYTEST).
@@ -16,7 +16,7 @@
 
 ## Next
 1. Phone playtest per `docs/PLAYTEST.md`.
-2. C05 — six Contender perks in the sim, plus the 10k balance bot.
+2. C08 — Missions, streaks and the Convoy Yard.
 
 ## Blockers
 - Legal: media-law review + ToS/Privacy before R0 (not code).
@@ -30,6 +30,7 @@
 - The community Rally Map (other players, 200 rallies) is still C14. The map in the game is this device's trail only.
 - Contender choice stays in localStorage until C11.
 - E2E: `pnpm test:e2e` (needs Chromium via `PLAYWRIGHT_BROWSERS_PATH=0 playwright install chromium`). Not part of `pnpm verify`.
+- State-pack loader registration is intentionally data-only; add a new pack via `packages/content/data/states/` and `packages/content/src/state-packs.ts`, then keep it under the 3 MB gzip budget.
 
 ## Session note (splash)
 - Splash is now a live 3D Lagos hero (render/showcase.ts, autopilot, 30 fps, private sim copy). Returning players get Continue campaign. Reference platform: Lagos Run (3D runner) and Lagos Life; differentiators are in the C03 plan (crowd on ride, adaptive music, Todays Road, WhatsApp 9:16 share card, offline).

@@ -1,11 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import { simConfig, contenders } from '@cr/content';
-import { initState, step, seedRng, Btn } from '../src';
+import { initState, step, seedRng, Btn, nextRng } from '../src';
 
 // A simple bot that plays the game
 function runBot(seedNum: number, contenderId: string): number {
   const seed = seedRng(seedNum);
   const state = initState(simConfig, seed, { contenderId });
+  const botRng = seedRng(seedNum ^ 0x9e3779b9);
   
   let ticks = 0;
   const MAX_TICKS = 60 * 120; // 2 minutes max
@@ -28,12 +29,12 @@ function runBot(seedNum: number, contenderId: string): number {
     if (hazardInLane) {
       if (state.targetLane === 0) input |= Btn.Right;
       else if (state.targetLane === 2) input |= Btn.Left;
-      else input |= (Math.random() < 0.5 ? Btn.Left : Btn.Right);
+      else input |= (nextRng(botRng) & 1) === 0 ? Btn.Left : Btn.Right;
     }
     
     // Random hops and perks
-    if (Math.random() < 0.05) input |= Btn.Up;
-    if (Math.random() < 0.05) input |= Btn.Perk;
+    if (nextRng(botRng) % 20 === 0) input |= Btn.Up;
+    if (nextRng(botRng) % 20 === 0) input |= Btn.Perk;
     
     step(state, input, simConfig);
     ticks++;
@@ -74,7 +75,11 @@ describe('10k Balance Bot', () => {
       let count = 0;
       for (let i = 0; i < RUNS_PER_CONTENDER; i++) {
         // Run bot and extract events
-        const seed = seedRng(i * 1000 + c.id.length);
+        // Every contender receives the same seeded course and input stream.
+        // This asserts the course itself is contender-neutral, not that two
+        // unrelated random bot runs happen to land on the same events.
+        const seed = seedRng(i * 1000 + 17);
+        const botRng = seedRng((i * 1000 + 17) ^ 0x9e3779b9);
         const state = initState(simConfig, seed, { contenderId: c.id });
         let ticks = 0;
         const MAX_TICKS = 60 * 120;
@@ -88,7 +93,7 @@ describe('10k Balance Bot', () => {
              if (!ent.active || ent.z < state.z || ent.z > state.z + lookAheadMm) continue;
              if (ent.lane === state.targetLane && !ent.isPickup && !ent.isZone) hazardInLane = true;
            }
-           if (hazardInLane) input |= (Math.random() < 0.5 ? Btn.Left : Btn.Right);
+           if (hazardInLane) input |= (nextRng(botRng) & 1) === 0 ? Btn.Left : Btn.Right;
            
            step(state, input, simConfig);
            

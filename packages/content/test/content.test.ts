@@ -2,9 +2,11 @@ import { describe, expect, it } from 'vitest';
 import {
   activeContenders,
   calendar,
+  availableStatePacks,
   contenders,
   copy,
   isRidePlayable,
+  loadStatePack,
   outfits,
   rides,
   simConfig,
@@ -111,6 +113,12 @@ describe('JSON-only state addition', () => {
   });
   it('palaces cannot be venues', () => {
     expect(venueTypeSchema.safeParse('palace').success).toBe(false);
+  });
+  it('loads a registered state pack without application-specific code', async () => {
+    expect(availableStatePacks()).toContain('lagos');
+    const state = await loadStatePack('lagos');
+    expect(state.id).toBe('lagos');
+    await expect(loadStatePack('not-a-state')).rejects.toThrow('Unknown state pack');
   });
 });
 

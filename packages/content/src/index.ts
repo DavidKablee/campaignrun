@@ -20,6 +20,7 @@ import {
 } from './schemas';
 
 export * from './schemas';
+export * from './state-packs';
 
 /** Parsed at import time: an invalid pack fails the build, not the player. */
 export const simConfig = simConfigSchema.parse(simJson);
