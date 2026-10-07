@@ -169,6 +169,15 @@ export const stateIndexSchema = z.object({
 });
 export type StateIndex = z.infer<typeof stateIndexSchema>;
 
+/** Minimal launch-shell metadata; the full state stays in a lazy pack. */
+export const launchStateSchema = z.object({
+  id: z.string().regex(/^[a-z0-9-]+$/),
+  audioStem: z.string().min(1),
+  welcomeLine: z.string().min(1),
+  landmarks: z.array(z.string().min(1)).length(5),
+});
+export type LaunchState = z.infer<typeof launchStateSchema>;
+
 export const calendarSchema = z.object({
   timezone: z.literal('Africa/Lagos'),
   closeAt: isoDate,

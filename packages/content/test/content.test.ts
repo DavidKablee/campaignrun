@@ -6,6 +6,7 @@ import {
   contenders,
   copy,
   isRidePlayable,
+  lagosLaunch,
   loadStatePack,
   outfits,
   rides,
@@ -118,6 +119,9 @@ describe('JSON-only state addition', () => {
     expect(availableStatePacks()).toContain('lagos');
     const state = await loadStatePack('lagos');
     expect(state.id).toBe('lagos');
+    expect(lagosLaunch.landmarks).toEqual(state.landmarks.map((landmark) => landmark.name));
+    expect(lagosLaunch.welcomeLine).toBe(state.welcomeLines[0]);
+    expect(lagosLaunch.audioStem).toBe(state.audioStem);
     await expect(loadStatePack('not-a-state')).rejects.toThrow('Unknown state pack');
   });
 });

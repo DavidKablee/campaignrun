@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useGameStore } from './state';
-import { copy, simConfig, contenders, rides, lagos, outfits, isRidePlayable, type OutfitChoice } from '@cr/content';
+import { copy, simConfig, contenders, rides, lagosLaunch, loadStatePack, outfits, isRidePlayable, type OutfitChoice } from '@cr/content';
 import { initState, step, seedRng, starForCrowd, type SimState } from '@cr/sim';
 import { GameRenderer } from './render/GameRenderer';
 import { InputController } from './input/controls';
@@ -14,6 +14,10 @@ import { Showcase } from './render/showcase';
 export function App() {
   const screen = useGameStore((s) => s.screen);
   const inRun = screen === 'game' || screen === 'paused';
+  useEffect(() => {
+    // The launch shell paints first; the full Lagos art/content pack follows.
+    void loadStatePack('lagos');
+  }, []);
   return (
     <div className="cr-shell">
       {screen === 'splash' && <Splash />}
@@ -45,7 +49,7 @@ function Splash() {
   const overrides = useGameStore((s) => s.outfits[contenderId]);
   const reduceMotion = useGameStore((s) => s.reduceMotion);
   const dataSaver = useGameStore((s) => s.dataSaver);
-  const station = stationFor(lagos.audioStem);
+  const station = stationFor(lagosLaunch.audioStem);
   const heroRef = useRef<HTMLDivElement>(null);
   const [live, setLive] = useState(false);
   const returning = following > 0 || !!best;
@@ -181,7 +185,7 @@ function Roster() {
         </span>
       </div>
       <p className="cr-tag" style={{ marginTop: 0 }}>
-        Day 1 starts in Lagos. {lagos.welcomeLines[0]} Your choice stays on this device.
+        Day 1 starts in Lagos. {lagosLaunch.welcomeLine} Your choice stays on this device.
       </p>
       <div className="cr-roster">
         {activeList.map((c) => (
@@ -366,7 +370,7 @@ function Briefing() {
     <div className="cr-screen cr-screen--briefing">
       <div className="cr-brief">
         <p className="cr-kicker">Day 1 · Lagos</p>
-        <h2>{lagos.welcomeLines[0]}</h2>
+        <h2>{lagosLaunch.welcomeLine}</h2>
         <p className="cr-tag">
           {contender.name} campaigns through Lagos on {chosen.name}. Load supporters at the yellow bus-stop boxes and unload
           them at the rally points.
@@ -398,10 +402,10 @@ function Briefing() {
           {nextRide ? ` · ${nextRide.followingGate - following} to ${nextRide.name}` : ''}
         </p>
         <ol className="cr-route">
-          {lagos.landmarks.map((l, i) => (
-            <li key={l.name}>
+          {lagosLaunch.landmarks.map((name, i) => (
+            <li key={name}>
               <b>{i + 1}</b>
-              {l.name}
+              {name}
             </li>
           ))}
           <li className="is-final">
@@ -637,7 +641,7 @@ function GameScreen() {
 
     void audio.unlock();
     audio.setVolumes(sfxVolume, musicVolume);
-    audio.tune(lagos.audioStem);
+    audio.tune(lagosLaunch.audioStem);
     audio.setRadio(radioOn);
 
     const debug = new URLSearchParams(window.location.search).has('debug');
@@ -645,7 +649,7 @@ function GameScreen() {
     const renderer = new GameRenderer({
       look: ch.look,
       outfit: ch.outfit,
-      landmarks: lagos.landmarks.map((l) => l.name),
+      landmarks: lagosLaunch.landmarks,
       rideId: ride.id,
       config: simConfig,
       reduceMotion: reduceMotion || window.matchMedia('(prefers-reduced-motion: reduce)').matches,
@@ -853,7 +857,7 @@ function GameScreen() {
             {hud.from} → {hud.to}
           </span>
           <button type="button" className="cr-radio-chip" onClick={() => setRadioOn(!radioOn)}>
-            {radioOn ? stationFor(lagos.audioStem).name : 'Radio off'}
+            {radioOn ? stationFor(lagosLaunch.audioStem).name : 'Radio off'}
           </button>
         </div>
 

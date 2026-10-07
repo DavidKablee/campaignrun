@@ -9,7 +9,13 @@ export default defineConfig({
       input: {
         main: 'index.html',
         waitlist: 'waitlist.html'
-      }
+      },
+      output: {
+        // Dynamic JSON state packs are independently cacheable and measured by
+        // tools/size-check.mjs rather than silently joining the main shell.
+        chunkFileNames: (chunk) =>
+          chunk.name === 'lagos' || chunk.name === 'dummy' ? 'states/[name]-[hash].js' : 'assets/[name]-[hash].js'
+      },
     }
   }
 });

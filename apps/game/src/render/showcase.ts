@@ -1,5 +1,5 @@
 import { initState, seedRng, type SimState } from '@cr/sim';
-import { simConfig, lagos, rides } from '@cr/content';
+import { simConfig, lagosLaunch, rides } from '@cr/content';
 import type { CharacterLook, OutfitChoice } from '@cr/content';
 import { GameRenderer } from './GameRenderer';
 
@@ -31,7 +31,7 @@ export class Showcase {
       outfit,
       rideId: ride.id,
       config: simConfig,
-      landmarks: lagos.landmarks.map((l) => l.name),
+      landmarks: lagosLaunch.landmarks,
       reduceMotion,
       dataSaver,
     });

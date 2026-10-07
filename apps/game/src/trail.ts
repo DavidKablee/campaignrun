@@ -1,4 +1,4 @@
-import { calendar, lagos, simConfig, stateIndex, stations, type StateIndex } from '@cr/content';
+import { calendar, lagosLaunch, simConfig, stateIndex, stations, type StateIndex } from '@cr/content';
 
 export interface TrailLeg {
   from: string;
@@ -8,7 +8,7 @@ export interface TrailLeg {
 /** Where the run is heading, using the Lagos landmark order. */
 export function legAt(zMm: number): TrailLeg {
   const c = simConfig.course;
-  const stops = lagos.landmarks.map((l) => l.name);
+  const stops = lagosLaunch.landmarks;
   const into = zMm - c.borderGateMm;
   if (into < 0) return { from: 'Your street', to: 'Lagos gate' };
   const seg = Math.floor(into / c.segmentLengthMm);
