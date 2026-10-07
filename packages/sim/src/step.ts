@@ -7,7 +7,7 @@ import { buildCourse } from './course';
 export function initState(
   config: SimConfig,
   seed: import('./types').RngState,
-  opts?: { capacity?: number; contenderId?: string },
+  opts?: { capacity?: number; contenderId?: string; upgrades?: SimState['upgrades'] },
 ): SimState {
   const state: SimState = {
     tick: 0,
@@ -43,6 +43,7 @@ export function initState(
     perkActiveTicks: 0,
     perkCooldownTicks: 0,
     hornCooldownTicks: 0,
+    upgrades: opts?.upgrades ?? { magnetRadiusMm: 0, shieldTicks: 0, hornCooldownTicks: 720, loadSpeedPermille: 1000, rewardPermille: 1000 },
   };
   buildCourse(state, config);
   return state;
@@ -176,7 +177,7 @@ export function step(state: SimState, input: number, config: SimConfig): void {
       state.activeZoneId = zone.id;
       state.zoneProgress = 0;
       state.zoneNeeded =
-        zone.zoneKind === 'pickup' ? config.zones.loadTicks : config.zones.unloadTicks;
+        Math.max(1, Math.floor((zone.zoneKind === 'pickup' ? config.zones.loadTicks : config.zones.unloadTicks) * 1000 / state.upgrades.loadSpeedPermille));
       if (zone.zoneKind !== 'pickup') {
         state.beatTaps = 0;
         state.beatWindowTicks = config.bonuses.onBeatWindowTicks;

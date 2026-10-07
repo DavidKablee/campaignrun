@@ -203,6 +203,16 @@ export const copySchema = z.object({
 });
 export type Copy = z.infer<typeof copySchema>;
 
+const upgradeId = z.enum(['magnet', 'shield', 'horn', 'loading', 'value']);
+export const metaConfigSchema = z.object({
+  starts: z.array(z.object({ id: z.enum(['funded', 'grassroots']), name: z.string(), description: z.string(), coins: int.nonnegative(), following: int.nonnegative() })).length(2),
+  upgrades: z.array(z.object({ id: upgradeId, name: z.string(), description: z.string(), costs: z.array(int.positive()).length(5), step: int.positive() })).length(5),
+  rewards: z.object({ baseRun: int.nonnegative(), perDelivered: int.nonnegative(), donation: int.nonnegative(), dailyMission: int.nonnegative(), weeklyMission: int.nonnegative() }),
+  missions: z.object({ daily: z.array(z.object({ id: z.enum(['run', 'deliver', 'crowd']), label: z.string(), target: int.positive() })).length(3), weekly: z.object({ id: z.string(), label: z.string(), target: int.positive() }) }),
+});
+export type MetaConfig = z.infer<typeof metaConfigSchema>;
+export type UpgradeId = z.infer<typeof upgradeId>;
+
 // ---------------------------------------------------------------------------
 // Character looks + outfit options (cosmetic only; never affects the sim)
 // ---------------------------------------------------------------------------

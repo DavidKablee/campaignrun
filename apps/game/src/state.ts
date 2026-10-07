@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { isRidePlayable, rides, type OutfitChoice } from '@cr/content';
+import { isRidePlayable, metaConfig, rides, type OutfitChoice, type UpgradeId } from '@cr/content';
+import { emptyUpgrades, missionDelta, type MissionProgress, type StartId, type UpgradeLevels, upgradeCost, watDay, watWeek } from './meta';
 
 export type Screen =
   | 'splash'
@@ -12,9 +13,10 @@ export type Screen =
   | 'settings'
   | 'about'
   | 'map'
-  | 'paused';
+  | 'paused'
+  | 'yard';
 
-const STORE_VERSION = 6;
+const STORE_VERSION = 7;
 
 const PREVIOUS_IDS: Record<string, string> = {
   'mama-ankara': 'baba-bullabaa',
@@ -70,6 +72,21 @@ interface GameState {
     dents: number;
     phase: 'finished' | 'breakdown';
   }) => void;
+  startingStory: StartId | null;
+  chooseStartingStory: (id: StartId) => void;
+  upgrades: UpgradeLevels;
+  buyUpgrade: (id: UpgradeId) => boolean;
+  dailyKey: string;
+  weeklyKey: string;
+  missionProgress: MissionProgress;
+  completedMissions: string[];
+  streak: number;
+  freezeWeek: string | null;
+  useFreeze: () => boolean;
+  donationDay: string | null;
+  claimDonation: () => boolean;
+  lastMetaReward: number;
+  recordMetaRun: (r: { delivered: number; crowd: number; finished: boolean }) => void;
 }
 
 export const useGameStore = create<GameState>()(
@@ -137,6 +154,64 @@ export const useGameStore = create<GameState>()(
           lastRunDents: r.dents,
           lastRunPhase: r.phase,
         }),
+      startingStory: null,
+      chooseStartingStory: (id) => set((st) => {
+        if (st.startingStory) return st;
+        const start = metaConfig.starts.find((item) => item.id === id)!;
+        return { startingStory: id, coins: st.coins + start.coins, following: st.following + start.following, activeRideId: 'trek' };
+      }),
+      upgrades: emptyUpgrades(),
+      buyUpgrade: (id) => {
+        let bought = false;
+        set((st) => {
+          const level = st.upgrades[id];
+          const cost = upgradeCost(id, level);
+          if (cost === null || st.coins < cost) return st;
+          bought = true;
+          return { coins: st.coins - cost, upgrades: { ...st.upgrades, [id]: level + 1 } };
+        });
+        return bought;
+      },
+      dailyKey: watDay(),
+      weeklyKey: watWeek(),
+      missionProgress: {},
+      completedMissions: [],
+      streak: 0,
+      freezeWeek: null,
+      useFreeze: () => {
+        let used = false;
+        set((st) => {
+          const week = watWeek();
+          if (st.freezeWeek === week) return st;
+          used = true;
+          return { freezeWeek: week };
+        });
+        return used;
+      },
+      donationDay: null,
+      claimDonation: () => {
+        let claimed = false;
+        set((st) => {
+          const day = watDay();
+          if (st.donationDay === day) return st;
+          claimed = true;
+          return { donationDay: day, coins: st.coins + metaConfig.rewards.donation };
+        });
+        return claimed;
+      },
+      lastMetaReward: 0,
+      recordMetaRun: (r) => set((st) => {
+        const day = watDay();
+        const week = watWeek();
+        const freshDay = st.dailyKey !== day;
+        const baseProgress = freshDay ? {} : st.missionProgress;
+        const baseCompleted = freshDay ? st.completedMissions.filter((id) => id === 'weekly-runs') : st.completedMissions;
+        const delta = missionDelta(baseProgress, baseCompleted, r.delivered, r.crowd, r.finished);
+        const newlyDone = delta.completed.filter((id) => !baseCompleted.includes(id));
+        const missionReward = newlyDone.reduce((sum, id) => sum + (id === 'weekly-runs' ? metaConfig.rewards.weeklyMission : metaConfig.rewards.dailyMission), 0);
+        const reward = Math.floor((metaConfig.rewards.baseRun + r.delivered * metaConfig.rewards.perDelivered) * (1000 + st.upgrades.value * 50) / 1000) + missionReward;
+        return { coins: st.coins + reward, dailyKey: day, weeklyKey: week, missionProgress: delta.progress, completedMissions: delta.completed, streak: r.finished ? st.streak + 1 : st.streak, lastMetaReward: reward };
+      }),
     }),
     {
       name: 'cr-storage',
@@ -176,6 +251,9 @@ export const useGameStore = create<GameState>()(
           }
           out = { ...out, outfits };
         }
+        if (version < 7) {
+          out = { ...out, startingStory: null, upgrades: emptyUpgrades(), dailyKey: watDay(), weeklyKey: watWeek(), missionProgress: {}, completedMissions: [], streak: 0, freezeWeek: null, donationDay: null, lastMetaReward: 0 };
+        }
         return out as unknown as GameState;
       },
       partialize: (state) => ({
@@ -192,6 +270,15 @@ export const useGameStore = create<GameState>()(
         dataSaver: state.dataSaver,
         reduceMotion: state.reduceMotion,
         seenTutorial: state.seenTutorial,
+        startingStory: state.startingStory,
+        upgrades: state.upgrades,
+        dailyKey: state.dailyKey,
+        weeklyKey: state.weeklyKey,
+        missionProgress: state.missionProgress,
+        completedMissions: state.completedMissions,
+        streak: state.streak,
+        freezeWeek: state.freezeWeek,
+        donationDay: state.donationDay,
       }),
       storage: createJSONStorage(() => localStorage),
     },

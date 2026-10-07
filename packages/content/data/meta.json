@@ -1,0 +1,22 @@
+{
+  "starts": [
+    { "id": "funded", "name": "Funded Start", "description": "Begin with campaign funds.", "coins": 180, "following": 0 },
+    { "id": "grassroots", "name": "Grassroots Start", "description": "Begin with a local following.", "coins": 40, "following": 35 }
+  ],
+  "upgrades": [
+    { "id": "magnet", "name": "Supporter Magnet", "description": "Collect supporters from farther away.", "costs": [80, 120, 180, 260, 360], "step": 250 },
+    { "id": "shield", "name": "Agbada Shield", "description": "Shield power-up lasts longer.", "costs": [80, 120, 180, 260, 360], "step": 30 },
+    { "id": "horn", "name": "Horn Kit", "description": "Horn recharges faster.", "costs": [80, 120, 180, 260, 360], "step": 90 },
+    { "id": "loading", "name": "Loading Crew", "description": "Load and unload faster.", "costs": [90, 135, 195, 280, 390], "step": 60 },
+    { "id": "value", "name": "Fundraising Desk", "description": "Earn slightly more local ₦ per run.", "costs": [100, 150, 220, 310, 430], "step": 50 }
+  ],
+  "rewards": { "baseRun": 60, "perDelivered": 4, "donation": 90, "dailyMission": 70, "weeklyMission": 180 },
+  "missions": {
+    "daily": [
+      { "id": "run", "label": "Complete 2 rallies", "target": 2 },
+      { "id": "deliver", "label": "Deliver 18 supporters", "target": 18 },
+      { "id": "crowd", "label": "Earn 24 Crowd", "target": 24 }
+    ],
+    "weekly": { "id": "weekly-runs", "label": "Complete 8 rallies", "target": 8 }
+  }
+}

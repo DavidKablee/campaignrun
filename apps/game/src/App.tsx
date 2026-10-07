@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useGameStore } from './state';
-import { copy, simConfig, contenders, rides, lagosLaunch, loadStatePack, outfits, isRidePlayable, type OutfitChoice } from '@cr/content';
+import { copy, metaConfig, simConfig, contenders, rides, lagosLaunch, loadStatePack, outfits, isRidePlayable, type OutfitChoice } from '@cr/content';
 import { initState, step, seedRng, starForCrowd, type SimState } from '@cr/sim';
 import { GameRenderer } from './render/GameRenderer';
 import { InputController } from './input/controls';
@@ -10,6 +10,7 @@ import { getCharacter } from './characters';
 import { CampaignMap } from './ui/CampaignMap';
 import { legAt, stationFor } from './trail';
 import { Showcase } from './render/showcase';
+import { runModifiers } from './meta';
 
 export function App() {
   const screen = useGameStore((s) => s.screen);
@@ -30,6 +31,7 @@ export function App() {
       {screen === 'settings' && <Settings />}
       {screen === 'about' && <About />}
       {screen === 'map' && <CampaignMap />}
+      {screen === 'yard' && <ConvoyYard />}
     </div>
   );
 }
@@ -106,6 +108,9 @@ function Splash() {
         <div className="cr-row">
           <button className="cr-btn cr-btn--ghost" type="button" onClick={() => setScreen('map')}>
             Campaign map
+          </button>
+          <button className="cr-btn cr-btn--ghost" type="button" onClick={() => setScreen('yard')}>
+            Convoy Yard
           </button>
           {returning && (
             <button className="cr-btn cr-btn--ghost" type="button" onClick={() => setScreen('roster')}>
@@ -441,15 +446,35 @@ function Briefing() {
   );
 }
 
+function ConvoyYard() {
+  const setScreen = useGameStore((s) => s.setScreen);
+  const coins = useGameStore((s) => s.coins);
+  const following = useGameStore((s) => s.following);
+  const story = useGameStore((s) => s.startingStory);
+  const choose = useGameStore((s) => s.chooseStartingStory);
+  const levels = useGameStore((s) => s.upgrades);
+  const buy = useGameStore((s) => s.buyUpgrade);
+  const donationDay = useGameStore((s) => s.donationDay);
+  const claim = useGameStore((s) => s.claimDonation);
+  const day = new Intl.DateTimeFormat('en-CA', { timeZone: 'Africa/Lagos' }).format(new Date());
+  return <div className="cr-screen cr-screen--settings"><h2>Convoy Yard</h2><p className="cr-kicker">₦{coins} · {following} Following</p>
+    {!story && <div className="cr-card"><h3>Choose your Starting Story</h3>{metaConfig.starts.map((start) => <button key={start.id} className="cr-btn" style={{ marginTop: '0.5rem' }} onClick={() => choose(start.id)}>{start.name} · {start.description}<small> ₦{start.coins} · {start.following} Following · Trek start</small></button>)}</div>}
+    <div className="cr-card"><h3>Daily Donation</h3><p>{donationDay === day ? 'Claimed for today.' : `Claim ₦${metaConfig.rewards.donation} for today.`}</p><button className="cr-btn" disabled={donationDay === day} onClick={() => claim()}>Claim donation</button></div>
+    <div className="cr-rides">{metaConfig.upgrades.map((upgrade) => { const level = levels[upgrade.id]; const cost = upgrade.costs[level]; return <div className="cr-card" key={upgrade.id}><strong>{upgrade.name} · {level}/5</strong><p>{upgrade.description}</p><button className="cr-btn" disabled={level >= 5 || coins < (cost ?? 0)} onClick={() => buy(upgrade.id)}>{level >= 5 ? 'Maxed' : `Upgrade · ₦${cost}`}</button></div>; })}</div>
+    <div className="cr-card"><h3>Ride ladder</h3>{rides.map((ride) => <p key={ride.id}>{ride.name}: {ride.playable ? (following >= ride.followingGate ? 'available' : `${ride.followingGate - following} Following to unlock`) : 'Coming later'}</p>)}</div>
+    <button className="cr-btn cr-btn--ghost" onClick={() => setScreen('splash')}>Back</button></div>;
+}
+
 function Summary() {
   const setScreen = useGameStore((s) => s.setScreen);
   const skill = useGameStore((s) => s.lastRunSkillCrowd);
   const delivered = useGameStore((s) => s.lastRunDelivered);
   const dents = useGameStore((s) => s.lastRunDents);
   const phase = useGameStore((s) => s.lastRunPhase);
-  const addCoins = useGameStore((s) => s.addCoins);
   const addFollowing = useGameStore((s) => s.addFollowing);
   const noteRun = useGameStore((s) => s.noteRun);
+  const recordMetaRun = useGameStore((s) => s.recordMetaRun);
+  const metaReward = useGameStore((s) => s.lastMetaReward);
   const following = useGameStore((s) => s.following);
   const rideId = useGameStore((s) => s.activeRideId);
   const awarded = useRef(false);
@@ -459,10 +484,10 @@ function Summary() {
   useEffect(() => {
     if (awarded.current) return;
     awarded.current = true;
-    addCoins(Math.floor(skill / 10) + delivered);
+    recordMetaRun({ delivered, crowd: skill, finished: phase === 'finished' });
     addFollowing(delivered);
     noteRun('lagos', skill);
-  }, [addCoins, addFollowing, noteRun, skill, delivered]);
+  }, [recordMetaRun, addFollowing, noteRun, skill, delivered, phase]);
 
   return (
     <div className="cr-screen cr-screen--summary">
@@ -475,6 +500,7 @@ function Summary() {
         <p>Delivered: {delivered}</p>
         <p>Following: {following + (awarded.current ? 0 : delivered)}</p>
         <p>Dents: {dents}/3</p>
+        <p>Campaign funds earned: ₦{metaReward}</p>
         <p style={{ marginTop: '0.5rem', opacity: 0.75 }}>{copy.disclosure}</p>
       </div>
       <div className="cr-row">
@@ -484,6 +510,7 @@ function Summary() {
         <button className="cr-btn cr-btn--ghost" type="button" onClick={() => setScreen('roster')}>
           Roster
         </button>
+        <button className="cr-btn cr-btn--ghost" type="button" onClick={() => setScreen('yard')}>Yard</button>
       </div>
     </div>
   );
@@ -608,6 +635,7 @@ function GameScreen() {
   const rideId = useGameStore((s) => s.activeRideId);
   const reduceMotion = useGameStore((s) => s.reduceMotion);
   const dataSaver = useGameStore((s) => s.dataSaver);
+  const upgrades = useGameStore((s) => s.upgrades);
   const haptics = useGameStore((s) => s.haptics);
   const sfxVolume = useGameStore((s) => s.sfxVolume);
   const musicVolume = useGameStore((s) => s.musicVolume);
@@ -664,7 +692,7 @@ function GameScreen() {
     input.attach(container);
 
     const seed = (Math.random() * 0xffffffff) >>> 0;
-    const state = initState(simConfig, seedRng(seed), { capacity: ride.capacity });
+    const state = initState(simConfig, seedRng(seed), { capacity: ride.capacity, contenderId, upgrades: runModifiers(upgrades) });
     // Debug-only (needs ?debug): jump to a distance in metres to inspect later Lagos segments.
     const dbgZ = Number(new URLSearchParams(window.location.search).get('debugZ'));
     if (debug && Number.isFinite(dbgZ) && dbgZ > 0) state.z = Math.floor(dbgZ) * 1000;

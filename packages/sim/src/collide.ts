@@ -16,7 +16,7 @@ export function checkCollision(state: SimState, config: SimConfig): Entity | nul
   const pRight = pX + pHalfWidth;
   
   const isMagnet = state.perkActiveTicks > 0 && state.activeContenderId === 'mr-obiliki';
-  const magnetRadius = isMagnet ? 2000 : 0;
+  const magnetRadius = (isMagnet ? 2000 : 0) + state.upgrades.magnetRadiusMm;
 
   const hopClear = state.hopT > 0;
 

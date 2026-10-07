@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-07 — C08 meta loop
+
+- Added the local Convoy Yard, Trek-only Starting Stories, five capped upgrades, WAT daily donation and missions, weekly progress, streak state, save migration, and reward breakdowns.
+
 ## 2026-10-07 — C07 content pipeline
 
 - State packs now have a schema-checked dynamic loader, with JSON-only pack coverage and size budgets. The Contender fairness bot now uses deterministic bot inputs, so it reliably catches a real course-balance regression.

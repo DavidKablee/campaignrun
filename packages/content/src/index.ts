@@ -7,6 +7,7 @@ import launchStateJson from '../data/launch-state.json';
 import outfitsJson from '../data/outfits.json';
 import stationsJson from '../data/stations.json';
 import statesIndexJson from '../data/states-index.json';
+import metaJson from '../data/meta.json';
 import {
   calendarSchema,
   contenderSchema,
@@ -17,6 +18,7 @@ import {
   simConfigSchema,
   stateIndexSchema,
   stationSchema,
+  metaConfigSchema,
 } from './schemas';
 
 export * from './schemas';
@@ -32,6 +34,7 @@ export const lagosLaunch = launchStateSchema.parse(launchStateJson);
 export const outfits = outfitsSchema.parse(outfitsJson);
 export const stations = stationSchema.array().parse(stationsJson);
 export const stateIndex = stateIndexSchema.array().parse(statesIndexJson);
+export const metaConfig = metaConfigSchema.parse(metaJson);
 
 export const activeContenders = contenders.filter((c) => c.status === 'active');
 

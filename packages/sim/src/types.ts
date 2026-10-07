@@ -96,6 +96,8 @@ export interface SimState {
   perkActiveTicks: number;
   perkCooldownTicks: number;
   hornCooldownTicks: number;
+  /** C08 local upgrade effects. Integer-only and captured at run start. */
+  upgrades: { magnetRadiusMm: number; shieldTicks: number; hornCooldownTicks: number; loadSpeedPermille: number; rewardPermille: number };
 }
 
 export const Btn = {
