@@ -317,6 +317,20 @@ export function skyTexture() {
   });
 }
 
+/** Soft sun glow sprite — a cheap bit of sky atmosphere (C23), not a bloom post-pass. */
+export function sunTexture() {
+  return memo('sun', () => {
+    const { c, ctx } = canvas(128, 128);
+    const g = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+    g.addColorStop(0, 'rgba(255,248,214,0.95)');
+    g.addColorStop(0.35, 'rgba(255,238,180,0.55)');
+    g.addColorStop(1, 'rgba(255,230,160,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, 128, 128);
+    return toTex(c, false);
+  });
+}
+
 export function cloudTexture() {
   return memo('cloud', () => {
     const { c, ctx } = canvas(256, 96);

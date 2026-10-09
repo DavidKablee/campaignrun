@@ -1,7 +1,9 @@
 import * as THREE from 'three';
+import { simConfig } from '@cr/content';
 import { biomeAssetIds, buildInstancedProp, loadAsset, preloadBiome } from './render/assets';
 import { bakeCharacter, buildCharacter, poseCharacter } from './render/character';
 import { vcMat } from './render/materials';
+import { World } from './render/world';
 
 /**
  * C20/C21 pipeline proof. Not part of the shipped game — reachable only via
@@ -70,7 +72,47 @@ function faceCheck() {
   log('face check rendered');
 }
 
+/** C23 check: jump straight to a theme (park/island/market) without having to survive a full run. */
+function themeCheck(theme: string) {
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 180);
+  const world = new World(scene, simConfig, ['Ojuelegba', 'Third Mainland Bridge', 'Lekki-Ikoyi Link Bridge', 'Balogun Market', 'Freedom Park']);
+  const gateM = simConfig.course.borderGateMm / 1000;
+  const segM = simConfig.course.segmentLengthMm / 1000;
+  const THEME_OFFSET: Record<string, number> = { ojuelegba: 0.5, bridge: 1.5, link: 2.5, market: 3.5, park: 4.5, island: 5.5 };
+  const distM = gateM + (THEME_OFFSET[theme] ?? 4.5) * segM;
+  world.update(distM, true);
+  log(`jumped to ${theme} at ${distM.toFixed(0)}m`);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(innerWidth, innerHeight);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  document.body.appendChild(renderer.domElement);
+
+  let angle = 0;
+  let frames = 0;
+  const t0 = performance.now();
+  function tick() {
+    angle += 0.006;
+    camera.position.set(Math.sin(angle) * 22, 7, -distM + Math.cos(angle) * 22);
+    camera.lookAt(0, 2, -distM);
+    renderer.render(scene, camera);
+    frames++;
+    if (frames === 30) {
+      const info = renderer.info;
+      log(`30 frames in ${(performance.now() - t0).toFixed(0)}ms · draws ${info.render.calls} · tris ${info.render.triangles}`);
+    }
+    requestAnimationFrame(tick);
+  }
+  tick();
+}
+
 async function main() {
+  const theme = new URLSearchParams(location.search).get('theme');
+  if (theme) {
+    themeCheck(theme);
+    return;
+  }
   if (new URLSearchParams(location.search).has('face')) {
     faceCheck();
     return;

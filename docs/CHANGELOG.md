@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-09 — C23 world: real CC0 integration (first pass)
+
+- `world.ts` now actually uses the C20 Lagos biome kit: real CC0 palm trees on `park`/`island` themes, CC0 parasols mixed into market stalls, loaded once and cloned per placement (shared geometry, cheap). Chunks built before the kit resolves fall back to the procedural prop and pick up the CC0 one on their next recycle a few seconds later — no loading screen needed.
+- Added a sun-glow sprite to the sky (the sky gradient itself was already decent — fixed the actual gap instead of redoing something that worked).
+- New debug harness `/debug-assets.html?theme=park|island|market|...` jumps straight to a theme's course distance for visual/perf checks without surviving a full run. Measured draw calls/triangles there (the harness's fps readout is unreliable under the automated preview's throttled rAF): market 48 draws/34.4k tris, island 24 draws/36.5k tris — both well under budget.
+- Explicitly deferred (see `docs/chunks/C23.md`): CC0 buildings (the existing procedural `buildings()` has real per-shop styling a straight swap would flatten), sidewalk/curb geometry, LOD on far chunk slots, and a real phone/throttled low-end pass.
+
 ## 2026-10-09 — C22 animation & movement feel
 
 - `poseCharacter`'s run pose is now continuous in `speed01` (smoothstep-based amplitude/frequency) instead of a hard `stand`/`run` boolean switch that snapped at a fixed speed threshold — the main source of "robotic" movement. Secondary motion: torso/head trail the leg phase slightly.

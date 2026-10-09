@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import type { SimConfig } from '@cr/content';
+import { loadAsset } from './assets';
 import { GeoBuilder, TexBuckets, mulberry, shade, texBox, type Rng } from './geo';
 import { bend, flatMat, texMat, unlitMat, vcMat } from './materials';
 import { personGeo } from './props';
@@ -11,7 +12,43 @@ import {
   shopTexture,
   signTexture,
   skyTexture,
+  sunTexture,
 } from './textures';
+
+/**
+ * CC0 Lagos biome-kit templates (ADR-0009), loaded once and cloned into chunks
+ * as they're built. `clone()` shares geometry/material buffers — only
+ * Object3D nodes are duplicated — so this is cheap per placement. Chunks
+ * recycle every ~40 m anyway, so a chunk built before the kit finishes
+ * loading just falls back to the procedural prop for its lifetime; the next
+ * time that slot rebuilds (a few seconds later) it picks up the CC0 model.
+ */
+const PALM_IDS = ['tree-palm', 'tree-palm-bend', 'tree-palm-short'] as const;
+const BUILDING_IDS = ['building-a', 'building-c', 'building-e', 'building-g', 'building-i', 'building-k', 'building-wide-a', 'building-wide-b'] as const;
+const PARASOL_IDS = ['parasol-a', 'parasol-b'] as const;
+const PALM_SCALE = 4.6; // native ~1.5 m tall -> ~7 m
+const PARASOL_SCALE = 5.3; // native ~0.45 m tall -> ~2.4 m, matches the procedural stall cone
+// `buildings` is preloaded for a near-term follow-up (swapping some of the
+// procedural shop/facade boxes for CC0 silhouettes) — not placed yet; the
+// existing buildings()/towers() methods already have real per-shop styling
+// (awnings, balconies, roofs, billboards) that a straight model swap would lose.
+
+let kitPromise: Promise<{
+  palms: THREE.Object3D[];
+  buildings: THREE.Object3D[];
+  parasols: THREE.Object3D[];
+}> | null = null;
+
+function lagosKit() {
+  if (!kitPromise) {
+    kitPromise = Promise.all([
+      Promise.all(PALM_IDS.map((id) => loadAsset('lagos', id))),
+      Promise.all(BUILDING_IDS.map((id) => loadAsset('lagos', id))),
+      Promise.all(PARASOL_IDS.map((id) => loadAsset('lagos', id))),
+    ]).then(([palms, buildings, parasols]) => ({ palms, buildings, parasols }));
+  }
+  return kitPromise;
+}
 
 export const CHUNK = 40;
 const PLANE = new THREE.PlaneGeometry(1, 1);
@@ -43,6 +80,7 @@ export class World {
   private gateM: number;
   private segM: number;
   private segCount: number;
+  private kit: { palms: THREE.Object3D[]; buildings: THREE.Object3D[]; parasols: THREE.Object3D[] } | null = null;
 
   constructor(
     private scene: THREE.Scene,
@@ -53,6 +91,9 @@ export class World {
     this.gateM = cfg.course.borderGateMm / 1000;
     this.segM = cfg.course.segmentLengthMm / 1000;
     this.segCount = cfg.course.segmentCount;
+    lagosKit().then((k) => {
+      this.kit = k;
+    });
 
     scene.background = skyTexture();
     scene.fog = new THREE.Fog('#f1e2bd', 35, 135);
@@ -68,6 +109,13 @@ export class World {
     const sun = new THREE.DirectionalLight('#fff1cf', 2.2);
     sun.position.set(-30, 50, 20);
     scene.add(sun);
+
+    const sunSprite = new THREE.Sprite(
+      new THREE.SpriteMaterial({ map: sunTexture(), fog: false, transparent: true, depthWrite: false, opacity: 0.8 }),
+    );
+    sunSprite.scale.set(90, 90, 1);
+    sunSprite.position.set(-55, 70, -170);
+    this.clouds.add(sunSprite);
 
     const cl = cloudTexture();
     for (let i = 0; i < 6; i++) {
@@ -156,7 +204,7 @@ export class World {
     vc.segScale = 0.6;
     const tb = new TexBuckets();
     const signs: THREE.Mesh[] = [];
-    const ctx: Ctx = { vc, tb, signs, r, zStart, zEnd, zMid, k, theme };
+    const ctx: Ctx = { vc, tb, signs, r, zStart, zEnd, zMid, k, theme, slot: slot.group };
 
     // theme gantry at the first chunk of each segment
     if (prev && prev !== theme) this.gantry(ctx, this.labelFor(theme));
@@ -352,28 +400,52 @@ export class World {
     const { vc, r } = c;
     const n = Math.round(density * r.range(1, 3));
     const cols = ['#e85d04', '#f5c518', '#2ec4b6', '#c23fa0', '#1fa45b', '#2a6f97'];
+    const kit = this.kit;
     for (let i = 0; i < n; i++) {
       const x = side * r.range(5.9, 6.7);
       const z = c.zStart + r.range(2, CHUNK - 2);
       vc.box(1.7, 0.8, 0.9, '#6b4a2b', { x, y: 0.4, z });
       vc.cyl(0.03, 0.03, 2.3, '#444', { x, y: 1.15, z }, 4);
-      vc.cone(1.5, 0.55, r.pick(cols), { x, y: 2.4, z }, 8);
+      if (kit && kit.parasols.length > 0) {
+        const obj = r.pick(kit.parasols).clone(true);
+        obj.scale.setScalar(PARASOL_SCALE);
+        obj.rotation.y = r.range(0, Math.PI * 2);
+        obj.position.set(x, 1.65, z);
+        c.slot.add(obj);
+      } else {
+        vc.cone(1.5, 0.55, r.pick(cols), { x, y: 2.4, z }, 8);
+      }
       for (let j = 0; j < 5; j++) vc.sphere(0.13, r.pick(cols), { x: x - 0.65 + j * 0.32, y: 0.95, z: z + r.range(-0.2, 0.2) }, 5);
     }
   }
 
   private trees(c: Ctx, side: 1 | -1, n: number) {
-    const { vc, r } = c;
+    const { r } = c;
     for (let i = 0; i < n; i++) {
       const x = side * r.range(9.4, 30);
       const z = c.zStart + r.range(1, CHUNK - 1);
-      if (r.chance(0.5)) this.palm(vc, r, x, z);
-      else this.mango(vc, r, x, z);
+      if (r.chance(0.5)) this.placePalm(c, x, z);
+      else this.mango(c.vc, r, x, z);
     }
   }
 
   private palms(c: Ctx, side: 1 | -1, n: number) {
-    for (let i = 0; i < n; i++) this.palm(c.vc, c.r, side * 9.4, c.zStart + (i + 0.5) * (CHUNK / n));
+    for (let i = 0; i < n; i++) this.placePalm(c, side * 9.4, c.zStart + (i + 0.5) * (CHUNK / n));
+  }
+
+  /** CC0 palm model once the Lagos kit has loaded; the hand-built primitive palm until then (ADR-0009). */
+  private placePalm(c: Ctx, x: number, z: number) {
+    const kit = this.kit;
+    if (!kit || kit.palms.length === 0) {
+      this.palm(c.vc, c.r, x, z);
+      return;
+    }
+    const template = c.r.pick(kit.palms);
+    const obj = template.clone(true);
+    obj.scale.setScalar(PALM_SCALE * c.r.range(0.85, 1.15));
+    obj.rotation.y = c.r.range(0, Math.PI * 2);
+    obj.position.set(x, 0, z);
+    c.slot.add(obj);
   }
 
   private palm(vc: GeoBuilder, r: Rng, x: number, z: number) {
@@ -496,5 +568,6 @@ interface Ctx {
   zMid: number;
   k: number;
   theme: Theme;
+  slot: THREE.Group;
 }
 
