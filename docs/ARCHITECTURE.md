@@ -32,7 +32,8 @@ tools              size-check, content-lint, hash-blocklist
 
 ## Performance budgets
 
-- First load ≤ 4 MB gzip. State pack ≤ 3 MB.
+- First load ≤ 4 MB gzip. State pack ≤ 3 MB. Biome-kit model bundle ≤ 1.5 MB gzip (ADR-0009) — lazy-loaded per biome, never part of first load.
 - ≤ 150 draw calls, ≤ 120k tris on screen.
 - DPR ≤ 1.5 (1.0 data-saver). No realtime shadow maps.
 - 60 fps target / 30 fps floor on 2 GB Android.
+- Environment CC0 assets (`apps/game/public/models/`) are instanced via `assets.ts: buildInstancedProp` — one `InstancedMesh` per sub-mesh, not per placed prop. Characters, rides and gameplay props stay procedural (never CC0) per ADR-0005/0007/0008.

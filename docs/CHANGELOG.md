@@ -1,5 +1,34 @@
 # Changelog
 
+## 2026-10-09 — C20 visual pipeline foundations
+
+- Starts the **visual & feel rebuild track (C20–C25)**: character models, movement, world/environment and the landing page were flagged as low quality, so this track rebuilds the render layer only — sim, content schemas and C0–C11 gameplay are untouched. See `docs/chunks/C20.md` and ADR-0008/ADR-0009.
+- New CC0 environment-asset pipeline: `apps/game/src/render/assets.ts` (GLTFLoader + meshopt decoder, both already bundled in `three`, no new dependency), instanced via one `InstancedMesh` per sub-mesh so a multi-part prop still costs one draw call per part regardless of instance count.
+- Lagos biome kit (19 Kenney CC0 models — buildings, market props, palm trees, grass, stone paths) under `apps/game/public/models/lagos/`, 63.2 KB gzip against a 1.5 MB/biome budget enforced by `tools/size-check.mjs`. First-load budget unaffected (still 296 KB gzip) — `models/` is excluded the same way `states/` is.
+- `apps/game/debug-assets.html` is a dev-only pipeline sanity page, not shipped in `dist`.
+
+## 2026-10-09 — Fix blank run view
+
+- Memoized run landmarks so HUD updates no longer remount the WebGL renderer (blank road after Start).
+
+## 2026-10-08 — C11 accounts and consent
+
+- Guest identity with local save (Terms/Privacy gate), append-only consent log, Contender data in a separate `cr-contender` store.
+- Export / delete local data; share and score helpers omit Contender id until Contender-share consent is granted.
+- Versioned legal copy in content; Account screen from splash/settings/about.
+
+## 2026-10-08 — C10 weekly packs
+
+- Kano, Rivers, Anambra, and Kaduna ship as JSON packs with glob registration (no per-state game code).
+- Live board opens a state only when calendar + pack agree; Rally here sets `activeStateId` for briefing/run/share/board.
+- Client travel caps (`travel.json`), weekly mission row + week rollover, and Live board travel counters.
+
+## 2026-10-08 — C09 share, daily, PWA
+
+- Daily challenge rotates by Africa/Lagos day with a Yard/Briefing chip and Summary reward.
+- Summary can export a 9:16 share card (disclosure + “not a poll”) and post finished runs to a device-local board after plausibility + username checks.
+- Vite PWA + Workbox offline shell; first-load gzip still under the 4 MB budget.
+
 ## 2026-10-07 — C08 meta loop
 
 - Added the local Convoy Yard, Trek-only Starting Stories, five capped upgrades, WAT daily donation and missions, weekly progress, streak state, save migration, and reward breakdowns.
@@ -7,6 +36,19 @@
 ## 2026-10-07 — C07 content pipeline
 
 - State packs now have a schema-checked dynamic loader, with JSON-only pack coverage and size budgets. The Contender fairness bot now uses deterministic bot inputs, so it reliably catches a real course-balance regression.
+
+## 2026-10-08 — C06 Integrity
+
+- Ballot Box Snatcher, Vote Buyer, and Sleepy Voter spawn in equal rotation. Hit fails Integrity; dodge restores it. HUD meter + toasts. Generic looks, civic facts in content.
+
+## 2026-10-08 — C05 Contender perks
+
+- Six in-run perks and trade-offs run in the sim (weave, reboot, magnet, beacon horn, street party, steady beat). HUD PERK pad. Contender locks after first finish with one grace switch. Balance bot keeps trek means within ±3% on a clean course.
+
+## 2026-10-08 — Live board + lean chrome
+
+- Campaign map is an election-night style Live board: state cells, open vs pending, Crowd heat, focus panel. Still game scores, not a poll.
+- Roster, briefing, yard, summary, and pause use denser poster chrome with less copy. HUD adds HORN.
 
 ## 2026-10-06 — Roster names
 

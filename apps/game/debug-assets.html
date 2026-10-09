@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Campaign Run — asset pipeline debug (dev only, not shipped)</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #0b1220;
+      }
+      #hud {
+        position: fixed;
+        top: 8px;
+        left: 8px;
+        color: #cde;
+        font: 12px monospace;
+        white-space: pre;
+        z-index: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="hud">loading…</div>
+    <script type="module" src="/src/debug-assets.ts"></script>
+  </body>
+</html>

@@ -1,39 +1,42 @@
 # Status
 
-**Current chunk:** C08 done. Next: C09 (Daily challenge, share card and offline shell).
-**Last done:** Local-only meta loop: Starting Stories, Convoy Yard, five capped upgrades, WAT daily donation and mission progress, streak/freeze state, versioned local save, and reward breakdowns.
+**Current chunk:** C20 done. Next: C21 (character rebuild — chibi + baked face + toon/outline).
+**Last done:** C20 — CC0 environment-asset pipeline (`assets.ts`, Lagos biome kit, size-check budget) + ADR-0008/0009. First of the **visual & feel rebuild track (C20–C25)**, scoped to the render layer only.
+
+## Status of C0–C19 (read this before touching either range)
+- **C0–C11: built and tested, not "perfect."** `pnpm verify` is green and the mechanics (sim, contender/ride/state loading, accounts/consent) behave correctly for what they cover. Content breadth is partial by design-so-far — only Trek/Okada rides and 5 states (Lagos, Kano, Rivers, Anambra, Kaduna) have real content packs; other rides/states are schema-ready but unfilled. That's a content/gameplay scope question, not a defect, and it's explicitly out of bounds for the current visual-only pass.
+- **C12–C19: not built at all.** Ghosts/replay, friends/teams, Rally Map, payments/ledger, rival convoys, ads, live-ops, FCT finale are backlog items waiting on backend infrastructure and legal review — not skipped because they're good enough, just not started. Not touched by C20–C25.
 
 ## Done
 - Agent handoff (`AGENTS.md` pointers, ADRs, chunks C00–C19, SPEC/ARCHITECTURE/DESIGN/PLAYTEST).
 - Real `pnpm verify` (size-check, content-lint, sim purity).
-- Sim v2: course, zones, pickup/unload, Momentum, Full House, On Beat, 3-Dent, edge-triggered lanes.
-- Three.js renderer: recycling 40 m Lagos chunks for the whole course, themed segments, merged characters and blockades.
-- Character studio (turntable, top / trousers / footwear / headwear) then a Lagos briefing. Outfit stays in localStorage.
-- Softer procedural audio (no sawtooth drone). Full-page layout, landscape controls.
-- C04: Following counter (local), Okada at 150, Keke+ listed but not selectable. Stars scale with ride capacity.
-- Campaign map lists all 37 states. Lagos is playable now. Later states show their Monday unlock. Best Crowd stays on this device.
-- HUD shows the current from → to landmark. Èkó Wave is the Lagos station. Other stations stay silent until that zone opens. Music is synthesised; nothing is streamed.
+- Sim v2 + Three.js renderer + studio + radio + Live board.
+- C04–C10: rides/stars, perks, Integrity, state packs, meta, share/PWA/daily, weekly packs + travel caps.
+- C11: `cr-account` + `cr-contender` stores; consent log; score payloads omit Contender id without consent; Account screen (save / export / delete); versioned legal copy.
+- **C20 (visual rebuild track):** CC0 asset loader/instancing pipeline, Lagos biome kit (19 models, 63 KB gzip), size-check budget, ADR-0008/0009. See `docs/chunks/C20.md`.
 
 ## Next
-1. Phone playtest per `docs/PLAYTEST.md`.
-2. C09 — Daily challenge, share card and offline shell.
+1. **C21** — rebuild `character.ts` on ADR-0008 (chibi proportions, baked-face texture, toon+outline shader). Phone/visual QA checkpoint after this one.
+2. C22 — animation & movement feel (poseCharacter, camera).
+3. C23 — world/environment rebuild using the C20 pipeline. Phone/visual QA checkpoint after this one.
+4. C24 — landing page polish. C25 — cross-cutting QA + perf hardening.
+5. (Deferred, not in this track) Phone playtest of pre-existing gameplay per `docs/PLAYTEST.md`; **C12** ghosts/server verification.
+
+## Later (C13–C19, untouched by the visual rebuild)
+Running mates, community Rally Map (C14), ledger, rivals, ads, live-ops, finale.
 
 ## Blockers
-- Legal: media-law review + ToS/Privacy before R0 (not code).
+- Legal: lawyer review of privacy/terms (chunk “7.5”) still required before public launch — copy is a draft gate only.
+- Cloud accounts / server Contender table wait on backend.
+- Lighthouse PWA ≥90 on a real HTTPS deploy still open.
 
 ## Gotchas
-- Default ride is **trek**. Okada unlocks at 150 Following. `playable: false` rides stay in `rides.json` until a later chunk.
-- Characters are rigs in `render/character.ts`, not indexed children.
-- Sim mm → world via `MM_TO_UNITS` (0.001) only. Road bend is renderer-only (`bend` uniforms).
-- Hop clears obstacles with `heightMm` < `hopHeightMm` (1500): pothole, cones, tyres, barricade, jersey. Cars, danfo, trailer, roadworks are solid.
-- Parody names are allowed. Names and faces must not be close to a real person. See AGENTS.md and ADR-0007. The roster is Baba Bullabaa, Mr Tiko, Mr Obiliki, Comrade Yale, Mr. Don, and Prof. Sarah.
-- The community Rally Map (other players, 200 rallies) is still C14. The map in the game is this device's trail only.
-- Contender choice stays in localStorage until C11.
-- E2E: `pnpm test:e2e` (needs Chromium via `PLAYWRIGHT_BROWSERS_PATH=0 playwright install chromium`). Not part of `pnpm verify`.
-- State-pack loader registration is intentionally data-only; add a new pack via `packages/content/data/states/` and `packages/content/src/state-packs.ts`, then keep it under the 3 MB gzip budget.
-- C08 economy is local-only until C15. Device clock changes can affect WAT daily systems; no map points or payments use it.
-
-## Session note (splash)
-- Splash is now a live 3D Lagos hero (render/showcase.ts, autopilot, 30 fps, private sim copy). Returning players get Continue campaign. Reference platform: Lagos Run (3D runner) and Lagos Life; differentiators are in the C03 plan (crowd on ride, adaptive music, Todays Road, WhatsApp 9:16 share card, offline).
-- Gotcha: animate CTAs with box-shadow, not transform (Playwright stability). e2e desktop passes.
-- Next still C05. Many earlier files are uncommitted in the working tree.
+- Contender choice is in `cr-contender`, not `cr-storage`. Score/share paths must check consent.
+- Default ride is **trek**. Okada unlocks at 150 Following.
+- Drop new state JSON under `packages/content/data/states/` — no loader edit.
+- Community Rally Map is C14. Live board + local board are this device only.
+- E2E: `pnpm test:e2e` (not part of `pnpm verify`).
+- Animate CTAs with box-shadow, not transform (Playwright).
+- **Visual rebuild (C20+):** environment glTF assets live under `apps/game/public/models/<biome>/`, loaded via `apps/game/src/render/assets.ts` (`loadAsset`/`preloadBiome`/`buildInstancedProp`). CC0 only (Kenney so far); characters/rides/gameplay props stay procedural (character.ts/props.ts) per ADR-0005/0007/0008 — never replace those with CC0 packs.
+- `pnpm --filter @cr/game dev` → `/debug-assets.html` is a dev-only asset-pipeline sanity page (not built into `dist`). Useful for checking a new biome kit loads before wiring it into `world.ts`.
+- `.claude/launch.json` (both at repo root and at the Claude Code primary-working-directory root) configures `preview_start` for the game dev server on port 5173.

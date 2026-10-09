@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 /**
  * Fails if first-load gzip of apps/game/dist exceeds 4 MB,
- * or any file under dist/states exceeds 3 MB gzip.
+ * any file under dist/states exceeds 3 MB gzip,
+ * or any dist/models/<biome> kit exceeds 1.5 MB gzip (ADR-0009).
  */
 import { readdirSync, readFileSync, statSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
@@ -12,6 +13,7 @@ const ROOT = join(import.meta.dirname, '..');
 const DIST = join(ROOT, 'apps/game/dist');
 const FIRST_LOAD_MAX = 4 * 1024 * 1024;
 const STATE_PACK_MAX = 3 * 1024 * 1024;
+const MODEL_KIT_MAX = 1.5 * 1024 * 1024;
 
 function gzipSize(buf) {
   return gzipSync(buf, { level: 9 }).byteLength;
@@ -41,6 +43,7 @@ const counted = new Set();
 for (const f of files) {
   const rel = f.slice(DIST.length + 1);
   if (rel.startsWith('states/')) continue;
+  if (rel.startsWith('models/')) continue;
   if (rel === 'waitlist.html' || rel.includes('waitlist')) continue;
   const buf = readFileSync(f);
   const gz = gzipSize(buf);
@@ -69,6 +72,21 @@ if (existsSync(statesDir)) {
     console.log(`size-check: state pack ${rel} gzip ${(gz / 1024).toFixed(1)} KB`);
     if (gz > STATE_PACK_MAX) {
       console.error(`size-check: FAIL ${rel} over ${STATE_PACK_MAX} bytes`);
+      process.exit(1);
+    }
+  }
+}
+
+const modelsDir = join(DIST, 'models');
+if (existsSync(modelsDir)) {
+  for (const biome of readdirSync(modelsDir)) {
+    const biomeDir = join(modelsDir, biome);
+    if (!statSync(biomeDir).isDirectory()) continue; // skip CREDITS.md etc.
+    let kitGz = 0;
+    for (const f of walk(biomeDir)) kitGz += gzipSize(readFileSync(f));
+    console.log(`size-check: biome kit models/${biome} gzip ${(kitGz / 1024).toFixed(1)} KB (budget ${(MODEL_KIT_MAX / 1024 / 1024).toFixed(1)} MB)`);
+    if (kitGz > MODEL_KIT_MAX) {
+      console.error(`size-check: FAIL models/${biome} over ${MODEL_KIT_MAX} bytes`);
       process.exit(1);
     }
   }
