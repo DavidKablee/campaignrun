@@ -1,15 +1,177 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Campaign Run - Waitlist</title>
-</head>
-<body>
-  <h1>Campaign Run</h1>
-  <p>The road opens on October 19.</p>
-  <form onsubmit="event.preventDefault(); alert('Joined waitlist!');">
-    <input type="email" placeholder="Enter your email" required />
-    <button type="submit">Join Waitlist</button>
-  </form>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#0b1220" />
+    <meta
+      name="description"
+      content="Campaign Run: a fictional satirical lane-runner through all 36 Nigerian states + FCT. Lagos is open now."
+    />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/pwa-192.png" />
+    <title>Campaign Run — Lagos is open</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;1,9..40,400&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --cr-danfo: #f5c518;
+        --cr-ink: #0b1220;
+        --cr-indigo: #1b2a4a;
+        --cr-jollof: #e85d04;
+        --cr-adire: #2a6f97;
+        --cr-paper: #f7f1e3;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+      }
+      body {
+        background: radial-gradient(120% 90% at 50% -10%, var(--cr-indigo) 0%, var(--cr-ink) 60%);
+        color: var(--cr-paper);
+        font-family: 'DM Sans', system-ui, sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: max(24px, env(safe-area-inset-top)) 20px max(32px, env(safe-area-inset-bottom));
+      }
+      main {
+        width: 100%;
+        max-width: 480px;
+        text-align: center;
+      }
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(245, 197, 24, 0.14);
+        border: 1px solid rgba(245, 197, 24, 0.4);
+        color: var(--cr-danfo);
+        border-radius: 999px;
+        padding: 6px 14px;
+        font-weight: 700;
+        font-size: 0.8rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        margin-bottom: 20px;
+      }
+      .pill::before {
+        content: '';
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--cr-danfo);
+        animation: blink 1.4s ease-in-out infinite;
+      }
+      @keyframes blink {
+        50% {
+          opacity: 0.35;
+        }
+      }
+      h1 {
+        font-family: 'Archivo Black', 'Arial Black', sans-serif;
+        font-size: clamp(2.6rem, 11vw, 3.6rem);
+        line-height: 0.95;
+        margin: 0 0 14px;
+        text-shadow: 0 3px 0 rgba(0, 0, 0, 0.35);
+      }
+      h1 .run {
+        color: var(--cr-danfo);
+      }
+      p.tagline {
+        font-size: 1.05rem;
+        line-height: 1.5;
+        color: rgba(247, 241, 227, 0.85);
+        margin: 0 0 28px;
+      }
+      .cta {
+        display: block;
+        width: 100%;
+        background: var(--cr-danfo);
+        color: var(--cr-ink);
+        font-family: 'Archivo Black', 'Arial Black', sans-serif;
+        font-size: 1.1rem;
+        text-decoration: none;
+        padding: 16px 20px;
+        border-radius: 14px;
+        box-shadow: 0 6px 0 #b4890a;
+        margin-bottom: 14px;
+      }
+      .cta:active {
+        transform: translateY(3px);
+        box-shadow: 0 3px 0 #b4890a;
+      }
+      form {
+        display: flex;
+        gap: 8px;
+        margin: 22px 0 10px;
+      }
+      input[type='email'] {
+        flex: 1;
+        min-width: 0;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(247, 241, 227, 0.25);
+        color: var(--cr-paper);
+        border-radius: 10px;
+        padding: 13px 14px;
+        font-size: 0.95rem;
+        font-family: inherit;
+      }
+      input[type='email']::placeholder {
+        color: rgba(247, 241, 227, 0.45);
+      }
+      form button {
+        background: transparent;
+        border: 1px solid rgba(245, 197, 24, 0.6);
+        color: var(--cr-danfo);
+        border-radius: 10px;
+        padding: 13px 18px;
+        font-weight: 700;
+        font-family: inherit;
+        cursor: pointer;
+      }
+      .note {
+        font-size: 0.82rem;
+        color: rgba(247, 241, 227, 0.55);
+        margin: 0 0 30px;
+      }
+      .disclosure {
+        font-size: 0.75rem;
+        line-height: 1.5;
+        color: rgba(247, 241, 227, 0.45);
+        border-top: 1px solid rgba(247, 241, 227, 0.12);
+        padding-top: 18px;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .pill::before {
+          animation: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <span class="pill">Lagos open now</span>
+      <h1>CAMPAIGN<br /><span class="run">RUN</span></h1>
+      <p class="tagline">Load the bus stops. Own the Lagos road. Land the grand rally. Three new states unlock every Monday until all 36 + FCT are live.</p>
+      <a class="cta" href="/">Play now — it's free</a>
+      <form onsubmit="event.preventDefault(); this.querySelector('button').textContent = 'You\'re in!'; this.querySelector('button').disabled = true;">
+        <input type="email" placeholder="Email (optional)" />
+        <button type="submit">Notify me</button>
+      </form>
+      <p class="note">No spam. Guest play needs no email at all — just tap Play now.</p>
+      <p class="disclosure">
+        Fictional game. All characters, parties and events are invented; any resemblance to real people is coincidental. Not
+        affiliated with or endorsed by any political party, aspirant or electoral body. Scores are game scores, not polls.
+      </p>
+    </main>
+  </body>
 </html>

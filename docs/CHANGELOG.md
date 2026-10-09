@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-09 — C24 landing page polish
+
+- Rewrote `apps/game/waitlist.html`: was a bare unstyled page with a stale pre-launch date ("the road opens October 19") even though the game already shipped and Lagos is playable today. Now on-brand (same palette/fonts as the in-game UI), honest "Lagos open now" copy, a Play-now CTA straight into `/`, and the approved disclosure line.
+- Fixed a real bug in the old copy: the email input was `required` while the surrounding text called it optional.
+- Reviewed the in-app splash and the live 3D showcase hero — no changes needed, since the hero drives the real `GameRenderer` and already inherited every C21–C23 visual improvement automatically.
+
 ## 2026-10-09 — C23 world: real CC0 integration (first pass)
 
 - `world.ts` now actually uses the C20 Lagos biome kit: real CC0 palm trees on `park`/`island` themes, CC0 parasols mixed into market stalls, loaded once and cloned per placement (shared geometry, cheap). Chunks built before the kit resolves fall back to the procedural prop and pick up the CC0 one on their next recycle a few seconds later — no loading screen needed.

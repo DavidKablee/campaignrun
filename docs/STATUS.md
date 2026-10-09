@@ -1,7 +1,7 @@
 # Status
 
-**Current chunk:** C23 done (first pass — see Open in `docs/chunks/C23.md`). Next: C24 (landing page polish).
-**Last done:** C23 — real CC0 integration into `world.ts`: palm trees (park/island) and market parasols now use the Lagos biome kit, plus a sun-glow sky sprite. Verified in-game via a new `/debug-assets.html?theme=<name>` harness (jumps straight to a theme). Buildings/curbs/LOD explicitly deferred, not silently dropped — see the chunk doc.
+**Current chunk:** C24 done. Next: C25 (cross-cutting QA + perf hardening — the final chunk of the visual-rebuild track).
+**Last done:** C24 — rewrote `waitlist.html` (was bare/unstyled with a stale pre-launch date; now on-brand, honest "Lagos open now" copy, Play-now CTA, fixed a `required`-on-an-optional-field bug). Splash/showcase reviewed, not changed — already inherits every C21–C23 visual improvement automatically since it drives the real `GameRenderer`.
 
 ## Status of C0–C19 (read this before touching either range)
 - **C0–C11: built and tested, not "perfect."** `pnpm verify` is green and the mechanics (sim, contender/ride/state loading, accounts/consent) behave correctly for what they cover. Content breadth is partial by design-so-far — only Trek/Okada rides and 5 states (Lagos, Kano, Rivers, Anambra, Kaduna) have real content packs; other rides/states are schema-ready but unfilled. That's a content/gameplay scope question, not a defect, and it's explicitly out of bounds for the current visual-only pass.
@@ -17,11 +17,11 @@
 - **C21:** chibi character rebuild (proportions, baked face, toon outline). See `docs/chunks/C21.md`.
 - **C22:** animation & movement feel (continuous run blend, hop easing, landing squash, camera spring/lean, speed streaks). See `docs/chunks/C22.md`.
 - **C23:** CC0 palms (park/island) + parasols (market) + sun-glow sky. See `docs/chunks/C23.md` for what's deferred (buildings, curbs/decals, LOD).
+- **C24:** `waitlist.html` rewrite (on-brand, honest copy, fixed a required-field bug). See `docs/chunks/C24.md`.
 
 ## Next
-1. **C24** — landing page polish: splash hero, typography/motion, fix `waitlist.html` (stale date, no styling).
-2. C25 — cross-cutting QA + perf hardening: real phone/throttled-CPU playtest (owed from C23), budget audit, CC0 buildings follow-up if time allows.
-3. (Deferred, not in this track) Phone playtest of pre-existing gameplay per `docs/PLAYTEST.md`; **C12** ghosts/server verification.
+1. **C25** — cross-cutting QA + perf hardening (last chunk of the visual-rebuild track): full regression playtest across the Lagos pack + other loaded states, real phone/throttled-CPU pass (owed from C23), PWA/offline cache check for the new model assets, final budget audit, update `docs/STATUS.md`/`CHANGELOG.md`/`ARCHITECTURE.md`.
+2. (Deferred, not in this track) Phone playtest of pre-existing gameplay per `docs/PLAYTEST.md`; **C12** ghosts/server verification; CC0 buildings follow-up (C23's Open list).
 
 ## Later (C13–C19, untouched by the visual rebuild)
 Running mates, community Rally Map (C14), ledger, rivals, ads, live-ops, finale.
