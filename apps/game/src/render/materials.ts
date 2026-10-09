@@ -27,10 +27,38 @@ function patchBend<T extends THREE.Material>(mat: T): T {
   return mat;
 }
 
+/** Push vertices outward along their normal — the classic cheap toon outline (ADR-0008). Composes with patchBend. */
+function patchExtrude<T extends THREE.Material>(mat: T, amount: number): T {
+  const prevCompile = mat.onBeforeCompile.bind(mat);
+  mat.onBeforeCompile = (shader, renderer) => {
+    prevCompile(shader, renderer);
+    shader.uniforms.uOutline = { value: amount };
+    shader.vertexShader = shader.vertexShader
+      .replace('#include <common>', '#include <common>\nuniform float uOutline;')
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\n\ttransformed += normalize(normal) * uOutline;');
+  };
+  mat.customProgramCacheKey = () => `bend|outline:${amount}`;
+  return mat;
+}
+
+/** Solid-color backface shell, slightly larger than the source mesh — a cheap, mobile-safe toon outline. */
+export function outlineMat(thickness = 0.014, color = '#19120d'): THREE.MeshBasicMaterial {
+  const key = `outline:${thickness}:${color}`;
+  let m = cache.get(key) as THREE.MeshBasicMaterial | undefined;
+  if (!m) {
+    m = new THREE.MeshBasicMaterial({ color: new THREE.Color(color), side: THREE.BackSide });
+    patchBend(m);
+    patchExtrude(m, thickness);
+    cache.set(key, m);
+  }
+  return m;
+}
+
 let gradient: THREE.DataTexture | null = null;
 function gradientMap() {
   if (!gradient) {
-    gradient = new THREE.DataTexture(new Uint8Array([110, 165, 215, 255]), 4, 1, THREE.RedFormat);
+    // 5-step toon ramp with more contrast at the shadow end (ADR-0008) — was a flat 4-value ramp.
+    gradient = new THREE.DataTexture(new Uint8Array([60, 120, 175, 215, 255]), 5, 1, THREE.RedFormat);
     gradient.minFilter = THREE.NearestFilter;
     gradient.magFilter = THREE.NearestFilter;
     gradient.generateMipmaps = false;

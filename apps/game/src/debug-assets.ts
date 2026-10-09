@@ -1,18 +1,80 @@
 import * as THREE from 'three';
 import { biomeAssetIds, buildInstancedProp, loadAsset, preloadBiome } from './render/assets';
+import { bakeCharacter, buildCharacter, poseCharacter } from './render/character';
+import { vcMat } from './render/materials';
 
 /**
- * C20 pipeline proof: loads the Lagos CC0 biome kit, instances a few props,
- * and renders them in a bare scene. Not part of the shipped game — reachable
- * only via `pnpm --filter @cr/game dev` + /debug-assets.html. Superseded by
- * the real world.ts integration in C23.
+ * C20/C21 pipeline proof. Not part of the shipped game — reachable only via
+ * `pnpm --filter @cr/game dev` + /debug-assets.html(?face=1). Superseded by
+ * the real world.ts integration (C23) / in-game rendering (C21 already real).
  */
 const hud = document.getElementById('hud')!;
 const log = (s: string) => {
   hud.textContent += `\n${s}`;
 };
 
+/** C21 close-up: a row of chibi heads at native res, for judging face-texture quality. */
+function faceCheck() {
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color('#dce8f0');
+  const camera = new THREE.PerspectiveCamera(35, innerWidth / innerHeight, 0.05, 50);
+  camera.position.set(0.1, 0.7, 2.6);
+  camera.lookAt(0.1, 0.6, 0);
+  scene.add(new THREE.HemisphereLight('#fff6df', '#8d7a63', 1.3));
+  const sun = new THREE.DirectionalLight('#fff1cf', 2.0);
+  sun.position.set(-1, 2, 2);
+  scene.add(sun);
+
+  const skins = ['#5C3A24'];
+  skins.forEach((skin, i) => {
+    const look = {
+      gender: (i % 2 ? 'f' : 'm') as 'f' | 'm',
+      skin,
+      hair: (i % 2 ? 'natural' : 'short') as 'short' | 'natural' | 'afro' | 'braids' | 'bald',
+      hairColor: '#15100d',
+      facialHair: 'none' as const,
+      face: { width: 1, jaw: 1, nose: 1, lips: 1, brow: 1, eye: 1 },
+      height: 1,
+      build: 1,
+      prop: 'none' as const,
+      accessory: 'none' as const,
+    };
+    const outfit = {
+      top: 'tee' as const,
+      topColor: '#e0902b',
+      bottom: 'trousers' as const,
+      bottomColor: '#2f4a6b',
+      footwear: 'sneakers' as const,
+      footColor: '#F3E3C3',
+      headwear: 'none' as const,
+      headColor: '#e0902b',
+    };
+    const rig = buildCharacter(look, outfit, 'hi');
+    poseCharacter(rig, 'cheer', i * 0.6, 1);
+    rig.group.position.x = -0.5;
+    scene.add(rig.group);
+
+    // 'lo' detail (crowd path): baked single-buffer mesh, no outline/face-plate.
+    const lo = bakeCharacter(look, { ...outfit, topColor: '#2a9d6f' }, 'wave', 0.3, 'lo');
+    const loMesh = new THREE.Mesh(lo, vcMat());
+    loMesh.position.x = 0.6;
+    scene.add(loMesh);
+  });
+  log('rig rendered');
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(innerWidth, innerHeight);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  document.body.appendChild(renderer.domElement);
+  renderer.render(scene, camera);
+  log('face check rendered');
+}
+
 async function main() {
+  if (new URLSearchParams(location.search).has('face')) {
+    faceCheck();
+    return;
+  }
   const t0 = performance.now();
   await preloadBiome('lagos');
   const ids = biomeAssetIds('lagos');

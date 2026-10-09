@@ -2,12 +2,16 @@ import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import type { CharacterLook, OutfitChoice } from '@cr/content';
 import { GeoBuilder, mix, mulberry, shade } from './geo';
-import { vcMat } from './materials';
+import { outlineMat, texMat, vcMat } from './materials';
 
 /**
- * Original, stylised-realistic Nigerian characters. Proportions follow an adult
- * figure (about 7.2 heads tall); faces have brows, eyes with iris, nose with
- * nostril wings, full lips, cheeks and ears. Every character is built from a
+ * Original, stylised CHIBI Nigerian characters (ADR-0008). Proportions are
+ * ~4.3 heads tall — big head, chunky simplified torso, short stubby limbs —
+ * instead of the old realistic ~7.2-head figure built from 15+ overlapping
+ * primitives (which read as lumpy/uncanny on a real phone). The face is a
+ * single baked 2D texture (deterministic per `look`) on a smooth head
+ * mesh, not a pile of overlapping eye/nose/lip primitives: fewer seams,
+ * fewer verts, and crowds stay cheap. Every character is built from a
  * `look` (identity, never a real person) and an `outfit` (player-editable).
  */
 
@@ -33,10 +37,18 @@ export interface CharacterRig {
   geometries: THREE.BufferGeometry[];
 }
 
-const HY = 0.12; // head centre above the neck pivot
-const HIP_Y = 0.94;
-const THIGH = 0.45;
-const SHIN = 0.46;
+// ---- Chibi skeleton (feet = y 0; ~4.3 heads tall) --------------------------
+const HEAD_R = 0.135;
+const HS = HEAD_R / 0.115; // scale factor for hair/headwear/ears carried over from the old head size
+const HIP_Y = 0.5;
+const THIGH = 0.25;
+const SHIN = 0.25;
+const TORSO_H = 0.46;
+const SHOULDER_Y = HIP_Y + TORSO_H; // 0.96
+const HEAD_Y = SHOULDER_Y - 0.03; // near-no neck: head sits almost directly on the shoulders
+const CHEST_Y = HIP_Y + 0.3;
+const PELVIS_Y = HIP_Y + 0.1;
+const BELT_Y = HIP_Y + 0.19;
 
 function sleeveSpec(top: string) {
   // [upper arm fraction covered, forearm fraction covered]
@@ -48,94 +60,198 @@ function sleeveSpec(top: string) {
     case 'kaftan':
       return [1, 0.55] as const;
     case 'blouse':
-      return [0.55, 0] as const;
+      return [0.6, 0] as const;
     case 'hi-vis':
       return [0, 0] as const;
     default:
-      return [0.6, 0] as const; // tee
+      return [0.55, 0] as const; // tee
   }
 }
 
-function headGeo(look: CharacterLook, outfit: OutfitChoice, detail: Detail): THREE.BufferGeometry {
+// ---- Baked 2D face (replaces 10+ overlapping primitive face parts) --------
+function faceCanvas(w: number, h: number) {
+  const c = document.createElement('canvas');
+  c.width = w;
+  c.height = h;
+  const ctx = c.getContext('2d')!;
+  return { c, ctx };
+}
+
+const faceCache = new Map<string, THREE.CanvasTexture>();
+
+/** Deterministic, cached per unique `look` signature — pure function of identity, no RNG. */
+function faceTexture(look: CharacterLook): THREE.CanvasTexture {
+  const f = look.face;
+  const key = `${look.skin}|${f.width}|${f.jaw}|${f.nose}|${f.lips}|${f.brow}|${f.eye}|${look.facialHair}|${look.hairColor}|${look.gender}`;
+  let tex = faceCache.get(key);
+  if (tex) return tex;
+
+  const W = 220;
+  const H = 220;
+  const sc = W / 160; // keep all the hand-tuned offsets below relative to the original 160px design
+  const { c, ctx } = faceCanvas(W, H);
+  const cx = W / 2;
+  const cy = H * 0.56;
+  const skin = look.skin;
+  const female = look.gender === 'f';
+
+  ctx.fillStyle = skin;
+  ctx.fillRect(0, 0, W, H);
+
+  // soft cheek warmth
+  const cheekGrad = ctx.createRadialGradient(cx, cy + 14 * sc, 2, cx, cy + 14 * sc, 60 * sc);
+  cheekGrad.addColorStop(0, shade(skin, 0.03));
+  cheekGrad.addColorStop(1, shade(skin, 0));
+  ctx.fillStyle = cheekGrad;
+  ctx.fillRect(0, 0, W, H);
+
+  // eyes: white, iris, pupil, highlight — big and close-set, chibi-cute
+  const eyeDX = 22 * f.width * sc;
+  const eyeW = 24 * f.eye * sc;
+  const eyeH = 22 * f.eye * sc;
+  for (const s of [-1, 1]) {
+    const ex = cx + s * eyeDX;
+    const ey = cy - 4 * sc;
+    // white almond
+    ctx.fillStyle = '#fbf8f1';
+    ctx.beginPath();
+    ctx.ellipse(ex, ey, eyeW * 0.5, eyeH * 0.46, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // iris (big, bold)
+    ctx.fillStyle = '#4a2f1c';
+    ctx.beginPath();
+    ctx.ellipse(ex, ey + eyeH * 0.06, eyeW * 0.4, eyeH * 0.42, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // pupil
+    ctx.fillStyle = '#0a0705';
+    ctx.beginPath();
+    ctx.ellipse(ex, ey + eyeH * 0.08, eyeW * 0.22, eyeH * 0.24, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // highlight
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.ellipse(ex - eyeW * 0.14, ey - eyeH * 0.16, eyeW * 0.1, eyeH * 0.12, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // lid line: a thin crease just above the white, not a cap that covers it
+    ctx.strokeStyle = shade(skin, -0.25);
+    ctx.lineWidth = 1.6 * sc;
+    ctx.beginPath();
+    ctx.ellipse(ex, ey, eyeW * 0.52, eyeH * 0.48, 0, Math.PI * 1.05, Math.PI * 1.95);
+    ctx.stroke();
+    // brow: short, confident, well clear of the eye
+    ctx.strokeStyle = look.hairColor;
+    ctx.lineWidth = (3.2 + 1.8 * f.brow) * sc;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    const by = ey - eyeH * (female ? 1.3 : 1.45);
+    ctx.moveTo(ex - eyeW * 0.46, by + 2 * sc);
+    ctx.quadraticCurveTo(ex, by - 2.5 * f.brow * sc, ex + eyeW * 0.5, by + 1.5 * sc);
+    ctx.stroke();
+  }
+
+  // nose: a soft vertical shade + tip, no hard line
+  ctx.strokeStyle = shade(skin, -0.1);
+  ctx.lineWidth = 2 * f.nose * sc;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(cx - 1, cy + 2 * sc);
+  ctx.quadraticCurveTo(cx - 3 * f.nose * sc, cy + 11 * sc, cx - 2 * f.nose * sc, cy + 15 * sc);
+  ctx.stroke();
+  ctx.fillStyle = shade(skin, -0.06);
+  ctx.beginPath();
+  ctx.ellipse(cx, cy + 16 * sc, 5 * f.nose * sc, 2.6 * sc, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // mouth: a simple warm curve
+  const lipC = mix(skin, '#7a2230', 0.55);
+  ctx.strokeStyle = shade(lipC, -0.1);
+  ctx.lineWidth = 3.4 * f.lips * sc;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(cx - 14 * f.lips * sc, cy + 32 * sc);
+  ctx.quadraticCurveTo(cx, cy + 38 * f.lips * sc, cx + 14 * f.lips * sc, cy + 32 * sc);
+  ctx.stroke();
+
+  // facial hair, baked rather than a separate clipping primitive
+  if (look.facialHair === 'moustache' || look.facialHair === 'beard') {
+    ctx.fillStyle = look.hairColor;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy + 27 * sc, 15 * sc, 4.5 * sc, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  if (look.facialHair === 'goatee' || look.facialHair === 'beard') {
+    ctx.fillStyle = look.hairColor;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy + 46 * sc, (look.facialHair === 'beard' ? 30 : 11) * sc, (look.facialHair === 'beard' ? 22 : 13) * sc, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // soft oval alpha mask: fades to fully transparent at the plate edge so the
+  // rectangular quad disappears into the curved skin-coloured head (ADR-0008)
+  // instead of showing as a hard sticker edge.
+  ctx.globalCompositeOperation = 'destination-in';
+  const mask = ctx.createRadialGradient(cx, cy, W * 0.28, cx, cy, W * 0.5);
+  mask.addColorStop(0, 'rgba(0,0,0,1)');
+  mask.addColorStop(0.75, 'rgba(0,0,0,1)');
+  mask.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = mask;
+  ctx.beginPath();
+  ctx.ellipse(cx, cy, W * 0.5, H * 0.56, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.globalCompositeOperation = 'source-over';
+
+  tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.wrapS = THREE.ClampToEdgeWrapping;
+  tex.wrapT = THREE.ClampToEdgeWrapping;
+  tex.anisotropy = 4;
+  faceCache.set(key, tex);
+  return tex;
+}
+
+interface HeadBuild {
+  skull: THREE.BufferGeometry; // cranium + ears + hair + headwear (vertex-coloured, merged)
+  face: THREE.BufferGeometry | null; // small flat textured plate (hi detail only)
+  faceMap: THREE.CanvasTexture | null;
+}
+
+function headGeo(look: CharacterLook, outfit: OutfitChoice, detail: Detail): HeadBuild {
   const b = new GeoBuilder();
   if (detail === 'lo') b.segScale = 0.5;
   const hi = detail === 'hi';
-  const f = look.face;
   const skin = look.skin;
-  const dark = shade(skin, -0.07);
-  const lipC = mix(skin, '#7a2230', 0.5);
-  const fw = f.width;
+  const fw = look.face.width;
   const hairCol = look.hairColor;
   const female = look.gender === 'f';
 
-  // cranium + jaw + chin
-  b.sphere(0.115, skin, { y: HY, sx: 0.9 * fw, sy: 1.1, sz: 1.0 }, 14);
-  b.sphere(0.1, skin, { y: HY - 0.055, z: 0.012, sx: 0.8 * fw * f.jaw, sy: 0.78, sz: 0.88 }, 12);
-  b.sphere(0.03, skin, { y: HY - 0.108, z: 0.07, sx: 1.1 * f.jaw, sy: 0.8, sz: 0.9 }, 8);
-  // cheeks
-  for (const s of [-1, 1]) b.sphere(0.034, shade(skin, 0.035), { x: s * 0.062 * fw, y: HY - 0.03, z: 0.078, sy: 0.9 }, 8);
+  // cranium: one smooth rounded shape (chibi — big, simple, reads clean at a distance)
+  b.sphere(HEAD_R, skin, { sx: 1.0 * fw, sy: 1.05, sz: 1.0 }, 16);
   // ears
   for (const s of [-1, 1]) {
-    b.sphere(0.026, skin, { x: s * 0.105 * fw, y: HY, z: -0.004, sx: 0.5, sy: 1.15, sz: 0.85 }, 8);
-    if (female) b.sphere(0.009, '#f0c75e', { x: s * 0.112 * fw, y: HY - 0.03, z: 0.0 }, 6);
-  }
-  // eyes: white, iris, pupil, lid line
-  for (const s of [-1, 1]) {
-    const ex = s * 0.04 * fw;
-    b.sphere(0.02 * f.eye, '#f4f1ea', { x: ex, y: HY + 0.012, z: 0.099, sx: 1.25, sy: 0.82, sz: 0.55 }, 8);
-    b.sphere(0.0125 * f.eye, '#2a1a12', { x: ex, y: HY + 0.012, z: 0.108, sz: 0.5 }, 8);
-    if (hi) b.sphere(0.006 * f.eye, '#0a0705', { x: ex, y: HY + 0.012, z: 0.112, sz: 0.4 }, 6);
-    if (hi) b.box(0.046 * f.eye, 0.006, 0.012, dark, { x: ex, y: HY + 0.03, z: 0.1, rz: s * -0.12 });
-    if (hi && female) b.box(0.05 * f.eye, 0.004, 0.01, '#0a0705', { x: ex, y: HY + 0.026, z: 0.104, rz: s * -0.12 });
-    // brows
-    b.box(0.055, 0.006 + 0.007 * f.brow, 0.012, hairCol, {
-      x: s * 0.043 * fw,
-      y: HY + 0.05 + (female ? 0.004 : 0),
-      z: 0.098,
-      rz: s * -0.1,
-    });
-  }
-  // nose: bridge + tip + nostril wings
-  b.box(0.014 * f.nose, 0.05, 0.014, shade(skin, 0.01), { y: HY - 0.002, z: 0.108, rx: -0.25 });
-  b.sphere(0.0235, shade(skin, 0.02), { y: HY - 0.03, z: 0.114, sx: 1.05 * f.nose, sy: 0.95, sz: 1.0 }, 8);
-  for (const s of [-1, 1]) b.sphere(0.0135, skin, { x: s * 0.02 * f.nose, y: HY - 0.037, z: 0.104, sx: 0.9 }, 6);
-  if (hi) for (const s of [-1, 1]) b.sphere(0.005, '#1a0e09', { x: s * 0.0105 * f.nose, y: HY - 0.043, z: 0.126 }, 4);
-  // lips
-  b.sphere(0.03, shade(lipC, -0.05), { y: HY - 0.063, z: 0.104, sx: 1.25 * f.lips, sy: 0.3 * f.lips, sz: 0.5 }, 8);
-  b.sphere(0.032, lipC, { y: HY - 0.075, z: 0.1, sx: 1.2 * f.lips, sy: 0.34 * f.lips, sz: 0.55 }, 8);
-  if (hi) b.box(0.04 * f.lips, 0.0035, 0.01, '#3a0f14', { y: HY - 0.0685, z: 0.108 });
-
-  // facial hair
-  if (look.facialHair === 'moustache' || look.facialHair === 'beard' || look.facialHair === 'goatee') {
-    b.box(0.07, 0.014, 0.02, hairCol, { y: HY - 0.054, z: 0.108 });
-  }
-  if (look.facialHair === 'goatee') b.sphere(0.03, hairCol, { y: HY - 0.105, z: 0.075, sx: 0.9, sy: 1.1, sz: 0.8 }, 8);
-  if (look.facialHair === 'beard') {
-    b.sphere(0.1, hairCol, { y: HY - 0.082, z: 0.022, sx: 0.88 * fw, sy: 0.5, sz: 0.82 }, 12);
-    for (const s of [-1, 1]) b.box(0.016, 0.07, 0.05, hairCol, { x: s * 0.088 * fw, y: HY - 0.03, z: 0.02 });
+    b.sphere(0.024 * HS, skin, { x: s * 0.118 * HS * fw, y: -0.01, z: -0.01, sx: 0.5, sy: 1.1, sz: 0.85 }, 8);
+    if (female) b.sphere(0.008 * HS, '#f0c75e', { x: s * 0.124 * HS * fw, y: -0.03 }, 6);
   }
 
-  // hair
+  // hair (skipped under a headtie)
   const hw = outfit.headwear;
-  const hairHidden = hw === 'headtie';
-  if (!hairHidden) {
+  if (hw !== 'headtie') {
     switch (look.hair) {
       case 'short':
-        b.cap(0.122, 1.75, hairCol, { y: HY + 0.008, rx: -0.75, sx: 0.93 * fw, sy: 1.1, sz: 1.04 }, 12);
+        b.cap(0.143 * HS, 1.85, hairCol, { y: 0.01, rx: -0.78, sx: 0.98 * fw, sy: 1.08, sz: 1.04 }, 12);
         break;
       case 'natural':
-        b.cap(0.132, 1.9, hairCol, { y: HY + 0.012, rx: -0.65, sx: 0.95 * fw, sy: 1.12, sz: 1.06 }, 12);
+        b.cap(0.156 * HS, 2.0, hairCol, { y: 0.015, rx: -0.68, sx: 1.0 * fw, sy: 1.1, sz: 1.06 }, 12);
         break;
       case 'afro':
-        b.cap(0.165, 2.1, hairCol, { y: HY + 0.02, rx: -0.5, sx: 1.0 * fw, sy: 1.05, sz: 1.0 }, 12);
+        b.sphere(0.182 * HS, hairCol, { y: 0.03, sx: 1.08 * fw, sy: 1.0, sz: 1.04 }, 14);
         break;
       case 'braids':
-        b.cap(0.124, 1.8, hairCol, { y: HY + 0.01, rx: -0.7, sx: 0.94 * fw, sy: 1.1, sz: 1.04 }, 12);
-        for (let i = 0; i < 9; i++) {
-          const a = -0.9 + (i / 8) * 1.8;
-          const x = Math.sin(a) * 0.11 * fw;
-          const z = -Math.cos(a) * 0.1;
-          b.cyl(0.012, 0.008, 0.3, hairCol, { x, y: HY - 0.1, z, rx: 0.05, rz: -a * 0.08 }, 5);
+        b.cap(0.145 * HS, 1.9, hairCol, { y: 0.012, rx: -0.73, sx: 0.98 * fw, sy: 1.08, sz: 1.04 }, 12);
+        for (let i = 0; i < 7; i++) {
+          const a = -0.85 + (i / 6) * 1.7;
+          const x = Math.sin(a) * 0.125 * HS * fw;
+          const z = -Math.cos(a) * 0.1 * HS;
+          b.cyl(0.011 * HS, 0.007 * HS, 0.2 * HS, hairCol, { x, y: -0.08, z, rx: 0.05, rz: -a * 0.08 }, 5);
         }
         break;
       default:
@@ -147,129 +263,135 @@ function headGeo(look: CharacterLook, outfit: OutfitChoice, detail: Detail): THR
   const hc = outfit.headColor;
   switch (hw) {
     case 'headtie': {
-      b.sphere(0.155, hc, { y: HY + 0.045, z: 0.01, sx: 1.18 * fw, sy: 0.85, sz: 1.15 }, 12);
-      b.torus(0.13, 0.04, shade(hc, -0.08), { y: HY + 0.01, rx: Math.PI / 2, sx: 1.2 * fw }, Math.PI * 2, 14);
-      b.box(0.22, 0.16, 0.045, shade(hc, -0.06), { x: 0.1, y: HY + 0.14, z: 0.09, rz: -0.55, ry: 0.2 });
-      b.box(0.2, 0.15, 0.045, hc, { x: -0.02, y: HY + 0.15, z: 0.1, rz: 0.45, ry: -0.15 });
-      b.sphere(0.055, shade(hc, 0.1), { x: 0.05, y: HY + 0.11, z: 0.12 }, 8);
+      b.sphere(0.18 * HS, hc, { y: 0.04, z: 0.01, sx: 1.12 * fw, sy: 0.85, sz: 1.1 }, 12);
+      b.torus(0.15 * HS, 0.042 * HS, shade(hc, -0.08), { y: 0.0, rx: Math.PI / 2, sx: 1.12 * fw }, Math.PI * 2, 14);
+      b.box(0.2 * HS, 0.15 * HS, 0.045 * HS, shade(hc, -0.06), { x: 0.1 * HS, y: 0.12 * HS, z: 0.08 * HS, rz: -0.55, ry: 0.2 });
+      b.box(0.18 * HS, 0.14 * HS, 0.045 * HS, hc, { x: -0.02 * HS, y: 0.13 * HS, z: 0.09 * HS, rz: 0.45, ry: -0.15 });
       break;
     }
     case 'cap':
-      b.cap(0.127, 1.65, hc, { y: HY + 0.015, rx: -0.5, sx: 0.93 * fw, sy: 1.08, sz: 1.04 }, 12);
-      b.box(0.13, 0.012, 0.1, shade(hc, -0.1), { y: HY + 0.052, z: 0.13, rx: 0.15 });
+      b.cap(0.148 * HS, 1.7, hc, { y: 0.015, rx: -0.5, sx: 0.98 * fw, sy: 1.05, sz: 1.04 }, 12);
+      b.box(0.14 * HS, 0.012 * HS, 0.1 * HS, shade(hc, -0.1), { y: 0.05 * HS, z: 0.13 * HS, rx: 0.15 });
       break;
     case 'hardhat':
-      b.cap(0.138, 1.9, hc, { y: HY + 0.02, rx: -0.4, sx: 0.95 * fw, sy: 1.0, sz: 1.06 }, 12);
-      b.cyl(0.155, 0.155, 0.014, shade(hc, -0.06), { y: HY + 0.055, z: 0.012, sz: 1.12 }, 16);
-      b.box(0.03, 0.02, 0.26, shade(hc, -0.1), { y: HY + 0.158, z: -0.005 });
+      b.cap(0.16 * HS, 1.95, hc, { y: 0.02, rx: -0.4, sx: 1.0 * fw, sy: 1.0, sz: 1.05 }, 12);
+      b.cyl(0.175 * HS, 0.175 * HS, 0.014 * HS, shade(hc, -0.06), { y: 0.06 * HS, z: 0.012 * HS, sz: 1.1 }, 16);
+      b.box(0.03 * HS, 0.02 * HS, 0.26 * HS, shade(hc, -0.1), { y: 0.16 * HS, z: -0.005 * HS });
       break;
     case 'sailor':
-      b.cyl(0.125 * fw, 0.115 * fw, 0.075, hc, { y: HY + 0.095, sz: 1.05 }, 14);
-      b.cyl(0.14 * fw, 0.14 * fw, 0.016, hc, { y: HY + 0.136, sz: 1.05 }, 14);
-      b.cyl(0.119 * fw, 0.119 * fw, 0.02, '#1a2a44', { y: HY + 0.07, sz: 1.05 }, 14);
-      b.sphere(0.014, '#f0b429', { y: HY + 0.095, z: 0.13 }, 6);
+      b.cyl(0.14 * HS * fw, 0.13 * HS * fw, 0.075 * HS, hc, { y: 0.1 * HS, sz: 1.04 }, 14);
+      b.cyl(0.155 * HS * fw, 0.155 * HS * fw, 0.016 * HS, hc, { y: 0.14 * HS, sz: 1.04 }, 14);
+      b.cyl(0.133 * HS * fw, 0.133 * HS * fw, 0.02 * HS, '#1a2a44', { y: 0.075 * HS, sz: 1.04 }, 14);
+      b.sphere(0.014 * HS, '#f0b429', { y: 0.1 * HS, z: 0.14 * HS }, 6);
       break;
     case 'headphones':
-      b.torus(0.128 * fw, 0.011, hc, { y: HY + 0.005, ry: 0 }, Math.PI, 14);
-      for (const s of [-1, 1]) b.cyl(0.046, 0.046, 0.034, shade(hc, -0.15), { x: s * 0.128 * fw, y: HY, rz: Math.PI / 2 }, 12);
+      b.torus(0.144 * HS * fw, 0.012 * HS, hc, { y: 0.0, ry: 0 }, Math.PI, 14);
+      for (const s of [-1, 1]) b.cyl(0.05 * HS, 0.05 * HS, 0.036 * HS, shade(hc, -0.15), { x: s * 0.144 * HS * fw, y: -0.005 * HS, rz: Math.PI / 2 }, 12);
       break;
     default:
       break;
   }
 
   if (look.accessory === 'goggles') {
-    const gy = HY + 0.085;
+    const gy = 0.03;
     for (const s of [-1, 1]) {
-      b.torus(0.029, 0.007, '#8a6a2f', { x: s * 0.04, y: gy, z: 0.122 }, Math.PI * 2, 10);
-      b.cyl(0.026, 0.026, 0.004, '#7fd4e8', { x: s * 0.04, y: gy, z: 0.122, rx: Math.PI / 2 }, 10);
+      b.torus(0.032 * HS, 0.008 * HS, '#8a6a2f', { x: s * 0.045 * HS, y: gy, z: 0.128 * HS }, Math.PI * 2, 10);
+      b.cyl(0.029 * HS, 0.029 * HS, 0.004 * HS, '#7fd4e8', { x: s * 0.045 * HS, y: gy, z: 0.128 * HS, rx: Math.PI / 2 }, 10);
     }
-    b.box(0.03, 0.01, 0.01, '#8a6a2f', { y: gy, z: 0.124 });
-    b.cyl(0.118 * fw, 0.118 * fw, 0.014, '#3a2f22', { y: gy, sz: 1.04 }, 14);
+    b.box(0.034 * HS, 0.01 * HS, 0.01 * HS, '#8a6a2f', { y: gy, z: 0.13 * HS });
+    b.cyl(0.13 * HS * fw, 0.13 * HS * fw, 0.014 * HS, '#3a2f22', { y: gy, sz: 1.03 }, 14);
   }
 
-  const g = b.build()!;
-  return g;
+  const skull = b.build()!;
+
+  if (!hi) return { skull, face: null, faceMap: null };
+
+  // face plate: one small flat textured quad, not an outline-prone pile of primitives
+  const faceMap = faceTexture(look);
+  const faceW = HEAD_R * 1.25 * fw;
+  const faceH = HEAD_R * 1.3;
+  const plate = new THREE.PlaneGeometry(faceW, faceH);
+  // Must clear the cranium sphere's surface at every point the (flat) plate
+  // covers, not just at its centre, or the sphere depth-occludes the middle
+  // of the face (that was the earlier bug: only the plate's grazing edges
+  // were visible, the iris/pupil were hidden behind the sphere).
+  plate.translate(0, 0.01, HEAD_R * 1.06);
+  return { skull, face: plate, faceMap };
 }
 
 function torsoGeo(look: CharacterLook, outfit: OutfitChoice, detail: Detail): THREE.BufferGeometry {
   const b = new GeoBuilder();
   if (detail === 'lo') b.segScale = 0.55;
   const f = look.gender === 'f';
-  const sw = (f ? 0.9 : 1) * Math.pow(look.build, 0.5);
-  const hw = (f ? 1.12 : 1) * Math.pow(look.build, 0.6);
+  const sw = (f ? 0.92 : 1) * Math.pow(look.build, 0.5);
+  const hw = (f ? 1.1 : 1) * Math.pow(look.build, 0.55);
   const skin = look.skin;
   const tc = outfit.topColor;
   const bc = outfit.bottomColor;
   const top = outfit.top;
 
-  // neck + collarbone
-  b.cyl(0.052, 0.058, 0.13, skin, { y: 1.47 }, 8);
-  b.sphere(0.07, skin, { y: 1.43, sx: 1.7 * sw, sy: 0.35, sz: 0.8 }, 8);
+  // short neck nub — chibi reads with little to no neck
+  b.cyl(0.05 * HS, 0.056 * HS, 0.05, skin, { y: SHOULDER_Y + 0.01 }, 8);
 
-  const bodyCol = top === 'hi-vis' ? '#8a8f96' : tc;
+  const bodyCol = top === 'hi-vis' ? '#9499a0' : tc;
   // chest
-  b.cyl(0.17 * sw, 0.14 * hw, 0.53, bodyCol, { y: 1.18, sz: 0.62 }, 12);
+  b.cyl(0.165 * sw, 0.15 * hw, 0.32, bodyCol, { y: CHEST_Y, sz: 0.75 }, 12);
   // pelvis
-  const pelvisCol = outfit.bottom === 'wrapper' ? bc : bc;
-  b.cyl(0.14 * hw, 0.15 * hw, 0.16, pelvisCol, { y: 0.97, sz: 0.66 }, 12);
-  b.cyl(0.146 * hw, 0.146 * hw, 0.035, shade(bc, -0.18), { y: 1.04, sz: 0.67 }, 12); // belt
+  b.cyl(0.15 * hw, 0.155 * hw, 0.2, bc, { y: PELVIS_Y, sz: 0.78 }, 12);
+  b.cyl(0.158 * hw, 0.158 * hw, 0.03, shade(bc, -0.18), { y: BELT_Y, sz: 0.79 }, 12); // belt
 
   switch (top) {
     case 'hi-vis':
-      b.cyl(0.178 * sw, 0.148 * hw, 0.5, tc, { y: 1.19, sz: 0.66 }, 12);
-      b.cyl(0.181 * sw, 0.15 * hw, 0.035, '#d9dde0', { y: 1.1, sz: 0.66 }, 12);
-      b.cyl(0.184 * sw, 0.17 * sw, 0.035, '#d9dde0', { y: 1.3, sz: 0.66 }, 12);
+      b.cyl(0.172 * sw, 0.156 * hw, 0.3, tc, { y: CHEST_Y, sz: 0.78 }, 12);
+      b.cyl(0.176 * sw, 0.158 * hw, 0.026, '#d9dde0', { y: CHEST_Y - 0.08, sz: 0.78 }, 12);
+      b.cyl(0.18 * sw, 0.164 * sw, 0.026, '#d9dde0', { y: CHEST_Y + 0.1, sz: 0.78 }, 12);
       break;
     case 'jacket':
-      b.cyl(0.18 * sw, 0.15 * hw, 0.53, tc, { y: 1.18, sz: 0.66 }, 12);
-      b.cyl(0.152 * hw, 0.152 * hw, 0.05, shade(tc, -0.15), { y: 0.95, sz: 0.68 }, 12);
-      b.torus(0.07, 0.02, shade(tc, -0.1), { y: 1.45, rx: Math.PI / 2, sz: 1.1 }, Math.PI * 2, 10);
-      b.box(0.012, 0.5, 0.012, shade(tc, -0.3), { y: 1.18, z: 0.108 });
-      for (const s of [-1, 1]) b.box(0.07, 0.03, 0.02, shade(tc, -0.12), { x: s * 0.09, y: 1.02, z: 0.1 });
+      b.cyl(0.175 * sw, 0.158 * hw, 0.33, tc, { y: CHEST_Y, sz: 0.78 }, 12);
+      b.cyl(0.158 * hw, 0.158 * hw, 0.04, shade(tc, -0.15), { y: PELVIS_Y, sz: 0.8 }, 12);
+      b.torus(0.052 * HS, 0.016 * HS, shade(tc, -0.1), { y: SHOULDER_Y, rx: Math.PI / 2, sz: 1.1 }, Math.PI * 2, 10);
+      b.box(0.01, 0.3, 0.01, shade(tc, -0.3), { y: CHEST_Y, z: 0.14 * sw });
       break;
     case 'kaftan':
-      b.cyl(0.178 * sw, 0.27 * hw, 0.9, tc, { y: 1.0, sz: 0.72 }, 12);
-      b.cyl(0.272 * hw, 0.272 * hw, 0.05, '#f0c75e', { y: 0.56, sz: 0.72 }, 12);
-      b.box(0.05, 0.3, 0.012, '#f0c75e', { y: 1.28, z: 0.115 });
+      b.cyl(0.175 * sw, 0.2 * hw, 0.56, tc, { y: HIP_Y + 0.02, sz: 0.82 }, 12);
+      b.cyl(0.2 * hw, 0.2 * hw, 0.03, '#f0c75e', { y: HIP_Y - 0.12, sz: 0.82 }, 12);
+      b.box(0.04, 0.22, 0.01, '#f0c75e', { y: CHEST_Y + 0.04, z: 0.16 * sw });
       break;
     case 'rain-cape':
-      b.cyl(0.11 * sw, 0.38 * hw, 0.94, tc, { y: 0.99, sz: 0.85 }, 12);
-      b.torus(0.095, 0.04, shade(tc, 0.06), { y: 1.47, rx: Math.PI / 2 }, Math.PI * 2, 10);
-      b.sphere(0.12, shade(tc, -0.06), { y: 1.5, z: -0.09, sx: 1.0, sy: 0.9, sz: 0.7 }, 8);
-      for (let i = 0; i < 6; i++) b.cyl(0.004, 0.004, 0.2, '#fff', { x: -0.2 + i * 0.08, y: 0.9, z: 0.31, rx: 0.1, rz: 0.2 }, 3);
+      b.cyl(0.11 * sw, 0.27 * hw, 0.58, tc, { y: HIP_Y + 0.04, sz: 0.9 }, 12);
+      b.torus(0.075 * HS, 0.032 * HS, shade(tc, 0.06), { y: SHOULDER_Y + 0.02, rx: Math.PI / 2 }, Math.PI * 2, 10);
+      b.sphere(0.095 * HS, shade(tc, -0.06), { y: SHOULDER_Y + 0.05, z: -0.07, sx: 1.0, sy: 0.85, sz: 0.68 }, 8);
       break;
     case 'blouse':
-      b.cyl(0.152 * hw, 0.23 * hw, 0.16, tc, { y: 0.97, sz: 0.72 }, 12);
-      b.torus(0.066, 0.016, '#f0c75e', { y: 1.45, rx: Math.PI / 2, sz: 1.1 }, Math.PI * 2, 10);
-      for (let i = 0; i < 3; i++) b.cyl(0.171 * sw, 0.171 * sw, 0.022, shade(tc, 0.18), { y: 1.1 + i * 0.1, sz: 0.63 }, 12);
+      b.cyl(0.156 * hw, 0.2 * hw, 0.12, tc, { y: PELVIS_Y + 0.02, sz: 0.78 }, 12);
+      b.torus(0.052 * HS, 0.013 * HS, '#f0c75e', { y: SHOULDER_Y, rx: Math.PI / 2, sz: 1.1 }, Math.PI * 2, 10);
+      for (let i = 0; i < 2; i++) b.cyl(0.168 * sw, 0.168 * sw, 0.018, shade(tc, 0.16), { y: CHEST_Y - 0.07 + i * 0.1, sz: 0.7 }, 12);
       break;
     case 'ankara-shirt':
-      for (let i = 0; i < 4; i++) b.cyl(0.172 * sw, 0.158 * hw, 0.04, i % 2 ? '#f0c75e' : shade(tc, -0.2), { y: 1.0 + i * 0.12, sz: 0.63 }, 12);
-      b.torus(0.07, 0.018, shade(tc, -0.25), { y: 1.45, rx: Math.PI / 2, sz: 1.1 }, Math.PI * 2, 10);
+      for (let i = 0; i < 3; i++) b.cyl(0.17 * sw, 0.158 * hw, 0.034, i % 2 ? '#f0c75e' : shade(tc, -0.2), { y: PELVIS_Y + 0.08 + i * 0.1, sz: 0.76 }, 12);
+      b.torus(0.052 * HS, 0.014 * HS, shade(tc, -0.25), { y: SHOULDER_Y, rx: Math.PI / 2, sz: 1.1 }, Math.PI * 2, 10);
       break;
     default:
-      b.torus(0.066, 0.016, shade(tc, -0.12), { y: 1.45, rx: Math.PI / 2, sz: 1.1 }, Math.PI * 2, 10);
+      b.torus(0.05 * HS, 0.013 * HS, shade(tc, -0.12), { y: SHOULDER_Y, rx: Math.PI / 2, sz: 1.1 }, Math.PI * 2, 10);
       break;
   }
 
-  // bottoms detail at the hips
   if (outfit.bottom === 'wrapper') {
-    b.cyl(0.16 * hw, 0.3 * hw, 0.72, bc, { y: 0.66, sz: 0.78 }, 12);
-    for (let i = 0; i < 3; i++) b.cyl(0.24 * hw + i * 0.018, 0.25 * hw + i * 0.018, 0.04, i % 2 ? '#f0c75e' : shade(bc, -0.22), { y: 0.5 - i * 0.12 + 0.06, sz: 0.78 }, 12);
+    b.cyl(0.17 * hw, 0.19 * hw, 0.2, bc, { y: HIP_Y - 0.04, sz: 0.82 }, 12);
+    b.cyl(0.19 * hw, 0.2 * hw, 0.024, shade(bc, -0.2), { y: HIP_Y - 0.12, sz: 0.82 }, 12);
   }
 
-  // accessories
   if (look.accessory === 'bowtie') {
-    b.cone(0.03, 0.05, '#e8a87c', { x: -0.035, y: 1.4, z: 0.1, rz: Math.PI / 2 }, 6);
-    b.cone(0.03, 0.05, '#e8a87c', { x: 0.035, y: 1.4, z: 0.1, rz: -Math.PI / 2 }, 6);
-    b.sphere(0.012, '#c98a5e', { y: 1.4, z: 0.105 }, 6);
+    b.cone(0.026, 0.044, '#e8a87c', { x: -0.03, y: SHOULDER_Y - 0.02, z: 0.15 * sw, rz: Math.PI / 2 }, 6);
+    b.cone(0.026, 0.044, '#e8a87c', { x: 0.03, y: SHOULDER_Y - 0.02, z: 0.15 * sw, rz: -Math.PI / 2 }, 6);
+    b.sphere(0.011, '#c98a5e', { y: SHOULDER_Y - 0.02, z: 0.145 * sw }, 6);
   }
   if (look.prop === 'pouch') {
-    b.sphere(0.055, '#8b5a2b', { x: 0.14 * hw, y: 0.98, z: 0.07, sy: 1.1 }, 8);
-    b.box(0.05, 0.015, 0.03, '#f0b429', { x: 0.14 * hw, y: 1.04, z: 0.07 });
+    b.sphere(0.048, '#8b5a2b', { x: 0.16 * hw, y: PELVIS_Y + 0.02, z: 0.08, sy: 1.1 }, 8);
+    b.box(0.044, 0.013, 0.026, '#f0b429', { x: 0.16 * hw, y: PELVIS_Y + 0.07, z: 0.08 });
   }
   if (look.prop === 'speaker') {
-    b.box(0.015, 0.04, 0.5, '#2a2a2a', { x: 0.1, y: 1.24, z: 0.0, rz: 0.7 }, );
+    b.box(0.013, 0.035, 0.42, '#2a2a2a', { x: 0.12, y: CHEST_Y, z: 0.0, rz: 0.7 });
   }
 
   return b.build()!;
@@ -280,28 +402,26 @@ function armGeos(look: CharacterLook, outfit: OutfitChoice, detail: Detail) {
   const sc = outfit.top === 'hi-vis' ? skin : outfit.topColor;
   const [upFrac, loFrac] = sleeveSpec(outfit.top);
   const f = look.gender === 'f';
-  const thin = f ? 0.88 : 1;
+  const thin = f ? 0.9 : 1;
   const upper = new GeoBuilder();
   const lo = new GeoBuilder();
   if (detail === 'lo') upper.segScale = lo.segScale = 0.55;
-  // upper arm 0.28
-  const upLen = 0.28;
-  upper.sphere(0.058 * thin, upFrac > 0 ? sc : skin, { y: 0 }, 8);
-  upper.cyl(0.05 * thin, 0.042 * thin, upLen, skin, { y: -upLen / 2 }, 8);
+  const upLen = 0.16;
+  upper.sphere(0.052 * thin, upFrac > 0 ? sc : skin, { y: 0 }, 8);
+  upper.cyl(0.046 * thin, 0.04 * thin, upLen, skin, { y: -upLen / 2 }, 8);
   if (upFrac > 0) {
     const l = upLen * upFrac;
-    upper.cyl(0.056 * thin, 0.05 * thin + 0.002, l, sc, { y: -l / 2 }, 8);
+    upper.cyl(0.05 * thin, 0.046 * thin + 0.002, l, sc, { y: -l / 2 }, 8);
   }
-  // forearm 0.26 + hand
-  const loLen = 0.26;
-  lo.sphere(0.042 * thin, skin, { y: 0 }, 8);
-  lo.cyl(0.041 * thin, 0.031 * thin, loLen, skin, { y: -loLen / 2 }, 8);
+  const loLen = 0.15;
+  lo.sphere(0.04 * thin, skin, { y: 0 }, 8);
+  lo.cyl(0.039 * thin, 0.032 * thin, loLen, skin, { y: -loLen / 2 }, 8);
   if (loFrac > 0) {
     const l = loLen * loFrac;
-    lo.cyl(0.046 * thin, 0.04 * thin + 0.004, l, sc, { y: -l / 2 }, 8);
+    lo.cyl(0.044 * thin, 0.038 * thin + 0.004, l, sc, { y: -l / 2 }, 8);
   }
-  lo.sphere(0.04 * thin, skin, { y: -loLen - 0.025, sx: 0.9, sy: 1.2, sz: 0.7 }, 8);
-  lo.box(0.014, 0.04, 0.02, skin, { x: 0.03, y: -loLen - 0.01, z: 0.02 });
+  // chibi hand: one round, slightly bigger "mitten" blob
+  lo.sphere(0.046 * thin, skin, { y: -loLen - 0.02, sx: 1.0, sy: 1.05, sz: 0.85 }, 8);
   return { upper: upper.build()!, lower: lo.build()! };
 }
 
@@ -309,58 +429,54 @@ function legGeos(look: CharacterLook, outfit: OutfitChoice, detail: Detail) {
   const skin = look.skin;
   const bc = outfit.bottomColor;
   const f = look.gender === 'f';
-  const hw = (f ? 1.1 : 1) * Math.pow(look.build, 0.5);
+  const hw = (f ? 1.08 : 1) * Math.pow(look.build, 0.5);
   const bottom = outfit.bottom;
   const thighCol = bottom === 'wrapper' ? skin : bc;
   const shinCol = bottom === 'shorts' || bottom === 'wrapper' ? skin : bc;
 
   const thigh = new GeoBuilder();
   if (detail === 'lo') thigh.segScale = 0.55;
-  thigh.sphere(0.075 * hw, thighCol, { y: 0 }, 8);
-  thigh.cyl(0.082 * hw, 0.06, THIGH, thighCol, { y: -THIGH / 2 }, 9);
-  if (bottom === 'shorts') thigh.cyl(0.085 * hw, 0.07, THIGH * 0.62, bc, { y: -THIGH * 0.31 }, 9);
-  if (bottom === 'work') thigh.box(0.02, 0.1, 0.07, shade(bc, -0.15), { x: 0.07 * hw, y: -0.2 });
+  thigh.sphere(0.066 * hw, thighCol, { y: 0 }, 8);
+  thigh.cyl(0.072 * hw, 0.055, THIGH, thighCol, { y: -THIGH / 2 }, 9);
+  if (bottom === 'shorts') thigh.cyl(0.075 * hw, 0.062, THIGH * 0.58, bc, { y: -THIGH * 0.29 }, 9);
+  if (bottom === 'work') thigh.box(0.018, 0.08, 0.06, shade(bc, -0.15), { x: 0.062 * hw, y: -0.1 });
 
   const shin = new GeoBuilder();
   if (detail === 'lo') shin.segScale = 0.55;
-  shin.sphere(0.06, shinCol, { y: 0 }, 8);
-  shin.cyl(0.058, 0.042, SHIN - 0.02, shinCol, { y: -(SHIN - 0.02) / 2 }, 9);
-  if (bottom === 'work') shin.box(0.09, 0.07, 0.03, shade(bc, -0.12), { y: -0.04, z: 0.05 });
-  if (bottom !== 'shorts' && bottom !== 'wrapper') shin.cyl(0.048, 0.048, 0.025, shade(bc, -0.12), { y: -SHIN + 0.04 }, 9);
+  shin.sphere(0.054, shinCol, { y: 0 }, 8);
+  shin.cyl(0.052, 0.04, SHIN - 0.03, shinCol, { y: -(SHIN - 0.03) / 2 }, 9);
+  if (bottom === 'work') shin.box(0.08, 0.06, 0.028, shade(bc, -0.12), { y: -0.03, z: 0.045 });
+  if (bottom !== 'shorts' && bottom !== 'wrapper') shin.cyl(0.044, 0.044, 0.02, shade(bc, -0.12), { y: -SHIN + 0.05 }, 9);
 
-  // footwear (ground at y = -(THIGH+SHIN...) relative to knee = -0.49 + 0.03)
-  const gy = -(HIP_Y - THIGH); // ground relative to knee
+  // ground relative to the knee pivot
+  const gy = -(HIP_Y - THIGH);
   const fc = outfit.footColor;
-  const zc = 0.05;
+  const zc = 0.045;
   switch (outfit.footwear) {
     case 'sandals':
-      shin.box(0.1, 0.022, 0.27, fc, { y: gy + 0.011, z: zc });
-      shin.box(0.085, 0.035, 0.2, skin, { y: gy + 0.04, z: zc + 0.02 });
-      shin.box(0.095, 0.012, 0.03, fc, { y: gy + 0.058, z: zc + 0.03 });
-      shin.box(0.095, 0.012, 0.03, fc, { y: gy + 0.058, z: zc - 0.03 });
-      for (const s of [-1, 1]) shin.sphere(0.012, skin, { x: s * 0.03, y: gy + 0.048, z: zc + 0.13 }, 5);
+      shin.box(0.088, 0.02, 0.23, fc, { y: gy + 0.01, z: zc });
+      shin.box(0.075, 0.03, 0.17, skin, { y: gy + 0.035, z: zc + 0.018 });
+      for (const s of [-1, 1]) shin.sphere(0.011, skin, { x: s * 0.026, y: gy + 0.042, z: zc + 0.1 }, 5);
       break;
     case 'boots':
-      shin.box(0.108, 0.035, 0.28, '#1a1410', { y: gy + 0.0175, z: zc });
-      shin.box(0.1, 0.08, 0.22, fc, { y: gy + 0.075, z: zc + 0.015 });
-      shin.cyl(0.056, 0.058, 0.2, fc, { y: gy + 0.19 }, 9);
-      shin.cyl(0.06, 0.06, 0.018, shade(fc, -0.15), { y: gy + 0.29 }, 9);
+      shin.box(0.095, 0.03, 0.24, '#1a1410', { y: gy + 0.015, z: zc });
+      shin.box(0.088, 0.065, 0.19, fc, { y: gy + 0.062, z: zc + 0.012 });
+      shin.cyl(0.05, 0.052, 0.17, fc, { y: gy + 0.16 }, 9);
       break;
     case 'shoes':
-      shin.box(0.108, 0.025, 0.28, '#0d0d0d', { y: gy + 0.0125, z: zc });
-      shin.box(0.095, 0.06, 0.24, fc, { y: gy + 0.055, z: zc + 0.015 });
-      shin.sphere(0.05, fc, { y: gy + 0.05, z: zc + 0.13, sy: 0.7, sz: 1.1 }, 8);
+      shin.box(0.095, 0.022, 0.24, '#0d0d0d', { y: gy + 0.011, z: zc });
+      shin.box(0.084, 0.05, 0.2, fc, { y: gy + 0.046, z: zc + 0.012 });
+      shin.sphere(0.044, fc, { y: gy + 0.042, z: zc + 0.11, sy: 0.7, sz: 1.1 }, 8);
       break;
     case 'slippers':
-      shin.box(0.1, 0.02, 0.27, fc, { y: gy + 0.01, z: zc });
-      shin.box(0.085, 0.032, 0.18, skin, { y: gy + 0.036, z: zc + 0.03 });
-      shin.box(0.1, 0.014, 0.05, shade(fc, 0.1), { y: gy + 0.05, z: zc + 0.07 });
+      shin.box(0.088, 0.018, 0.23, fc, { y: gy + 0.009, z: zc });
+      shin.box(0.075, 0.028, 0.15, skin, { y: gy + 0.03, z: zc + 0.025 });
       break;
     default: // sneakers
-      shin.box(0.112, 0.038, 0.29, '#f4f1ea', { y: gy + 0.019, z: zc });
-      shin.box(0.1, 0.06, 0.22, fc, { y: gy + 0.068, z: zc + 0.02 });
-      shin.sphere(0.052, fc, { y: gy + 0.062, z: zc + 0.13, sy: 0.7, sz: 1.1 }, 8);
-      shin.box(0.103, 0.012, 0.07, '#f4f1ea', { y: gy + 0.088, z: zc + 0.05 });
+      shin.box(0.098, 0.032, 0.25, '#f4f1ea', { y: gy + 0.016, z: zc });
+      shin.box(0.088, 0.05, 0.19, fc, { y: gy + 0.058, z: zc + 0.017 });
+      shin.sphere(0.046, fc, { y: gy + 0.052, z: zc + 0.11, sy: 0.7, sz: 1.1 }, 8);
+      shin.box(0.09, 0.01, 0.06, '#f4f1ea', { y: gy + 0.075, z: zc + 0.04 });
       break;
   }
   return { thigh: thigh.build()!, shin: shin.build()! };
@@ -369,34 +485,34 @@ function legGeos(look: CharacterLook, outfit: OutfitChoice, detail: Detail) {
 function propGeo(kind: string): THREE.BufferGeometry | null {
   const b = new GeoBuilder();
   switch (kind) {
-    case 'fan': // hand fan: handle + round face
-      b.cyl(0.012, 0.012, 0.16, '#6b4a2b', { y: -0.04 }, 5);
-      b.cyl(0.11, 0.11, 0.012, '#e0902b', { y: 0.08, rz: Math.PI / 2, ry: 0.0 }, 14);
-      b.cyl(0.075, 0.075, 0.014, '#2a6f97', { y: 0.08, rz: Math.PI / 2 }, 14);
+    case 'fan':
+      b.cyl(0.011, 0.011, 0.13, '#6b4a2b', { y: -0.03 }, 5);
+      b.cyl(0.095, 0.095, 0.011, '#e0902b', { y: 0.06, rz: Math.PI / 2 }, 14);
+      b.cyl(0.065, 0.065, 0.013, '#2a6f97', { y: 0.06, rz: Math.PI / 2 }, 14);
       break;
     case 'wrench':
-      b.cyl(0.014, 0.014, 0.34, '#9aa3ab', { y: -0.02, rx: Math.PI / 2 }, 6);
-      b.box(0.04, 0.07, 0.03, '#9aa3ab', { y: -0.02, z: 0.19 });
-      b.box(0.012, 0.03, 0.03, '#2a2a2a', { y: -0.02, z: 0.215 });
+      b.cyl(0.012, 0.012, 0.28, '#9aa3ab', { y: -0.02, rx: Math.PI / 2 }, 6);
+      b.box(0.034, 0.06, 0.026, '#9aa3ab', { y: -0.02, z: 0.16 });
+      b.box(0.01, 0.026, 0.026, '#2a2a2a', { y: -0.02, z: 0.18 });
       break;
     case 'lantern':
-      b.cyl(0.006, 0.006, 0.08, '#2a2a2a', { y: 0.05 }, 4);
-      b.box(0.09, 0.12, 0.09, '#d9a441', { y: -0.1 });
-      b.box(0.075, 0.1, 0.075, '#ffe9a0', { y: -0.1 });
-      b.box(0.1, 0.02, 0.1, '#2a2a2a', { y: -0.17 });
-      b.box(0.1, 0.02, 0.1, '#2a2a2a', { y: -0.03 });
+      b.cyl(0.005, 0.005, 0.065, '#2a2a2a', { y: 0.042 }, 4);
+      b.box(0.075, 0.1, 0.075, '#d9a441', { y: -0.08 });
+      b.box(0.062, 0.082, 0.062, '#ffe9a0', { y: -0.08 });
+      b.box(0.084, 0.016, 0.084, '#2a2a2a', { y: -0.135 });
+      b.box(0.084, 0.016, 0.084, '#2a2a2a', { y: -0.025 });
       break;
     case 'speaker':
-      b.box(0.36, 0.2, 0.14, '#22262e', { y: -0.1, rz: 0.0 });
+      b.box(0.3, 0.165, 0.115, '#22262e', { y: -0.08 });
       for (const s of [-1, 1]) {
-        b.cyl(0.07, 0.07, 0.016, '#8a8f99', { x: s * 0.09, y: -0.1, z: 0.075, rx: Math.PI / 2 }, 12);
-        b.cyl(0.03, 0.03, 0.02, '#111', { x: s * 0.09, y: -0.1, z: 0.08, rx: Math.PI / 2 }, 8);
+        b.cyl(0.058, 0.058, 0.014, '#8a8f99', { x: s * 0.075, y: -0.08, z: 0.062, rx: Math.PI / 2 }, 12);
+        b.cyl(0.025, 0.025, 0.017, '#111', { x: s * 0.075, y: -0.08, z: 0.066, rx: Math.PI / 2 }, 8);
       }
-      b.cyl(0.006, 0.006, 0.2, '#999', { x: 0.14, y: 0.06, rz: -0.6 }, 4);
+      b.cyl(0.005, 0.005, 0.16, '#999', { x: 0.11, y: 0.05, rz: -0.6 }, 4);
       break;
     case 'baton':
-      b.cyl(0.01, 0.007, 0.34, '#e8e1d0', { y: -0.02, rx: Math.PI / 2 - 0.4, z: 0.1 }, 6);
-      b.sphere(0.014, '#c98a5e', { y: 0.08, z: -0.03 }, 6);
+      b.cyl(0.008, 0.006, 0.28, '#e8e1d0', { y: -0.02, rx: Math.PI / 2 - 0.4, z: 0.08 }, 6);
+      b.sphere(0.012, '#c98a5e', { y: 0.065, z: -0.025 }, 6);
       break;
     default:
       return null;
@@ -407,16 +523,21 @@ function propGeo(kind: string): THREE.BufferGeometry | null {
 export function buildCharacter(look: CharacterLook, outfit: OutfitChoice, detail: Detail = 'hi'): CharacterRig {
   const mat = vcMat();
   const geometries: THREE.BufferGeometry[] = [];
-  const mesh = (g: THREE.BufferGeometry) => {
+  const mesh = (g: THREE.BufferGeometry, outline = detail === 'hi') => {
     geometries.push(g);
-    return new THREE.Mesh(g, mat);
+    const m = new THREE.Mesh(g, mat);
+    if (outline) {
+      const o = new THREE.Mesh(g, outlineMat());
+      m.add(o);
+    }
+    return m;
   };
   const group = new THREE.Group();
   const body = new THREE.Group();
   group.add(body);
   const f = look.gender === 'f';
-  const sw = (f ? 0.9 : 1) * Math.pow(look.build, 0.5);
-  const hipX = 0.09 * (f ? 1.12 : 1) * Math.pow(look.build, 0.5);
+  const sw = (f ? 0.92 : 1) * Math.pow(look.build, 0.5);
+  const hipX = 0.085 * (f ? 1.1 : 1) * Math.pow(look.build, 0.5);
 
   const torso = new THREE.Group();
   torso.position.y = 0;
@@ -424,17 +545,26 @@ export function buildCharacter(look: CharacterLook, outfit: OutfitChoice, detail
   body.add(torso);
 
   const head = new THREE.Group();
-  head.position.set(0, 1.5, 0);
-  head.add(mesh(headGeo(look, outfit, detail)));
+  head.position.set(0, HEAD_Y, 0);
+  const headBuild = headGeo(look, outfit, detail);
+  head.add(mesh(headBuild.skull));
+  if (headBuild.face && headBuild.faceMap) {
+    const faceMesh = new THREE.Mesh(
+      headBuild.face,
+      texMat(`face:${headBuild.faceMap.uuid}`, headBuild.faceMap, { transparent: true, alphaTest: 0.08 }),
+    );
+    geometries.push(headBuild.face);
+    head.add(faceMesh);
+  }
   torso.add(head);
 
   const arms = armGeos(look, outfit, detail);
   const mkArm = (side: 1 | -1) => {
     const arm = new THREE.Group();
-    arm.position.set(side * 0.2 * sw, 1.41, 0);
+    arm.position.set(side * 0.155 * sw, SHOULDER_Y - 0.04, 0);
     arm.add(mesh(arms.upper.clone()));
     const elbow = new THREE.Group();
-    elbow.position.y = -0.28;
+    elbow.position.y = -0.16;
     elbow.add(mesh(arms.lower.clone()));
     arm.add(elbow);
     torso.add(arm);
@@ -444,8 +574,8 @@ export function buildCharacter(look: CharacterLook, outfit: OutfitChoice, detail
   const R = mkArm(1);
   const prop = propGeo(look.prop);
   if (prop) {
-    const pm = mesh(prop);
-    pm.position.set(0, -0.3, 0.02);
+    const pm = mesh(prop, false);
+    pm.position.set(0, -0.16, 0.015);
     R.elbow.add(pm);
   }
 
@@ -508,7 +638,7 @@ export function poseCharacter(rig: CharacterRig, pose: Pose, t: number, speed01 
       set(p.elbowR, -1.0);
       set(p.torso, 0.14, Math.sin(ph) * 0.1);
       set(p.head, -0.1, -Math.sin(ph) * 0.1);
-      rig.body.position.y = Math.abs(Math.cos(ph)) * 0.06;
+      rig.body.position.y = Math.abs(Math.cos(ph)) * 0.04;
       break;
     }
     case 'sit': {
@@ -536,7 +666,7 @@ export function poseCharacter(rig: CharacterRig, pose: Pose, t: number, speed01 
       set(p.elbowR, -0.25);
       set(p.torso, 0);
       set(p.head, -0.1);
-      rig.body.position.y = Math.abs(Math.sin(t * 9)) * 0.05;
+      rig.body.position.y = Math.abs(Math.sin(t * 9)) * 0.04;
       break;
     }
     case 'wave': {
@@ -564,7 +694,7 @@ export function poseCharacter(rig: CharacterRig, pose: Pose, t: number, speed01 
       set(p.elbowR, -0.55);
       set(p.torso, br * 0.01);
       set(p.head, 0, Math.sin(t * 0.7) * 0.05);
-      rig.body.position.y = br * 0.004;
+      rig.body.position.y = br * 0.003;
       break;
     }
   }
@@ -575,14 +705,14 @@ export function disposeRig(rig: CharacterRig) {
   rig.geometries.length = 0;
 }
 
-/** Bake a posed rig into ONE vertex-coloured geometry (crowds / statics). */
+/** Bake a posed rig into ONE vertex-coloured geometry (crowds / statics — always 'lo', so no textured face plate to merge). */
 export function bakeCharacter(look: CharacterLook, outfit: OutfitChoice, pose: Pose, t = 0, detail: Detail = 'lo'): THREE.BufferGeometry {
   const rig = buildCharacter(look, outfit, detail);
   poseCharacter(rig, pose, t, 1);
   rig.group.updateMatrixWorld(true);
   const list: THREE.BufferGeometry[] = [];
   rig.group.traverse((o) => {
-    if (o instanceof THREE.Mesh) {
+    if (o instanceof THREE.Mesh && o.material === vcMat()) {
       const g = (o.geometry as THREE.BufferGeometry).clone();
       g.applyMatrix4(o.matrixWorld);
       list.push(g);
