@@ -39,6 +39,11 @@ interface Runaway {
   vx: number;
   ttl: number;
 }
+interface Streak {
+  obj: THREE.Mesh;
+  mat: THREE.MeshBasicMaterial;
+  ttl: number;
+}
 
 const AMBER_ON = new THREE.Color('#ffb020');
 const AMBER_OFF = new THREE.Color('#5a3200');
@@ -54,6 +59,8 @@ export class GameRenderer {
   private entityMeshes = new Map<number, THREE.Object3D>();
   private followers: Follower[] = [];
   private runaways: Runaway[] = [];
+  private streaks: Streak[] = [];
+  private streakCd = 0;
   private shakeT = 0;
   private confetti: THREE.Points | null = null;
   private dprCap: number;
@@ -64,6 +71,14 @@ export class GameRenderer {
   private shadow = blobShadow(1.3, 1.1);
   private t0 = performance.now();
   private onResize = () => this.resize();
+  // camera: eased follow instead of a hard snap-to-target every frame (C22)
+  private camX = 0;
+  private camY = 3.3;
+  private camZ = 7.2;
+  private camLean = 0;
+  // hop landing: brief squash-stretch + camera dip (C22)
+  private prevHop = 0;
+  private squashT = 0;
 
   constructor(opts: RenderOpts) {
     this.opts = opts;
@@ -103,7 +118,9 @@ export class GameRenderer {
     rig.group.rotation.y = Math.PI; // build faces +z; run toward -z
     if (this.opts.rideId === 'okada') {
       this.playerRoot.add(buildOkada());
-      rig.group.position.set(0, 0.8 - 0.94 * this.opts.look.height, 0.32);
+      // Seat the rig's hip (local y = HIP_Y * height, chibi skeleton — see character.ts)
+      // on the okada's seat (world y ~0.8, unrelated to the character rebuild).
+      rig.group.position.set(0, 0.8 - 0.5 * this.opts.look.height, 0.32);
     }
     this.playerRoot.add(rig.group);
   }
@@ -161,6 +178,18 @@ export class GameRenderer {
     }, 900);
   }
 
+  /** Thin fading streak beside the player at high momentum — cheap "speed" juice (C22). */
+  private spawnStreak(pX: number, pZ: number) {
+    const side = Math.random() < 0.5 ? -1 : 1;
+    const geo = new THREE.PlaneGeometry(0.035, 0.9 + Math.random() * 0.9);
+    const mat = new THREE.MeshBasicMaterial({ color: '#fff7df', transparent: true, opacity: 0.3, depthWrite: false, side: THREE.DoubleSide });
+    const obj = new THREE.Mesh(geo, mat);
+    obj.rotation.y = Math.PI / 2;
+    obj.position.set(pX + side * (1.5 + Math.random() * 0.7), 0.5 + Math.random() * 0.9, pZ + 1.2);
+    this.scene.add(obj);
+    this.streaks.push({ obj, mat, ttl: 0.22 });
+  }
+
   private syncFollowers(carried: number, pX: number, pZ: number) {
     const target = Math.min(carried, 10);
     while (this.followers.length > target) {
@@ -203,14 +232,29 @@ export class GameRenderer {
     this.playerRoot.rotation.z = -(curr.targetLane - 1) * (this.opts.reduceMotion ? 0.02 : 0.07) * (this.opts.rideId === 'okada' ? 1.4 : 0.5);
     this.playerRoot.visible = curr.invulnTicks === 0 || ((curr.invulnTicks >> 2) & 1) === 0;
     this.shadow.position.set(pX, 0.04, pZ);
+    // hop landing: detect the hop→ground transition and trigger a brief squash
+    if (this.prevHop > 0.15 && hop <= 0.001 && this.opts.rideId !== 'okada') this.squashT = 0.16;
+    this.prevHop = hop;
+    if (this.squashT > 0) {
+      this.squashT = Math.max(0, this.squashT - dt);
+      const k = this.squashT / 0.16; // 1 → 0, eased back to neutral
+      const sq = k * k;
+      this.rig?.body.scale.set(1 + sq * 0.12, 1 - sq * 0.18, 1 + sq * 0.12);
+    } else {
+      this.rig?.body.scale.set(1, 1, 1);
+    }
+
     if (this.rig) {
-      const moving = curr.speed > cfg.brakeSpeedUm * 0.6;
-      poseCharacter(this.rig, this.opts.rideId === 'okada' ? 'sit' : moving ? 'run' : 'stand', t, 0.5 + speed01);
-      if (hop > 0.05 && this.opts.rideId !== 'okada') {
-        this.rig.parts.thighL.rotation.x = -1.1;
-        this.rig.parts.thighR.rotation.x = -0.6;
-        this.rig.parts.shinL.rotation.x = 1.2;
-        this.rig.parts.shinR.rotation.x = 1.4;
+      poseCharacter(this.rig, this.opts.rideId === 'okada' ? 'sit' : 'run', t, speed01);
+      // ease the hop tuck in/out by blending with whatever poseCharacter just set,
+      // instead of a hard overwrite past a fixed threshold (used to snap)
+      if (this.opts.rideId !== 'okada' && hop > 0.001) {
+        const hopAmt = Math.min(1, hop / 1.1);
+        const p = this.rig.parts;
+        p.thighL.rotation.x = p.thighL.rotation.x * (1 - hopAmt) + -1.1 * hopAmt;
+        p.thighR.rotation.x = p.thighR.rotation.x * (1 - hopAmt) + -0.6 * hopAmt;
+        p.shinL.rotation.x = p.shinL.rotation.x * (1 - hopAmt) + 1.2 * hopAmt;
+        p.shinR.rotation.x = p.shinR.rotation.x * (1 - hopAmt) + 1.4 * hopAmt;
       }
     }
 
@@ -234,22 +278,49 @@ export class GameRenderer {
       }
     }
 
-    // camera chase
-    const fov = 58 + speed01 * (this.opts.reduceMotion ? 2 : 8);
-    if (Math.abs(this.camera.fov - fov) > 0.05) {
-      this.camera.fov = fov;
-      this.camera.updateProjectionMatrix();
+    // speed-streak juice at high momentum (skipped under reduce-motion / data-saver)
+    if (speed01 > 0.62 && !this.opts.reduceMotion && !this.opts.dataSaver) {
+      this.streakCd -= dt;
+      if (this.streakCd <= 0) {
+        this.streakCd = 0.1 - speed01 * 0.045;
+        this.spawnStreak(pX, pZ);
+      }
     }
+    for (const s of [...this.streaks]) {
+      s.ttl -= dt;
+      s.obj.position.z += dt * 9;
+      s.mat.opacity = Math.max(0, s.ttl / 0.22) * 0.3;
+      if (s.ttl <= 0) {
+        this.scene.remove(s.obj);
+        s.obj.geometry.dispose();
+        s.mat.dispose();
+        this.streaks.splice(this.streaks.indexOf(s), 1);
+      }
+    }
+
+    // camera chase: eased follow (lag, not a hard snap) + FOV kick + lane-change lean + landing dip
+    const fovTarget = 58 + speed01 * (this.opts.reduceMotion ? 2 : 8);
+    this.camera.fov += (fovTarget - this.camera.fov) * Math.min(1, dt * 7);
+    this.camera.updateProjectionMatrix();
+
     let sx = 0;
     let sy = 0;
     if (this.shakeT > 0) {
       this.shakeT -= dt;
-      const mag = this.shakeT * 0.35;
-      sx = (Math.random() - 0.5) * mag;
-      sy = (Math.random() - 0.5) * mag;
+      const mag = Math.max(0, this.shakeT) * 0.4;
+      sx = Math.sin(this.shakeT * 53) * mag;
+      sy = Math.cos(this.shakeT * 67) * mag * 0.7;
     }
-    this.camera.position.set(pX * 0.5 + sx, 3.3 + sy, pZ + 7.2);
+    const camLerp = Math.min(1, dt * 9);
+    const dip = this.squashT > 0 ? (this.squashT / 0.16) ** 2 * 0.12 : 0;
+    this.camX += (pX * 0.5 - this.camX) * camLerp;
+    this.camY += (3.3 - dip - this.camY) * camLerp;
+    this.camZ += (pZ + 7.2 - this.camZ) * camLerp;
+    this.camera.position.set(this.camX + sx, this.camY + sy, this.camZ);
     this.camera.lookAt(pX * 0.3, 1.25, pZ - 10);
+    const leanTarget = -(curr.targetLane - 1) * (this.opts.reduceMotion ? 0.006 : 0.03);
+    this.camLean += (leanTarget - this.camLean) * Math.min(1, dt * 6);
+    this.camera.rotateZ(this.camLean);
 
     this.syncEntities(curr, zMm, t);
 

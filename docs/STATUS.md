@@ -1,7 +1,7 @@
 # Status
 
-**Current chunk:** C21 done. Next: C22 (animation & movement feel).
-**Last done:** C21 — character rebuild: chibi proportions, baked 2D face texture (replaces 15+ overlapping primitives), real toon outline shader. See `docs/chunks/C21.md` for two real bugs found/fixed (face-plate z-depth occlusion, outline shader normal-attribute bug) — worth reading before touching `character.ts`/`materials.ts` again.
+**Current chunk:** C22 done. Next: C23 (world/environment rebuild).
+**Last done:** C22 — animation & movement feel: continuous speed-blended run pose (no more hard stand/run snap), eased hop tuck, landing squash-stretch + camera dip, spring-lag camera + lane-lean, retuned hit shake, speed-streak juice. Also fixed a real pre-existing bug: the okada seat offset still used the pre-C21 `HIP_Y=0.94`. See `docs/chunks/C22.md`.
 
 ## Status of C0–C19 (read this before touching either range)
 - **C0–C11: built and tested, not "perfect."** `pnpm verify` is green and the mechanics (sim, contender/ride/state loading, accounts/consent) behave correctly for what they cover. Content breadth is partial by design-so-far — only Trek/Okada rides and 5 states (Lagos, Kano, Rivers, Anambra, Kaduna) have real content packs; other rides/states are schema-ready but unfilled. That's a content/gameplay scope question, not a defect, and it's explicitly out of bounds for the current visual-only pass.
@@ -15,12 +15,12 @@
 - C11: `cr-account` + `cr-contender` stores; consent log; score payloads omit Contender id without consent; Account screen (save / export / delete); versioned legal copy.
 - **C20 (visual rebuild track):** CC0 asset loader/instancing pipeline, Lagos biome kit (19 models, 63 KB gzip), size-check budget, ADR-0008/0009. See `docs/chunks/C20.md`.
 - **C21:** chibi character rebuild (proportions, baked face, toon outline). See `docs/chunks/C21.md`.
+- **C22:** animation & movement feel (continuous run blend, hop easing, landing squash, camera spring/lean, speed streaks). See `docs/chunks/C22.md`.
 
 ## Next
-1. **C22** — animation & movement feel: eased `poseCharacter` blending, secondary motion, camera spring/FOV-kick/lean, hit-stop/shake retune, dust/skid/speed-streak juice. Phone/visual QA checkpoint after this one.
-2. C23 — world/environment rebuild using the C20 pipeline + C21 crowd system. Phone/visual QA checkpoint after this one.
-3. C24 — landing page polish. C25 — cross-cutting QA + perf hardening.
-4. (Deferred, not in this track) Phone playtest of pre-existing gameplay per `docs/PLAYTEST.md`; **C12** ghosts/server verification.
+1. **C23** — world/environment rebuild: replace flat painted facades with the C20 CC0 biome-kit props (instanced, palette-tinted), add sidewalk/curb + lane-paint decals (also a natural place to add the dust/skid decals deferred from C22), gradient sky, vary crowd instances via C21's character system at `'lo'` detail, LOD on far chunk slots. Phone/visual QA checkpoint after this one.
+2. C24 — landing page polish. C25 — cross-cutting QA + perf hardening.
+3. (Deferred, not in this track) Phone playtest of pre-existing gameplay per `docs/PLAYTEST.md`; **C12** ghosts/server verification.
 
 ## Later (C13–C19, untouched by the visual rebuild)
 Running mates, community Rally Map (C14), ledger, rivals, ads, live-ops, finale.

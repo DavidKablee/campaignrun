@@ -619,26 +619,42 @@ export function buildCharacter(look: CharacterLook, outfit: OutfitChoice, detail
   };
 }
 
-/** Pose / animate. t is seconds; speed01 scales stride. Renderer-only (uses Math.sin freely). */
+/**
+ * Pose / animate. t is seconds; speed01 scales stride. Renderer-only (uses Math.sin freely).
+ *
+ * 'run' is continuous in speed01, not a hard switch from 'stand' (C22): at
+ * speed01=0 it eases to a small idle shuffle with breathing blended in, at
+ * speed01=1 it's a full stride. GameRenderer can therefore always call
+ * 'run' while on foot — the old boolean `moving ? 'run' : 'stand'` snapped
+ * instantly at the speed threshold, which read as robotic.
+ */
 export function poseCharacter(rig: CharacterRig, pose: Pose, t: number, speed01 = 1) {
   const p = rig.parts;
   const set = (g: THREE.Object3D, x = 0, y = 0, z = 0) => g.rotation.set(x, y, z);
   rig.body.position.y = 0;
   switch (pose) {
     case 'run': {
-      const ph = t * (8 + speed01 * 4);
+      // smoothstep, not linear: gentle ease into the stride instead of a linear ramp
+      const amt = speed01 * speed01 * (3 - 2 * speed01);
+      const idle = 1 - amt;
+      const freq = 7 + amt * 5;
+      const ph = t * freq;
       const s = Math.sin(ph);
-      set(p.thighL, -s * 0.95);
-      set(p.thighR, s * 0.95);
-      set(p.shinL, Math.max(0, -s) * 1.3 + 0.12);
-      set(p.shinR, Math.max(0, s) * 1.3 + 0.12);
-      set(p.armL, s * 0.85, 0, 0.08);
-      set(p.armR, -s * 0.85, 0, -0.08);
-      set(p.elbowL, -1.0);
-      set(p.elbowR, -1.0);
-      set(p.torso, 0.14, Math.sin(ph) * 0.1);
-      set(p.head, -0.1, -Math.sin(ph) * 0.1);
-      rig.body.position.y = Math.abs(Math.cos(ph)) * 0.04;
+      const stride = 0.2 + amt * 0.85;
+      set(p.thighL, -s * stride);
+      set(p.thighR, s * stride);
+      set(p.shinL, Math.max(0, -s) * (0.3 + amt * 1.1) + 0.1);
+      set(p.shinR, Math.max(0, s) * (0.3 + amt * 1.1) + 0.1);
+      set(p.armL, s * (0.2 + amt * 0.75), 0, 0.08);
+      set(p.armR, -s * (0.2 + amt * 0.75), 0, -0.08);
+      set(p.elbowL, -0.4 - amt * 0.65);
+      set(p.elbowR, -0.4 - amt * 0.65);
+      // secondary motion: torso/head trail the leg phase slightly (overlap),
+      // with idle breathing fading in as the stride fades out
+      const phLag = (t - 0.055) * freq;
+      set(p.torso, 0.04 + amt * 0.12, Math.sin(phLag) * (0.03 + amt * 0.08));
+      set(p.head, -0.02 - amt * 0.09, -Math.sin(phLag) * (0.03 + amt * 0.08) + Math.sin(t * 0.9) * 0.025 * idle);
+      rig.body.position.y = Math.abs(Math.cos(ph)) * (0.015 + amt * 0.028) + Math.sin(t * 1.6) * 0.003 * idle;
       break;
     }
     case 'sit': {

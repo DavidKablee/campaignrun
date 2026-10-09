@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-09 — C22 animation & movement feel
+
+- `poseCharacter`'s run pose is now continuous in `speed01` (smoothstep-based amplitude/frequency) instead of a hard `stand`/`run` boolean switch that snapped at a fixed speed threshold — the main source of "robotic" movement. Secondary motion: torso/head trail the leg phase slightly.
+- Hop tuck blends in/out via a continuous `hopAmt` instead of a hard overwrite past a threshold; landing now triggers a brief squash-stretch on the character plus a small camera dip.
+- Camera position and FOV ease toward their targets every frame (previously hard-set, no lag); added a small eased roll on lane changes; hit shake switched from random jitter to a decaying oscillation.
+- New speed-streak particle juice above 62% speed (off under reduce-motion/data-saver).
+- Fixed a real bug found while in this code: the okada seat offset in `buildPlayer()` still used the pre-C21 skeleton's `HIP_Y = 0.94` instead of the chibi skeleton's `0.5` — would have seated every okada rider at the wrong height.
+
 ## 2026-10-09 — C21 chibi character rebuild
 
 - Replaced the realistic ~7.2-head character (15+ overlapping primitive face parts, flat 2-tone shading — uncanny/lumpy on a real phone) with ADR-0008's chibi direction: ~4.3 heads tall, far fewer/bigger primitives, a single baked 2D face texture, and a real toon outline shader.
