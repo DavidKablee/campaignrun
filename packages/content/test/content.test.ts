@@ -156,6 +156,17 @@ describe('JSON-only state addition', () => {
     }
     expect(travelCaps.maxRunsPerDay).toBeGreaterThan(0);
   });
+  it('ships the 2 Nov week (C27 batch) as JSON-only packs, no palace venues, no dead signatureRide', async () => {
+    expect(shippedStatePacks()).toEqual(expect.arrayContaining(['oyo', 'borno', 'delta', 'kwara']));
+    for (const id of ['oyo', 'borno', 'delta', 'kwara'] as const) {
+      const pack = await loadStatePack(id);
+      expect(pack.id).toBe(id);
+      expect(pack.landmarks).toHaveLength(5);
+      expect(stateIndex.some((s) => s.id === id && s.audioStem === pack.audioStem)).toBe(true);
+      for (const l of pack.landmarks) expect(venueTypeSchema.safeParse(l.venueType).success).toBe(true);
+      expect(rides.some((r) => r.id === pack.signatureRide)).toBe(true);
+    }
+  });
 });
 
 describe('guardrail lint', () => {

@@ -1,0 +1,19 @@
+{
+  "id": "kwara",
+  "name": "Kwara",
+  "zone": "NC",
+  "biomeKit": "hills-plateau",
+  "palette": { "sky": "#9ED0D8", "fog": "#EFE3C8", "ground": "#8D6E4A", "accent": "#6B8E4E" },
+  "landmarks": [
+    { "name": "Sobi Hill", "venueType": "landmark", "verified": false },
+    { "name": "Owu Falls", "venueType": "landmark", "verified": false },
+    { "name": "Kwara State Stadium", "venueType": "stadium", "verified": false },
+    { "name": "Oja Oba Market", "venueType": "market", "verified": false },
+    { "name": "Post Office Roundabout", "venueType": "square", "verified": false }
+  ],
+  "scenery": ["rocky escarpment", "Yoruba-Hausa blended architecture"],
+  "hazards": ["rocky-ridge", "switchback", "go-slow"],
+  "signatureRide": "keke",
+  "welcomeLines": ["Ẹ káàbọ̀ sí Kwara!"],
+  "audioStem": "nc-drums"
+}

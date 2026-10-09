@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-10 — C27 state pack batch 2 (Oyo, Borno, Delta, Kwara)
+
+- Four new state packs matching the calendar's 2 Nov unlock week exactly, researched via web search for real landmark/cultural accuracy rather than placeholders (Cocoa House/Bower's Tower/Agodi Gardens for Oyo; Monday Market/Borno Museum/El-Kanemi Stadium for Borno; Niger Bridge/Effurun Roundabout/Warri Township Stadium for Delta; Sobi Hill/Owu Falls/Kwara State Stadium for Kwara). Every landmark is `verified: false` per the spec's own local-reviewer guardrail.
+- Two content-safety calls made during research: no palaces used as landmark venues anywhere (the schema already has no `palace` venueType, confirmed by an existing test) — swapped for museums/stadiums/markets instead; and Borno's well-known Alau Dam was deliberately **not** used, since it catastrophically collapsed in September 2024 and flooded part of Maiduguri — using it as hazard flavour in a satirical game would trivialize a real, recent disaster.
+- New content test mirrors the existing "ships the 26 Oct week" check for this batch: loads each pack, confirms `audioStem` matches `states-index.json`, every `venueType` is schema-valid, and `signatureRide` always resolves to a real (not dead) ride id.
+
 ## 2026-10-10 — C26 ride roster complete
 
 - Starts the **content breadth & client-side gameplay upgrade track (C26–C30)**, following up the visual rebuild. Keke/Hilux/Danfo/Coaster/Grand Convoy flip from locked to playable, and their previously-flavour-text traits get real mechanics: ride size-class collision rules (narrow gaps block M/L, floods block L, light barriers ploughed by Danfo+), Hilux's free-hit-per-run, Coaster's wider magnet, and the state's Signature Ride +10% Crowd bonus (the `signatureRide` field existed in content since C07 but was never read by anything).

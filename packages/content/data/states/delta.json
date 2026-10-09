@@ -1,0 +1,19 @@
+{
+  "id": "delta",
+  "name": "Delta",
+  "zone": "SS",
+  "biomeKit": "creek-delta",
+  "palette": { "sky": "#A8D8D8", "fog": "#D8ECE8", "ground": "#4A6B5A", "accent": "#2A6F97" },
+  "landmarks": [
+    { "name": "Niger Bridge (Asaba head)", "venueType": "bridge", "verified": false },
+    { "name": "Effurun Roundabout", "venueType": "square", "verified": false },
+    { "name": "Sapele Waterside", "venueType": "waterfront", "verified": false },
+    { "name": "Warri Township Stadium", "venueType": "stadium", "verified": false },
+    { "name": "Nelson Mandela Gardens", "venueType": "park", "verified": false }
+  ],
+  "scenery": ["mangrove tree line", "riverine stilt houses"],
+  "hazards": ["creek-crossing", "roundabout-maze", "go-slow"],
+  "signatureRide": "keke",
+  "welcomeLines": ["Welcome o! Na Delta we dey!"],
+  "audioStem": "ss-brass"
+}

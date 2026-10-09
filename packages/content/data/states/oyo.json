@@ -1,0 +1,19 @@
+{
+  "id": "oyo",
+  "name": "Oyo",
+  "zone": "SW",
+  "biomeKit": "hills-plateau",
+  "palette": { "sky": "#8FD0E8", "fog": "#F0E0C0", "ground": "#A0522D", "accent": "#2E7D32" },
+  "landmarks": [
+    { "name": "Cocoa House", "venueType": "landmark", "verified": false },
+    { "name": "Bower's Tower", "venueType": "landmark", "verified": false },
+    { "name": "Agodi Gardens", "venueType": "park", "verified": false },
+    { "name": "Mapo Hall", "venueType": "square", "verified": false },
+    { "name": "Bodija Market", "venueType": "market", "verified": false }
+  ],
+  "scenery": ["seven hills skyline", "cocoa warehouses"],
+  "hazards": ["okada-swarm", "hilly-road", "go-slow"],
+  "signatureRide": "okada",
+  "welcomeLines": ["Ẹ káàbọ̀ sí Oyo!"],
+  "audioStem": "sw-fuji"
+}

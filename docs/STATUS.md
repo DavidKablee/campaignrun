@@ -1,10 +1,10 @@
 # Status
 
-**Current chunk:** C26 done. **Visual & feel rebuild track (C20–C25) is complete**; now mid-way through the **content breadth & client-side gameplay upgrade track (C26–C30)**. Next: C27 (state pack batch 2).
-**Last done:** C26 — ride roster complete: Keke/Hilux/Danfo/Coaster/Grand Convoy are playable, with real mechanics behind their previously-cosmetic traits (size-class collision rules, Hilux free-hit, Danfo plough, Coaster magnet, Signature Ride +10% Crowd). Balance bot extended from trek-only to all 7 ride classes and passes. Also caught and fixed a real gap found mid-chunk: only okada had a 3D vehicle model — added the rest so newly-unlocked rides don't ship looking broken. See `docs/chunks/C26.md`.
+**Current chunk:** C27 done. **Visual & feel rebuild track (C20–C25) is complete**; mid-way through the **content breadth & client-side gameplay upgrade track (C26–C30)**. Next: C28 (rival convoys + remaining Integrity events).
+**Last done:** C27 — state pack batch 2 (Oyo, Borno, Delta, Kwara), researched for real landmark accuracy, matching the calendar's 2 Nov unlock week exactly. Two content-safety calls worth knowing about: no palaces used as venues anywhere (schema already forbids it), and Borno's Alau Dam was deliberately excluded despite being a well-known landmark — it catastrophically collapsed in Sept 2024, flooding part of Maiduguri; using it as hazard flavour would trivialize a real disaster. See `docs/chunks/C27.md`.
 
 ## Status of C0–C19 (read this before touching either range)
-- **C0–C11: built and tested, breadth gap closing.** `pnpm verify` is green and the mechanics (sim, contender/ride/state loading, accounts/consent) behave correctly for what they cover. Rides: all 7 are now playable as of C26 (was Trek/Okada only). States: 5 have real content packs (Lagos, Kano, Rivers, Anambra, Kaduna); 31 remain schema-ready stubs — C27 adds 4 more (Oyo, Borno, Delta, Kwara), the rest stay a later-session task.
+- **C0–C11: built and tested, breadth gap closing.** `pnpm verify` is green and the mechanics (sim, contender/ride/state loading, accounts/consent) behave correctly for what they cover. Rides: all 7 are now playable as of C26 (was Trek/Okada only). States: 9 have real content packs as of C27 (Lagos, Kano, Rivers, Anambra, Kaduna, Oyo, Borno, Delta, Kwara); 27 remain schema-ready stubs — a later-session task, same pattern each time (research + author matching `stateSchema`, `import.meta.glob` already picks it up with zero code change).
 - **C12–C19: not built at all** as originally scoped (all assume a real backend — hosting, database, and for C15 a real payment merchant account that only the user can set up). C26–C30 add **new** chunks for the genuinely client-side-only slices of C12/C16/C18 (ghosts playback, rival convoys + remaining Integrity events, weather/time-of-day) without marking the original backend-dependent chunks "done" — see each new chunk's "Open" section for exactly what's still backend-gated.
 
 ## Done
@@ -20,10 +20,11 @@
 - **C24:** `waitlist.html` rewrite (on-brand, honest copy, fixed a required-field bug). See `docs/chunks/C24.md`.
 - **C25:** PWA/offline fix for CC0 model caching, regression check, final docs/budget pass. See `docs/chunks/C25.md`. **Visual track complete.**
 - **C26 (content/gameplay upgrade track):** ride roster complete — all 7 rides playable with real mechanics, balance bot extended to all ride classes, missing vehicle models added. See `docs/chunks/C26.md`.
+- **C27:** state pack batch 2 (Oyo/Borno/Delta/Kwara), researched content, matches the 2 Nov calendar week. See `docs/chunks/C27.md`.
 
 ## Next
-1. **C27** — state pack batch 2 (Oyo, Borno, Delta, Kwara), researched for real landmark accuracy.
-2. C28 (rival convoys + remaining Integrity events), C29 (local ghost playback), C30 (weather/time-of-day) — see the plan for the C26–C30 track.
+1. **C28** — rival convoys + remaining 5 Integrity events (client-side slice of C16).
+2. C29 (local ghost playback), C30 (weather/time-of-day) — see the plan for the C26–C30 track.
 3. **Owed from the visual track:** a real phone / throttled-CPU playtest per `docs/PLAYTEST.md` ("Visual & feel rebuild QA") — everything so far was verified via browser preview emulation only.
 4. Optional follow-ups noted as deferred-not-dropped in C23/C25: CC0 buildings integration, sidewalk/curb decals, LOD on far chunk slots, Lighthouse run (needs an HTTPS deploy).
 5. (Separate backlog) Phone playtest of pre-existing gameplay per the original Gate-1 checklist in `docs/PLAYTEST.md`; backend-dependent halves of C12/C16/C18, plus C13/C14/C15/C17/C19 in full, all wait on hosting + payment-provider accounts only the user can create.

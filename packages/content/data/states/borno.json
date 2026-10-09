@@ -1,0 +1,19 @@
+{
+  "id": "borno",
+  "name": "Borno",
+  "zone": "NE",
+  "biomeKit": "sahel-savanna",
+  "palette": { "sky": "#EAC78E", "fog": "#F5E6C8", "ground": "#B8894F", "accent": "#8B5A2B" },
+  "landmarks": [
+    { "name": "Monday Market", "venueType": "market", "verified": false },
+    { "name": "Borno State Museum", "venueType": "landmark", "verified": false },
+    { "name": "El-Kanemi Stadium", "venueType": "stadium", "verified": false },
+    { "name": "Sanda Kyarimi Park", "venueType": "park", "verified": false },
+    { "name": "Ramat Polytechnic", "venueType": "landmark", "verified": false }
+  ],
+  "scenery": ["Kanem-Bornu motifs", "savanna acacia line"],
+  "hazards": ["dust-storm", "low-visibility", "go-slow"],
+  "signatureRide": "okada",
+  "welcomeLines": ["Barka da zuwa Borno!"],
+  "audioStem": "ne-algaita"
+}
