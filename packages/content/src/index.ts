@@ -8,6 +8,9 @@ import outfitsJson from '../data/outfits.json';
 import stationsJson from '../data/stations.json';
 import statesIndexJson from '../data/states-index.json';
 import metaJson from '../data/meta.json';
+import integrityJson from '../data/integrity.json';
+import travelJson from '../data/travel.json';
+import legalJson from '../data/legal.json';
 import {
   calendarSchema,
   contenderSchema,
@@ -19,6 +22,9 @@ import {
   stateIndexSchema,
   stationSchema,
   metaConfigSchema,
+  integrityEventSchema,
+  travelCapsSchema,
+  legalSchema,
 } from './schemas';
 
 export * from './schemas';
@@ -35,8 +41,15 @@ export const outfits = outfitsSchema.parse(outfitsJson);
 export const stations = stationSchema.array().parse(stationsJson);
 export const stateIndex = stateIndexSchema.array().parse(statesIndexJson);
 export const metaConfig = metaConfigSchema.parse(metaJson);
+export const integrityEvents = integrityEventSchema.array().parse(integrityJson);
+export const travelCaps = travelCapsSchema.parse(travelJson);
+export const legal = legalSchema.parse(legalJson);
 
 export const activeContenders = contenders.filter((c) => c.status === 'active');
+
+export function integrityEvent(id: string) {
+  return integrityEvents.find((e) => e.id === id) ?? integrityEvents[0]!;
+}
 
 /** A ride can be selected only when this chunk marks it playable and Following is met. */
 export function isRidePlayable(ride: (typeof rides)[number], following: number): boolean {

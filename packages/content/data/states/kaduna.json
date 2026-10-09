@@ -1,0 +1,19 @@
+{
+  "id": "kaduna",
+  "name": "Kaduna",
+  "zone": "NW",
+  "biomeKit": "sahel-savanna",
+  "palette": { "sky": "#B9C9D9", "fog": "#E4EBF2", "ground": "#8B7355", "accent": "#C0392B" },
+  "landmarks": [
+    { "name": "Kawo Market", "venueType": "market", "verified": false },
+    { "name": "River Kaduna Bridge", "venueType": "bridge", "verified": false },
+    { "name": "Centenary Park", "venueType": "park", "verified": false },
+    { "name": "Rigasa Square", "venueType": "square", "verified": false },
+    { "name": "Central Stadium Ground", "venueType": "stadium", "verified": false }
+  ],
+  "scenery": ["rail yards", "harmattan haze"],
+  "hazards": ["dust-plume", "go-slow", "cart-weave"],
+  "signatureRide": "hilux",
+  "welcomeLines": ["Barka da zuwa Kaduna!"],
+  "audioStem": "nw-kalangu"
+}

@@ -1,0 +1,19 @@
+{
+  "id": "kano",
+  "name": "Kano",
+  "zone": "NW",
+  "biomeKit": "sahel-savanna",
+  "palette": { "sky": "#E8C48A", "fog": "#F3E2C5", "ground": "#A67C52", "accent": "#C45C26" },
+  "landmarks": [
+    { "name": "Kurmi Market", "venueType": "market", "verified": false },
+    { "name": "Sabon Gari Square", "venueType": "square", "verified": false },
+    { "name": "Zoo Road Park", "venueType": "park", "verified": false },
+    { "name": "Challawa Bridge", "venueType": "bridge", "verified": false },
+    { "name": "Race Course Ground", "venueType": "stadium", "verified": false }
+  ],
+  "scenery": ["old city walls", "dye pits"],
+  "hazards": ["dust-plume", "cart-weave", "go-slow"],
+  "signatureRide": "keke",
+  "welcomeLines": ["Barka da zuwa Kano!"],
+  "audioStem": "nw-kalangu"
+}

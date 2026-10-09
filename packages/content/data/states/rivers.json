@@ -1,0 +1,19 @@
+{
+  "id": "rivers",
+  "name": "Rivers",
+  "zone": "SS",
+  "biomeKit": "creek-delta",
+  "palette": { "sky": "#6BB3C9", "fog": "#B7DCE6", "ground": "#4A6B5A", "accent": "#E09F3E" },
+  "landmarks": [
+    { "name": "Mile One Market", "venueType": "market", "verified": false },
+    { "name": "Creek Road Waterfront", "venueType": "waterfront", "verified": false },
+    { "name": "Liberation Stadium", "venueType": "stadium", "verified": false },
+    { "name": "Garden City Park", "venueType": "park", "verified": false },
+    { "name": "Amadi Bridge", "venueType": "bridge", "verified": false }
+  ],
+  "scenery": ["creek stilts", "waterfront cranes"],
+  "hazards": ["flood-sheet", "keke-swerve", "go-slow"],
+  "signatureRide": "danfo",
+  "welcomeLines": ["Welcome to Garden City!"],
+  "audioStem": "ss-brass"
+}

@@ -1,0 +1,5 @@
+{
+  "maxRunsPerDay": 20,
+  "maxStatesPerDay": 4,
+  "maxRunsPerStatePerDay": 8
+}

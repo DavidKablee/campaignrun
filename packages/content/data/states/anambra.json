@@ -1,0 +1,19 @@
+{
+  "id": "anambra",
+  "name": "Anambra",
+  "zone": "SE",
+  "biomeKit": "farmland-river",
+  "palette": { "sky": "#87B7E0", "fog": "#D5E6F5", "ground": "#7A8B5C", "accent": "#D4A017" },
+  "landmarks": [
+    { "name": "Onitsha Main Market", "venueType": "market", "verified": false },
+    { "name": "Bridgehead Crossing", "venueType": "bridge", "verified": false },
+    { "name": "Ekwulobia Square", "venueType": "square", "verified": false },
+    { "name": "Nkisi Park", "venueType": "park", "verified": false },
+    { "name": "Awka Civic Ground", "venueType": "landmark", "verified": false }
+  ],
+  "scenery": ["river barges", "market canopies"],
+  "hazards": ["market-spill", "go-slow", "keke-swerve"],
+  "signatureRide": "keke",
+  "welcomeLines": ["Nnọọ! Anambra is open."],
+  "audioStem": "se-highlife"
+}

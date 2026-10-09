@@ -10,10 +10,14 @@ import {
   loadStatePack,
   outfits,
   rides,
+  shippedStatePacks,
   simConfig,
   stateIndex,
   stations,
+  integrityEvents,
   stateSchema,
+  travelCaps,
+  legal,
   venueTypeSchema,
 } from '../src/index';
 import { collectStrings, findViolations, hashTerm, loadHashes, readAllDataFiles, readJsonDir } from '../src/guardrails';
@@ -49,6 +53,11 @@ describe('content packs', () => {
     expect(copy.disclosure).toMatch(/not polls/i);
     expect(copy.disclosure).toMatch(/Fictional game/);
   });
+  it('legal copy carries a versioned consent gate', () => {
+    expect(legal.version.length).toBeGreaterThan(0);
+    expect(legal.contenderConsentBody).toMatch(/consent/i);
+    expect(legal.privacyBody.length).toBeGreaterThan(20);
+  });
 });
 
 describe('characters', () => {
@@ -68,6 +77,17 @@ describe('characters', () => {
     const high = simConfig.obstacles.filter((o) => o.heightMm >= simConfig.hopHeightMm);
     expect(low.length).toBeGreaterThanOrEqual(4);
     expect(high.length).toBeGreaterThanOrEqual(3);
+  });
+});
+
+describe('integrity events', () => {
+  it('ships three generic threats with civic facts', () => {
+    expect(integrityEvents.map((e) => e.id).sort()).toEqual(['sleepy-voter', 'snatcher', 'vote-buyer']);
+    for (const e of integrityEvents) {
+      expect(e.title.length).toBeGreaterThan(3);
+      expect(e.civicFact.length).toBeGreaterThan(20);
+      expect(e.verified).toBe(true);
+    }
   });
 });
 
@@ -123,6 +143,16 @@ describe('JSON-only state addition', () => {
     expect(lagosLaunch.welcomeLine).toBe(state.welcomeLines[0]);
     expect(lagosLaunch.audioStem).toBe(state.audioStem);
     await expect(loadStatePack('not-a-state')).rejects.toThrow('Unknown state pack');
+  });
+  it('ships the 26 Oct week as JSON-only packs', async () => {
+    expect(shippedStatePacks()).toEqual(expect.arrayContaining(['kano', 'rivers', 'anambra', 'kaduna']));
+    for (const id of ['kano', 'rivers', 'anambra', 'kaduna'] as const) {
+      const pack = await loadStatePack(id);
+      expect(pack.id).toBe(id);
+      expect(pack.landmarks).toHaveLength(5);
+      expect(stateIndex.some((s) => s.id === id && s.audioStem === pack.audioStem)).toBe(true);
+    }
+    expect(travelCaps.maxRunsPerDay).toBeGreaterThan(0);
   });
 });
 
