@@ -203,6 +203,20 @@ export const copySchema = z.object({
 });
 export type Copy = z.infer<typeof copySchema>;
 
+export const legalSchema = z.object({
+  version: z.string().min(1),
+  privacyTitle: z.string().min(1),
+  privacyBody: z.string().min(20),
+  termsTitle: z.string().min(1),
+  termsBody: z.string().min(20),
+  contenderConsentTitle: z.string().min(1),
+  contenderConsentBody: z.string().min(20),
+  contenderConsentAccept: z.string().min(1),
+  guestSaveTitle: z.string().min(1),
+  guestSaveBody: z.string().min(20),
+});
+export type LegalCopy = z.infer<typeof legalSchema>;
+
 const upgradeId = z.enum(['magnet', 'shield', 'horn', 'loading', 'value']);
 export const metaConfigSchema = z.object({
   starts: z.array(z.object({ id: z.enum(['funded', 'grassroots']), name: z.string(), description: z.string(), coins: int.nonnegative(), following: int.nonnegative() })).length(2),
@@ -212,6 +226,14 @@ export const metaConfigSchema = z.object({
 });
 export type MetaConfig = z.infer<typeof metaConfigSchema>;
 export type UpgradeId = z.infer<typeof upgradeId>;
+
+/** Soft travel limits (client-enforced until C11/C12 server caps). */
+export const travelCapsSchema = z.object({
+  maxRunsPerDay: int.positive(),
+  maxStatesPerDay: int.positive(),
+  maxRunsPerStatePerDay: int.positive(),
+});
+export type TravelCaps = z.infer<typeof travelCapsSchema>;
 
 // ---------------------------------------------------------------------------
 // Character looks + outfit options (cosmetic only; never affects the sim)

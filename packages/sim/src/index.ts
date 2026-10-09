@@ -7,3 +7,4 @@ export * from './inputlog';
 export * from './course';
 export * from './step';
 export * from './stars';
+export * from './perks';

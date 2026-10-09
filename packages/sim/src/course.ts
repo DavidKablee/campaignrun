@@ -76,9 +76,10 @@ function spawnHazardCluster(state: SimState, config: SimConfig, fromZ: number, t
         });
       }
     } else if (isIntegrity) {
-      // Pick random integrity hazard
-      const kinds = ['snatcher', 'vote-buyer', 'sleepy-voter'];
-      const kind = kinds[rngIntRange(state.rng, 0, 2)]!;
+      // Round-robin kinds so frequencies stay equal across Contenders and seeds.
+      const kinds = ['snatcher', 'vote-buyer', 'sleepy-voter'] as const;
+      const kind = kinds[state.integritySpawnSeq % 3]!;
+      state.integritySpawnSeq++;
       state.entities.push({
         id: state.entityIdSeq++,
         kind,

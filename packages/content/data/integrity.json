@@ -1,0 +1,20 @@
+[
+  {
+    "id": "snatcher",
+    "title": "Ballot Box Snatcher",
+    "civicFact": "A ballot box belongs at the polling unit until counting is done. Grabbing it is a crime, not a joke.",
+    "verified": true
+  },
+  {
+    "id": "vote-buyer",
+    "title": "Vote Buyer",
+    "civicFact": "Buying or selling a vote is illegal. Your vote is not for sale.",
+    "verified": true
+  },
+  {
+    "id": "sleepy-voter",
+    "title": "Sleepy Voter",
+    "civicFact": "Turnout matters. Staying home leaves the road to whoever shows up.",
+    "verified": true
+  }
+]

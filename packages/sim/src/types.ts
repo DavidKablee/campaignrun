@@ -50,7 +50,9 @@ export type SimEventType =
   | 'zoneProgress'
   | 'gate'
   | 'integrityFail'
-  | 'integritySuccess';
+  | 'integritySuccess'
+  | 'horn'
+  | 'perk';
 
 export interface SimEvent {
   type: SimEventType;
@@ -75,6 +77,8 @@ export interface SimState {
   skillCrowd: number;
   displayCrowd: number;
   integrity: number;
+  /** Counts integrity spawns so snatcher / vote-buyer / sleepy-voter stay equal. */
+  integritySpawnSeq: number;
   delivered: number;
   entities: Entity[];
   events: SimEvent[];
@@ -96,6 +100,8 @@ export interface SimState {
   perkActiveTicks: number;
   perkCooldownTicks: number;
   hornCooldownTicks: number;
+  /** Venues (incl. grand) already unloaded — powers firstVenueMultiplier tradeoff. */
+  venuesUnloaded: number;
   /** C08 local upgrade effects. Integer-only and captured at run start. */
   upgrades: { magnetRadiusMm: number; shieldTicks: number; hornCooldownTicks: number; loadSpeedPermille: number; rewardPermille: number };
 }
