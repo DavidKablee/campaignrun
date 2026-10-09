@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-09 — C25 cross-cutting QA + perf hardening (visual rebuild track complete)
+
+- Fixed a real PWA bug: the CC0 colormap texture (`.png`, matches the Workbox precache glob) was leaking into the service-worker's initial install because `models/` wasn't excluded. Added `models/**` to `globIgnores` and a `CacheFirst` `runtimeCaching` rule (`cr-biome-models`) mirroring the existing state-pack caching — models now cache on first use, not on first app load, and stay available offline after that.
+- Confirmed via the Live Board that only Lagos is unlocked right now, so there's no live regression surface on other states to check yet.
+- `docs/ARCHITECTURE.md` and `docs/PLAYTEST.md` updated with a visual-rebuild-track summary and a real-device QA checklist.
+- **This closes the visual & feel rebuild track (C20–C25)**, started because character models, movement, world/environment and the landing page were flagged as low quality. Biggest open item: none of it has been checked on a real phone yet — only browser-preview emulation, which can't produce trustworthy fps numbers. See `docs/STATUS.md` Blockers.
+
 ## 2026-10-09 — C24 landing page polish
 
 - Rewrote `apps/game/waitlist.html`: was a bare unstyled page with a stale pre-launch date ("the road opens October 19") even though the game already shipped and Lagos is playable today. Now on-brand (same palette/fonts as the in-game UI), honest "Lagos open now" copy, a Play-now CTA straight into `/`, and the approved disclosure line.

@@ -1,7 +1,7 @@
 # Status
 
-**Current chunk:** C24 done. Next: C25 (cross-cutting QA + perf hardening — the final chunk of the visual-rebuild track).
-**Last done:** C24 — rewrote `waitlist.html` (was bare/unstyled with a stale pre-launch date; now on-brand, honest "Lagos open now" copy, Play-now CTA, fixed a `required`-on-an-optional-field bug). Splash/showcase reviewed, not changed — already inherits every C21–C23 visual improvement automatically since it drives the real `GameRenderer`.
+**Current chunk:** C25 done — **the visual & feel rebuild track (C20–C25) is complete** within this environment's limits (see Blockers). Next: either a real-device QA pass on this track, or resume the pre-existing backlog (C12+).
+**Last done:** C25 — fixed a real PWA bug found while closing out the track (the CC0 colormap texture was leaking into the service-worker precache; models now excluded from precache and runtime-cached like state packs instead), confirmed no live regression surface on other states (only Lagos is unlocked right now), wrote the visual-rebuild QA checklist into `docs/PLAYTEST.md`, final budget re-check green.
 
 ## Status of C0–C19 (read this before touching either range)
 - **C0–C11: built and tested, not "perfect."** `pnpm verify` is green and the mechanics (sim, contender/ride/state loading, accounts/consent) behave correctly for what they cover. Content breadth is partial by design-so-far — only Trek/Okada rides and 5 states (Lagos, Kano, Rivers, Anambra, Kaduna) have real content packs; other rides/states are schema-ready but unfilled. That's a content/gameplay scope question, not a defect, and it's explicitly out of bounds for the current visual-only pass.
@@ -18,10 +18,12 @@
 - **C22:** animation & movement feel (continuous run blend, hop easing, landing squash, camera spring/lean, speed streaks). See `docs/chunks/C22.md`.
 - **C23:** CC0 palms (park/island) + parasols (market) + sun-glow sky. See `docs/chunks/C23.md` for what's deferred (buildings, curbs/decals, LOD).
 - **C24:** `waitlist.html` rewrite (on-brand, honest copy, fixed a required-field bug). See `docs/chunks/C24.md`.
+- **C25:** PWA/offline fix for CC0 model caching, regression check, final docs/budget pass. See `docs/chunks/C25.md`. **Track complete.**
 
 ## Next
-1. **C25** — cross-cutting QA + perf hardening (last chunk of the visual-rebuild track): full regression playtest across the Lagos pack + other loaded states, real phone/throttled-CPU pass (owed from C23), PWA/offline cache check for the new model assets, final budget audit, update `docs/STATUS.md`/`CHANGELOG.md`/`ARCHITECTURE.md`.
-2. (Deferred, not in this track) Phone playtest of pre-existing gameplay per `docs/PLAYTEST.md`; **C12** ghosts/server verification; CC0 buildings follow-up (C23's Open list).
+1. **Owed from this track:** a real phone / throttled-CPU playtest per the new checklist in `docs/PLAYTEST.md` ("Visual & feel rebuild QA") — everything so far was verified via browser preview emulation only.
+2. Optional follow-ups noted as deferred-not-dropped in C23/C25: CC0 buildings integration, sidewalk/curb decals, LOD on far chunk slots, Lighthouse run (needs an HTTPS deploy).
+3. (Separate backlog, untouched by this track) Phone playtest of pre-existing gameplay per the original Gate-1 checklist in `docs/PLAYTEST.md`; **C12** ghosts/server verification onward.
 
 ## Later (C13–C19, untouched by the visual rebuild)
 Running mates, community Rally Map (C14), ledger, rivals, ads, live-ops, finale.
@@ -30,6 +32,7 @@ Running mates, community Rally Map (C14), ledger, rivals, ads, live-ops, finale.
 - Legal: lawyer review of privacy/terms (chunk “7.5”) still required before public launch — copy is a draft gate only.
 - Cloud accounts / server Contender table wait on backend.
 - Lighthouse PWA ≥90 on a real HTTPS deploy still open.
+- **Visual rebuild track (C20–C25):** no real phone / throttled-CPU device has touched any of this work yet — every check this session was via browser-preview emulation (desktop + mobile viewport). The emulation environment's `requestAnimationFrame` throttling made its own fps readouts meaningless, so draw-call/triangle counts were used as the performance proxy instead. Run `docs/PLAYTEST.md`'s "Visual & feel rebuild QA" checklist on an actual device before treating this as launch-ready.
 
 ## Gotchas
 - Contender choice is in `cr-contender`, not `cr-storage`. Score/share paths must check consent.
