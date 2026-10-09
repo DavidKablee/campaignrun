@@ -1,23 +1,31 @@
 # Backlog
 
-Items deferred from Gate 1. Do not start until the current chunk's Done-when is green.
+Work only the current chunk (`docs/STATUS.md`). Do not start later chunks early.
 
-## Spec chunks (queued)
+## Spec chunks
 
-- **C05** — Six Contender perks (in-run only) + 10k balance bot ±3%.
-- **C06** — Hazards + Ballot Box Snatcher, Vote Buyer, Sleepy Voter; Integrity meter.
-- **C07** — Lagos pack polish, Border Gate art, lazy state loader ≤3 MB.
-- **C08** — Meta: ₦, upgrades, missions, streak, Starting Story, local save migrations.
-- **C09** — Leaderboard, share card, PWA, plausibility checks, username filter.
-- **C10–C19** — Weekly packs, accounts, ghosts, Rally Map, ledger, rivals, ads, live-ops, finale.
+| Chunk | Status | Notes |
+|-------|--------|-------|
+| C00–C04 | done | Foundations through rides/stars |
+| C05 | done | Perks + balance bot ±3% |
+| C06 | done | Integrity villains + meter |
+| C07–C08 | done | State packs + local meta |
+| C09 | done | Share card, PWA, daily challenge, username filter, local board |
+| C10 | done | Weekly packs (26 Oct), travel caps (client), live counters |
+| C11 | done | Guest→save, Contender consent log, export/delete (client) |
+| **C12** | **next** | Ghosts / server verification |
+| C13–C19 | todo | Running mates, community Rally Map, ledger, rivals, ads, live-ops, finale |
 
-## Still outside the current build (do not start early)
+## Outside the current chunk
 
-Perks are copy only until C05. Integrity events, naira upgrades, missions, accounts, the community Rally Map, ghosts, rival convoys, and ads stay in C06–C19. The in-game campaign map and per-state radio are local: Lagos plays now, other states show unlock dates, and stations are synthesised in the browser. Pickup groups are 0.6–1.5× capacity so a full ride is reachable. The playable layout is full-page landscape; under 700 px the controls stay in one row.
+- Community Rally Map / other players’ Contenders (C14 + C11 consent).
+- Real-money / ads / server scores.
+- glTF meshopt swaps, recorded audio stems, Playwright visual baselines, Cloudflare/waitlist.
 
-## Notes from Gate 1
+## Polish notes
 
-- glTF meshopt swaps for procedural models (registry already keyed by `assetId`).
-- Real audio stems replacing procedural layers.
-- Playwright visual regression baselines.
-- Cloudflare account / domain / waitlist wiring.
+- denser Lagos set-pieces; Border Gate welcome beat; coin arcs / hit-stop.
+- Live board stays game Crowd / open / locked — never poll percentages.
+- Wire `StateDef.palette` / `biomeKit` into the Three.js world (packs carry the data already).
+- Server-side travel caps + global live counters + cloud Contender table (C12+).
+- Lawyer sign-off on privacy/terms before public launch.

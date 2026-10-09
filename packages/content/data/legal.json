@@ -1,0 +1,12 @@
+{
+  "version": "2026-10-08",
+  "privacyTitle": "Privacy",
+  "privacyBody": "Campaign Run stores progress on this device by default. Contender choice is sensitive: it stays local until you give explicit consent. Scores are game scores, not polls. We do not sell Contender choice for political advertising. Lawyer review of the full privacy notice is still required before public launch.",
+  "termsTitle": "Terms",
+  "termsBody": "This is a fictional game for players 18+. Play fair. Do not use the game to claim real election results. Disclosure applies everywhere: fictional characters and events; not affiliated with any party, aspirant, or electoral body. Lawyer review of the full terms is still required before public launch.",
+  "contenderConsentTitle": "Share Contender data?",
+  "contenderConsentBody": "Your Contender choice can stay on this device forever. If you consent, future cloud features may store Contender id separately from public scores (Nigeria Data Protection Act style consent). You can withdraw consent, export, or delete your data any time in Account.",
+  "contenderConsentAccept": "I consent to Contender data leaving this device",
+  "guestSaveTitle": "Save progress",
+  "guestSaveBody": "Keep playing as a guest, or save a local account name so export and consent logs stay attached to you on this device. Cloud sign-in arrives later."
+}

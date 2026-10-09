@@ -1,7 +1,12 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { isRidePlayable, metaConfig, rides, type OutfitChoice, type UpgradeId } from '@cr/content';
+import { isRidePlayable, metaConfig, rides, type UpgradeId } from '@cr/content';
+import { useContenderStore } from './contenderStore';
+import { challengeMet, todaysChallenge } from './daily';
+import { submitLocalBoard, type LocalBoardEntry } from './localBoard';
 import { emptyUpgrades, missionDelta, type MissionProgress, type StartId, type UpgradeLevels, upgradeCost, watDay, watWeek } from './meta';
+import { canTravel, emptyTravel, noteTravel, type TravelProgress } from './travel';
+import { validateUsername } from './username';
 
 export type Screen =
   | 'splash'
@@ -12,24 +17,19 @@ export type Screen =
   | 'summary'
   | 'settings'
   | 'about'
+  | 'account'
   | 'map'
   | 'paused'
   | 'yard';
 
-const STORE_VERSION = 7;
-
-const PREVIOUS_IDS: Record<string, string> = {
-  'mama-ankara': 'baba-bullabaa',
-  'engineer-spark': 'mr-tiko',
-  'captain-kobo': 'mr-obiliki',
-  'sister-beacon': 'comrade-yale',
-  'uncle-boombox': 'mr-don',
-  'madam-metronome': 'prof-sarah',
-};
+const STORE_VERSION = 11;
 
 interface GameState {
   screen: Screen;
   setScreen: (s: Screen) => void;
+  /** Where Settings returns when closed (not persisted). */
+  settingsBack: Screen;
+  openSettings: () => void;
 
   coins: number;
   addCoins: (amount: number) => void;
@@ -40,14 +40,10 @@ interface GameState {
   noteRun: (stateId: string, crowd: number) => void;
   radioOn: boolean;
   setRadioOn: (on: boolean) => void;
-  activeContenderId: string | null;
-  setActiveContender: (id: string) => void;
   activeRideId: string;
   setActiveRide: (id: string) => void;
-  /** Player edits to each Contender's outfit (cosmetic, local only). */
-  outfits: Record<string, Partial<OutfitChoice>>;
-  setOutfit: (contenderId: string, patch: Partial<OutfitChoice>) => void;
-  resetOutfit: (contenderId: string) => void;
+  activeStateId: string;
+  setActiveState: (id: string) => void;
 
   sfxVolume: number;
   musicVolume: number;
@@ -64,12 +60,16 @@ interface GameState {
   lastRunDisplayCrowd: number;
   lastRunDelivered: number;
   lastRunDents: number;
+  lastRunIntegrity: number;
+  lastRunCapacity: number;
   lastRunPhase: 'finished' | 'breakdown';
   setRunResult: (r: {
     skillCrowd: number;
     displayCrowd: number;
     delivered: number;
     dents: number;
+    integrity: number;
+    capacity: number;
     phase: 'finished' | 'breakdown';
   }) => void;
   startingStory: StartId | null;
@@ -87,6 +87,23 @@ interface GameState {
   claimDonation: () => boolean;
   lastMetaReward: number;
   recordMetaRun: (r: { delivered: number; crowd: number; finished: boolean }) => void;
+  /** Claimed daily-challenge id (WAT day + kind). */
+  dailyChallengeClaimed: string | null;
+  lastDailyReward: number;
+  claimDailyIfMet: (r: {
+    finished: boolean;
+    dents: number;
+    delivered: number;
+    crowd: number;
+    integrity: number;
+    star: string;
+  }) => number;
+  username: string;
+  setUsername: (raw: string) => { ok: true; name: string } | { ok: false; reason: string };
+  localBoard: LocalBoardEntry[];
+  submitLastRunToBoard: (stateId?: string) => { ok: true } | { ok: false; reason: string };
+  travel: TravelProgress;
+  travelGate: (stateId?: string) => { ok: true } | { ok: false; reason: string };
 }
 
 export const useGameStore = create<GameState>()(
@@ -94,6 +111,8 @@ export const useGameStore = create<GameState>()(
     (set) => ({
       screen: 'splash',
       setScreen: (s) => set({ screen: s }),
+      settingsBack: 'splash',
+      openSettings: () => set((st) => ({ settingsBack: st.screen === 'settings' ? st.settingsBack : st.screen, screen: 'settings' })),
 
       coins: 0,
       addCoins: (amount) => set((state) => ({ coins: state.coins + amount })),
@@ -112,8 +131,6 @@ export const useGameStore = create<GameState>()(
         }),
       radioOn: true,
       setRadioOn: (on) => set({ radioOn: on }),
-      activeContenderId: null,
-      setActiveContender: (id) => set({ activeContenderId: id }),
       activeRideId: 'trek',
       setActiveRide: (id) =>
         set((st) => {
@@ -121,14 +138,8 @@ export const useGameStore = create<GameState>()(
           if (!ride || !isRidePlayable(ride, st.following)) return st;
           return { activeRideId: id };
         }),
-      outfits: {},
-      setOutfit: (id, patch) => set((st) => ({ outfits: { ...st.outfits, [id]: { ...st.outfits[id], ...patch } } })),
-      resetOutfit: (id) =>
-        set((st) => {
-          const next = { ...st.outfits };
-          delete next[id];
-          return { outfits: next };
-        }),
+      activeStateId: 'lagos',
+      setActiveState: (id) => set({ activeStateId: id }),
 
       sfxVolume: 0.8,
       musicVolume: 0.35,
@@ -145,6 +156,8 @@ export const useGameStore = create<GameState>()(
       lastRunDisplayCrowd: 0,
       lastRunDelivered: 0,
       lastRunDents: 0,
+      lastRunIntegrity: 100,
+      lastRunCapacity: 8,
       lastRunPhase: 'finished',
       setRunResult: (r) =>
         set({
@@ -152,6 +165,8 @@ export const useGameStore = create<GameState>()(
           lastRunDisplayCrowd: r.displayCrowd,
           lastRunDelivered: r.delivered,
           lastRunDents: r.dents,
+          lastRunIntegrity: r.integrity,
+          lastRunCapacity: r.capacity,
           lastRunPhase: r.phase,
         }),
       startingStory: null,
@@ -204,14 +219,93 @@ export const useGameStore = create<GameState>()(
         const day = watDay();
         const week = watWeek();
         const freshDay = st.dailyKey !== day;
-        const baseProgress = freshDay ? {} : st.missionProgress;
-        const baseCompleted = freshDay ? st.completedMissions.filter((id) => id === 'weekly-runs') : st.completedMissions;
+        const freshWeek = st.weeklyKey !== week;
+        const baseProgress = freshDay
+          ? freshWeek
+            ? {}
+            : Object.fromEntries(Object.entries(st.missionProgress).filter(([id]) => id === 'weekly-runs'))
+          : st.missionProgress;
+        const baseCompleted = freshDay
+          ? freshWeek
+            ? []
+            : st.completedMissions.filter((id) => id === 'weekly-runs')
+          : freshWeek
+            ? st.completedMissions.filter((id) => id !== 'weekly-runs')
+            : st.completedMissions;
         const delta = missionDelta(baseProgress, baseCompleted, r.delivered, r.crowd, r.finished);
         const newlyDone = delta.completed.filter((id) => !baseCompleted.includes(id));
         const missionReward = newlyDone.reduce((sum, id) => sum + (id === 'weekly-runs' ? metaConfig.rewards.weeklyMission : metaConfig.rewards.dailyMission), 0);
         const reward = Math.floor((metaConfig.rewards.baseRun + r.delivered * metaConfig.rewards.perDelivered) * (1000 + st.upgrades.value * 50) / 1000) + missionReward;
-        return { coins: st.coins + reward, dailyKey: day, weeklyKey: week, missionProgress: delta.progress, completedMissions: delta.completed, streak: r.finished ? st.streak + 1 : st.streak, lastMetaReward: reward };
+        const travel = r.finished ? noteTravel(st.travel, st.activeStateId) : st.travel;
+        if (r.finished) useContenderStore.getState().lockAfterFinish();
+        return {
+          coins: st.coins + reward,
+          dailyKey: day,
+          weeklyKey: week,
+          missionProgress: delta.progress,
+          completedMissions: delta.completed,
+          streak: r.finished ? st.streak + 1 : st.streak,
+          lastMetaReward: reward,
+          dailyChallengeClaimed: freshDay ? null : st.dailyChallengeClaimed,
+          travel,
+        };
       }),
+      dailyChallengeClaimed: null,
+      lastDailyReward: 0,
+      claimDailyIfMet: (r) => {
+        let reward = 0;
+        set((st) => {
+          const ch = todaysChallenge();
+          if (st.dailyChallengeClaimed === ch.id) return st;
+          if (!challengeMet(ch, r)) return st;
+          reward = ch.reward;
+          return {
+            dailyChallengeClaimed: ch.id,
+            coins: st.coins + ch.reward,
+            lastDailyReward: ch.reward,
+          };
+        });
+        return reward;
+      },
+      username: '',
+      setUsername: (raw) => {
+        const checked = validateUsername(raw);
+        if (checked.ok) set({ username: checked.name });
+        return checked;
+      },
+      localBoard: [],
+      submitLastRunToBoard: (stateId) => {
+        let result: { ok: true } | { ok: false; reason: string } = { ok: false, reason: 'unknown' };
+        set((st) => {
+          const submitted = submitLocalBoard(
+            st.localBoard,
+            st.username,
+            {
+              skillCrowd: st.lastRunSkillCrowd,
+              displayCrowd: st.lastRunDisplayCrowd,
+              delivered: st.lastRunDelivered,
+              dents: st.lastRunDents,
+              capacity: st.lastRunCapacity,
+              integrity: st.lastRunIntegrity,
+              finished: st.lastRunPhase === 'finished',
+            },
+            stateId ?? st.activeStateId,
+          );
+          if (!submitted.ok) {
+            result = { ok: false, reason: submitted.reason };
+            return st;
+          }
+          result = { ok: true };
+          return { localBoard: submitted.board, username: submitted.name };
+        });
+        return result;
+      },
+      travel: emptyTravel(),
+      travelGate: (stateId) => {
+        const st = useGameStore.getState();
+        const gate = canTravel(st.travel, stateId ?? st.activeStateId);
+        return gate.ok ? { ok: true } : { ok: false, reason: gate.reason };
+      },
     }),
     {
       name: 'cr-storage',
@@ -221,7 +315,6 @@ export const useGameStore = create<GameState>()(
         return {
           ...current,
           ...p,
-          outfits: p.outfits ?? {},
           following: p.following ?? 0,
           bestByState: p.bestByState ?? {},
           radioOn: p.radioOn ?? true,
@@ -233,7 +326,7 @@ export const useGameStore = create<GameState>()(
           out = { ...out, activeRideId: 'trek', haptics: true, dataSaver: false, reduceMotion: false, seenTutorial: false };
         }
         if (version < 3) {
-          out = { ...out, outfits: {}, sfxVolume: 0.8, musicVolume: 0.35 };
+          out = { ...out, sfxVolume: 0.8, musicVolume: 0.35 };
         }
         if (version < 4) {
           out = { ...out, following: 0 };
@@ -241,18 +334,21 @@ export const useGameStore = create<GameState>()(
         if (version < 5) {
           out = { ...out, bestByState: {}, radioOn: true };
         }
-        if (version < 6) {
-          const id = out.activeContenderId;
-          const outfits = { ...((out.outfits ?? {}) as Record<string, unknown>) };
-          if (typeof id === 'string' && PREVIOUS_IDS[id]) out.activeContenderId = PREVIOUS_IDS[id];
-          for (const [oldId, nextId] of Object.entries(PREVIOUS_IDS)) {
-            if (outfits[oldId] && !outfits[nextId]) outfits[nextId] = outfits[oldId];
-            delete outfits[oldId];
-          }
-          out = { ...out, outfits };
-        }
         if (version < 7) {
           out = { ...out, startingStory: null, upgrades: emptyUpgrades(), dailyKey: watDay(), weeklyKey: watWeek(), missionProgress: {}, completedMissions: [], streak: 0, freezeWeek: null, donationDay: null, lastMetaReward: 0 };
+        }
+        if (version < 9) {
+          out = { ...out, dailyChallengeClaimed: null, lastDailyReward: 0, username: '', localBoard: [], lastRunIntegrity: 100, lastRunCapacity: 8 };
+        }
+        if (version < 10) {
+          out = { ...out, activeStateId: 'lagos', travel: emptyTravel() };
+        }
+        if (version < 11) {
+          // Contender fields live in `cr-contender` after migrateContenderFromGameStorage().
+          delete out.activeContenderId;
+          delete out.contenderLocked;
+          delete out.contenderGraceUsed;
+          delete out.outfits;
         }
         return out as unknown as GameState;
       },
@@ -261,9 +357,8 @@ export const useGameStore = create<GameState>()(
         following: state.following,
         bestByState: state.bestByState,
         radioOn: state.radioOn,
-        activeContenderId: state.activeContenderId,
         activeRideId: state.activeRideId,
-        outfits: state.outfits,
+        activeStateId: state.activeStateId,
         sfxVolume: state.sfxVolume,
         musicVolume: state.musicVolume,
         haptics: state.haptics,
@@ -279,6 +374,10 @@ export const useGameStore = create<GameState>()(
         streak: state.streak,
         freezeWeek: state.freezeWeek,
         donationDay: state.donationDay,
+        dailyChallengeClaimed: state.dailyChallengeClaimed,
+        username: state.username,
+        localBoard: state.localBoard,
+        travel: state.travel,
       }),
       storage: createJSONStorage(() => localStorage),
     },

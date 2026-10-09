@@ -5,7 +5,7 @@
     "name": "Baba Bullabaa",
     "archetype": "The Convener",
     "perk": { "id": "market-weave", "description": "Auto-weaves through the next hazard cluster.", "cooldownSec": 25, "durationSec": 4 },
-    "tradeoff": { "stat": "laneChangeSpeed", "permille": 850, "description": "Slower lane change" },
+    "tradeoff": { "stat": "laneChangeSpeed", "permille": 920, "description": "Slower lane change" },
     "palette": ["#E0902B", "#2B6E8E", "#F3E3C3"],
     "barks": ["Make we gather!", "Everybody come!", "No stay for back!", "See crowd o!", "Na we dey call!", "Small small, we reach."],
     "catchphrase": "Make we gather!"
@@ -16,7 +16,7 @@
     "name": "Mr Tiko",
     "archetype": "The Delegate",
     "perk": { "id": "reboot", "description": "One free revive with 3 seconds of invulnerability.", "cooldownSec": 40, "durationSec": 3 },
-    "tradeoff": { "stat": "acceleration", "permille": 900, "description": "Gentler acceleration" },
+    "tradeoff": { "stat": "acceleration", "permille": 980, "description": "Gentler acceleration" },
     "palette": ["#1FA45B", "#3A4A5A", "#E8EEF2"],
     "barks": ["We go settle am.", "Talk am finish.", "One seat, one voice.", "Hold your lane.", "Agreement don land.", "Move with the hall."],
     "catchphrase": "We go settle am."
@@ -27,7 +27,7 @@
     "name": "Mr Obiliki",
     "archetype": "The Counter",
     "perk": { "id": "kobo-magnet", "description": "6 seconds of wide supporter and naira magnet.", "cooldownSec": 25, "durationSec": 6 },
-    "tradeoff": { "stat": "topSpeed", "permille": 950, "description": "Slightly lower top speed" },
+    "tradeoff": { "stat": "topSpeed", "permille": 980, "description": "Slightly lower top speed" },
     "palette": ["#F3E3C3", "#2A6F97", "#161616"],
     "barks": ["Count the people.", "Write am down.", "No inflate the number.", "Every head counts.", "Check am twice.", "The tally dey talk."],
     "catchphrase": "Count the people."
@@ -38,7 +38,7 @@
     "name": "Comrade Yale",
     "archetype": "The Organiser",
     "perk": { "id": "beacon-horn", "description": "Horn cone is doubled.", "cooldownSec": 12, "durationSec": 2 },
-    "tradeoff": { "stat": "hornCooldown", "permille": 1250, "description": "Longer horn cooldown" },
+    "tradeoff": { "stat": "hornCooldown", "permille": 1100, "description": "Longer horn cooldown" },
     "palette": ["#B3261E", "#161616", "#F4EFE6"],
     "barks": ["The street get a say.", "Form a line!", "Pass the word.", "Nobody dey left behind.", "Hold the banner high.", "We move together."],
     "catchphrase": "The street get a say."
@@ -49,7 +49,7 @@
     "name": "Mr. Don",
     "archetype": "The Host",
     "perk": { "id": "street-party", "description": "8 seconds of confetti that turns hazards into crowd.", "cooldownSec": 35, "durationSec": 8 },
-    "tradeoff": { "stat": "perkCharge", "permille": 1400, "description": "Perk meter takes longer to charge" },
+    "tradeoff": { "stat": "perkCharge", "permille": 1150, "description": "Perk meter takes longer to charge" },
     "palette": ["#E85D04", "#3A4A5A", "#FFE66D"],
     "barks": ["Welcome to the rally.", "Come inside!", "Chair for everybody.", "The hall is open.", "Sit down, then we start.", "Guests don land."],
     "catchphrase": "Welcome to the rally."
@@ -60,7 +60,7 @@
     "name": "Prof. Sarah",
     "archetype": "The Lecturer",
     "perk": { "id": "steady-beat", "description": "World slows 30% for 6 seconds.", "cooldownSec": 30, "durationSec": 6 },
-    "tradeoff": { "stat": "firstVenueMultiplier", "permille": 900, "description": "Lower multiplier at the first venue" },
+    "tradeoff": { "stat": "firstVenueMultiplier", "permille": 980, "description": "Lower multiplier at the first venue" },
     "palette": ["#7B5EA7", "#E8A87C", "#F4EFE6"],
     "barks": ["Listen first. Then we move.", "One point at a time.", "Class, eyes front.", "Keep the beat.", "Question, then answer.", "Well done, class!"],
     "catchphrase": "Listen first. Then we move."

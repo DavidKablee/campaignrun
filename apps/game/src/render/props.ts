@@ -266,9 +266,42 @@ export function buildObstacle(kind: string, seed: number): THREE.Group {
       return group(danfoGeo());
     case 'trailer':
       return group(truckGeo(seed));
+    case 'snatcher':
+    case 'vote-buyer':
+    case 'sleepy-voter':
+      return group(integrityGeo(kind, seed));
     default:
       return group(sedanGeo(seed));
   }
+}
+
+/** Generic integrity threats — neutral greys/amber, never party colours. */
+function integrityGeo(kind: string, seed: number): THREE.BufferGeometry {
+  return cached(`int:${kind}:${seed % 4}`, () => {
+    const b = new GeoBuilder();
+    const skin = seed % 2 ? '#5c3a24' : '#3b2417';
+    const suit = kind === 'vote-buyer' ? '#3a4a5a' : kind === 'snatcher' ? '#2a2a2a' : '#4a5560';
+    // shadow disc
+    b.cyl(0.55, 0.55, 0.02, '#161616', { y: 0.01 }, 12);
+    // legs + torso + head
+    b.cyl(0.09, 0.1, 0.55, suit, { x: -0.12, y: 0.35 }, 6);
+    b.cyl(0.09, 0.1, 0.55, suit, { x: 0.12, y: 0.35 }, 6);
+    b.box(0.55, 0.7, 0.28, suit, { y: 1.0 });
+    b.sphere(0.22, skin, { y: 1.55 }, 10);
+    if (kind === 'snatcher') {
+      b.box(0.45, 0.35, 0.35, '#8b5a2b', { x: 0.35, y: 1.05, z: 0.15 });
+      b.box(0.5, 0.08, 0.08, '#f5c518', { x: 0.35, y: 1.25, z: 0.15 });
+    } else if (kind === 'vote-buyer') {
+      b.box(0.28, 0.18, 0.05, '#1fa45b', { x: 0.3, y: 1.05, z: 0.2 });
+      b.box(0.22, 0.04, 0.04, '#f7f1e3', { x: 0.3, y: 1.05, z: 0.24 });
+    } else {
+      // sleepy-voter: slumped, no prop
+      b.box(0.5, 0.2, 0.35, suit, { y: 0.75, rx: 0.4 });
+    }
+    // warning ring (civic threat, not a party mark)
+    b.cyl(0.7, 0.7, 0.04, '#e85d04', { y: 0.04 }, 16);
+    return b.build()!;
+  });
 }
 
 function warnSign(x: number, z: number): THREE.Group {

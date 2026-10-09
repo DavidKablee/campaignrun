@@ -9,3 +9,5 @@ coverage
 # NEVER commit: any file mapping characters to real people, plain-text blocklists
 private/
 blocklist.plain.*
+
+.superdesign/tmp/

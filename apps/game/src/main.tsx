@@ -1,7 +1,12 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
+import { registerSW } from 'virtual:pwa-register';
 import { App } from './App';
+import { migrateContenderFromGameStorage } from './contenderStore';
 import './ui/styles.css';
+
+registerSW({ immediate: true });
+migrateContenderFromGameStorage();
 
 async function init() {
   const flagsReq = await fetch('/flags.json');

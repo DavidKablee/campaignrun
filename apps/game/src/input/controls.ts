@@ -3,6 +3,7 @@ import { Btn } from '@cr/sim';
 export class InputController {
   private bits = 0;
   private tapPulse = 0;
+  private perkPulse = 0;
   private el: HTMLElement | null = null;
   private startX = 0;
   private startY = 0;
@@ -48,12 +49,20 @@ export class InputController {
     this.tapPulse = 2;
   }
 
+  pulsePerk() {
+    this.perkPulse = 2;
+  }
+
   /** Consume one frame of input (edge bits included). */
   sample(): number {
     let out = this.bits;
     if (this.tapPulse > 0) {
       out |= Btn.Tap;
       this.tapPulse--;
+    }
+    if (this.perkPulse > 0) {
+      out |= Btn.Perk;
+      this.perkPulse--;
     }
     // Clear edge lane/hop after sample? No — sim is edge-triggered via prevInput.
     // Clear swipe-one-shots after a short hold so rising edge fires once.
@@ -74,6 +83,7 @@ export class InputController {
     if (e.key === 'ArrowDown' || e.key === 's') this.bits |= Btn.Brake;
     if (e.key === 'h') this.bits |= Btn.Horn;
     if (e.key === 'j') this.pulseTap();
+    if (e.key === 'k') this.pulsePerk();
   };
 
   private onKeyUp = (e: KeyboardEvent) => {

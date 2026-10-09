@@ -18,5 +18,5 @@
       "@cr/*": ["./packages/*/src", "./apps/*/src"]
     }
   },
-  "include": ["packages/*/src", "packages/*/test", "apps/*/src", "apps/*/vite.config.ts", "tools", "vitest.config.ts"]
+  "include": ["packages/*/src", "packages/*/test", "apps/*/src", "apps/*/test", "apps/*/vite.config.ts", "tools", "vitest.config.ts"]
 }

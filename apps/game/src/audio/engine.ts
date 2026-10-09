@@ -389,6 +389,15 @@ export class AudioEngine {
       case 'breakdown':
         this.tone(300, 0.7, 0.6, { slideTo: 70, lp: 900 });
         break;
+      case 'integrityFail':
+        if (this.throttled('intFail', 200)) return;
+        this.tone(220, 0.35, 0.7, { slideTo: 90, lp: 500 });
+        break;
+      case 'integritySuccess':
+        if (this.throttled('intOk', 160)) return;
+        this.tone(740, 0.14, 0.35);
+        this.tone(988, 0.16, 0.3, { at: 0.08 });
+        break;
       default:
         break;
     }
