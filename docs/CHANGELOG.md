@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-10 — C26 ride roster complete
+
+- Starts the **content breadth & client-side gameplay upgrade track (C26–C30)**, following up the visual rebuild. Keke/Hilux/Danfo/Coaster/Grand Convoy flip from locked to playable, and their previously-flavour-text traits get real mechanics: ride size-class collision rules (narrow gaps block M/L, floods block L, light barriers ploughed by Danfo+), Hilux's free-hit-per-run, Coaster's wider magnet, and the state's Signature Ride +10% Crowd bonus (the `signatureRide` field existed in content since C07 but was never read by anything).
+- Balance bot extended from trek-only to all 7 ride classes (6 Contenders × 120 runs each) — this is acceptance criteria #4 from the original spec, never actually checked past 2 of 7 rides before now. Still holds ±3%.
+- Found and fixed a real gap outside the original plan: only `okada` had a 3D vehicle model, so the other 5 rides would have been selectable but rendered the character just walking — shipped-looking-broken. Added procedural models for all of them and generalized `GameRenderer.ts`'s one hardcoded ride check into a small per-ride visuals table.
+
 ## 2026-10-09 — C25 cross-cutting QA + perf hardening (visual rebuild track complete)
 
 - Fixed a real PWA bug: the CC0 colormap texture (`.png`, matches the Workbox precache glob) was leaking into the service-worker's initial install because `models/` wasn't excluded. Added `models/**` to `globIgnores` and a `CacheFirst` `runtimeCaching` rule (`cr-biome-models`) mirroring the existing state-pack caching — models now cache on first use, not on first app load, and stay available offline after that.

@@ -8,7 +8,16 @@ import { applyMarketWeave, blastHorn } from './perks';
 export function initState(
   config: SimConfig,
   seed: import('./types').RngState,
-  opts?: { capacity?: number; contenderId?: string; upgrades?: SimState['upgrades'] },
+  opts?: {
+    capacity?: number;
+    contenderId?: string;
+    upgrades?: SimState['upgrades'];
+    rideSize?: SimState['rideSize'];
+    ridePloughsLight?: boolean;
+    rideFreeHit?: boolean;
+    rideMagnetBonusMm?: number;
+    signatureRideBonusPermille?: number;
+  },
 ): SimState {
   const state: SimState = {
     tick: 0,
@@ -53,6 +62,12 @@ export function initState(
       loadSpeedPermille: 1000,
       rewardPermille: 1000,
     },
+    rideSize: opts?.rideSize ?? 'S',
+    ridePloughsLight: opts?.ridePloughsLight ?? false,
+    rideFreeHit: opts?.rideFreeHit ?? false,
+    freeHitUsed: false,
+    rideMagnetBonusMm: opts?.rideMagnetBonusMm ?? 0,
+    signatureRideBonusPermille: opts?.signatureRideBonusPermille ?? 1000,
   };
   buildCourse(state, config);
   return state;
@@ -76,6 +91,7 @@ function deliverCrowd(state: SimState, config: SimConfig, onBeat: boolean, venue
   }
   let gained = Math.floor((state.carried * mult) / 1000);
   gained = applyPermille(gained, venueMult);
+  gained = applyPermille(gained, state.signatureRideBonusPermille);
   state.skillCrowd += gained;
   state.displayCrowd += gained;
   state.delivered += state.carried;
@@ -280,6 +296,13 @@ export function step(state: SimState, input: number, config: SimConfig): void {
         // sleepy-voter: jam the lane
         state.speed = config.brakeSpeedUm;
       }
+      state.events.push({ type: 'hit', payload: hitEnt.id });
+    } else if (state.rideFreeHit && !state.freeHitUsed) {
+      // C26 Hilux trait: the first real hit per run is absorbed, no dent.
+      state.freeHitUsed = true;
+      state.speed = applyPermille(state.speed, config.hit.speedPermille);
+      state.momentum = config.momentum.min;
+      state.invulnTicks = config.hit.invulnTicks;
       state.events.push({ type: 'hit', payload: hitEnt.id });
     } else {
       state.dents++;

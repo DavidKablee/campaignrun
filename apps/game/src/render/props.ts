@@ -497,6 +497,110 @@ export function buildOkada(): THREE.Group {
   return group(geo);
 }
 
+/** Keke Napep: enclosed canopy tricycle (C26 ride roster). */
+export function buildKeke(): THREE.Group {
+  const geo = cached('keke', () => {
+    const b = new GeoBuilder();
+    const Y = '#F2C230';
+    wheel(b, 0, -0.85, 0.28, 0.12);
+    for (const s of [-1, 1]) wheel(b, s * 0.52, 0.55, 0.3, 0.14);
+    b.box(0.38, 0.5, 0.55, Y, { y: 0.55, z: -0.55 });
+    b.cyl(0.04, 0.04, 0.5, '#1a1a1c', { y: 0.78, z: -0.85, rx: -0.2 }, 6);
+    b.box(1.0, 0.08, 1.3, '#2a2a2c', { y: 0.42, z: 0.35 });
+    b.box(0.96, 0.4, 0.2, Y, { y: 0.66, z: 0.95 });
+    for (const [x, z] of [
+      [-0.48, -0.15],
+      [0.48, -0.15],
+      [-0.48, 0.9],
+      [0.48, 0.9],
+    ] as const) {
+      b.cyl(0.025, 0.025, 1.0, '#1a1a1c', { x, y: 1.1, z }, 6);
+    }
+    b.box(1.05, 0.04, 1.5, Y, { y: 1.62, z: 0.35 });
+    b.box(1.05, 0.3, 0.04, shade(Y, -0.1), { y: 1.45, z: 1.08 });
+    b.box(0.4, 0.1, 0.02, '#111', { y: 0.6, z: 1.09 });
+    return b.build();
+  });
+  return group(geo);
+}
+
+/** Sienna / Hilux people-carrier (C26 ride roster). */
+export function buildHilux(): THREE.Group {
+  const geo = cached('hilux', () => {
+    const b = new GeoBuilder();
+    const C = '#8C9AA8';
+    for (const z of [-0.95, 0.95]) for (const s of [-1, 1]) wheel(b, s * 0.72, z, 0.34, 0.2);
+    b.box(1.62, 0.6, 2.4, C, { y: 0.62 });
+    b.box(1.5, 0.55, 1.5, C, { y: 1.18, z: -0.3 });
+    b.box(1.52, 0.42, 1.44, '#25333c', { y: 1.2, z: -0.3 });
+    b.box(1.6, 0.14, 0.2, '#1a1a1c', { y: 0.44, z: -2.12 });
+    b.box(1.6, 0.14, 0.2, '#1a1a1c', { y: 0.44, z: 2.12 });
+    for (const s of [-1, 1]) {
+      b.box(0.26, 0.12, 0.04, '#fff6d0', { x: s * 0.6, y: 0.78, z: -2.14 });
+      b.box(0.2, 0.3, 0.04, '#ff3b30', { x: s * 0.74, y: 0.95, z: 2.14 });
+    }
+    return b.build();
+  });
+  return group(geo);
+}
+
+/** The player's own Danfo ride — same model as the oncoming-traffic obstacle (C26). */
+export function buildDanfo(): THREE.Group {
+  return group(danfoGeo());
+}
+
+function coasterGeo() {
+  return cached('coaster', () => {
+    const b = new GeoBuilder();
+    const W = '#EDEFF2';
+    const Bl = '#1F6FB2';
+    b.box(2.3, 1.1, 7.6, W, { y: 0.95 });
+    b.box(2.24, 0.95, 6.9, W, { y: 2.05, z: 0.1 });
+    b.box(2.32, 0.5, 7.62, Bl, { y: 1.15 });
+    b.box(2.33, 0.05, 7.63, '#111', { y: 1.58 });
+    for (let i = 0; i < 7; i++) {
+      for (const s of [-1, 1]) b.box(0.03, 0.55, 0.85, '#25333c', { x: s * 1.13, y: 2.1, z: -2.4 + i * 0.95 });
+    }
+    b.box(2.3, 0.22, 0.22, '#1a1a1c', { y: 0.5, z: -3.78 });
+    b.box(2.3, 0.22, 0.22, '#1a1a1c', { y: 0.5, z: 3.78 });
+    for (const s of [-1, 1]) {
+      b.box(0.3, 0.16, 0.04, '#fff6d0', { x: s * 0.75, y: 0.9, z: -3.76 });
+      b.box(0.24, 0.4, 0.05, '#ff3b30', { x: s * 0.95, y: 1.15, z: 3.76 });
+    }
+    for (const z of [-2.4, 0, 2.4]) for (const s of [-1, 1]) wheel(b, s * 1.14, z, 0.44, 0.26);
+    return b.build();
+  });
+}
+/** Coaster bus (C26 ride roster). */
+export function buildCoaster(): THREE.Group {
+  return group(coasterGeo());
+}
+
+/** Grand Convoy: a gold/purple flashy coaster variant (cosmetic prestige ride, C26). */
+export function buildGrandConvoy(): THREE.Group {
+  const geo = cached('grand-convoy', () => {
+    const b = new GeoBuilder();
+    const G = '#D4A017';
+    const P = '#5B2A86';
+    b.box(2.3, 1.1, 7.6, P, { y: 0.95 });
+    b.box(2.24, 0.95, 6.9, P, { y: 2.05, z: 0.1 });
+    b.box(2.32, 0.5, 7.62, G, { y: 1.15 });
+    b.box(2.33, 0.05, 7.63, G, { y: 1.58 });
+    for (let i = 0; i < 7; i++) {
+      for (const s of [-1, 1]) b.box(0.03, 0.55, 0.85, '#25333c', { x: s * 1.13, y: 2.1, z: -2.4 + i * 0.95 });
+    }
+    for (const s of [-1, 1]) {
+      b.box(0.3, 0.16, 0.04, '#fff6d0', { x: s * 0.75, y: 0.9, z: -3.76 });
+      b.box(0.24, 0.4, 0.05, '#ff3b30', { x: s * 0.95, y: 1.15, z: 3.76 });
+      b.cyl(0.015, 0.015, 0.7, '#111', { x: s * 1.1, y: 2.75, z: -3.2 });
+      b.box(0.3, 0.2, 0.01, G, { x: s * 1.1 + s * 0.16, y: 2.95, z: -3.2 });
+    }
+    for (const z of [-2.4, 0, 2.4]) for (const s of [-1, 1]) wheel(b, s * 1.14, z, 0.44, 0.26);
+    return b.build();
+  });
+  return group(geo);
+}
+
 /** Soft blob shadow under people / vehicles. */
 export function blobShadow(w = 1.0, l = 1.0): THREE.Mesh {
   const m = new THREE.Mesh(

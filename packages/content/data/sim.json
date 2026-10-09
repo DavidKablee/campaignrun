@@ -40,7 +40,8 @@
       "weight": 14,
       "halfWidthMm": 1100,
       "halfLenMm": 400,
-      "heightMm": 600
+      "heightMm": 600,
+      "sizeTag": "light"
     },
     {
       "kind": "tyres",
@@ -54,7 +55,8 @@
       "weight": 14,
       "halfWidthMm": 1200,
       "halfLenMm": 350,
-      "heightMm": 1000
+      "heightMm": 1000,
+      "sizeTag": "light"
     },
     {
       "kind": "jersey",
@@ -90,6 +92,22 @@
       "halfWidthMm": 1150,
       "halfLenMm": 4000,
       "heightMm": 3000
+    },
+    {
+      "kind": "narrow-gate",
+      "weight": 7,
+      "halfWidthMm": 1250,
+      "halfLenMm": 600,
+      "heightMm": 1400,
+      "sizeTag": "narrow"
+    },
+    {
+      "kind": "flood-patch",
+      "weight": 7,
+      "halfWidthMm": 1300,
+      "halfLenMm": 1600,
+      "heightMm": 250,
+      "sizeTag": "flood"
     }
   ],
   "hit": {

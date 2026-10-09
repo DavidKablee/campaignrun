@@ -8,8 +8,13 @@ import { buildCharacter, disposeRig, poseCharacter, type CharacterRig } from './
 import {
   AMBER,
   blobShadow,
+  buildCoaster,
+  buildDanfo,
   buildFinish,
   buildGate,
+  buildGrandConvoy,
+  buildHilux,
+  buildKeke,
   buildObstacle,
   buildOkada,
   buildPickupZone,
@@ -17,6 +22,22 @@ import {
   buildVenue,
   personGeo,
 } from './props';
+
+/**
+ * Per-ride vehicle visuals (C26). Rides not listed here (Trek) render the
+ * character on foot. `mounted: true` rides seat the character on/in the
+ * vehicle (open rides); `mounted: false` hides the character — showing a
+ * person precisely seated inside an enclosed bus cabin isn't worth the
+ * clipping-avoidance effort for a chase-cam runner.
+ */
+const RIDE_VISUALS: Record<string, { build: () => THREE.Group; seatY: number; seatZ: number; lean: number; mounted: boolean }> = {
+  okada: { build: buildOkada, seatY: 0.8, seatZ: 0.32, lean: 1.4, mounted: true },
+  keke: { build: buildKeke, seatY: 0.74, seatZ: 0.15, lean: 0.6, mounted: true },
+  hilux: { build: buildHilux, seatY: 0.0, seatZ: 0.0, lean: 0.5, mounted: false },
+  danfo: { build: buildDanfo, seatY: 0.0, seatZ: 0.0, lean: 0.3, mounted: false },
+  coaster: { build: buildCoaster, seatY: 0.0, seatZ: 0.0, lean: 0.25, mounted: false },
+  'grand-convoy': { build: buildGrandConvoy, seatY: 0.0, seatZ: 0.0, lean: 0.2, mounted: false },
+};
 
 export interface RenderOpts {
   look: CharacterLook;
@@ -116,13 +137,19 @@ export class GameRenderer {
     const rig = buildCharacter(this.opts.look, this.opts.outfit, 'hi');
     this.rig = rig;
     rig.group.rotation.y = Math.PI; // build faces +z; run toward -z
-    if (this.opts.rideId === 'okada') {
-      this.playerRoot.add(buildOkada());
-      // Seat the rig's hip (local y = HIP_Y * height, chibi skeleton — see character.ts)
-      // on the okada's seat (world y ~0.8, unrelated to the character rebuild).
-      rig.group.position.set(0, 0.8 - 0.5 * this.opts.look.height, 0.32);
+    const visual = RIDE_VISUALS[this.opts.rideId];
+    if (visual) {
+      this.playerRoot.add(visual.build());
+      if (visual.mounted) {
+        // Seat the rig's hip (local y = HIP_Y * height, chibi skeleton — see character.ts)
+        // on the vehicle's seat height; unrelated to the character rebuild.
+        rig.group.position.set(0, visual.seatY - 0.5 * this.opts.look.height, visual.seatZ);
+        this.playerRoot.add(rig.group);
+      }
+      // Enclosed rides (bus-type): no character mesh added — see RIDE_VISUALS doc comment.
+    } else {
+      this.playerRoot.add(rig.group);
     }
-    this.playerRoot.add(rig.group);
   }
 
   setOpts(partial: Partial<RenderOpts>) {
@@ -228,12 +255,13 @@ export class GameRenderer {
     this.world.update(-pZ);
 
     // player
+    const visual = RIDE_VISUALS[this.opts.rideId];
     this.playerRoot.position.set(pX, hop, pZ);
-    this.playerRoot.rotation.z = -(curr.targetLane - 1) * (this.opts.reduceMotion ? 0.02 : 0.07) * (this.opts.rideId === 'okada' ? 1.4 : 0.5);
+    this.playerRoot.rotation.z = -(curr.targetLane - 1) * (this.opts.reduceMotion ? 0.02 : 0.07) * (visual?.lean ?? 0.5);
     this.playerRoot.visible = curr.invulnTicks === 0 || ((curr.invulnTicks >> 2) & 1) === 0;
     this.shadow.position.set(pX, 0.04, pZ);
-    // hop landing: detect the hop→ground transition and trigger a brief squash
-    if (this.prevHop > 0.15 && hop <= 0.001 && this.opts.rideId !== 'okada') this.squashT = 0.16;
+    // hop landing: detect the hop→ground transition and trigger a brief squash (foot rides only — a vehicle doesn't "tuck")
+    if (this.prevHop > 0.15 && hop <= 0.001 && !visual) this.squashT = 0.16;
     this.prevHop = hop;
     if (this.squashT > 0) {
       this.squashT = Math.max(0, this.squashT - dt);
@@ -245,10 +273,10 @@ export class GameRenderer {
     }
 
     if (this.rig) {
-      poseCharacter(this.rig, this.opts.rideId === 'okada' ? 'sit' : 'run', t, speed01);
+      poseCharacter(this.rig, visual?.mounted ? 'sit' : 'run', t, speed01);
       // ease the hop tuck in/out by blending with whatever poseCharacter just set,
       // instead of a hard overwrite past a fixed threshold (used to snap)
-      if (this.opts.rideId !== 'okada' && hop > 0.001) {
+      if (!visual && hop > 0.001) {
         const hopAmt = Math.min(1, hop / 1.1);
         const p = this.rig.parts;
         p.thighL.rotation.x = p.thighL.rotation.x * (1 - hopAmt) + -1.1 * hopAmt;

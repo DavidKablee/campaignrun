@@ -148,7 +148,7 @@ describe('controls', () => {
   it('hop clears every obstacle shorter than hopHeightMm and hits the rest', () => {
     const hoppable = simConfig.obstacles.filter((o) => o.heightMm < simConfig.hopHeightMm);
     const solid = simConfig.obstacles.filter((o) => o.heightMm >= simConfig.hopHeightMm);
-    expect(hoppable.map((o) => o.kind)).toEqual(['pothole', 'cones', 'tyres', 'barricade', 'jersey']);
+    expect(hoppable.map((o) => o.kind)).toEqual(['pothole', 'cones', 'tyres', 'barricade', 'jersey', 'narrow-gate', 'flood-patch']);
     expect(solid.map((o) => o.kind)).toEqual(['roadworks', 'car', 'danfo', 'trailer']);
 
     for (const o of simConfig.obstacles) {

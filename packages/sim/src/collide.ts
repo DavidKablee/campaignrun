@@ -16,7 +16,7 @@ export function checkCollision(state: SimState, config: SimConfig): Entity | nul
   const pRight = pX + pHalfWidth;
   
   const isMagnet = state.perkActiveTicks > 0 && state.activeContenderId === 'mr-obiliki';
-  const magnetRadius = (isMagnet ? 900 : 0) + state.upgrades.magnetRadiusMm;
+  const magnetRadius = (isMagnet ? 900 : 0) + state.upgrades.magnetRadiusMm + state.rideMagnetBonusMm;
 
   const hopClear = state.hopT > 0;
 
@@ -37,6 +37,13 @@ export function checkCollision(state: SimState, config: SimConfig): Entity | nul
     } else {
       if (pRight < eLeft || pLeft > eRight) continue;
       if (hopClear && config.hopHeightMm > ent.heightMm) continue;
+      // C26 ride size-class rules (spec §4.3): narrow gaps block M/L, only S
+      // passes; floods block L only; light barriers are ploughed by rides
+      // with ploughsLight (Danfo+) — all three make the hazard transparent
+      // to this ride rather than ending in a hit.
+      if (ent.sizeTag === 'narrow' && state.rideSize === 'S') continue;
+      if (ent.sizeTag === 'flood' && state.rideSize !== 'L') continue;
+      if (ent.sizeTag === 'light' && state.ridePloughsLight) continue;
     }
 
     return ent;

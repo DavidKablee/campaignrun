@@ -38,8 +38,10 @@ describe('content packs', () => {
     const keke = rides.find((r) => r.id === 'keke')!;
     expect(isRidePlayable(okada, 149)).toBe(false);
     expect(isRidePlayable(okada, 150)).toBe(true);
-    expect(isRidePlayable(keke, 1_000_000)).toBe(false);
-    expect(rides.filter((r) => r.playable).map((r) => r.id)).toEqual(['trek', 'okada']);
+    expect(isRidePlayable(keke, 1_499)).toBe(false);
+    expect(isRidePlayable(keke, 1_500)).toBe(true);
+    // C26: full roster is playable (gated by Following, not a playable:false lock).
+    expect(rides.filter((r) => r.playable).map((r) => r.id)).toEqual(['trek', 'okada', 'keke', 'hilux', 'danfo', 'coaster', 'grand-convoy']);
   });
 
   it('sim config sanity', () => {

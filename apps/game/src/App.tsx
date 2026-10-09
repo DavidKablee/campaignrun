@@ -1135,7 +1135,16 @@ function GameScreen() {
     input.attach(container);
 
     const seed = (Math.random() * 0xffffffff) >>> 0;
-    const state = initState(simConfig, seedRng(seed), { capacity: ride.capacity, contenderId, upgrades: runModifiers(upgrades) });
+    const state = initState(simConfig, seedRng(seed), {
+      capacity: ride.capacity,
+      contenderId,
+      upgrades: runModifiers(upgrades),
+      rideSize: ride.size,
+      ridePloughsLight: ride.ploughsLight,
+      rideFreeHit: ride.freeHitPerRun,
+      rideMagnetBonusMm: ride.magnetBonusMm,
+      signatureRideBonusPermille: pack?.signatureRide === ride.id ? 1100 : 1000,
+    });
     // Debug-only (needs ?debug): jump to a distance in metres to inspect later Lagos segments.
     const dbgZ = Number(new URLSearchParams(window.location.search).get('debugZ'));
     if (debug && Number.isFinite(dbgZ) && dbgZ > 0) state.z = Math.floor(dbgZ) * 1000;

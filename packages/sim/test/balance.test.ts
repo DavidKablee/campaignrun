@@ -1,13 +1,20 @@
 import { describe, it, expect } from 'vitest';
-import { simConfig, activeContenders, rides } from '@cr/content';
+import { simConfig, activeContenders, rides, type Ride } from '@cr/content';
 import { initState, step, seedRng, Btn } from '../src';
 
 /**
  * Equal-power check: same clean course (zones only), same inputs, no hazard RNG.
  * Perk toys that rewrite the road are out of scope here; tradeoffs must stay mild.
  */
-function runClean(seedNum: number, contenderId: string, capacity: number): number {
-  const state = initState(simConfig, seedRng(seedNum), { contenderId, capacity });
+function runClean(seedNum: number, contenderId: string, ride: Ride): number {
+  const state = initState(simConfig, seedRng(seedNum), {
+    contenderId,
+    capacity: ride.capacity,
+    rideSize: ride.size,
+    ridePloughsLight: ride.ploughsLight,
+    rideFreeHit: ride.freeHitPerRun,
+    rideMagnetBonusMm: ride.magnetBonusMm,
+  });
   state.entities = state.entities.filter((e) => e.isZone);
   let ticks = 0;
   const MAX_TICKS = simConfig.tickHz * 120;
@@ -39,7 +46,7 @@ describe('C05 balance bot', () => {
     for (const c of activeContenders) {
       let sum = 0;
       for (let i = 0; i < RUNS; i++) {
-        sum += runClean(i * 997 + 17, c.id, trek.capacity);
+        sum += runClean(i * 997 + 17, c.id, trek);
       }
       averages.set(c.id, sum / RUNS);
     }
@@ -53,4 +60,32 @@ describe('C05 balance bot', () => {
       expect(delta, `${id} avg=${avg.toFixed(2)} mean=${mean.toFixed(2)}`).toBeLessThanOrEqual(0.03);
     }
   });
+});
+
+describe('C26 balance bot — all 7 ride classes', () => {
+  // Acceptance criteria #4 from the spec: ±3% mean Crowd parity per Contender,
+  // per ride class, never actually checked past trek before this chunk.
+  const RUNS = 120;
+
+  for (const ride of rides) {
+    it(`active Contenders stay within ±3% mean Crowd on ${ride.id} (${ride.rideClass}, clean course)`, () => {
+      const averages = new Map<string, number>();
+      for (const c of activeContenders) {
+        let sum = 0;
+        for (let i = 0; i < RUNS; i++) {
+          sum += runClean(i * 619 + 31, c.id, ride);
+        }
+        averages.set(c.id, sum / RUNS);
+      }
+
+      const values = [...averages.values()];
+      const mean = values.reduce((a, b) => a + b, 0) / values.length;
+      expect(mean).toBeGreaterThan(0);
+
+      for (const [id, avg] of averages) {
+        const delta = Math.abs(avg - mean) / mean;
+        expect(delta, `${ride.id}/${id} avg=${avg.toFixed(2)} mean=${mean.toFixed(2)}`).toBeLessThanOrEqual(0.03);
+      }
+    });
+  }
 });

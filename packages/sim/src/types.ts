@@ -31,6 +31,8 @@ export interface Entity {
   isZone?: boolean;
   isIntegrityHazard?: boolean;
   zoneKind?: 'pickup' | 'venue' | 'grand' | 'finish' | 'gate';
+  /** C26 ride size-class rules. See SimConfig obstacles[].sizeTag for the full rule. */
+  sizeTag?: 'narrow' | 'flood' | 'light';
   value?: number;
   /** Group size reserved for pickup zones (integer). */
   groupSize?: number;
@@ -104,6 +106,15 @@ export interface SimState {
   venuesUnloaded: number;
   /** C08 local upgrade effects. Integer-only and captured at run start. */
   upgrades: { magnetRadiusMm: number; shieldTicks: number; hornCooldownTicks: number; loadSpeedPermille: number; rewardPermille: number };
+
+  // C26 ride traits, captured at run start from the selected ride/state (sim stays decoupled from @cr/content).
+  rideSize: 'S' | 'M' | 'L';
+  ridePloughsLight: boolean;
+  rideFreeHit: boolean;
+  freeHitUsed: boolean;
+  rideMagnetBonusMm: number;
+  /** 1000 = no bonus, 1100 = +10% (state's signatureRide === current ride). */
+  signatureRideBonusPermille: number;
 }
 
 export const Btn = {

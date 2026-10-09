@@ -102,6 +102,7 @@ function spawnHazardCluster(state: SimState, config: SimConfig, fromZ: number, t
         halfLenMm: obstacle.halfLenMm,
         heightMm: obstacle.heightMm,
         active: true,
+        sizeTag: obstacle.sizeTag,
       });
       if (rngIntRange(state.rng, 0, 999) < config.spawn.doubleChancePermille) {
         const lane2 = ((lane + 1 + rngIntRange(state.rng, 0, 1)) % 3) as 0 | 1 | 2;
@@ -115,6 +116,7 @@ function spawnHazardCluster(state: SimState, config: SimConfig, fromZ: number, t
           halfLenMm: o2.halfLenMm,
           heightMm: o2.heightMm,
           active: true,
+          sizeTag: o2.sizeTag,
         });
       }
     }

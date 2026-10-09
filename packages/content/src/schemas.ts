@@ -38,6 +38,11 @@ export const simConfigSchema = z.object({
         halfWidthMm: int.positive(),
         halfLenMm: int.positive(),
         heightMm: int.positive(),
+        /** C26 ride size-class rules: 'narrow' blocks M/L (S passes), 'flood'
+         *  blocks L only (S/M pass), 'light' is ploughed by rides with
+         *  ploughsLight (Danfo+) without a dent. Undefined = normal obstacle,
+         *  blocks every ride size the same way it always has. */
+        sizeTag: z.enum(['narrow', 'flood', 'light']).optional(),
       }),
     )
     .min(1),
@@ -121,6 +126,10 @@ export const rideSchema = z.object({
   rideClass: z.enum(['light', 'mid', 'heavy']),
   /** C04 ships Trek and Okada. Later rides stay in the pack but are not selectable. */
   playable: z.boolean(),
+  /** C26: give the flavour-text traits real mechanics. All default false/0 so Trek/Okada (and any pack missing these) behave exactly as before. */
+  ploughsLight: z.boolean().default(false),
+  freeHitPerRun: z.boolean().default(false),
+  magnetBonusMm: int.nonnegative().default(0),
 });
 export type Ride = z.infer<typeof rideSchema>;
 
