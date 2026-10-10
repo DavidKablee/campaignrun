@@ -25,7 +25,9 @@
     "doubleChancePermille": 250,
     "supporterChancePermille": 400,
     "looseSupporterChancePermille": 200,
-    "integrityChancePermille": 80
+    "integrityChancePermille": 80,
+    "pvcChancePermille": 30,
+    "rivalChancePermille": 60
   },
   "obstacles": [
     {
@@ -134,7 +136,11 @@
     "fullHousePermille": 1250,
     "onBeatPermille": 1500,
     "onBeatTaps": 4,
-    "onBeatWindowTicks": 90
+    "onBeatWindowTicks": 90,
+    "pvcMultiplierPermille": 1100,
+    "pvcDurationTicks": 600,
+    "rivalOutpaceCrowd": 6,
+    "rivalBumpSpeedPermille": 850
   },
   "course": {
     "borderGateMm": 20000,

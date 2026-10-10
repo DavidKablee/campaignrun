@@ -406,6 +406,14 @@ export class GameRenderer {
           return buildGate('WELCOME TO LAGOS', 'Ẹ káàbọ̀ sí Èkó');
       }
     }
+    if (ent.isRivalConvoy) {
+      // C28: reuse the C26 ride models for visual variety — a rival is just another campaign vehicle.
+      const models = [buildOkada, buildKeke, buildHilux, buildDanfo];
+      const build = models[(ent.value ?? 0) % models.length]!;
+      const g = build();
+      g.scale.setScalar(1.15); // read clearly as "another convoy", not the player's own ride
+      return g;
+    }
     if (ent.isPickup) return buildSupporterGroup(ent.value ?? 1, ent.id);
     return buildObstacle(ent.kind, ent.id);
   }

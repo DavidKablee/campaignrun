@@ -29,6 +29,9 @@ export const simConfigSchema = z.object({
     supporterChancePermille: int.min(0).max(1000),
     looseSupporterChancePermille: int.min(0).max(1000),
     integrityChancePermille: int.min(0).max(1000),
+    /** C28: PVC pickup and rival-convoy spawn chances, same roll pipeline as the rest. */
+    pvcChancePermille: int.min(0).max(1000),
+    rivalChancePermille: int.min(0).max(1000),
   }),
   obstacles: z
     .array(
@@ -71,6 +74,12 @@ export const simConfigSchema = z.object({
     onBeatPermille: int.positive(),
     onBeatTaps: int.positive(),
     onBeatWindowTicks: int.positive(),
+    /** C28 PVC pickup: temporary Crowd multiplier. */
+    pvcMultiplierPermille: int.positive(),
+    pvcDurationTicks: int.positive(),
+    /** C28 rival convoys: flat skillCrowd bonus for an unhit pass, gentle speed knock on a bump. */
+    rivalOutpaceCrowd: int.nonnegative(),
+    rivalBumpSpeedPermille: int.min(0).max(1000),
   }),
   course: z.object({
     borderGateMm: int.positive(),

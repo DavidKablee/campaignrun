@@ -269,10 +269,37 @@ export function buildObstacle(kind: string, seed: number): THREE.Group {
     case 'snatcher':
     case 'vote-buyer':
     case 'sleepy-voter':
+    case 'result-swapper':
+    case 'network-glitch':
+    case 'late-materials':
+    case 'spot-the-fake':
       return group(integrityGeo(kind, seed));
+    case 'pvc-pickup':
+      return buildPvcCard(seed);
     default:
       return group(sedanGeo(seed));
   }
+}
+
+/** C28: a glowing collectible card — never a hazard, so visually distinct from the integrity cast. */
+function buildPvcCard(seed: number): THREE.Group {
+  const g = new THREE.Group();
+  const geo = cached('pvc-card', () => {
+    const b = new GeoBuilder();
+    b.box(0.34, 0.5, 0.02, '#1fa45b', { y: 1.1 });
+    b.box(0.3, 0.44, 0.022, '#f7f1e3', { y: 1.1 });
+    b.box(0.26, 0.12, 0.024, '#2a6f97', { y: 1.26 });
+    b.sphere(0.07, '#8b5a2b', { y: 1.1, sy: 1.2 }, 8);
+    return b.build();
+  });
+  const card = new THREE.Mesh(geo, vcMat());
+  card.rotation.y = (seed % 7) * 0.2;
+  g.add(card);
+  const glow = new THREE.Mesh(cached('pvc-glow', () => new THREE.CircleGeometry(0.55, 16)), AMBER());
+  glow.rotation.x = -Math.PI / 2;
+  glow.position.y = 0.03;
+  g.add(glow);
+  return g;
 }
 
 /** Generic integrity threats — neutral greys/amber, never party colours. */
@@ -280,7 +307,7 @@ function integrityGeo(kind: string, seed: number): THREE.BufferGeometry {
   return cached(`int:${kind}:${seed % 4}`, () => {
     const b = new GeoBuilder();
     const skin = seed % 2 ? '#5c3a24' : '#3b2417';
-    const suit = kind === 'vote-buyer' ? '#3a4a5a' : kind === 'snatcher' ? '#2a2a2a' : '#4a5560';
+    const suit = kind === 'vote-buyer' ? '#3a4a5a' : kind === 'snatcher' ? '#2a2a2a' : kind === 'network-glitch' ? '#5a4a3a' : '#4a5560';
     // shadow disc
     b.cyl(0.55, 0.55, 0.02, '#161616', { y: 0.01 }, 12);
     // legs + torso + head
@@ -294,6 +321,23 @@ function integrityGeo(kind: string, seed: number): THREE.BufferGeometry {
     } else if (kind === 'vote-buyer') {
       b.box(0.28, 0.18, 0.05, '#1fa45b', { x: 0.3, y: 1.05, z: 0.2 });
       b.box(0.22, 0.04, 0.04, '#f7f1e3', { x: 0.3, y: 1.05, z: 0.24 });
+    } else if (kind === 'result-swapper') {
+      // a second result sheet, swapped behind the back
+      b.box(0.3, 0.4, 0.02, '#f7f1e3', { x: -0.3, y: 1.05, z: -0.2, ry: 0.4 });
+      b.box(0.26, 0.05, 0.022, '#c8281e', { x: -0.3, y: 1.18, z: -0.2, ry: 0.4 });
+    } else if (kind === 'network-glitch') {
+      // a small antenna/static burst
+      b.cyl(0.015, 0.015, 0.3, '#2a2a2a', { x: 0.2, y: 1.7, z: 0.1 }, 5);
+      b.sphere(0.07, '#7fd4e8', { x: 0.2, y: 1.88, z: 0.1 }, 8);
+    } else if (kind === 'late-materials') {
+      // crate of ballot materials, not yet delivered
+      b.box(0.3, 0.28, 0.3, '#8b5a2b', { x: 0.32, y: 0.5, z: 0.1 });
+      b.box(0.3, 0.03, 0.3, '#5a3d24', { x: 0.32, y: 0.65, z: 0.1 });
+    } else if (kind === 'spot-the-fake') {
+      // a held-up fake headline card
+      b.box(0.34, 0.26, 0.02, '#f7f1e3', { x: 0.3, y: 1.3, z: 0.18, rz: -0.08 });
+      b.box(0.26, 0.04, 0.022, '#161616', { x: 0.3, y: 1.33, z: 0.19, rz: -0.08 });
+      b.box(0.2, 0.03, 0.022, '#161616', { x: 0.28, y: 1.26, z: 0.19, rz: -0.08 });
     } else {
       // sleepy-voter: slumped, no prop
       b.box(0.5, 0.2, 0.35, suit, { y: 0.75, rx: 0.4 });

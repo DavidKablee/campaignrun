@@ -36,6 +36,8 @@ export function initState(
     displayCrowd: 0,
     integrity: 100,
     integritySpawnSeq: 0,
+    rivalSpawnSeq: 0,
+    pvcBuffTicks: 0,
     delivered: 0,
     entities: [],
     events: [],
@@ -92,6 +94,7 @@ function deliverCrowd(state: SimState, config: SimConfig, onBeat: boolean, venue
   let gained = Math.floor((state.carried * mult) / 1000);
   gained = applyPermille(gained, venueMult);
   gained = applyPermille(gained, state.signatureRideBonusPermille);
+  if (state.pvcBuffTicks > 0) gained = applyPermille(gained, config.bonuses.pvcMultiplierPermille);
   state.skillCrowd += gained;
   state.displayCrowd += gained;
   state.delivered += state.carried;
@@ -276,14 +279,23 @@ export function step(state: SimState, input: number, config: SimConfig): void {
     hitEnt.active = false;
     const isStreetParty = state.perkActiveTicks > 0 && perkId === 'street-party';
 
-    if (hitEnt.isPickup || (isStreetParty && !hitEnt.isZone)) {
+    if (hitEnt.kind === 'pvc-pickup') {
+      // C28: a positive pickup, not a hazard — grants a temporary Crowd multiplier.
+      state.pvcBuffTicks = config.bonuses.pvcDurationTicks;
+      state.events.push({ type: 'pvcActive' });
+    } else if (hitEnt.isPickup || (isStreetParty && !hitEnt.isZone)) {
       const amount = hitEnt.value || 1;
       const free = state.capacity - state.carried;
       const add = clamp(amount, 0, free);
       state.carried += add;
       state.events.push({ type: 'pickup', payload: add });
+    } else if (hitEnt.isRivalConvoy) {
+      // C28: rivals are traffic, never a run-ending hazard — a small speed knock only.
+      state.speed = applyPermille(state.speed, config.bonuses.rivalBumpSpeedPermille);
+      state.events.push({ type: 'rivalBump', payload: hitEnt.id });
     } else if (hitEnt.isIntegrityHazard) {
-      state.integrity = Math.max(0, state.integrity - 15);
+      const mild = hitEnt.kind === 'late-materials';
+      state.integrity = Math.max(0, state.integrity - (mild ? 10 : 15));
       state.events.push({ type: 'integrityFail', payload: hitEnt.kind });
       state.momentum = config.momentum.min;
       if (hitEnt.kind === 'snatcher') {
@@ -292,6 +304,19 @@ export function step(state: SimState, input: number, config: SimConfig): void {
       } else if (hitEnt.kind === 'vote-buyer') {
         state.carried -= applyPermille(state.carried, 250);
         state.speed = applyPermille(state.speed, 350);
+      } else if (hitEnt.kind === 'result-swapper') {
+        // Upload interrupted: a delay, no crowd lost.
+        state.speed = applyPermille(state.speed, 300);
+      } else if (hitEnt.kind === 'network-glitch') {
+        // Retry the upload: hard stall, no crowd lost.
+        state.speed = config.brakeSpeedUm;
+      } else if (hitEnt.kind === 'late-materials') {
+        // Venue opens late: mild delay only.
+        state.speed = applyPermille(state.speed, 600);
+      } else if (hitEnt.kind === 'spot-the-fake') {
+        // Misjudged a headline: brief jam, small crowd nibble.
+        state.carried -= applyPermille(state.carried, 150);
+        state.speed = applyPermille(state.speed, 400);
       } else {
         // sleepy-voter: jam the lane
         state.speed = config.brakeSpeedUm;
@@ -338,9 +363,17 @@ export function step(state: SimState, input: number, config: SimConfig): void {
     if (e.active && e.isIntegrityHazard) {
       state.integrity = Math.min(100, state.integrity + 8);
       state.events.push({ type: 'integritySuccess', payload: e.kind });
+    } else if (e.active && e.isRivalConvoy) {
+      // C28: passed a rival without a bump — the "Draft & Overtake" bonus (spec §4.6).
+      state.skillCrowd += config.bonuses.rivalOutpaceCrowd;
+      state.displayCrowd += config.bonuses.rivalOutpaceCrowd;
+      state.events.push({ type: 'rivalOutpace', payload: e.id });
     }
     return false;
   });
+
+  // C28 PVC pickup buff: applies to every delivery while active, independent of venue timing.
+  if (state.pvcBuffTicks > 0) state.pvcBuffTicks--;
 
   state.prevInput = input;
   state.tick++;

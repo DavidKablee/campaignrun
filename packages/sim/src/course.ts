@@ -40,8 +40,14 @@ function spawnHazardCluster(state: SimState, config: SimConfig, fromZ: number, t
   let z = fromZ + config.course.hazardGapMinMm;
   while (z < toZ - 5000) {
     const roll = rngIntRange(state.rng, 0, 999);
-    const isSupporter = roll < config.spawn.supporterChancePermille;
-    const isIntegrity = !isSupporter && roll < config.spawn.supporterChancePermille + config.spawn.integrityChancePermille;
+    const supporterCut = config.spawn.supporterChancePermille;
+    const integrityCut = supporterCut + config.spawn.integrityChancePermille;
+    const pvcCut = integrityCut + config.spawn.pvcChancePermille;
+    const rivalCut = pvcCut + config.spawn.rivalChancePermille;
+    const isSupporter = roll < supporterCut;
+    const isIntegrity = !isSupporter && roll < integrityCut;
+    const isPvc = !isSupporter && !isIntegrity && roll < pvcCut;
+    const isRival = !isSupporter && !isIntegrity && !isPvc && roll < rivalCut;
     const lane = rngIntRange(state.rng, 0, 2) as 0 | 1 | 2;
 
     if (isSupporter) {
@@ -76,9 +82,17 @@ function spawnHazardCluster(state: SimState, config: SimConfig, fromZ: number, t
         });
       }
     } else if (isIntegrity) {
-      // Round-robin kinds so frequencies stay equal across Contenders and seeds.
-      const kinds = ['snatcher', 'vote-buyer', 'sleepy-voter'] as const;
-      const kind = kinds[state.integritySpawnSeq % 3]!;
+      // Round-robin kinds so frequencies stay equal across Contenders and seeds (C06 + C28).
+      const kinds = [
+        'snatcher',
+        'vote-buyer',
+        'sleepy-voter',
+        'result-swapper',
+        'network-glitch',
+        'late-materials',
+        'spot-the-fake',
+      ] as const;
+      const kind = kinds[state.integritySpawnSeq % kinds.length]!;
       state.integritySpawnSeq++;
       state.entities.push({
         id: state.entityIdSeq++,
@@ -90,6 +104,34 @@ function spawnHazardCluster(state: SimState, config: SimConfig, fromZ: number, t
         heightMm: 1200,
         active: true,
         isIntegrityHazard: true,
+      });
+    } else if (isPvc) {
+      // C28: a free-standing collectible, not a pickup zone — grants a temporary Crowd buff.
+      state.entities.push({
+        id: state.entityIdSeq++,
+        kind: 'pvc-pickup',
+        lane,
+        z,
+        halfWidthMm: 400,
+        halfLenMm: 400,
+        heightMm: 900,
+        active: true,
+      });
+    } else if (isRival) {
+      // C28: an NPC convoy of another Contender — round-robin so every ride model shows equally.
+      const model = state.rivalSpawnSeq % 4;
+      state.rivalSpawnSeq++;
+      state.entities.push({
+        id: state.entityIdSeq++,
+        kind: 'rival-convoy',
+        lane,
+        z,
+        halfWidthMm: 700,
+        halfLenMm: 1600,
+        heightMm: 1700,
+        active: true,
+        isRivalConvoy: true,
+        value: model,
       });
     } else {
       const obstacle = pickWeightedObstacle(state, config);

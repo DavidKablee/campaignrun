@@ -33,6 +33,8 @@ export interface Entity {
   zoneKind?: 'pickup' | 'venue' | 'grand' | 'finish' | 'gate';
   /** C26 ride size-class rules. See SimConfig obstacles[].sizeTag for the full rule. */
   sizeTag?: 'narrow' | 'flood' | 'light';
+  /** C28: an NPC convoy of another Contender. Touch = small bump, never a dent/integrity hit. */
+  isRivalConvoy?: boolean;
   value?: number;
   /** Group size reserved for pickup zones (integer). */
   groupSize?: number;
@@ -54,7 +56,10 @@ export type SimEventType =
   | 'integrityFail'
   | 'integritySuccess'
   | 'horn'
-  | 'perk';
+  | 'perk'
+  | 'rivalBump'
+  | 'rivalOutpace'
+  | 'pvcActive';
 
 export interface SimEvent {
   type: SimEventType;
@@ -79,8 +84,12 @@ export interface SimState {
   skillCrowd: number;
   displayCrowd: number;
   integrity: number;
-  /** Counts integrity spawns so snatcher / vote-buyer / sleepy-voter stay equal. */
+  /** Counts integrity spawns so all 8 Integrity event kinds stay equal (C06 + C28). */
   integritySpawnSeq: number;
+  /** C28: round-robins rival-convoy spawns so exposure is identical across seeds. */
+  rivalSpawnSeq: number;
+  /** C28 PVC pickup: ticks remaining on the ×1.1 Crowd buff, 0 = inactive. */
+  pvcBuffTicks: number;
   delivered: number;
   entities: Entity[];
   events: SimEvent[];

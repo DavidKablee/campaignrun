@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-10 — C28 rival convoys + remaining 5 Integrity events
+
+- The 5 Integrity events from the spec that C06 never shipped: Result Swapper, Network Glitch, Late Materials, Spot the Fake (all extend C06's exact round-robin hazard pattern — hit = integrity loss + kind-specific effect, dodge = success) and PVC pickup, correctly implemented as the positive collectible the spec describes (×1.1 Crowd buff for 10s), not another hazard.
+- Rival Convoys (spec §4.6), scoped to the always-on core: NPC traffic that's touch-safe (small bump, never a dent/integrity hit/run-ender) with an Outpace Crowd bonus for a clean pass. The 3 situational sub-interactions (Contest a Venue, Face-off, Peace Salute) need bespoke mini-game UI and are deferred, documented in `docs/chunks/C28.md` rather than silently dropped.
+- Rendering added for all of it so nothing ships invisible: a glowing PVC card, 4 new generic-villain variants matching the existing neutral-colours style, and rivals reusing the C26 ride models for free visual variety.
+- `packages/sim/test/integrity.test.ts` extended accordingly — 86 tests total, all green.
+
 ## 2026-10-10 — C27 state pack batch 2 (Oyo, Borno, Delta, Kwara)
 
 - Four new state packs matching the calendar's 2 Nov unlock week exactly, researched via web search for real landmark/cultural accuracy rather than placeholders (Cocoa House/Bower's Tower/Agodi Gardens for Oyo; Monday Market/Borno Museum/El-Kanemi Stadium for Borno; Niger Bridge/Effurun Roundabout/Warri Township Stadium for Delta; Sobi Hill/Owu Falls/Kwara State Stadium for Kwara). Every landmark is `verified: false` per the spec's own local-reviewer guardrail.
