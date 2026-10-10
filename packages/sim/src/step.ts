@@ -17,6 +17,8 @@ export function initState(
     rideFreeHit?: boolean;
     rideMagnetBonusMm?: number;
     signatureRideBonusPermille?: number;
+    /** C30: Rally Saturday — decided by the caller from a real clock, sim just applies it. */
+    rallySaturdayMultiplierPermille?: number;
   },
 ): SimState {
   const state: SimState = {
@@ -38,6 +40,7 @@ export function initState(
     integritySpawnSeq: 0,
     rivalSpawnSeq: 0,
     pvcBuffTicks: 0,
+    rallySaturdayMultiplierPermille: opts?.rallySaturdayMultiplierPermille ?? 1000,
     delivered: 0,
     entities: [],
     events: [],
@@ -95,6 +98,9 @@ function deliverCrowd(state: SimState, config: SimConfig, onBeat: boolean, venue
   gained = applyPermille(gained, venueMult);
   gained = applyPermille(gained, state.signatureRideBonusPermille);
   if (state.pvcBuffTicks > 0) gained = applyPermille(gained, config.bonuses.pvcMultiplierPermille);
+  // Rally Saturday affects display/skill Crowd alike — it's a real, map-eligible bonus window
+  // (unlike the Integrity bonus, which is display-only), same treatment as Full House/On Beat.
+  gained = applyPermille(gained, state.rallySaturdayMultiplierPermille);
   state.skillCrowd += gained;
   state.displayCrowd += gained;
   state.delivered += state.carried;

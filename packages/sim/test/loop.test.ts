@@ -220,6 +220,36 @@ describe('pickup / venue loop', () => {
     expect(state.carried).toBe(8);
   });
 
+  it('C30: Rally Saturday doubles delivered Crowd, off by default', () => {
+    const run = (rallySaturdayMultiplierPermille?: number) => {
+      const state = initState(simConfig, seedRng(11), { capacity: 10, rallySaturdayMultiplierPermille });
+      state.carried = 10;
+      state.entities = [
+        {
+          id: 1,
+          kind: 'venue',
+          lane: 1,
+          z: state.z,
+          halfWidthMm: simConfig.zones.halfWidthMm,
+          halfLenMm: simConfig.zones.halfLenMm,
+          heightMm: 500,
+          active: true,
+          isZone: true,
+          zoneKind: 'venue',
+          consumed: false,
+        },
+      ];
+      state.finishZ = 999999999;
+      state.speed = simConfig.brakeSpeedUm;
+      for (let i = 0; i < simConfig.zones.unloadTicks + 2; i++) step(state, Btn.Brake, simConfig);
+      return state.skillCrowd;
+    };
+    const normal = run();
+    const doubled = run(simConfig.bonuses.rallySaturdayMultiplierPermille);
+    expect(normal).toBeGreaterThan(0);
+    expect(doubled).toBe(normal * 2);
+  });
+
   it('only delivered supporters become skillCrowd', () => {
     const state = initState(simConfig, seedRng(11), { capacity: 10 });
     state.carried = 10;

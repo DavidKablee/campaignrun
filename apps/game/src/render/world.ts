@@ -4,6 +4,7 @@ import { loadAsset } from './assets';
 import { GeoBuilder, TexBuckets, mulberry, shade, texBox, type Rng } from './geo';
 import { bend, flatMat, texMat, unlitMat, vcMat } from './materials';
 import { personGeo } from './props';
+import type { WeatherContext } from '../weather';
 import {
   SHOP_VARIANTS,
   cloudTexture,
@@ -81,11 +82,20 @@ export class World {
   private segM: number;
   private segCount: number;
   private kit: { palms: THREE.Object3D[]; buildings: THREE.Object3D[]; parasols: THREE.Object3D[] } | null = null;
+  // C30: refs kept for applyWeather() — everything else in this file builds roads/props, not light.
+  private hemi!: THREE.HemisphereLight;
+  private sun!: THREE.DirectionalLight;
+  private fog!: THREE.Fog;
+  private dayFogColor = new THREE.Color('#f1e2bd');
+  private nightFogColor = new THREE.Color('#141b2e');
+  private daySunColor = new THREE.Color('#fff1cf');
+  private nightSunColor = new THREE.Color('#3a4a6e');
 
   constructor(
     private scene: THREE.Scene,
     cfg: SimConfig,
     landmarks: string[],
+    weather?: WeatherContext,
   ) {
     this.lagoonNames = landmarks;
     this.gateM = cfg.course.borderGateMm / 1000;
@@ -96,7 +106,8 @@ export class World {
     });
 
     scene.background = skyTexture();
-    scene.fog = new THREE.Fog('#f1e2bd', 35, 135);
+    this.fog = new THREE.Fog('#f1e2bd', 35, 135);
+    scene.fog = this.fog;
 
     this.roadGeo = new THREE.PlaneGeometry(18, CHUNK);
     const uv = this.roadGeo.getAttribute('uv') as THREE.BufferAttribute;
@@ -105,10 +116,11 @@ export class World {
     this.groundGeo = new THREE.PlaneGeometry(700, CHUNK);
     this.groundGeo.rotateX(-Math.PI / 2);
 
-    scene.add(new THREE.HemisphereLight('#fff6df', '#8d7a63', 1.35));
-    const sun = new THREE.DirectionalLight('#fff1cf', 2.2);
-    sun.position.set(-30, 50, 20);
-    scene.add(sun);
+    this.hemi = new THREE.HemisphereLight('#fff6df', '#8d7a63', 1.35);
+    scene.add(this.hemi);
+    this.sun = new THREE.DirectionalLight('#fff1cf', 2.2);
+    this.sun.position.set(-30, 50, 20);
+    scene.add(this.sun);
 
     const sunSprite = new THREE.Sprite(
       new THREE.SpriteMaterial({ map: sunTexture(), fog: false, transparent: true, depthWrite: false, opacity: 0.8 }),
@@ -130,6 +142,44 @@ export class World {
       const group = new THREE.Group();
       scene.add(group);
       this.slots.push({ group, index: -999, owned: [] });
+    }
+
+    if (weather) this.applyWeather(weather);
+  }
+
+  /**
+   * C30: time-of-day, NEPA, harmattan and rainy-season all boil down to the same four knobs —
+   * hemisphere/sun intensity, sun/fog colour, and fog draw distance — set once per run from a
+   * real clock the caller already read (see weather.ts). Nothing here re-reads the clock itself.
+   */
+  private applyWeather(ctx: WeatherContext) {
+    // Smooth day/night blend: 1 at midnight (dayPhase 0 or 1), 0 at noon (dayPhase 0.5).
+    const night = (1 + Math.cos(ctx.dayPhase * Math.PI * 2)) / 2;
+    const nepaDarken = ctx.isNepaOut ? 0.45 : 1;
+
+    this.hemi.intensity = (1.35 * (1 - night) + 0.3 * night) * nepaDarken;
+    this.sun.intensity = (2.2 * (1 - night) + 0.12 * night) * nepaDarken;
+    this.sun.color.copy(this.daySunColor).lerp(this.nightSunColor, night);
+
+    let fogColor = this.dayFogColor.clone().lerp(this.nightFogColor, night);
+    let fogFar = 135;
+    if (ctx.isHarmattan) {
+      fogColor = fogColor.lerp(new THREE.Color('#cdbd96'), 0.55); // dusty tan haze
+      fogFar = 85; // reduced visibility
+    }
+    if (ctx.isRainySeason) {
+      fogColor = fogColor.lerp(new THREE.Color('#90a0a8'), 0.4); // wet grey-blue
+      fogFar = Math.min(fogFar, 105);
+    }
+    this.fog.color.copy(fogColor);
+    this.fog.far = fogFar;
+    const mood = ctx.isHarmattan ? 'harmattan' : ctx.isRainySeason ? 'rainy' : night > 0.5 ? 'night' : 'day';
+    this.scene.background = skyTexture(mood);
+
+    // Sun glow + clouds read wrong against a dark sky — fade them out at night.
+    const skyOpacity = 0.85 * (1 - night * 0.9);
+    for (const c of this.clouds.children) {
+      if (c instanceof THREE.Sprite) (c.material as THREE.SpriteMaterial).opacity = skyOpacity;
     }
   }
 

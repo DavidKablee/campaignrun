@@ -4,6 +4,7 @@ import { copy, legal, metaConfig, simConfig, contenders, rides, lagosLaunch, loa
 import { initState, step, seedRng, starForCrowd, encodeInputLog, type SimState, type InputRecord } from '@cr/sim';
 import { loadGhost, saveGhostIfBest, bytesToBase64 } from './ghostStore';
 import { computeGhostTrajectory } from './ghostReplay';
+import { computeWeather } from './weather';
 import { useAccountStore } from './accountStore';
 import { contenderShareAllowed } from './consent';
 import { GameRenderer } from './render/GameRenderer';
@@ -1123,6 +1124,10 @@ function GameScreen() {
     // front so the render loop only ever does an array lookup, no second live sim.
     const ghost = loadGhost(stateId);
     const ghostTrajectory = ghost ? computeGhostTrajectory(ghost, simConfig) : undefined;
+    const seed = (Math.random() * 0xffffffff) >>> 0;
+    // C30: decided once, here, from the real clock — sim and the renderer's World just apply
+    // the result, neither ever reads Date itself.
+    const weather = computeWeather(Date.now(), pack?.zone ?? 'SW', seed);
     const renderer = new GameRenderer({
       look: ch.look,
       outfit: ch.outfit,
@@ -1133,6 +1138,7 @@ function GameScreen() {
       dataSaver,
       debug,
       ghostTrajectory,
+      weather,
     });
     container.insertBefore(renderer.canvas, container.firstChild);
     renderer.resize();
@@ -1141,7 +1147,6 @@ function GameScreen() {
     const input = new InputController();
     input.attach(container);
 
-    const seed = (Math.random() * 0xffffffff) >>> 0;
     const inputLog: InputRecord[] = [];
     let lastLoggedBits = -1;
     const state = initState(simConfig, seedRng(seed), {
@@ -1153,6 +1158,7 @@ function GameScreen() {
       rideFreeHit: ride.freeHitPerRun,
       rideMagnetBonusMm: ride.magnetBonusMm,
       signatureRideBonusPermille: pack?.signatureRide === ride.id ? 1100 : 1000,
+      rallySaturdayMultiplierPermille: weather.isRallySaturday ? simConfig.bonuses.rallySaturdayMultiplierPermille : 1000,
     });
     // Debug-only (needs ?debug): jump to a distance in metres to inspect later Lagos segments.
     const dbgZ = Number(new URLSearchParams(window.location.search).get('debugZ'));

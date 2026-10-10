@@ -90,6 +90,8 @@ export interface SimState {
   rivalSpawnSeq: number;
   /** C28 PVC pickup: ticks remaining on the ×1.1 Crowd buff, 0 = inactive. */
   pvcBuffTicks: number;
+  /** C30: Rally Saturday ×2 Crowd window (6-9pm WAT), decided once at initState from a real clock — never read live inside sim. 1000 = ×1.0. */
+  rallySaturdayMultiplierPermille: number;
   delivered: number;
   entities: Entity[];
   events: SimEvent[];

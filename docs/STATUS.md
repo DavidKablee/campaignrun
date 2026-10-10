@@ -1,7 +1,7 @@
 # Status
 
-**Current chunk:** C29 done. **Visual & feel rebuild track (C20–C25) is complete**; mid-way through the **content breadth & client-side gameplay upgrade track (C26–C30)**. Next: C30 (weather & time-of-day).
-**Last done:** C29 — local ghost record/playback, the client-side-only slice of C12. Every run's input log is now recorded (sparse, on input change only); a clean finish that beats your stored personal-best for that state is saved to `localStorage`; your next run of that state replays it as a translucent ghost positioned from a once-precomputed trajectory (no live second sim). Friend/top-5 ghosts stay backend-gated (C12 proper). Same preview-tool rAF limitation as C28 blocked a live screenshot — verified via 7 new tests (determinism, monotonic progress, personal-best comparison) plus a live-browser check that the store round-trips through real `localStorage`.
+**Current chunk:** C30 done. **Both tracks now complete: visual & feel rebuild (C20–C25) and content breadth & client-side gameplay upgrade (C26–C30).** Next: either a real-device playtest of everything in both tracks, or resume the backend-dependent backlog (the parts of C12/C16/C18 not covered above, plus C13/C14/C15/C17/C19 in full).
+**Last done:** C30 — weather & time-of-day: NEPA night outages, harmattan haze (Dec–Jan, north), rainy-season mood (Apr–Oct, south), and a real, tested Rally Saturday ×2 Crowd window (not just a visual label — it's a `SimState` multiplier set once at `initState` from a caller-supplied flag, sim itself never reads a clock). All weather decisions are pure functions of `(time, zone, seed)` computed once per run. Real time at verification was daytime, so only the default day-mood lighting was ever actually seen on screen — the other moods are covered by 6 new unit tests with fixed date fixtures, not a screenshot.
 
 ## Status of C0–C19 (read this before touching either range)
 - **C0–C11: built and tested, breadth gap closing.** `pnpm verify` is green and the mechanics (sim, contender/ride/state loading, accounts/consent) behave correctly for what they cover. Rides: all 7 are now playable as of C26 (was Trek/Okada only). States: 9 have real content packs as of C27 (Lagos, Kano, Rivers, Anambra, Kaduna, Oyo, Borno, Delta, Kwara); 27 remain schema-ready stubs — a later-session task, same pattern each time (research + author matching `stateSchema`, `import.meta.glob` already picks it up with zero code change).
@@ -23,15 +23,16 @@
 - **C27:** state pack batch 2 (Oyo/Borno/Delta/Kwara), researched content, matches the 2 Nov calendar week. See `docs/chunks/C27.md`.
 - **C28:** 5 remaining Integrity events + core Rival Convoys (client-side slice of C16). See `docs/chunks/C28.md`.
 - **C29:** local ghost record/playback (client-side slice of C12). See `docs/chunks/C29.md`.
+- **C30:** weather & time-of-day — NEPA, harmattan, rainy season, Rally Saturday ×2 Crowd (real multiplier, tested). See `docs/chunks/C30.md`. **Content/gameplay track complete.**
 
 ## Next
-1. **C30** — weather & time-of-day (NEPA/harmattan/Rally Saturday), the last chunk in the C26–C30 track.
-3. **Owed from the visual track:** a real phone / throttled-CPU playtest per `docs/PLAYTEST.md` ("Visual & feel rebuild QA") — everything so far was verified via browser preview emulation only.
-4. Optional follow-ups noted as deferred-not-dropped in C23/C25: CC0 buildings integration, sidewalk/curb decals, LOD on far chunk slots, Lighthouse run (needs an HTTPS deploy).
-5. (Separate backlog) Phone playtest of pre-existing gameplay per the original Gate-1 checklist in `docs/PLAYTEST.md`; backend-dependent halves of C12/C16/C18, plus C13/C14/C15/C17/C19 in full, all wait on hosting + payment-provider accounts only the user can create.
+1. **Owed from both tracks, same root cause:** a real phone / throttled-CPU playtest. Every check across C20–C30 was via browser-preview emulation (desktop + mobile viewport simulation) — never an actual device. Checklist: `docs/PLAYTEST.md` ("Visual & feel rebuild QA"), plus specifically seeing the C28 rival/Integrity entities, C29's ghost, and C30's night/NEPA/harmattan/rainy moods in motion (none of those were ever actually screen-rendered this session — all verified through tests + live-browser module/logic checks instead, see each chunk's "Open" section).
+2. Optional follow-ups noted as deferred-not-dropped: CC0 buildings integration, sidewalk/curb decals, LOD on far chunk slots (C23); Contest a Venue / Face-off / Peace Salute, the 3 situational rival interactions (C28); Lighthouse run (needs an HTTPS deploy).
+3. 27 states still need content packs (C27's pattern repeats).
+4. Backend-dependent backlog: the server-verification half of C12, the ads/sponsor half of C16, the live-ops half of C18, plus C13/C14/C15/C17/C19 in full — all wait on hosting + payment-provider accounts only the user can create.
 
-## Later (C13–C19, untouched by the visual rebuild)
-Running mates, community Rally Map (C14), ledger, rivals, ads, live-ops, finale.
+## Later (backend-dependent backlog, untouched by either rebuild track)
+Server replay verification, friends/teams, community Rally Map (C14), payments ledger, ads/sponsors, live-ops, finale.
 
 ## Blockers
 - Legal: lawyer review of privacy/terms (chunk “7.5”) still required before public launch — copy is a draft gate only.
@@ -50,3 +51,5 @@ Running mates, community Rally Map (C14), ledger, rivals, ads, live-ops, finale.
 - `pnpm --filter @cr/game dev` → `/debug-assets.html` is a dev-only asset-pipeline sanity page (not built into `dist`). Useful for checking a new biome kit loads before wiring it into `world.ts`. Add `?face=1` for a close-up character/face view (light background, no world) — useful for any future `character.ts` work.
 - Flat decal meshes mounted on curved geometry (e.g. the face plate on the cranium sphere) must clear the parent surface at every covered point, not just at the decal's own center, or the parent occludes the decal's middle. Custom vertex-shader patches that need a normal should use the raw `normal` attribute, not `objectNormal` (only declared under `USE_ENVMAP`/`USE_SKINNING`) — see `docs/chunks/C21.md`.
 - `.claude/launch.json` (both at repo root and at the Claude Code primary-working-directory root) configures `preview_start` for the game dev server on port 5173.
+- **Weather (C30):** the real clock is read exactly once, in `App.tsx` right next to the run's `seed`, via `computeWeather()` in `apps/game/src/weather.ts`. Never add a `Date`/`Math.random` call anywhere else for weather/time-of-day — pass the result through props instead, same as every other run-start decision.
+- A long edit session can leave the running `pnpm dev` server's Vite HMR state stuck showing a stale error even after the on-disk files are fixed (seen once in C30, around a content-schema change) — if the console shows an error that a fresh `pnpm build` doesn't reproduce, restart the dev server (`preview_stop` + `preview_start`) before assuming it's real.

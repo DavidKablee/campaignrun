@@ -4,6 +4,7 @@ import { laneCenterMm } from '@cr/sim';
 import type { CharacterLook, OutfitChoice, SimConfig } from '@cr/content';
 import { MM_TO_UNITS, ghostMat, vcMat } from './materials';
 import type { GhostFrame } from '../ghostReplay';
+import type { WeatherContext } from '../weather';
 import { World } from './world';
 import { buildCharacter, disposeRig, poseCharacter, type CharacterRig } from './character';
 import {
@@ -51,6 +52,8 @@ export interface RenderOpts {
   debug?: boolean;
   /** C29: your personal-best run for this state, precomputed into positions-per-tick. */
   ghostTrajectory?: GhostFrame[];
+  /** C30: time-of-day/NEPA/harmattan/rainy-season, decided once from a real clock before the run starts. */
+  weather?: WeatherContext;
 }
 
 interface Follower {
@@ -119,12 +122,21 @@ export class GameRenderer {
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.camera = new THREE.PerspectiveCamera(60, 16 / 9, 0.1, 180);
 
-    this.world = new World(this.scene, opts.config, opts.landmarks);
+    this.world = new World(this.scene, opts.config, opts.landmarks, opts.weather);
     this.world.update(0, true);
 
     this.scene.add(this.playerRoot);
     this.scene.add(this.shadow);
     this.buildPlayer();
+
+    if (opts.weather?.isNepaOut) {
+      // C30: NEPA night outage — a warm phone-torch glow riding with the player, cutting
+      // through the darkened ambient/sun from World.applyWeather(). Parented to playerRoot so
+      // it tracks position for free, no per-frame work needed.
+      const torch = new THREE.PointLight('#ffd27a', 2.4, 11, 2);
+      torch.position.set(0, 1.7, 0.6);
+      this.playerRoot.add(torch);
+    }
 
     if (opts.ghostTrajectory && opts.ghostTrajectory.length > 0) {
       this.ghostMesh = new THREE.Mesh(personGeo(7, 'run'), ghostMat());

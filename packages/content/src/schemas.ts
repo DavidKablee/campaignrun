@@ -80,6 +80,8 @@ export const simConfigSchema = z.object({
     /** C28 rival convoys: flat skillCrowd bonus for an unhit pass, gentle speed knock on a bump. */
     rivalOutpaceCrowd: int.nonnegative(),
     rivalBumpSpeedPermille: int.min(0).max(1000),
+    /** C30: Rally Saturday (spec: "x2 Crowd, 6-9pm WAT"). The caller decides the window is active from a real clock; sim only applies the number. */
+    rallySaturdayMultiplierPermille: int.positive(),
   }),
   course: z.object({
     borderGateMm: int.positive(),

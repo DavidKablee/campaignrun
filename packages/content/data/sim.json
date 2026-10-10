@@ -140,7 +140,8 @@
     "pvcMultiplierPermille": 1100,
     "pvcDurationTicks": 600,
     "rivalOutpaceCrowd": 6,
-    "rivalBumpSpeedPermille": 850
+    "rivalBumpSpeedPermille": 850,
+    "rallySaturdayMultiplierPermille": 2000
   },
   "course": {
     "borderGateMm": 20000,

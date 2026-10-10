@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-10 — C30 weather & time-of-day (track complete)
+
+- Closes the content/gameplay upgrade track (C26–C30): spec section 6.8's "Nigerian rhythm" — NEPA night outages, harmattan haze (Dec-Jan, north), rainy-season mood (Apr-Oct, south), and the Rally Saturday ×2 Crowd window. All decided once per run by a single new pure function, `computeWeather(nowMs, zone, runSeed)` in `apps/game/src/weather.ts` — the only place in the whole client that reads a real clock for this; neither `packages/sim` nor the renderer's per-frame code ever does.
+- Rally Saturday is a real, tested Crowd multiplier (a new `rallySaturdayMultiplierPermille` field on `SimState`, applied in `deliverCrowd`), not just a visual label — sim only ever applies the number it's given, keeping the no-Date/no-Math.random purity rule intact.
+- `World.applyWeather()` drives a smooth day/night lighting blend, harmattan/rainy-season fog and sky-colour shifts (3 new sky gradient textures alongside the existing day one), and a NEPA outage adds a warm "phone torch" point light riding with the player.
+- 6 new tests in `apps/game/test/weather.test.ts`, 1 new sim test for the Rally Saturday multiplier — 97 tests total.
+- Both the visual & feel rebuild (C20-C25) and the content breadth & client-side gameplay upgrade (C26-C30) tracks are now complete. What's left (server replay verification, friends/teams, the community Rally Map, payments, ads, live-ops, the finale) all needs real backend infrastructure the user has to provision — see `docs/STATUS.md`.
+
 ## 2026-10-10 — C29 local ghost record/playback
 
 - The client-side-only slice of C12: a translucent ghost of your own personal-best run for a state now races alongside you on your next run there. Input is recorded sparsely (on change, not every tick) throughout a run; a clean finish beating the stored best for that state is saved to `localStorage` (`ghostStore.ts`); the next run of that state decodes and replays the log once up front into a plain per-tick position array (`ghostReplay.ts`, fully deterministic, no live second sim), which the renderer indexes by the live run's own tick counter.

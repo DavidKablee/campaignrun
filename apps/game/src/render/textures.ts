@@ -302,14 +302,39 @@ export function zoneTexture(kind: 'pickup' | 'venue') {
   });
 }
 
-export function skyTexture() {
-  return memo('sky', () => {
+/** C30: gradient stops per time-of-day/weather mood, same baked-canvas technique as the day sky. */
+const SKY_MOODS: Record<string, [number, string][]> = {
+  day: [
+    [0, '#4d9ede'],
+    [0.55, '#9fd0ee'],
+    [0.85, '#f3e6c6'],
+    [1, '#f6e3b8'],
+  ],
+  night: [
+    [0, '#0a1430'],
+    [0.5, '#162040'],
+    [0.85, '#2a2f4a'],
+    [1, '#3a3450'],
+  ],
+  harmattan: [
+    [0, '#8a8362'],
+    [0.55, '#bcae84'],
+    [0.85, '#dcc99a'],
+    [1, '#e8d8ac'],
+  ],
+  rainy: [
+    [0, '#5a6c78'],
+    [0.55, '#8498a0'],
+    [0.85, '#aebcc0'],
+    [1, '#c2cdd0'],
+  ],
+};
+
+export function skyTexture(mood: keyof typeof SKY_MOODS = 'day') {
+  return memo(`sky:${mood}`, () => {
     const { c, ctx } = canvas(8, 256);
     const g = ctx.createLinearGradient(0, 0, 0, 256);
-    g.addColorStop(0, '#4d9ede');
-    g.addColorStop(0.55, '#9fd0ee');
-    g.addColorStop(0.85, '#f3e6c6');
-    g.addColorStop(1, '#f6e3b8');
+    for (const [stop, color] of SKY_MOODS[mood]!) g.addColorStop(stop, color);
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, 8, 256);
     const t = toTex(c, false);
