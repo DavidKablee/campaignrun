@@ -1,7 +1,7 @@
 # Status
 
-**Current chunk:** C28 done. **Visual & feel rebuild track (C20–C25) is complete**; mid-way through the **content breadth & client-side gameplay upgrade track (C26–C30)**. Next: C29 (local ghost record/playback).
-**Last done:** C28 — the 5 remaining Integrity events (Result Swapper, Network Glitch, Late Materials, Spot the Fake, PVC pickup) and the core of Rival Convoys (spec §4.6), both previously unbuilt. PVC pickup is correctly a positive collectible (×1.1 Crowd buff), not a hazard — the other 4 extend the exact C06 pattern. Rivals spawn as NPC traffic (touch = small bump only, never ends a run) with an Outpace Crowd bonus for passing one clean; Contest-a-Venue/Face-off/Peace-Salute deferred (need bespoke mini-game UI, logged in `docs/chunks/C28.md`). Live in-run visual verification was blocked by the preview tool (backgrounded tab never advances rAF) — verified instead via unit tests + a live-browser construction check of every new render function.
+**Current chunk:** C29 done. **Visual & feel rebuild track (C20–C25) is complete**; mid-way through the **content breadth & client-side gameplay upgrade track (C26–C30)**. Next: C30 (weather & time-of-day).
+**Last done:** C29 — local ghost record/playback, the client-side-only slice of C12. Every run's input log is now recorded (sparse, on input change only); a clean finish that beats your stored personal-best for that state is saved to `localStorage`; your next run of that state replays it as a translucent ghost positioned from a once-precomputed trajectory (no live second sim). Friend/top-5 ghosts stay backend-gated (C12 proper). Same preview-tool rAF limitation as C28 blocked a live screenshot — verified via 7 new tests (determinism, monotonic progress, personal-best comparison) plus a live-browser check that the store round-trips through real `localStorage`.
 
 ## Status of C0–C19 (read this before touching either range)
 - **C0–C11: built and tested, breadth gap closing.** `pnpm verify` is green and the mechanics (sim, contender/ride/state loading, accounts/consent) behave correctly for what they cover. Rides: all 7 are now playable as of C26 (was Trek/Okada only). States: 9 have real content packs as of C27 (Lagos, Kano, Rivers, Anambra, Kaduna, Oyo, Borno, Delta, Kwara); 27 remain schema-ready stubs — a later-session task, same pattern each time (research + author matching `stateSchema`, `import.meta.glob` already picks it up with zero code change).
@@ -22,10 +22,10 @@
 - **C26 (content/gameplay upgrade track):** ride roster complete — all 7 rides playable with real mechanics, balance bot extended to all ride classes, missing vehicle models added. See `docs/chunks/C26.md`.
 - **C27:** state pack batch 2 (Oyo/Borno/Delta/Kwara), researched content, matches the 2 Nov calendar week. See `docs/chunks/C27.md`.
 - **C28:** 5 remaining Integrity events + core Rival Convoys (client-side slice of C16). See `docs/chunks/C28.md`.
+- **C29:** local ghost record/playback (client-side slice of C12). See `docs/chunks/C29.md`.
 
 ## Next
-1. **C29** — local ghost record/playback (client-side slice of C12).
-2. C30 (weather/time-of-day) — see the plan for the C26–C30 track.
+1. **C30** — weather & time-of-day (NEPA/harmattan/Rally Saturday), the last chunk in the C26–C30 track.
 3. **Owed from the visual track:** a real phone / throttled-CPU playtest per `docs/PLAYTEST.md` ("Visual & feel rebuild QA") — everything so far was verified via browser preview emulation only.
 4. Optional follow-ups noted as deferred-not-dropped in C23/C25: CC0 buildings integration, sidewalk/curb decals, LOD on far chunk slots, Lighthouse run (needs an HTTPS deploy).
 5. (Separate backlog) Phone playtest of pre-existing gameplay per the original Gate-1 checklist in `docs/PLAYTEST.md`; backend-dependent halves of C12/C16/C18, plus C13/C14/C15/C17/C19 in full, all wait on hosting + payment-provider accounts only the user can create.

@@ -2,7 +2,8 @@ import * as THREE from 'three';
 import type { SimState, SimEvent } from '@cr/sim';
 import { laneCenterMm } from '@cr/sim';
 import type { CharacterLook, OutfitChoice, SimConfig } from '@cr/content';
-import { MM_TO_UNITS, vcMat } from './materials';
+import { MM_TO_UNITS, ghostMat, vcMat } from './materials';
+import type { GhostFrame } from '../ghostReplay';
 import { World } from './world';
 import { buildCharacter, disposeRig, poseCharacter, type CharacterRig } from './character';
 import {
@@ -48,6 +49,8 @@ export interface RenderOpts {
   reduceMotion: boolean;
   dataSaver: boolean;
   debug?: boolean;
+  /** C29: your personal-best run for this state, precomputed into positions-per-tick. */
+  ghostTrajectory?: GhostFrame[];
 }
 
 interface Follower {
@@ -77,6 +80,7 @@ export class GameRenderer {
   private world: World;
   private playerRoot = new THREE.Group();
   private rig: CharacterRig | null = null;
+  private ghostMesh: THREE.Mesh | null = null;
   private entityMeshes = new Map<number, THREE.Object3D>();
   private followers: Follower[] = [];
   private runaways: Runaway[] = [];
@@ -121,6 +125,12 @@ export class GameRenderer {
     this.scene.add(this.playerRoot);
     this.scene.add(this.shadow);
     this.buildPlayer();
+
+    if (opts.ghostTrajectory && opts.ghostTrajectory.length > 0) {
+      this.ghostMesh = new THREE.Mesh(personGeo(7, 'run'), ghostMat());
+      this.ghostMesh.rotation.y = Math.PI;
+      this.scene.add(this.ghostMesh);
+    }
 
     if (opts.debug) {
       this.debugEl = document.createElement('div');
@@ -286,6 +296,25 @@ export class GameRenderer {
       }
     }
 
+    // C29: ghost replay — pure position lookup, no live sim running for it.
+    if (this.ghostMesh) {
+      const traj = this.opts.ghostTrajectory!;
+      const last = traj.length - 1;
+      const gPrevIdx = Math.min(prev.tick, last);
+      const gCurrIdx = Math.min(curr.tick, last);
+      if (curr.tick > last) {
+        this.ghostMesh.visible = false;
+      } else {
+        this.ghostMesh.visible = true;
+        const gp = traj[gPrevIdx]!;
+        const gc = traj[gCurrIdx]!;
+        const gLaneX = lerp(gp.laneX, gc.laneX);
+        const gZ = lerp(gp.z, gc.z);
+        const gX = (((gLaneX - 1000) * cfg.laneSpacingMm) / 1000) * MM_TO_UNITS;
+        this.ghostMesh.position.set(gX, 0, -gZ * MM_TO_UNITS);
+      }
+    }
+
     this.syncFollowers(curr.carried, pX, pZ);
     this.followers.forEach((f, i) => {
       const row = Math.floor(i / 3) + 1;
@@ -433,6 +462,7 @@ export class GameRenderer {
   dispose() {
     window.removeEventListener('resize', this.onResize);
     if (this.rig) disposeRig(this.rig);
+    if (this.ghostMesh) this.scene.remove(this.ghostMesh); // geometry/material are cached singletons — not owned here
     this.world.dispose();
     this.renderer.dispose();
     this.renderer.forceContextLoss();

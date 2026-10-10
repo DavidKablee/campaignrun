@@ -79,6 +79,25 @@ export function vcMat(): THREE.MeshToonMaterial {
   return m;
 }
 
+/** C29: translucent cyan-tinted variant of vcMat for ghost replays — same geometry, see-through. */
+export function ghostMat(): THREE.MeshToonMaterial {
+  let m = cache.get('ghost') as THREE.MeshToonMaterial | undefined;
+  if (!m) {
+    m = patchBend(
+      new THREE.MeshToonMaterial({
+        vertexColors: true,
+        gradientMap: gradientMap(),
+        color: new THREE.Color('#bfe6ff'),
+        transparent: true,
+        opacity: 0.4,
+        depthWrite: false,
+      }),
+    );
+    cache.set('ghost', m);
+  }
+  return m;
+}
+
 export function texMat(key: string, map: THREE.Texture, opts: { transparent?: boolean; alphaTest?: number } = {}) {
   let m = cache.get(`tex:${key}`) as THREE.MeshToonMaterial | undefined;
   if (!m) {

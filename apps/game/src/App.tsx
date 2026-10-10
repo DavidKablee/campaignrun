@@ -1,7 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useGameStore } from './state';
 import { copy, legal, metaConfig, simConfig, contenders, rides, lagosLaunch, loadStatePack, outfits, isRidePlayable, integrityEvent, travelCaps, type OutfitChoice, type StateDef } from '@cr/content';
-import { initState, step, seedRng, starForCrowd, type SimState } from '@cr/sim';
+import { initState, step, seedRng, starForCrowd, encodeInputLog, type SimState, type InputRecord } from '@cr/sim';
+import { loadGhost, saveGhostIfBest, bytesToBase64 } from './ghostStore';
+import { computeGhostTrajectory } from './ghostReplay';
 import { useAccountStore } from './accountStore';
 import { contenderShareAllowed } from './consent';
 import { GameRenderer } from './render/GameRenderer';
@@ -1117,6 +1119,10 @@ function GameScreen() {
 
     const debug = new URLSearchParams(window.location.search).has('debug');
     const ch = getCharacter(contender.id, outfitOverrides);
+    // C29: your personal-best ghost for this state, if one's been set — precomputed once up
+    // front so the render loop only ever does an array lookup, no second live sim.
+    const ghost = loadGhost(stateId);
+    const ghostTrajectory = ghost ? computeGhostTrajectory(ghost, simConfig) : undefined;
     const renderer = new GameRenderer({
       look: ch.look,
       outfit: ch.outfit,
@@ -1126,6 +1132,7 @@ function GameScreen() {
       reduceMotion: reduceMotion || window.matchMedia('(prefers-reduced-motion: reduce)').matches,
       dataSaver,
       debug,
+      ghostTrajectory,
     });
     container.insertBefore(renderer.canvas, container.firstChild);
     renderer.resize();
@@ -1135,6 +1142,8 @@ function GameScreen() {
     input.attach(container);
 
     const seed = (Math.random() * 0xffffffff) >>> 0;
+    const inputLog: InputRecord[] = [];
+    let lastLoggedBits = -1;
     const state = initState(simConfig, seedRng(seed), {
       capacity: ride.capacity,
       contenderId,
@@ -1198,6 +1207,18 @@ function GameScreen() {
     perkEl?.addEventListener('pointerdown', onPerk);
 
     const endRun = () => {
+      // C29: only a clean finish becomes your "personal best" ghost to race next time.
+      if (state.phase === 'finished' && stateId) {
+        saveGhostIfBest({
+          stateId,
+          seed,
+          contenderId,
+          rideId: ride.id,
+          ticks: state.tick,
+          crowd: state.displayCrowd,
+          log: bytesToBase64(encodeInputLog(inputLog)),
+        });
+      }
       useGameStore.getState().setRunResult({
         skillCrowd: state.skillCrowd,
         displayCrowd: state.displayCrowd,
@@ -1230,6 +1251,10 @@ function GameScreen() {
       while (acc >= msPerTick) {
         prev = cloneState(state);
         const bits = input.sample();
+        if (bits !== lastLoggedBits) {
+          inputLog.push({ tick: state.tick, input: bits });
+          lastLoggedBits = bits;
+        }
         step(state, bits, simConfig);
         input.postSampleClear();
 

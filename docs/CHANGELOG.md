@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-10 — C29 local ghost record/playback
+
+- The client-side-only slice of C12: a translucent ghost of your own personal-best run for a state now races alongside you on your next run there. Input is recorded sparsely (on change, not every tick) throughout a run; a clean finish beating the stored best for that state is saved to `localStorage` (`ghostStore.ts`); the next run of that state decodes and replays the log once up front into a plain per-tick position array (`ghostReplay.ts`, fully deterministic, no live second sim), which the renderer indexes by the live run's own tick counter.
+- Ghost renders as a translucent cyan silhouette (new `ghostMat()`, reusing the existing crowd-supporter geometry rather than the full character rig — cheap, no face-texture complexity) and disappears once the live run outlasts the ghost's recorded length.
+- Friend ghosts and state top-5 ghosts stay backend-gated (the rest of spec C12) — this is "my own past best" only, which needs nothing but local storage.
+- 7 new tests in `apps/game/test/ghost.test.ts` — 90 tests total.
+
 ## 2026-10-10 — C28 rival convoys + remaining 5 Integrity events
 
 - The 5 Integrity events from the spec that C06 never shipped: Result Swapper, Network Glitch, Late Materials, Spot the Fake (all extend C06's exact round-robin hazard pattern — hit = integrity loss + kind-specific effect, dodge = success) and PVC pickup, correctly implemented as the positive collectible the spec describes (×1.1 Crowd buff for 10s), not another hazard.
