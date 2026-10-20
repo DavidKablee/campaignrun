@@ -1,0 +1,20 @@
+{
+  "id": "ebonyi",
+  "name": "Ebonyi",
+  "zone": "SE",
+  "biomeKit": "farmland-river",
+  "palette": { "sky": "#8FBDE4", "fog": "#DCE8F2", "ground": "#8C9A5B", "accent": "#D4A017" },
+  "landmarks": [
+    { "name": "Abakaliki Main Market", "venueType": "market", "verified": false },
+    { "name": "Rice Mill Row", "venueType": "landmark", "verified": false },
+    { "name": "Ebonyi River Crossing", "venueType": "bridge", "verified": false },
+    { "name": "Salt Lake Waterside", "venueType": "waterfront", "verified": false },
+    { "name": "Abakaliki Township Stadium", "venueType": "stadium", "verified": false }
+  ],
+  "scenery": ["rice paddies", "quarry stone yards"],
+  "hazards": ["dust-plume", "keke-swerve", "go-slow"],
+  "signatureRide": "keke",
+  "welcomeLines": ["Nnọọ! Ebonyi is open."],
+  "farewellLine": "Daalụ, Ebonyi!",
+  "audioStem": "se-highlife"
+}

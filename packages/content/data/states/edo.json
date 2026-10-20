@@ -1,0 +1,19 @@
+{
+  "id": "edo",
+  "name": "Edo",
+  "zone": "SS",
+  "biomeKit": "rainforest",
+  "palette": { "sky": "#8CC5E2", "fog": "#DCEBDF", "ground": "#7A4B32", "accent": "#B8860B" },
+  "landmarks": [
+    { "name": "New Benin Market", "venueType": "market", "verified": false },
+    { "name": "Benin City Walls", "venueType": "landmark", "verified": false },
+    { "name": "Ring Road", "venueType": "square", "verified": false },
+    { "name": "Ogba Gardens", "venueType": "park", "verified": false },
+    { "name": "Ikpoba Hill Crossing", "venueType": "bridge", "verified": false }
+  ],
+  "scenery": ["bronze-casters' row", "red laterite banks"],
+  "hazards": ["okada-swarm", "rain-slick", "go-slow"],
+  "signatureRide": "danfo",
+  "welcomeLines": ["Obokhian! Welcome to Benin City."],
+  "audioStem": "ss-brass"
+}

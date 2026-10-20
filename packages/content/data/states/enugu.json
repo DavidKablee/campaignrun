@@ -1,0 +1,20 @@
+{
+  "id": "enugu",
+  "name": "Enugu",
+  "zone": "SE",
+  "biomeKit": "hills-plateau",
+  "palette": { "sky": "#92CCE6", "fog": "#EFE1C4", "ground": "#7A4A2E", "accent": "#3F3F3F" },
+  "landmarks": [
+    { "name": "Ogbete Main Market", "venueType": "market", "verified": false },
+    { "name": "Milken Hill", "venueType": "landmark", "verified": false },
+    { "name": "Nike Lake Waterside", "venueType": "waterfront", "verified": false },
+    { "name": "Coal Camp", "venueType": "square", "verified": false },
+    { "name": "Enugu Township Stadium", "venueType": "stadium", "verified": false }
+  ],
+  "scenery": ["coal-camp sheds", "escarpment hairpins"],
+  "hazards": ["hilly-road", "switchback", "go-slow"],
+  "signatureRide": "keke",
+  "welcomeLines": ["Nnọọ! Welcome to Coal City."],
+  "farewellLine": "Daalụ, Enugu!",
+  "audioStem": "se-highlife"
+}

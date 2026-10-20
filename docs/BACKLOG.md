@@ -36,4 +36,7 @@ Work only the current chunk (`docs/STATUS.md`). Do not start later chunks early.
 - `StudioScene`'s camera still uses a literal `0.92` eye height. C32 made the portrait camera measure the rig's bounds instead; this one was left as-is and is the same shape of bug waiting on the next proportion change.
 - `RIG.widestTopR` (C33) is maintained by hand because the radii it summarises are literals inside a `switch`. Worth deriving from the geometry if the tops list grows.
 - A properly sculpted gele. C33's is a cap plus three slabs — an improvement on the pagoda brim, not a model of the real thing.
+- Fact-check the C34 landmark names with someone who knows each state; they all carry `verified: false` and were written from general knowledge. Least certain: Gombe's `Tudun Wada Square`, Zamfara's `Damba Square`, Kebbi's `Old City Gate`, Yobe's `Gashua Dune Road`, and Edo's `Obokhian!` greeting.
+- Author `farewellLine` for the 9 states that have none (South-South, Benue, Kogi, FCT) — needs a speaker of the language, which is why C34 left them on the neutral sign rather than guessing.
+- Give `hazards` real mechanics. The vocabulary is a closed 20-value enum as of C34 and every pack uses it, but nothing in the sim or renderer reads the field yet.
 

@@ -1,0 +1,20 @@
+{
+  "id": "ekiti",
+  "name": "Ekiti",
+  "zone": "SW",
+  "biomeKit": "hills-plateau",
+  "palette": { "sky": "#92CCE6", "fog": "#EFE1C4", "ground": "#7F5B34", "accent": "#2E7D32" },
+  "landmarks": [
+    { "name": "Oja Oba Ado-Ekiti", "venueType": "market", "verified": false },
+    { "name": "Ikogosi Warm Springs", "venueType": "landmark", "verified": false },
+    { "name": "Arinta Waterfalls", "venueType": "landmark", "verified": false },
+    { "name": "Ekiti Civic Square", "venueType": "square", "verified": false },
+    { "name": "Ado-Ekiti Township Stadium", "venueType": "stadium", "verified": false }
+  ],
+  "scenery": ["hill farms", "palm-wine stalls"],
+  "hazards": ["hilly-road", "switchback", "go-slow"],
+  "signatureRide": "okada",
+  "welcomeLines": ["Ẹ káàbọ̀ sí Èkìtì!"],
+  "farewellLine": "Ẹ ṣeun, Ekiti!",
+  "audioStem": "sw-fuji"
+}

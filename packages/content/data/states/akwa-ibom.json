@@ -1,0 +1,19 @@
+{
+  "id": "akwa-ibom",
+  "name": "Akwa Ibom",
+  "zone": "SS",
+  "biomeKit": "rainforest",
+  "palette": { "sky": "#86BBD8", "fog": "#DCEBDF", "ground": "#3F6B3A", "accent": "#D98324" },
+  "landmarks": [
+    { "name": "Itam Market", "venueType": "market", "verified": false },
+    { "name": "Ibom Plaza", "venueType": "square", "verified": false },
+    { "name": "Ibeno Beach", "venueType": "waterfront", "verified": false },
+    { "name": "Ikot Ekpene Raffia Row", "venueType": "landmark", "verified": false },
+    { "name": "Uyo Township Stadium", "venueType": "stadium", "verified": false }
+  ],
+  "scenery": ["raffia palm stands", "coastal rain squalls"],
+  "hazards": ["rain-slick", "keke-swerve", "go-slow"],
+  "signatureRide": "keke",
+  "welcomeLines": ["Welcome to Uyo — Akwa Ibom is open."],
+  "audioStem": "ss-brass"
+}

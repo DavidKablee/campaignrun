@@ -1,0 +1,20 @@
+{
+  "id": "ondo",
+  "name": "Ondo",
+  "zone": "SW",
+  "biomeKit": "rainforest",
+  "palette": { "sky": "#8CC5E2", "fog": "#DCEBDF", "ground": "#3F6B3A", "accent": "#D98324" },
+  "landmarks": [
+    { "name": "Oja Oba Akure", "venueType": "market", "verified": false },
+    { "name": "Idanre Hills", "venueType": "landmark", "verified": false },
+    { "name": "Igbokoda Waterside", "venueType": "waterfront", "verified": false },
+    { "name": "Owena River Crossing", "venueType": "bridge", "verified": false },
+    { "name": "Akure Township Stadium", "venueType": "stadium", "verified": false }
+  ],
+  "scenery": ["cocoa belt", "hill staircase"],
+  "hazards": ["hilly-road", "rain-slick", "go-slow"],
+  "signatureRide": "okada",
+  "welcomeLines": ["Ẹ káàbọ̀ sí Oǹdó!"],
+  "farewellLine": "Ẹ ṣeun, Ondo!",
+  "audioStem": "sw-fuji"
+}

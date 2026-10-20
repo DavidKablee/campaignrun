@@ -15,5 +15,6 @@
   "hazards": ["dust-plume", "go-slow", "cart-weave"],
   "signatureRide": "hilux",
   "welcomeLines": ["Barka da zuwa Kaduna!"],
+  "farewellLine": "Na gode, Kaduna!",
   "audioStem": "nw-kalangu"
 }

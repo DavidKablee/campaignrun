@@ -16,6 +16,7 @@ import {
   stations,
   integrityEvents,
   stateSchema,
+  hazardSchema,
   travelCaps,
   legal,
   venueTypeSchema,
@@ -156,6 +157,47 @@ describe('JSON-only state addition', () => {
     }
     expect(travelCaps.maxRunsPerDay).toBeGreaterThan(0);
   });
+  it('C34: every state the calendar unlocks has a pack behind it', async () => {
+    // Nine states had packs and 28 were stubs, so every unlock week from 9 Nov
+    // would have opened onto nothing. This is the invariant, not the batch lists
+    // below it: a state added to the calendar without content fails here.
+    const scheduled = calendar.unlocks.flatMap((u) => u.states);
+    expect(shippedStatePacks().sort()).toEqual([...scheduled].sort());
+
+    const rideIds = new Set(rides.map((r) => r.id));
+    for (const id of scheduled) {
+      const pack = await loadStatePack(id);
+      const row = stateIndex.find((s) => s.id === id)!;
+      expect(pack.name, id).toBe(row.name);
+      expect(pack.zone, id).toBe(row.zone);
+      // The map screen reads the index and the run reads the pack; if these drift
+      // the radio changes station when the run starts.
+      expect(pack.audioStem, id).toBe(row.audioStem);
+      expect(rideIds.has(pack.signatureRide), `${id}: ${pack.signatureRide}`).toBe(true);
+      expect(pack.landmarks, id).toHaveLength(5);
+      expect(pack.welcomeLines.length, id).toBeGreaterThan(0);
+    }
+  });
+
+  it('C34: no landmark is a palace or a throne (spec amendment A8)', async () => {
+    // venueTypeSchema already has no 'palace' member; this catches one smuggled in
+    // under another venueType, which is the way it would actually happen.
+    for (const id of shippedStatePacks()) {
+      const pack = await loadStatePack(id);
+      for (const l of pack.landmarks) {
+        expect(l.name, `${id}: ${l.name}`).not.toMatch(/\b(palace|throne|emir'?s? court)\b/i);
+      }
+    }
+  });
+
+  it('C34: hazards stay a closed vocabulary', () => {
+    // Guards the schema itself: if hazards go back to z.string() the 38 packs are
+    // free to invent synonyms again, and whoever implements them inherits the mess.
+    expect(hazardSchema.safeParse('go-slow').success).toBe(true);
+    expect(hazardSchema.safeParse('dust').success).toBe(false);
+    expect(hazardSchema.safeParse('traffic').success).toBe(false);
+  });
+
   it('ships the 2 Nov week (C27 batch) as JSON-only packs, no palace venues, no dead signatureRide', async () => {
     expect(shippedStatePacks()).toEqual(expect.arrayContaining(['oyo', 'borno', 'delta', 'kwara']));
     for (const id of ['oyo', 'borno', 'delta', 'kwara'] as const) {

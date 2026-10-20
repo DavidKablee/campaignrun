@@ -1,0 +1,19 @@
+{
+  "id": "cross-river",
+  "name": "Cross River",
+  "zone": "SS",
+  "biomeKit": "rainforest",
+  "palette": { "sky": "#8CC5E2", "fog": "#DCEBDF", "ground": "#3F6B3A", "accent": "#E0319A" },
+  "landmarks": [
+    { "name": "Marina Waterfront", "venueType": "waterfront", "verified": false },
+    { "name": "Carnival Route", "venueType": "square", "verified": false },
+    { "name": "Watt Market", "venueType": "market", "verified": false },
+    { "name": "Tinapa Grounds", "venueType": "landmark", "verified": false },
+    { "name": "Calabar Township Stadium", "venueType": "stadium", "verified": false }
+  ],
+  "scenery": ["carnival floats", "rainforest canopy"],
+  "hazards": ["crowd-surge", "rain-slick", "go-slow"],
+  "signatureRide": "danfo",
+  "welcomeLines": ["Welcome to Calabar — carnival city!"],
+  "audioStem": "ss-brass"
+}

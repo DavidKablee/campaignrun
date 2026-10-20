@@ -1,0 +1,20 @@
+{
+  "id": "sokoto",
+  "name": "Sokoto",
+  "zone": "NW",
+  "biomeKit": "harmattan-dune",
+  "palette": { "sky": "#EBD3A0", "fog": "#F6EAD2", "ground": "#C79B63", "accent": "#9C6B3C" },
+  "landmarks": [
+    { "name": "Sokoto Central Market", "venueType": "market", "verified": false },
+    { "name": "Kofar Rini Gate", "venueType": "landmark", "verified": false },
+    { "name": "Sokoto River Crossing", "venueType": "bridge", "verified": false },
+    { "name": "Takalmawa Leather Row", "venueType": "square", "verified": false },
+    { "name": "Sokoto Township Stadium", "venueType": "stadium", "verified": false }
+  ],
+  "scenery": ["deleb palm line", "tannery yards"],
+  "hazards": ["dust-storm", "heat-shimmer", "go-slow"],
+  "signatureRide": "okada",
+  "welcomeLines": ["Barka da zuwa Sakkwato!"],
+  "farewellLine": "Na gode, Sokoto!",
+  "audioStem": "nw-kalangu"
+}

@@ -15,5 +15,6 @@
   "hazards": ["dust-plume", "cart-weave", "go-slow"],
   "signatureRide": "keke",
   "welcomeLines": ["Barka da zuwa Kano!"],
+  "farewellLine": "Na gode, Kano!",
   "audioStem": "nw-kalangu"
 }

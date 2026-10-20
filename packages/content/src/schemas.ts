@@ -147,6 +147,41 @@ export type Ride = z.infer<typeof rideSchema>;
 /** Palaces/thrones are scenery only, never a venue (spec amendment A8). */
 export const venueTypeSchema = z.enum(['market', 'stadium', 'square', 'park', 'bridge', 'landmark', 'waterfront']);
 
+/**
+ * Closed vocabulary (C34). Hazards are flavour data today — nothing in the sim or
+ * the renderer reads them yet — but they are the shortlist of road events the game
+ * is meant to grow, and 38 packs free-typing their own strings would hand whoever
+ * implements them 40 one-off synonyms to triage. Adding a hazard is deliberate:
+ * add it here first.
+ */
+export const hazardSchema = z.enum([
+  // traffic
+  'go-slow',
+  'keke-swerve',
+  'okada-swarm',
+  'cart-weave',
+  'cattle-crossing',
+  'roundabout-maze',
+  'market-spill',
+  'crowd-surge',
+  // water
+  'flash-flood',
+  'flood-sheet',
+  'creek-crossing',
+  'rain-slick',
+  'river-fog',
+  // dry air
+  'dust-plume',
+  'dust-storm',
+  'heat-shimmer',
+  'low-visibility',
+  // terrain
+  'hilly-road',
+  'rocky-ridge',
+  'switchback',
+]);
+export type Hazard = z.infer<typeof hazardSchema>;
+
 export const stateSchema = z.object({
   id: z.string().regex(/^[a-z0-9-]+$/),
   name: z.string(),
@@ -166,9 +201,15 @@ export const stateSchema = z.object({
     .array(z.object({ name: z.string(), venueType: venueTypeSchema, verified: z.boolean() }))
     .length(5),
   scenery: z.array(z.string()).default([]),
-  hazards: z.array(z.string()),
+  hazards: z.array(hazardSchema).min(1),
   signatureRide: z.string(),
   welcomeLines: z.array(z.string()).min(1),
+  /**
+   * Shown on the finish gantry. Optional: a farewell is only worth printing in a
+   * language the state actually speaks, and for the states whose languages are not
+   * represented here the sign falls back to a neutral line rather than guessing.
+   */
+  farewellLine: z.string().min(1).optional(),
   audioStem: z.string(),
 });
 export type StateDef = z.infer<typeof stateSchema>;

@@ -1,0 +1,19 @@
+{
+  "id": "bayelsa",
+  "name": "Bayelsa",
+  "zone": "SS",
+  "biomeKit": "creek-delta",
+  "palette": { "sky": "#7FC2CE", "fog": "#C9E4E6", "ground": "#44624E", "accent": "#E0A24A" },
+  "landmarks": [
+    { "name": "Swali Market", "venueType": "market", "verified": false },
+    { "name": "Nembe Creek Waterside", "venueType": "waterfront", "verified": false },
+    { "name": "Oxbow Lake Park", "venueType": "park", "verified": false },
+    { "name": "Kolo Creek Crossing", "venueType": "bridge", "verified": false },
+    { "name": "Yenagoa Township Stadium", "venueType": "stadium", "verified": false }
+  ],
+  "scenery": ["mangrove channels", "gas-flare glow"],
+  "hazards": ["flood-sheet", "creek-crossing", "go-slow"],
+  "signatureRide": "keke",
+  "welcomeLines": ["Welcome to Yenagoa — Bayelsa is open."],
+  "audioStem": "ss-brass"
+}

@@ -15,5 +15,6 @@
   "hazards": ["go-slow", "keke-swerve", "flash-flood"],
   "signatureRide": "danfo",
   "welcomeLines": ["Ẹ káàbọ̀ sí Èkó!"],
+  "farewellLine": "Ẹ ṣeun, Èkó!",
   "audioStem": "sw-fuji"
 }

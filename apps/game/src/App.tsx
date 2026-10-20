@@ -15,7 +15,7 @@ import { getCharacter } from './characters';
 import { useContenderStore } from './contenderStore';
 import { buildExportBundle, deleteAllLocalData, downloadExport } from './dataExport';
 import { CampaignMap } from './ui/CampaignMap';
-import { legAt, stationFor } from './trail';
+import { finishSign, gateSign, legAt, stationFor } from './trail';
 import { Showcase } from './render/showcase';
 import { todaysChallenge } from './daily';
 import { runModifiers } from './meta';
@@ -1126,6 +1126,14 @@ function GameScreen() {
   );
   const audioStem = pack?.audioStem ?? lagosLaunch.audioStem;
   const gateLabel = `${pack?.name ?? 'Lagos'} gate`;
+  // C34: the roadside signs read from the pack. They were literals in the
+  // renderer, so every state greeted the player with "WELCOME TO LAGOS".
+  const stateName = pack?.name ?? 'Lagos';
+  const gate = useMemo(
+    () => gateSign(stateName, pack?.welcomeLines[0] ?? lagosLaunch.welcomeLine),
+    [stateName, pack],
+  );
+  const finish = useMemo(() => finishSign(stateName, pack?.farewellLine), [stateName, pack]);
   useEffect(() => {
     if (!containerRef.current || !pack) return;
     const container = containerRef.current;
@@ -1150,6 +1158,8 @@ function GameScreen() {
       look: ch.look,
       outfit: ch.outfit,
       landmarks,
+      gate,
+      finish,
       rideId: ride.id,
       config: simConfig,
       reduceMotion: reduceMotion || window.matchMedia('(prefers-reduced-motion: reduce)').matches,
@@ -1357,6 +1367,8 @@ function GameScreen() {
     landmarks,
     audioStem,
     gateLabel,
+    gate,
+    finish,
     contender.id,
     outfitOverrides,
     ride.id,

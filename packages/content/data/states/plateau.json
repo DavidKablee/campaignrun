@@ -1,0 +1,20 @@
+{
+  "id": "plateau",
+  "name": "Plateau",
+  "zone": "NC",
+  "biomeKit": "hills-plateau",
+  "palette": { "sky": "#A7D8EE", "fog": "#E3E9DC", "ground": "#9A5B38", "accent": "#5E8A46" },
+  "landmarks": [
+    { "name": "Jos Main Market", "venueType": "market", "verified": false },
+    { "name": "Shere Hills", "venueType": "landmark", "verified": false },
+    { "name": "Rayfield Lakeside", "venueType": "waterfront", "verified": false },
+    { "name": "Wildlife Park Gate", "venueType": "park", "verified": false },
+    { "name": "Jos Township Stadium", "venueType": "stadium", "verified": false }
+  ],
+  "scenery": ["tin-mine ponds", "rock domes"],
+  "hazards": ["rocky-ridge", "low-visibility", "go-slow"],
+  "signatureRide": "hilux",
+  "welcomeLines": ["Barka da zuwa Jos!"],
+  "farewellLine": "Na gode, Plateau!",
+  "audioStem": "nc-drums"
+}

@@ -1,0 +1,20 @@
+{
+  "id": "kebbi",
+  "name": "Kebbi",
+  "zone": "NW",
+  "biomeKit": "farmland-river",
+  "palette": { "sky": "#A9C9DE", "fog": "#EFE6CC", "ground": "#7E8E58", "accent": "#D4A017" },
+  "landmarks": [
+    { "name": "Birnin Kebbi Central Market", "venueType": "market", "verified": false },
+    { "name": "Argungu Fishing Waterside", "venueType": "waterfront", "verified": false },
+    { "name": "Rima River Crossing", "venueType": "bridge", "verified": false },
+    { "name": "Old City Gate", "venueType": "landmark", "verified": false },
+    { "name": "Kebbi Township Stadium", "venueType": "stadium", "verified": false }
+  ],
+  "scenery": ["fadama rice flats", "fishing calabashes"],
+  "hazards": ["river-fog", "cart-weave", "go-slow"],
+  "signatureRide": "keke",
+  "welcomeLines": ["Barka da zuwa Kebbi!"],
+  "farewellLine": "Na gode, Kebbi!",
+  "audioStem": "nw-kalangu"
+}

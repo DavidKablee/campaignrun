@@ -1,0 +1,20 @@
+{
+  "id": "adamawa",
+  "name": "Adamawa",
+  "zone": "NE",
+  "biomeKit": "hills-plateau",
+  "palette": { "sky": "#92CCE6", "fog": "#EFE1C4", "ground": "#8A6038", "accent": "#5E8A46" },
+  "landmarks": [
+    { "name": "Jimeta Modern Market", "venueType": "market", "verified": false },
+    { "name": "Sukur Hill Terraces", "venueType": "landmark", "verified": false },
+    { "name": "Numan Bridge", "venueType": "bridge", "verified": false },
+    { "name": "Kiri Lakeside", "venueType": "waterfront", "verified": false },
+    { "name": "Yola Township Stadium", "venueType": "stadium", "verified": false }
+  ],
+  "scenery": ["terraced hillsides", "mountain haze"],
+  "hazards": ["switchback", "rocky-ridge", "go-slow"],
+  "signatureRide": "hilux",
+  "welcomeLines": ["Barka da zuwa Adamawa!"],
+  "farewellLine": "Na gode, Adamawa!",
+  "audioStem": "ne-algaita"
+}

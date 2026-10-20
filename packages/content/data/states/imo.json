@@ -1,0 +1,20 @@
+{
+  "id": "imo",
+  "name": "Imo",
+  "zone": "SE",
+  "biomeKit": "rainforest",
+  "palette": { "sky": "#8CC5E2", "fog": "#DCEBDF", "ground": "#3F6B3A", "accent": "#D98324" },
+  "landmarks": [
+    { "name": "Relief Market", "venueType": "market", "verified": false },
+    { "name": "Oguta Lake", "venueType": "waterfront", "verified": false },
+    { "name": "Mbari Cultural Centre", "venueType": "landmark", "verified": false },
+    { "name": "Wetheral Square", "venueType": "square", "verified": false },
+    { "name": "Owerri Township Stadium", "venueType": "stadium", "verified": false }
+  ],
+  "scenery": ["palm belt", "lake jetty"],
+  "hazards": ["rain-slick", "keke-swerve", "go-slow"],
+  "signatureRide": "keke",
+  "welcomeLines": ["Nnọọ! Welcome to Owerri."],
+  "farewellLine": "Daalụ, Imo!",
+  "audioStem": "se-highlife"
+}

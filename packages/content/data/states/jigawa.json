@@ -1,0 +1,20 @@
+{
+  "id": "jigawa",
+  "name": "Jigawa",
+  "zone": "NW",
+  "biomeKit": "sahel-savanna",
+  "palette": { "sky": "#E8C48A", "fog": "#F3E2C5", "ground": "#9E7B4F", "accent": "#C45C26" },
+  "landmarks": [
+    { "name": "Dutse Central Market", "venueType": "market", "verified": false },
+    { "name": "Birnin Kudu Rock Shelters", "venueType": "landmark", "verified": false },
+    { "name": "Hadejia Wetlands", "venueType": "waterfront", "verified": false },
+    { "name": "Kazaure Gate", "venueType": "square", "verified": false },
+    { "name": "Dutse Township Stadium", "venueType": "stadium", "verified": false }
+  ],
+  "scenery": ["inselberg rocks", "wetland reed beds"],
+  "hazards": ["dust-plume", "cart-weave", "go-slow"],
+  "signatureRide": "keke",
+  "welcomeLines": ["Barka da zuwa Jigawa!"],
+  "farewellLine": "Na gode, Jigawa!",
+  "audioStem": "nw-kalangu"
+}

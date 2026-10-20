@@ -15,5 +15,6 @@
   "hazards": ["market-spill", "go-slow", "keke-swerve"],
   "signatureRide": "keke",
   "welcomeLines": ["Nnọọ! Anambra is open."],
+  "farewellLine": "Daalụ, Anambra!",
   "audioStem": "se-highlife"
 }

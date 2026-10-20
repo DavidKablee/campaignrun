@@ -1,0 +1,20 @@
+{
+  "id": "osun",
+  "name": "Osun",
+  "zone": "SW",
+  "biomeKit": "rainforest",
+  "palette": { "sky": "#8CC5E2", "fog": "#DCEBDF", "ground": "#3F6B3A", "accent": "#1F7A4C" },
+  "landmarks": [
+    { "name": "Osun-Osogbo Sacred Grove", "venueType": "landmark", "verified": false },
+    { "name": "Oja Oba Osogbo", "venueType": "market", "verified": false },
+    { "name": "Osun River Crossing", "venueType": "bridge", "verified": false },
+    { "name": "Ife Cultural Ground", "venueType": "square", "verified": false },
+    { "name": "Osogbo Township Stadium", "venueType": "stadium", "verified": false }
+  ],
+  "scenery": ["grove canopy", "indigo dye pots"],
+  "hazards": ["okada-swarm", "rain-slick", "go-slow"],
+  "signatureRide": "okada",
+  "welcomeLines": ["Ẹ káàbọ̀ sí Ọ̀sun!"],
+  "farewellLine": "Ẹ ṣeun, Osun!",
+  "audioStem": "sw-fuji"
+}

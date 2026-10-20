@@ -1,0 +1,20 @@
+{
+  "id": "ogun",
+  "name": "Ogun",
+  "zone": "SW",
+  "biomeKit": "rainforest",
+  "palette": { "sky": "#8CC5E2", "fog": "#DCEBDF", "ground": "#6B5B3E", "accent": "#D98324" },
+  "landmarks": [
+    { "name": "Olumo Rock", "venueType": "landmark", "verified": false },
+    { "name": "Kuto Market", "venueType": "market", "verified": false },
+    { "name": "Ogun River Crossing", "venueType": "bridge", "verified": false },
+    { "name": "Itoku Adire Row", "venueType": "square", "verified": false },
+    { "name": "Abeokuta Sports Ground", "venueType": "stadium", "verified": false }
+  ],
+  "scenery": ["granite outcrops", "adire dye yards"],
+  "hazards": ["rocky-ridge", "okada-swarm", "go-slow"],
+  "signatureRide": "danfo",
+  "welcomeLines": ["Ẹ káàbọ̀ sí Ògùn!"],
+  "farewellLine": "Ẹ ṣeun, Ogun!",
+  "audioStem": "sw-fuji"
+}

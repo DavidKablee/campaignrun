@@ -1,0 +1,20 @@
+{
+  "id": "taraba",
+  "name": "Taraba",
+  "zone": "NE",
+  "biomeKit": "hills-plateau",
+  "palette": { "sky": "#A2D4E8", "fog": "#EFE1C4", "ground": "#5E7A43", "accent": "#3F7D4F" },
+  "landmarks": [
+    { "name": "Jalingo Main Market", "venueType": "market", "verified": false },
+    { "name": "Mambilla Plateau Road", "venueType": "landmark", "verified": false },
+    { "name": "Gashaka Gumti Gate", "venueType": "park", "verified": false },
+    { "name": "Benue River Waterside", "venueType": "waterfront", "verified": false },
+    { "name": "Jalingo Township Stadium", "venueType": "stadium", "verified": false }
+  ],
+  "scenery": ["tea terraces", "highland mist"],
+  "hazards": ["switchback", "low-visibility", "go-slow"],
+  "signatureRide": "hilux",
+  "welcomeLines": ["Barka da zuwa Taraba!"],
+  "farewellLine": "Na gode, Taraba!",
+  "audioStem": "ne-algaita"
+}

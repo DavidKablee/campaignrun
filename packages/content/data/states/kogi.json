@@ -1,0 +1,19 @@
+{
+  "id": "kogi",
+  "name": "Kogi",
+  "zone": "NC",
+  "biomeKit": "farmland-river",
+  "palette": { "sky": "#8FBDE4", "fog": "#DCE8F2", "ground": "#7E8E58", "accent": "#D4A017" },
+  "landmarks": [
+    { "name": "Lokoja Confluence Point", "venueType": "waterfront", "verified": false },
+    { "name": "Mount Patti", "venueType": "landmark", "verified": false },
+    { "name": "Kabba Market", "venueType": "market", "verified": false },
+    { "name": "Felele Roundabout", "venueType": "square", "verified": false },
+    { "name": "Lokoja Township Stadium", "venueType": "stadium", "verified": false }
+  ],
+  "scenery": ["confluence sandbars", "steel-works silhouette"],
+  "hazards": ["river-fog", "hilly-road", "go-slow"],
+  "signatureRide": "hilux",
+  "welcomeLines": ["Welcome to Lokoja — the confluence city."],
+  "audioStem": "nc-drums"
+}

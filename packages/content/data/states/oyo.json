@@ -15,5 +15,6 @@
   "hazards": ["okada-swarm", "hilly-road", "go-slow"],
   "signatureRide": "okada",
   "welcomeLines": ["Ẹ káàbọ̀ sí Oyo!"],
+  "farewellLine": "Ẹ ṣeun, Oyo!",
   "audioStem": "sw-fuji"
 }

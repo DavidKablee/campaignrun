@@ -53,6 +53,23 @@ export function campaignRows(now = Date.now()): CampaignRow[] {
   return rows;
 }
 
+/**
+ * Copy for the two roadside signs. Lived as string literals inside GameRenderer
+ * until C34 made 28 more states playable and every one of them opened with
+ * "WELCOME TO LAGOS" over the gate and a Yoruba thank-you at the finish.
+ *
+ * The finish sub comes from the pack's own `farewellLine` where it has one. A
+ * Yoruba farewell is right in Lagos and wrong in Kano, so states whose language
+ * is not represented in the packs get a neutral line instead of a guess.
+ */
+export function gateSign(stateName: string, welcomeLine: string): { label: string; sub: string } {
+  return { label: `WELCOME TO ${stateName.toUpperCase()}`, sub: welcomeLine };
+}
+
+export function finishSign(stateName: string, farewellLine?: string): { label: string; sub: string } {
+  return { label: 'FINISH', sub: farewellLine ?? `${stateName} · Grand Rally` };
+}
+
 export function stationFor(stem: string) {
   return stations.find((s) => s.id === stem) ?? stations[0]!;
 }

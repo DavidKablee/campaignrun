@@ -505,7 +505,7 @@ export function buildGate(label: string, sub: string): THREE.Group {
   return g;
 }
 
-export function buildFinish(): THREE.Group {
+export function buildFinish(label = 'FINISH', sub = 'Grand Rally'): THREE.Group {
   const g = new THREE.Group();
   const geo = cached('finish', () => {
     const b = new GeoBuilder();
@@ -516,7 +516,7 @@ export function buildFinish(): THREE.Group {
     return b.build();
   });
   g.add(new THREE.Mesh(geo, vcMat()));
-  const s = sign('FINISH', '#f5c518', '#161616', 10.4, 2.4, 'Ẹ ṣeun, Lagos', 1024, 256);
+  const s = sign(label, '#f5c518', '#161616', 10.4, 2.4, sub, 1024, 256);
   s.position.set(0, 4.8, 0.3);
   g.add(s);
   return g;

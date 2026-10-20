@@ -1,0 +1,20 @@
+{
+  "id": "yobe",
+  "name": "Yobe",
+  "zone": "NE",
+  "biomeKit": "harmattan-dune",
+  "palette": { "sky": "#EBD3A0", "fog": "#F6EAD2", "ground": "#C79B63", "accent": "#9C6B3C" },
+  "landmarks": [
+    { "name": "Damaturu Central Market", "venueType": "market", "verified": false },
+    { "name": "Potiskum Cattle Market", "venueType": "market", "verified": false },
+    { "name": "Gashua Dune Road", "venueType": "landmark", "verified": false },
+    { "name": "Komadugu Waterside", "venueType": "waterfront", "verified": false },
+    { "name": "Damaturu Township Stadium", "venueType": "stadium", "verified": false }
+  ],
+  "scenery": ["shifting dune line", "cattle kraals"],
+  "hazards": ["dust-storm", "cattle-crossing", "go-slow"],
+  "signatureRide": "hilux",
+  "welcomeLines": ["Barka da zuwa Yobe!"],
+  "farewellLine": "Na gode, Yobe!",
+  "audioStem": "ne-algaita"
+}

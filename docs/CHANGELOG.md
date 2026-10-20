@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-20 — C34 the remaining 28 state packs
+
+- Every state the calendar unlocks now has content behind it: 28 packs authored (9 Nov through the 4 Jan finale), each with five landmarks, palette, scenery, hazards, signature ride and a welcome line. No landmark is named after a person and none is a palace. `hazards` became a closed enum, and `farewellLine` is a new optional field so a state only gets a farewell in a language it actually speaks. Playing a non-Lagos state for the first time exposed a bug the packs had been hiding: the border gate and finish line were hard-coded to "WELCOME TO LAGOS" and a Yoruba thank-you — both are now read from the pack.
+
 ## 2026-10-20 — C33 characters and city read as 3D
 
 - The flatness was lighting: hemisphere light is not put through the toon ramp, so a 1.25/1.35 floor already saturated the ramp's top step and nothing could have a shadow side. Rebalanced both rigs, added real shadow maps and contact shadows to the studio and portrait bakes. Silhouette fixes: arms now sit outboard of the shoulders (they were inside the torso, so same-coloured tops rendered a character with no arms), shoulder yoke, visible neck, and headwear scaled to the head it sits on. Also fixed an intermittent blank-portrait bug — the picker created two WebGL contexts in one tick and browsers drop the oldest past the cap.

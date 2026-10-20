@@ -1,0 +1,20 @@
+{
+  "id": "bauchi",
+  "name": "Bauchi",
+  "zone": "NE",
+  "biomeKit": "sahel-savanna",
+  "palette": { "sky": "#E8C48A", "fog": "#F3E2C5", "ground": "#A67C52", "accent": "#C45C26" },
+  "landmarks": [
+    { "name": "Bauchi Central Market", "venueType": "market", "verified": false },
+    { "name": "Yankari Reserve Gate", "venueType": "park", "verified": false },
+    { "name": "Wikki Warm Spring", "venueType": "waterfront", "verified": false },
+    { "name": "Railway Quarters Square", "venueType": "square", "verified": false },
+    { "name": "Bauchi Township Stadium", "venueType": "stadium", "verified": false }
+  ],
+  "scenery": ["game-reserve escarpment", "baobab line"],
+  "hazards": ["dust-plume", "cattle-crossing", "go-slow"],
+  "signatureRide": "hilux",
+  "welcomeLines": ["Barka da zuwa Bauchi!"],
+  "farewellLine": "Na gode, Bauchi!",
+  "audioStem": "ne-algaita"
+}

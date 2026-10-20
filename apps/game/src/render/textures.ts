@@ -270,7 +270,15 @@ export function signTexture(text: string, bg: string, fg: string, w = 512, h = 1
     }
     ctx.fillText(text, w / 2, sub ? h * 0.38 : h / 2);
     if (sub) {
-      ctx.font = `700 ${h * 0.2}px Arial, sans-serif`;
+      // Shrink to fit, same as the label above. The sub used to be a fixed size,
+      // which was safe only while it was the one hard-coded Lagos string; state
+      // welcome lines vary from 15 to 40 characters.
+      let subSize = h * 0.2;
+      ctx.font = `700 ${subSize}px Arial, sans-serif`;
+      while (ctx.measureText(sub).width > w - 60 && subSize > 8) {
+        subSize -= 2;
+        ctx.font = `700 ${subSize}px Arial, sans-serif`;
+      }
       ctx.fillText(sub, w / 2, h * 0.76);
     }
     return toTex(c, false);

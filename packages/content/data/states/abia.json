@@ -1,0 +1,20 @@
+{
+  "id": "abia",
+  "name": "Abia",
+  "zone": "SE",
+  "biomeKit": "rainforest",
+  "palette": { "sky": "#8CC5E2", "fog": "#DCEBDF", "ground": "#3F6B3A", "accent": "#D98324" },
+  "landmarks": [
+    { "name": "Ariaria International Market", "venueType": "market", "verified": false },
+    { "name": "Ngwa Road Square", "venueType": "square", "verified": false },
+    { "name": "Azumini Blue River", "venueType": "waterfront", "verified": false },
+    { "name": "Aba River Crossing", "venueType": "bridge", "verified": false },
+    { "name": "Umuahia Township Stadium", "venueType": "stadium", "verified": false }
+  ],
+  "scenery": ["shoemakers' sheds", "tailoring rows"],
+  "hazards": ["market-spill", "keke-swerve", "go-slow"],
+  "signatureRide": "keke",
+  "welcomeLines": ["Nnọọ! Aba is open for business."],
+  "farewellLine": "Daalụ, Abia!",
+  "audioStem": "se-highlife"
+}

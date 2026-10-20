@@ -2,6 +2,7 @@ import { initState, seedRng, type SimState } from '@cr/sim';
 import { simConfig, lagosLaunch, rides } from '@cr/content';
 import type { CharacterLook, OutfitChoice } from '@cr/content';
 import { GameRenderer } from './GameRenderer';
+import { finishSign, gateSign } from '../trail';
 
 /**
  * Splash hero: the real Lagos world driven by a scripted autopilot.
@@ -32,6 +33,9 @@ export class Showcase {
       rideId: ride.id,
       config: simConfig,
       landmarks: lagosLaunch.landmarks,
+      // The splash hero is always the Lagos road, by design.
+      gate: gateSign('Lagos', lagosLaunch.welcomeLine),
+      finish: finishSign('Lagos'),
       reduceMotion,
       dataSaver,
     });

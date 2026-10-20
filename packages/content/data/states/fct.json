@@ -1,0 +1,19 @@
+{
+  "id": "fct",
+  "name": "FCT",
+  "zone": "FCT",
+  "biomeKit": "capital-city",
+  "palette": { "sky": "#9CC9E8", "fog": "#DDE4EA", "ground": "#6E7480", "accent": "#E6B422" },
+  "landmarks": [
+    { "name": "Wuse Market", "venueType": "market", "verified": false },
+    { "name": "Central Boulevard", "venueType": "square", "verified": false },
+    { "name": "Jabi Lake Waterfront", "venueType": "waterfront", "verified": false },
+    { "name": "Millennium Park", "venueType": "park", "verified": false },
+    { "name": "Abuja National Stadium", "venueType": "stadium", "verified": false }
+  ],
+  "scenery": ["granite inselbergs on the skyline", "boulevard flagpoles"],
+  "hazards": ["roundabout-maze", "crowd-surge", "go-slow"],
+  "signatureRide": "grand-convoy",
+  "welcomeLines": ["Welcome to the Capital. Final week."],
+  "audioStem": "fct-mix"
+}

@@ -12,7 +12,7 @@
     { "name": "Test Bridge", "venueType": "bridge", "verified": false }
   ],
   "scenery": [],
-  "hazards": ["dust"],
+  "hazards": ["dust-plume"],
   "signatureRide": "keke",
   "welcomeLines": ["Welcome o!"],
   "audioStem": "nc-drums"

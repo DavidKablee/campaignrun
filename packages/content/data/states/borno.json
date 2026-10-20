@@ -15,5 +15,6 @@
   "hazards": ["dust-storm", "low-visibility", "go-slow"],
   "signatureRide": "okada",
   "welcomeLines": ["Barka da zuwa Borno!"],
+  "farewellLine": "Na gode, Borno!",
   "audioStem": "ne-algaita"
 }

@@ -15,5 +15,6 @@
   "hazards": ["rocky-ridge", "switchback", "go-slow"],
   "signatureRide": "keke",
   "welcomeLines": ["Ẹ káàbọ̀ sí Kwara!"],
+  "farewellLine": "Ẹ ṣeun, Kwara!",
   "audioStem": "nc-drums"
 }

@@ -47,6 +47,9 @@ export interface RenderOpts {
   rideId: string;
   config: SimConfig;
   landmarks: string[];
+  /** C34: sign copy for the border gate and the finish line, per state. */
+  gate: { label: string; sub: string };
+  finish: { label: string; sub: string };
   reduceMotion: boolean;
   dataSaver: boolean;
   debug?: boolean;
@@ -442,9 +445,9 @@ export class GameRenderer {
         case 'grand':
           return tagFx(buildVenue(true, ent.id));
         case 'finish':
-          return buildFinish();
+          return buildFinish(this.opts.finish.label, this.opts.finish.sub);
         default:
-          return buildGate('WELCOME TO LAGOS', 'Ẹ káàbọ̀ sí Èkó');
+          return buildGate(this.opts.gate.label, this.opts.gate.sub);
       }
     }
     if (ent.isRivalConvoy) {

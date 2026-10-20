@@ -1,0 +1,20 @@
+{
+  "id": "niger",
+  "name": "Niger",
+  "zone": "NC",
+  "biomeKit": "farmland-river",
+  "palette": { "sky": "#8FBDE4", "fog": "#DCE8F2", "ground": "#8A8257", "accent": "#D4A017" },
+  "landmarks": [
+    { "name": "Kure Market", "venueType": "market", "verified": false },
+    { "name": "Zuma Rock", "venueType": "landmark", "verified": false },
+    { "name": "Gurara Falls", "venueType": "landmark", "verified": false },
+    { "name": "Shiroro Lakeside", "venueType": "waterfront", "verified": false },
+    { "name": "Minna Township Stadium", "venueType": "stadium", "verified": false }
+  ],
+  "scenery": ["granite monolith", "hydro pylons"],
+  "hazards": ["rocky-ridge", "cart-weave", "go-slow"],
+  "signatureRide": "hilux",
+  "welcomeLines": ["Barka da zuwa Minna!"],
+  "farewellLine": "Na gode, Niger!",
+  "audioStem": "nc-drums"
+}
