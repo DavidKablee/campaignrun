@@ -23,7 +23,7 @@ describe('C11 consent log', () => {
       crowd: 12,
       delivered: 8,
       stateId: 'lagos',
-      contenderId: 'baba-bullabaa',
+      contenderId: 'mama-ankara',
       consentLog: [],
     });
     expect(denied).toEqual({ crowd: 12, delivered: 8, stateId: 'lagos' });
@@ -33,9 +33,9 @@ describe('C11 consent log', () => {
       crowd: 12,
       delivered: 8,
       stateId: 'lagos',
-      contenderId: 'baba-bullabaa',
+      contenderId: 'mama-ankara',
       consentLog: appendConsent([], 'contender-share', 'v1', true, 1),
     });
-    expect(allowed.contenderId).toBe('baba-bullabaa');
+    expect(allowed.contenderId).toBe('mama-ankara');
   });
 });

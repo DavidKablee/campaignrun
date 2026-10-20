@@ -1067,7 +1067,7 @@ type HudSnapshot = {
 function GameScreen() {
   const containerRef = useRef<HTMLDivElement>(null);
   const setScreen = useGameStore((s) => s.setScreen);
-  const contenderId = useContenderStore((s) => s.activeContenderId) ?? 'baba-bullabaa';
+  const contenderId = useContenderStore((s) => s.activeContenderId) ?? 'mama-ankara';
   const outfitOverrides = useContenderStore((s) => s.outfits[contenderId]);
   const rideId = useGameStore((s) => s.activeRideId);
   const stateId = useGameStore((s) => s.activeStateId);

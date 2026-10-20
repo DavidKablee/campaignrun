@@ -13,7 +13,7 @@ test('flow: splash → roster → studio → Lagos briefing → game', async ({ 
   await expect(page.locator('.cr-portrait img').first()).toBeVisible({ timeout: 10_000 });
   await shot('2-roster');
 
-  await page.getByRole('button', { name: /Baba Bullabaa/i }).click();
+  await page.getByRole('button', { name: /Mama Ankara/i }).click();
   await expect(page.locator('canvas.cr-studio-canvas')).toBeVisible();
   await page.waitForTimeout(600);
   await shot('3-studio');
@@ -44,7 +44,7 @@ test('flow: splash → roster → studio → Lagos briefing → game', async ({ 
 test('canvas fills the viewport (no portrait column on landscape)', async ({ page }) => {
   await page.goto('/?debug');
   await page.getByRole('button', { name: /I'm 18\+ · Play/i }).click();
-  await page.getByRole('button', { name: /Mr Tiko/i }).click();
+  await page.getByRole('button', { name: /Engineer Spark/i }).click();
   await page.getByRole('button', { name: /Campaign in Lagos/i }).click();
   await page.getByRole('button', { name: /Start the run/i }).click();
   await page.getByRole('button', { name: /Got it/i }).click({ timeout: 10_000 });
@@ -58,11 +58,11 @@ test('every Lagos segment renders (jump along the 1.4 km course)', async ({ page
   test.skip(info.project.name !== 'desktop-landscape', 'visual tour runs once');
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
-  await page.addInitScript(() => localStorage.setItem('cr-storage', JSON.stringify({ state: { seenTutorial: true, activeContenderId: 'mr-obiliki' }, version: 6 })));
+  await page.addInitScript(() => localStorage.setItem('cr-storage', JSON.stringify({ state: { seenTutorial: true, activeContenderId: 'captain-kobo' }, version: 6 })));
   for (const [name, z] of [['ojuelegba', 120], ['bridge', 400], ['link', 640], ['market', 900], ['park', 1160], ['island', 1340]] as const) {
     await page.goto(`/?debug&debugZ=${z}`);
     await page.getByRole('button', { name: /I'm 18\+ · Play/i }).click();
-    await page.getByRole('button', { name: /Mr Obiliki/i }).click();
+    await page.getByRole('button', { name: /Captain Kobo/i }).click();
     await page.getByRole('button', { name: /Campaign in Lagos/i }).click();
     await page.getByRole('button', { name: /Start the run/i }).click();
     await page.waitForTimeout(1200);

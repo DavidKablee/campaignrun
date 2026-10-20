@@ -12,7 +12,7 @@ const simConfig = JSON.parse(
 
 describe('Controls', () => {
   it('handles lane changes with edge trigger', () => {
-    const state = initState(simConfig, seedRng(123), { contenderId: 'prof-sarah' });
+    const state = initState(simConfig, seedRng(123), { contenderId: 'madam-metronome' });
     expect(state.laneX).toBe(1000);
     expect(state.targetLane).toBe(1);
 
@@ -25,7 +25,7 @@ describe('Controls', () => {
   });
 
   it('handles hop', () => {
-    const state = initState(simConfig, seedRng(123), { contenderId: 'prof-sarah' });
+    const state = initState(simConfig, seedRng(123), { contenderId: 'madam-metronome' });
     step(state, Btn.Up, simConfig);
     expect(state.hopT).toBe(simConfig.hopTicks - 1);
 
@@ -34,7 +34,7 @@ describe('Controls', () => {
   });
 
   it('handles gas and brake bounds', () => {
-    const state = initState(simConfig, seedRng(123), { contenderId: 'prof-sarah' });
+    const state = initState(simConfig, seedRng(123), { contenderId: 'madam-metronome' });
     const initSpeed = state.speed;
 
     step(state, Btn.Gas, simConfig);

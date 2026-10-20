@@ -55,7 +55,7 @@ export function initState(
     phase: 'running',
     finishZ: 0,
     courseBuilt: false,
-    activeContenderId: opts?.contenderId ?? 'baba-bullabaa',
+    activeContenderId: opts?.contenderId ?? 'mama-ankara',
     perkActiveTicks: 0,
     perkCooldownTicks: 0,
     hornCooldownTicks: 0,

@@ -7,7 +7,10 @@ const plainFile = process.argv[2] || 'private/blocklist.plain.txt';
 const outFile = 'packages/content/data/blocklist.hashes.json';
 
 try {
-  const words = readFileSync(plainFile, 'utf8').split('\n').map(w => w.trim()).filter(Boolean);
+  const words = readFileSync(plainFile, 'utf8')
+    .split('\n')
+    .map((w) => w.trim())
+    .filter((w) => w && !w.startsWith('#'));
   const hashes = words.map(w => createHash('sha256').update(
     w.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
      .replace(/0/g, 'o').replace(/[1!|]/g, 'i').replace(/3/g, 'e')
@@ -15,7 +18,7 @@ try {
   ).digest('hex'));
   
   writeFileSync(outFile, JSON.stringify({
-    note: "SHA-256 hashes of normalised blocked terms.",
+    note: "SHA-256 hashes of normalised blocked terms. Regenerate with tools/hash-blocklist.mjs; the plain-text list lives in private/ and is never committed.",
     hashes: Array.from(new Set(hashes))
   }, null, 2));
   console.log(`Hashed ${hashes.length} terms to ${outFile}`);

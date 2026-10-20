@@ -29,3 +29,6 @@ Work only the current chunk (`docs/STATUS.md`). Do not start later chunks early.
 - Wire `StateDef.palette` / `biomeKit` into the Three.js world (packs carry the data already).
 - Server-side travel caps + global live counters + cloud Contender table (C12+).
 - Lawyer sign-off on privacy/terms before public launch.
+- `packages/sim/src/collide.ts` keys the magnet perk off a hard-coded contender id (`captain-kobo`) instead of the perk id. Renamed in C31, not fixed.
+- Add the legal review's real-name list to `private/blocklist.plain.txt` and re-run `tools/hash-blocklist.mjs` (C31 seeded retired fictional forms only).
+- Consider deleting `RENAMED_IDS` in `contenderStore.ts` before launch to purge the retired name strings (safe while no real device holds an old save).

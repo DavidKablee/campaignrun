@@ -4,7 +4,7 @@ import { initState, step, seedRng, Btn } from '../src';
 
 describe('Contender perks', () => {
   it('market-weave steers out of a blocked lane', () => {
-    const state = initState(simConfig, seedRng(1), { contenderId: 'baba-bullabaa' });
+    const state = initState(simConfig, seedRng(1), { contenderId: 'mama-ankara' });
     state.perkActiveTicks = 120;
     state.targetLane = 1;
     state.entities.push({
@@ -27,7 +27,7 @@ describe('Contender perks', () => {
   });
 
   it('reboot prevents breakdown once when ready', () => {
-    const state = initState(simConfig, seedRng(2), { contenderId: 'mr-tiko' });
+    const state = initState(simConfig, seedRng(2), { contenderId: 'engineer-spark' });
     state.dents = simConfig.hit.maxDents - 1;
     state.perkCooldownTicks = 0;
     state.invulnTicks = 0;
@@ -56,8 +56,8 @@ describe('Contender perks', () => {
   });
 
   it('steady-beat advances less z than a normal tick at same speed', () => {
-    const a = initState(simConfig, seedRng(3), { contenderId: 'prof-sarah' });
-    const b = initState(simConfig, seedRng(3), { contenderId: 'prof-sarah' });
+    const a = initState(simConfig, seedRng(3), { contenderId: 'madam-metronome' });
+    const b = initState(simConfig, seedRng(3), { contenderId: 'madam-metronome' });
     a.speed = b.speed = simConfig.maxSpeedUm;
     a.perkActiveTicks = 120;
     const za = a.z;
@@ -68,7 +68,7 @@ describe('Contender perks', () => {
   });
 
   it('horn clears hoppable clutter ahead', () => {
-    const state = initState(simConfig, seedRng(4), { contenderId: 'comrade-yale' });
+    const state = initState(simConfig, seedRng(4), { contenderId: 'sister-beacon' });
     state.hornCooldownTicks = 0;
     state.entities.push({
       id: 9003,

@@ -23,7 +23,7 @@ Swipe lanes, flick hop, hold Gas/Brake, Horn, Perk. Desktop: ←/→, ↑ gas, �
 
 ## Contenders (original fiction)
 
-Baba Bullabaa, Mr Tiko, Mr Obiliki, Comrade Yale, Mr. Don, Prof. Sarah. Perks are **in-run only**. Choice local until C11.
+Mama Ankara, Engineer Spark, Captain Kobo, Sister Beacon, Uncle Boombox, Madam Metronome. Perks are **in-run only**. Choice local until C11.
 
 ## Rides
 

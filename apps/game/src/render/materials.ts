@@ -183,10 +183,10 @@ export function makeToonMaterial(color: string | number, opts?: { emissive?: str
 
 /** @deprecated replaced by outfits.json characters. */
 export const CONTENDER_PROPS: Record<string, string> = {
-  'baba-bullabaa': 'none',
-  'mr-tiko': 'none',
-  'mr-obiliki': 'pouch',
-  'comrade-yale': 'none',
-  'mr-don': 'none',
-  'prof-sarah': 'baton',
+  'mama-ankara': 'fan',
+  'engineer-spark': 'wrench',
+  'captain-kobo': 'pouch',
+  'sister-beacon': 'lantern',
+  'uncle-boombox': 'speaker',
+  'madam-metronome': 'baton',
 };

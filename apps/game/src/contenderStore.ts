@@ -2,13 +2,19 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { OutfitChoice } from '@cr/content';
 
-const PREVIOUS_IDS: Record<string, string> = {
-  'mama-ankara': 'baba-bullabaa',
-  'engineer-spark': 'mr-tiko',
-  'captain-kobo': 'mr-obiliki',
-  'sister-beacon': 'comrade-yale',
-  'uncle-boombox': 'mr-don',
-  'madam-metronome': 'prof-sarah',
+/**
+ * C31: the roster reverted to the original fictional names (spec v3 section 4.2).
+ * Maps a retired id to its replacement. Applied on load, so a device that picked a
+ * Contender under the old ids keeps the same character, perk and outfit.
+ * Ids already on the current roster are left untouched, so this is idempotent.
+ */
+const RENAMED_IDS: Record<string, string> = {
+  'baba-bullabaa': 'mama-ankara',
+  'mr-tiko': 'engineer-spark',
+  'mr-obiliki': 'captain-kobo',
+  'comrade-yale': 'sister-beacon',
+  'mr-don': 'uncle-boombox',
+  'prof-sarah': 'madam-metronome',
 };
 
 interface ContenderState {
@@ -56,13 +62,13 @@ export const useContenderStore = create<ContenderState>()(
     }),
     {
       name: 'cr-contender',
-      version: 1,
+      version: 2,
       migrate: (persisted) => {
         let out = { ...((persisted ?? {}) as Record<string, unknown>) };
         const id = out.activeContenderId;
         const outfits = { ...((out.outfits ?? {}) as Record<string, unknown>) };
-        if (typeof id === 'string' && PREVIOUS_IDS[id]) out.activeContenderId = PREVIOUS_IDS[id];
-        for (const [oldId, nextId] of Object.entries(PREVIOUS_IDS)) {
+        if (typeof id === 'string' && RENAMED_IDS[id]) out.activeContenderId = RENAMED_IDS[id];
+        for (const [oldId, nextId] of Object.entries(RENAMED_IDS)) {
           if (outfits[oldId] && !outfits[nextId]) outfits[nextId] = outfits[oldId];
           delete outfits[oldId];
         }

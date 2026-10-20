@@ -1,107 +1,309 @@
 {
   "options": {
     "tops": [
-      { "id": "tee", "name": "T-shirt" },
-      { "id": "ankara-shirt", "name": "Ankara shirt" },
-      { "id": "blouse", "name": "Buba blouse" },
-      { "id": "hi-vis", "name": "Hi-vis vest" },
-      { "id": "jacket", "name": "Jacket" },
-      { "id": "kaftan", "name": "Kaftan" },
-      { "id": "rain-cape", "name": "Rain cape" }
+      {
+        "id": "tee",
+        "name": "T-shirt"
+      },
+      {
+        "id": "ankara-shirt",
+        "name": "Ankara shirt"
+      },
+      {
+        "id": "blouse",
+        "name": "Buba blouse"
+      },
+      {
+        "id": "hi-vis",
+        "name": "Hi-vis vest"
+      },
+      {
+        "id": "jacket",
+        "name": "Jacket"
+      },
+      {
+        "id": "kaftan",
+        "name": "Kaftan"
+      },
+      {
+        "id": "rain-cape",
+        "name": "Rain cape"
+      }
     ],
     "bottoms": [
-      { "id": "jeans", "name": "Jeans" },
-      { "id": "trousers", "name": "Trousers" },
-      { "id": "work", "name": "Work trousers" },
-      { "id": "shorts", "name": "Shorts" },
-      { "id": "wrapper", "name": "Ankara wrapper" }
+      {
+        "id": "jeans",
+        "name": "Jeans"
+      },
+      {
+        "id": "trousers",
+        "name": "Trousers"
+      },
+      {
+        "id": "work",
+        "name": "Work trousers"
+      },
+      {
+        "id": "shorts",
+        "name": "Shorts"
+      },
+      {
+        "id": "wrapper",
+        "name": "Ankara wrapper"
+      }
     ],
     "footwear": [
-      { "id": "sneakers", "name": "Sneakers" },
-      { "id": "sandals", "name": "Sandals" },
-      { "id": "boots", "name": "Boots" },
-      { "id": "shoes", "name": "Shoes" },
-      { "id": "slippers", "name": "Slippers" }
+      {
+        "id": "sneakers",
+        "name": "Sneakers"
+      },
+      {
+        "id": "sandals",
+        "name": "Sandals"
+      },
+      {
+        "id": "boots",
+        "name": "Boots"
+      },
+      {
+        "id": "shoes",
+        "name": "Shoes"
+      },
+      {
+        "id": "slippers",
+        "name": "Slippers"
+      }
     ],
     "headwear": [
-      { "id": "none", "name": "None" },
-      { "id": "cap", "name": "Cap" },
-      { "id": "headtie", "name": "Headtie" },
-      { "id": "hardhat", "name": "Hard hat" },
-      { "id": "sailor", "name": "Sailor cap" },
-      { "id": "headphones", "name": "Headphones" }
+      {
+        "id": "none",
+        "name": "None"
+      },
+      {
+        "id": "cap",
+        "name": "Cap"
+      },
+      {
+        "id": "headtie",
+        "name": "Headtie"
+      },
+      {
+        "id": "hardhat",
+        "name": "Hard hat"
+      },
+      {
+        "id": "sailor",
+        "name": "Sailor cap"
+      },
+      {
+        "id": "headphones",
+        "name": "Headphones"
+      }
     ],
     "colors": [
-      "#E0902B", "#F5C518", "#E85D04", "#C23FA0", "#7B5EA7", "#2A6F97",
-      "#1F5F8B", "#2EC4B6", "#1FA45B", "#F3E3C3", "#E9E2D0", "#3A4A5A",
-      "#161616", "#8B5A2B", "#C6F31A", "#B3261E"
+      "#E0902B",
+      "#F5C518",
+      "#E85D04",
+      "#C23FA0",
+      "#7B5EA7",
+      "#2A6F97",
+      "#1F5F8B",
+      "#2EC4B6",
+      "#1FA45B",
+      "#F3E3C3",
+      "#E9E2D0",
+      "#3A4A5A",
+      "#161616",
+      "#8B5A2B",
+      "#C6F31A",
+      "#B3261E"
     ]
   },
   "characters": {
-    "baba-bullabaa": {
+    "mama-ankara": {
       "look": {
-        "gender": "m", "skin": "#5C3A24", "hair": "short", "hairColor": "#4a4a4a", "facialHair": "none",
-        "face": { "width": 1.15, "jaw": 1.14, "nose": 1.1, "lips": 1.0, "brow": 1.1, "eye": 0.85 },
-        "height": 0.92, "build": 1.2, "prop": "none", "accessory": "none"
+        "gender": "f",
+        "skin": "#5C3A24",
+        "hair": "braids",
+        "hairColor": "#1d1512",
+        "facialHair": "none",
+        "face": {
+          "width": 1.1,
+          "jaw": 1.08,
+          "nose": 1.05,
+          "lips": 1.15,
+          "brow": 1.05,
+          "eye": 0.95
+        },
+        "height": 0.93,
+        "build": 1.18,
+        "prop": "fan",
+        "accessory": "none"
       },
       "outfit": {
-        "top": "ankara-shirt", "topColor": "#E0902B", "bottom": "trousers", "bottomColor": "#2A6F97",
-        "footwear": "sandals", "footColor": "#F3E3C3", "headwear": "none", "headColor": "#E0902B"
+        "top": "ankara-shirt",
+        "topColor": "#E0902B",
+        "bottom": "wrapper",
+        "bottomColor": "#2A6F97",
+        "footwear": "sandals",
+        "footColor": "#F3E3C3",
+        "headwear": "headtie",
+        "headColor": "#E0902B"
       }
     },
-    "mr-tiko": {
+    "engineer-spark": {
       "look": {
-        "gender": "m", "skin": "#8D5A3B", "hair": "short", "hairColor": "#14100d", "facialHair": "none",
-        "face": { "width": 0.86, "jaw": 0.9, "nose": 1.05, "lips": 0.85, "brow": 1.05, "eye": 0.95 },
-        "height": 1.08, "build": 0.88, "prop": "none", "accessory": "none"
+        "gender": "m",
+        "skin": "#8D5A3B",
+        "hair": "short",
+        "hairColor": "#14100d",
+        "facialHair": "goatee",
+        "face": {
+          "width": 0.9,
+          "jaw": 0.95,
+          "nose": 1.05,
+          "lips": 0.88,
+          "brow": 1.05,
+          "eye": 0.95
+        },
+        "height": 1.06,
+        "build": 1.0,
+        "prop": "wrench",
+        "accessory": "none"
       },
       "outfit": {
-        "top": "jacket", "topColor": "#1F5F8B", "bottom": "trousers", "bottomColor": "#161616",
-        "footwear": "shoes", "footColor": "#161616", "headwear": "none", "headColor": "#1F5F8B"
+        "top": "hi-vis",
+        "topColor": "#C6F31A",
+        "bottom": "work",
+        "bottomColor": "#3A4A5A",
+        "footwear": "boots",
+        "footColor": "#8B5A2B",
+        "headwear": "hardhat",
+        "headColor": "#F5C518"
       }
     },
-    "mr-obiliki": {
+    "captain-kobo": {
       "look": {
-        "gender": "m", "skin": "#6A4129", "hair": "short", "hairColor": "#14100d", "facialHair": "none",
-        "face": { "width": 0.95, "jaw": 0.95, "nose": 0.85, "lips": 0.9, "brow": 0.9, "eye": 1.1 },
-        "height": 1.0, "build": 0.86, "prop": "pouch", "accessory": "none"
+        "gender": "m",
+        "skin": "#6A4129",
+        "hair": "short",
+        "hairColor": "#14100d",
+        "facialHair": "none",
+        "face": {
+          "width": 0.95,
+          "jaw": 0.95,
+          "nose": 0.85,
+          "lips": 0.9,
+          "brow": 0.9,
+          "eye": 1.1
+        },
+        "height": 1.0,
+        "build": 0.88,
+        "prop": "pouch",
+        "accessory": "goggles"
       },
       "outfit": {
-        "top": "tee", "topColor": "#F3E3C3", "bottom": "jeans", "bottomColor": "#2A6F97",
-        "footwear": "sneakers", "footColor": "#161616", "headwear": "none", "headColor": "#F3E3C3"
+        "top": "tee",
+        "topColor": "#E9E2D0",
+        "bottom": "jeans",
+        "bottomColor": "#1F5F8B",
+        "footwear": "sneakers",
+        "footColor": "#161616",
+        "headwear": "sailor",
+        "headColor": "#1F5F8B"
       }
     },
-    "comrade-yale": {
+    "sister-beacon": {
       "look": {
-        "gender": "m", "skin": "#3B2417", "hair": "afro", "hairColor": "#14100d", "facialHair": "none",
-        "face": { "width": 1.05, "jaw": 1.18, "nose": 1.0, "lips": 1.1, "brow": 1.2, "eye": 0.88 },
-        "height": 1.04, "build": 1.05, "prop": "none", "accessory": "none"
+        "gender": "f",
+        "skin": "#3B2417",
+        "hair": "natural",
+        "hairColor": "#14100d",
+        "facialHair": "none",
+        "face": {
+          "width": 0.95,
+          "jaw": 0.88,
+          "nose": 0.95,
+          "lips": 1.1,
+          "brow": 1.1,
+          "eye": 1.08
+        },
+        "height": 1.04,
+        "build": 0.95,
+        "prop": "lantern",
+        "accessory": "none"
       },
       "outfit": {
-        "top": "tee", "topColor": "#B3261E", "bottom": "jeans", "bottomColor": "#161616",
-        "footwear": "boots", "footColor": "#8B5A2B", "headwear": "none", "headColor": "#B3261E"
+        "top": "rain-cape",
+        "topColor": "#F5C518",
+        "bottom": "trousers",
+        "bottomColor": "#2EC4B6",
+        "footwear": "boots",
+        "footColor": "#3A4A5A",
+        "headwear": "none",
+        "headColor": "#F5C518"
       }
     },
-    "mr-don": {
+    "uncle-boombox": {
       "look": {
-        "gender": "m", "skin": "#7A4B2E", "hair": "short", "hairColor": "#1a120e", "facialHair": "moustache",
-        "face": { "width": 1.0, "jaw": 1.0, "nose": 1.18, "lips": 0.95, "brow": 0.8, "eye": 1.0 },
-        "height": 1.02, "build": 1.08, "prop": "none", "accessory": "none"
+        "gender": "m",
+        "skin": "#7A4B2E",
+        "hair": "short",
+        "hairColor": "#1a120e",
+        "facialHair": "moustache",
+        "face": {
+          "width": 1.0,
+          "jaw": 1.0,
+          "nose": 1.15,
+          "lips": 1.0,
+          "brow": 0.85,
+          "eye": 1.05
+        },
+        "height": 1.02,
+        "build": 1.1,
+        "prop": "speaker",
+        "accessory": "none"
       },
       "outfit": {
-        "top": "jacket", "topColor": "#E85D04", "bottom": "trousers", "bottomColor": "#3A4A5A",
-        "footwear": "shoes", "footColor": "#161616", "headwear": "none", "headColor": "#E85D04"
+        "top": "jacket",
+        "topColor": "#E85D04",
+        "bottom": "trousers",
+        "bottomColor": "#C23FA0",
+        "footwear": "sneakers",
+        "footColor": "#FFE66D",
+        "headwear": "headphones",
+        "headColor": "#161616"
       }
     },
-    "prof-sarah": {
+    "madam-metronome": {
       "look": {
-        "gender": "f", "skin": "#4A2C1B", "hair": "natural", "hairColor": "#17110e", "facialHair": "none",
-        "face": { "width": 0.9, "jaw": 0.84, "nose": 0.95, "lips": 1.08, "brow": 1.15, "eye": 1.05 },
-        "height": 1.06, "build": 0.9, "prop": "baton", "accessory": "none"
+        "gender": "f",
+        "skin": "#4A2C1B",
+        "hair": "natural",
+        "hairColor": "#17110e",
+        "facialHair": "none",
+        "face": {
+          "width": 0.9,
+          "jaw": 0.84,
+          "nose": 0.95,
+          "lips": 1.08,
+          "brow": 1.15,
+          "eye": 1.05
+        },
+        "height": 1.06,
+        "build": 0.9,
+        "prop": "baton",
+        "accessory": "bowtie"
       },
       "outfit": {
-        "top": "blouse", "topColor": "#7B5EA7", "bottom": "trousers", "bottomColor": "#3d3354",
-        "footwear": "shoes", "footColor": "#E8A87C", "headwear": "none", "headColor": "#7B5EA7"
+        "top": "blouse",
+        "topColor": "#7B5EA7",
+        "bottom": "trousers",
+        "bottomColor": "#3d3354",
+        "footwear": "shoes",
+        "footColor": "#E9E2D0",
+        "headwear": "none",
+        "headColor": "#161616"
       }
     }
   }

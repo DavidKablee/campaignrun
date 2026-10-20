@@ -177,6 +177,14 @@ describe('guardrail lint', () => {
       for (const s of collectStrings(f.json)) expect(findViolations(s, hashes), `${f.file}: ${s}`).toEqual([]);
     }
   });
+  it('the hashed blocklist is populated (an empty list silently disables guardrail 12)', () => {
+    // C31: this shipped empty, so every name check passed by default. Keep it loaded.
+    expect(loadHashes().size).toBeGreaterThan(0);
+  });
+  it('every Contender outfit and prop map keys off a live roster id', () => {
+    const ids = new Set(contenders.map((c) => c.id));
+    expect(Object.keys(outfits.characters).sort()).toEqual([...ids].sort());
+  });
   it('detects banned wording and hashed terms', () => {
     expect(findViolations('our candidate wins', new Set())).not.toEqual([]);
     const h = new Set([hashTerm('Banned Name')]);

@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-20 — C31 roster names
+
+- Roster restored to the original fictional six (Mama Ankara, Engineer Spark, Captain Kobo, Sister Beacon, Uncle Boombox, Madam Metronome); the previous names were phonetic echoes. Saves migrate by id. The hashed blocklist shipped empty and is now seeded, with a test so it cannot silently empty again.
+
 ## 2026-10-10 — C30 weather & time-of-day (track complete)
 
 - Closes the content/gameplay upgrade track (C26–C30): spec section 6.8's "Nigerian rhythm" — NEPA night outages, harmattan haze (Dec-Jan, north), rainy-season mood (Apr-Oct, south), and the Rally Saturday ×2 Crowd window. All decided once per run by a single new pure function, `computeWeather(nowMs, zone, runSeed)` in `apps/game/src/weather.ts` — the only place in the whole client that reads a real clock for this; neither `packages/sim` nor the renderer's per-frame code ever does.

@@ -1,6 +1,6 @@
 import { outfits, type CharacterLook, type OutfitChoice } from '@cr/content';
 
-const FALLBACK_ID = 'baba-bullabaa';
+const FALLBACK_ID = 'mama-ankara';
 
 /** Identity (look) is fixed per Contender; the outfit is player-editable and local-only. */
 export function getCharacter(
