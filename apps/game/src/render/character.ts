@@ -45,10 +45,53 @@ const THIGH = 0.25;
 const SHIN = 0.25;
 const TORSO_H = 0.46;
 const SHOULDER_Y = HIP_Y + TORSO_H; // 0.96
-const HEAD_Y = SHOULDER_Y - 0.03; // near-no neck: head sits almost directly on the shoulders
+// Chibi still means a short neck, but at -0.03 the cranium sank into the chest
+// cylinder up to the chin: head and torso merged into one column with no join to
+// read. +0.03 clears the shoulder yoke by about a third of a head radius.
+const HEAD_Y = SHOULDER_Y + 0.03;
 const CHEST_Y = HIP_Y + 0.3;
 const PELVIS_Y = HIP_Y + 0.1;
 const BELT_Y = HIP_Y + 0.19;
+/**
+ * Upper-body radii. Every chest-level clothing layer is expressed against these,
+ * because the arms hang just outside SHOULDER_R: when a top quietly specified a
+ * radius wider than the shoulders (hi-vis was 0.172, the yoke 0.168) it swallowed
+ * the arms and the figure lost its silhouette.
+ */
+const CHEST_R = 0.142;
+const SHOULDER_R = 0.152;
+/** Arm pivot, outboard of SHOULDER_R so the upper arm always breaks the outline. */
+const ARM_X = 0.188;
+
+/**
+ * Exported for the silhouette test. `widestTopR` is the largest radius any `top`
+ * puts at chest height — keep it in step when adding or resizing a top, because a
+ * top wider than the arms hides them and the character loses its arms entirely.
+ */
+export const RIG = {
+  headR: HEAD_R,
+  chestR: CHEST_R,
+  shoulderR: SHOULDER_R,
+  armX: ARM_X,
+  /** rain-cape is excluded: it is a cape, deliberately draped over the arms. */
+  widestTopR: 0.156,
+} as const;
+/**
+ * Segment multipliers. 'hi' is the player, the studio turntable and the baked
+ * portraits — one character on screen, shown large, where a 12-segment cylinder
+ * is visibly a dodecagon. 'lo' is crowds and statics, which are small, numerous
+ * and merged, and stay where they were.
+ */
+const HI_SEG = 1.4;
+const LO_SEG = 0.55;
+/**
+ * Front-to-back squash on the torso. At 0.75 — set when the chest was much wider —
+ * the body was a board in profile, which the studio turntable shows every few
+ * seconds. Outer clothing layers use LAYER_Z so they stay proud of the chest in
+ * depth as well as in radius.
+ */
+const TORSO_Z = 0.86;
+const LAYER_Z = 0.88;
 
 function sleeveSpec(top: string) {
   // [upper arm fraction covered, forearm fraction covered]
@@ -265,13 +308,31 @@ function headGeo(look: CharacterLook, outfit: OutfitChoice, detail: Detail): Hea
     case 'headtie': {
       // A cap, not a full sphere: a sphere here reaches z ~0.23 and depth-occludes
       // the whole face plate (which sits at z = HEAD_R * 1.06), leaving a blank head.
-      // The wrap band also has to stay above the eyes — hence y ~0.1, not 0.
-      b.cap(0.149 * HS, 2.0, hc, { y: 0.016, rx: -0.62, sx: 1.12 * fw, sy: 1.0, sz: 1.06 }, 12);
-      b.torus(0.15 * HS, 0.03 * HS, shade(hc, -0.08), { y: 0.1 * HS, rx: Math.PI / 2, sx: 1.12 * fw }, Math.PI * 2, 14);
-      // Gele fan: two slim folds sitting ON TOP of the wrap. They used to sit at
-      // z ~0.09 (in front of the head), which read as a point jutting over the brow.
-      b.box(0.21 * HS, 0.125 * HS, 0.028 * HS, shade(hc, -0.06), { x: 0.055 * HS, y: 0.17 * HS, z: -0.005 * HS, rz: -0.42, ry: 0.14 });
-      b.box(0.19 * HS, 0.115 * HS, 0.028 * HS, hc, { x: -0.06 * HS, y: 0.175 * HS, z: 0.012 * HS, rz: 0.4, ry: -0.12 });
+      // The wrap band also has to stay above the eyes — hence y ~0.07, not 0.
+      // Hugging the cranium matters too: at r 0.149 * HS (C32) the wrap was 45 %
+      // wider than the head and as wide as the shoulders, which read as a lampshade.
+      b.cap(0.122 * HS, 1.75, hc, { y: 0.022, rx: -0.5, sx: 1.03 * fw, sy: 1.02, sz: 1.04 }, 14);
+      b.torus(0.126 * HS, 0.03 * HS, shade(hc, -0.12), { y: 0.07 * HS, rx: Math.PI / 2, sx: 1.04 * fw }, Math.PI * 2, 16);
+      // Gele fan: three folds, each TALLER than it is wide and leaning back off the
+      // crown. The previous pair were wide slabs laid flat across the head, which
+      // read as a pagoda brim and put the whole face in its shade.
+      const fold: Array<[number, number, number, number, number]> = [
+        // x, y, height, spread (rz), twist (ry). Bases overlap so the fan reads as
+        // one pleated mass; too much spread and it separates into three prongs.
+        [0.05, 0.175, 0.2, -0.3, 0.22],
+        [0.0, 0.195, 0.235, -0.04, 0.0],
+        [-0.052, 0.17, 0.185, 0.26, -0.2],
+      ];
+      fold.forEach(([fx, fy, fh, rz, ry], i) => {
+        b.box(0.095 * HS, fh * HS, 0.036 * HS, shade(hc, i === 1 ? 0.05 : -0.06 * (i + 1)), {
+          x: fx * HS,
+          y: fy * HS,
+          z: -0.03 * HS,
+          rx: -0.3,
+          rz,
+          ry,
+        });
+      });
       break;
     }
     case 'cap':
@@ -279,14 +340,17 @@ function headGeo(look: CharacterLook, outfit: OutfitChoice, detail: Detail): Hea
       b.box(0.14 * HS, 0.012 * HS, 0.1 * HS, shade(hc, -0.1), { y: 0.05 * HS, z: 0.13 * HS, rx: 0.15 });
       break;
     case 'hardhat':
-      b.cap(0.16 * HS, 1.95, hc, { y: 0.02, rx: -0.4, sx: 1.0 * fw, sy: 1.0, sz: 1.05 }, 12);
-      b.cyl(0.175 * HS, 0.175 * HS, 0.014 * HS, shade(hc, -0.06), { y: 0.06 * HS, z: 0.012 * HS, sz: 1.1 }, 16);
-      b.box(0.03 * HS, 0.02 * HS, 0.26 * HS, shade(hc, -0.1), { y: 0.16 * HS, z: -0.005 * HS });
+      // A helmet clears the skull by a liner's thickness, not by 40 %: the shell was
+      // r 0.16 * HS and the brim 0.175 * HS against a 0.135 head, so it read as a
+      // sombrero and shaded the whole face.
+      b.cap(0.133 * HS, 1.95, hc, { y: 0.02, rx: -0.4, sx: 1.0 * fw, sy: 1.02, sz: 1.04 }, 14);
+      b.cyl(0.146 * HS, 0.146 * HS, 0.013 * HS, shade(hc, -0.08), { y: 0.055 * HS, z: 0.012 * HS, sz: 1.04 }, 18);
+      b.box(0.028 * HS, 0.022 * HS, 0.23 * HS, shade(hc, -0.12), { y: 0.14 * HS, z: -0.005 * HS });
       break;
     case 'sailor':
-      b.cyl(0.14 * HS * fw, 0.13 * HS * fw, 0.075 * HS, hc, { y: 0.1 * HS, sz: 1.04 }, 14);
-      b.cyl(0.155 * HS * fw, 0.155 * HS * fw, 0.016 * HS, hc, { y: 0.14 * HS, sz: 1.04 }, 14);
-      b.cyl(0.133 * HS * fw, 0.133 * HS * fw, 0.02 * HS, '#1a2a44', { y: 0.075 * HS, sz: 1.04 }, 14);
+      b.cyl(0.128 * HS * fw, 0.12 * HS * fw, 0.075 * HS, hc, { y: 0.1 * HS, sz: 1.04 }, 16);
+      b.cyl(0.142 * HS * fw, 0.142 * HS * fw, 0.015 * HS, hc, { y: 0.138 * HS, sz: 1.04 }, 18);
+      b.cyl(0.124 * HS * fw, 0.124 * HS * fw, 0.02 * HS, '#1a2a44', { y: 0.075 * HS, sz: 1.04 }, 16);
       b.sphere(0.014 * HS, '#f0b429', { y: 0.1 * HS, z: 0.14 * HS }, 6);
       break;
     case 'headphones':
@@ -326,7 +390,7 @@ function headGeo(look: CharacterLook, outfit: OutfitChoice, detail: Detail): Hea
 
 function torsoGeo(look: CharacterLook, outfit: OutfitChoice, detail: Detail): THREE.BufferGeometry {
   const b = new GeoBuilder();
-  if (detail === 'lo') b.segScale = 0.55;
+  b.segScale = detail === 'lo' ? LO_SEG : HI_SEG;
   const f = look.gender === 'f';
   const sw = (f ? 0.92 : 1) * Math.pow(look.build, 0.5);
   const hw = (f ? 1.1 : 1) * Math.pow(look.build, 0.55);
@@ -335,61 +399,67 @@ function torsoGeo(look: CharacterLook, outfit: OutfitChoice, detail: Detail): TH
   const bc = outfit.bottomColor;
   const top = outfit.top;
 
-  // short neck nub — chibi reads with little to no neck
-  b.cyl(0.05 * HS, 0.056 * HS, 0.05, skin, { y: SHOULDER_Y + 0.01 }, 8);
+  // Short neck, shaded down: the underside of a jaw is never the same value as a
+  // cheek, and that one darker band is most of what separates head from body.
+  b.cyl(0.05 * HS, 0.058 * HS, 0.09, shade(skin, -0.07), { y: SHOULDER_Y + 0.025 }, 12);
 
   const bodyCol = top === 'hi-vis' ? '#9499a0' : tc;
   // chest
-  b.cyl(0.165 * sw, 0.15 * hw, 0.32, bodyCol, { y: CHEST_Y, sz: 0.75 }, 12);
+  b.cyl(CHEST_R * sw, 0.134 * hw, 0.32, bodyCol, { y: CHEST_Y, sz: TORSO_Z }, 12);
+  // Shoulder yoke: a flattened ellipsoid capping the chest. Without it the torso
+  // ended in a hard cylinder disc at chin height and the figure read as stacked
+  // tins; this rounds the shoulder line and pushes the deltoids out past the arms
+  // so the arms have something to hang off.
+  b.sphere(SHOULDER_R * sw, bodyCol, { y: SHOULDER_Y - 0.075, sx: 1.06, sy: 0.72, sz: TORSO_Z + 0.02 }, 14);
   // pelvis
-  b.cyl(0.15 * hw, 0.155 * hw, 0.2, bc, { y: PELVIS_Y, sz: 0.78 }, 12);
-  b.cyl(0.158 * hw, 0.158 * hw, 0.03, shade(bc, -0.18), { y: BELT_Y, sz: 0.79 }, 12); // belt
+  b.cyl(0.136 * hw, 0.148 * hw, 0.2, bc, { y: PELVIS_Y, sz: TORSO_Z }, 12);
+  b.cyl(0.144 * hw, 0.144 * hw, 0.03, shade(bc, -0.18), { y: BELT_Y, sz: TORSO_Z + 0.01 }, 12); // belt
 
   switch (top) {
     case 'hi-vis':
-      b.cyl(0.172 * sw, 0.156 * hw, 0.3, tc, { y: CHEST_Y, sz: 0.78 }, 12);
-      b.cyl(0.176 * sw, 0.158 * hw, 0.026, '#d9dde0', { y: CHEST_Y - 0.08, sz: 0.78 }, 12);
-      b.cyl(0.18 * sw, 0.164 * sw, 0.026, '#d9dde0', { y: CHEST_Y + 0.1, sz: 0.78 }, 12);
+      b.cyl(0.152 * sw, 0.14 * hw, 0.3, tc, { y: CHEST_Y, sz: LAYER_Z }, 12);
+      b.cyl(0.156 * sw, 0.142 * hw, 0.026, '#d9dde0', { y: CHEST_Y - 0.08, sz: LAYER_Z }, 12);
+      b.cyl(0.156 * sw, 0.148 * sw, 0.026, '#d9dde0', { y: CHEST_Y + 0.1, sz: LAYER_Z }, 12);
       break;
     case 'jacket':
-      b.cyl(0.175 * sw, 0.158 * hw, 0.33, tc, { y: CHEST_Y, sz: 0.78 }, 12);
-      b.cyl(0.158 * hw, 0.158 * hw, 0.04, shade(tc, -0.15), { y: PELVIS_Y, sz: 0.8 }, 12);
-      b.torus(0.052 * HS, 0.016 * HS, shade(tc, -0.1), { y: SHOULDER_Y, rx: Math.PI / 2, sz: 1.1 }, Math.PI * 2, 10);
-      b.box(0.01, 0.3, 0.01, shade(tc, -0.3), { y: CHEST_Y, z: 0.14 * sw });
+      b.cyl(0.154 * sw, 0.142 * hw, 0.33, tc, { y: CHEST_Y, sz: LAYER_Z }, 12);
+      b.cyl(0.144 * hw, 0.144 * hw, 0.04, shade(tc, -0.15), { y: PELVIS_Y, sz: LAYER_Z }, 12);
+      b.torus(0.046 * HS, 0.016 * HS, shade(tc, -0.1), { y: SHOULDER_Y, rx: Math.PI / 2, sz: 1.1 }, Math.PI * 2, 12);
+      b.box(0.01, 0.3, 0.01, shade(tc, -0.3), { y: CHEST_Y, z: 0.125 * sw });
       break;
     case 'kaftan':
-      b.cyl(0.175 * sw, 0.2 * hw, 0.56, tc, { y: HIP_Y + 0.02, sz: 0.82 }, 12);
-      b.cyl(0.2 * hw, 0.2 * hw, 0.03, '#f0c75e', { y: HIP_Y - 0.12, sz: 0.82 }, 12);
-      b.box(0.04, 0.22, 0.01, '#f0c75e', { y: CHEST_Y + 0.04, z: 0.16 * sw });
+      b.cyl(0.152 * sw, 0.2 * hw, 0.56, tc, { y: HIP_Y + 0.02, sz: LAYER_Z + 0.02 }, 12);
+      b.cyl(0.2 * hw, 0.2 * hw, 0.03, '#f0c75e', { y: HIP_Y - 0.12, sz: LAYER_Z + 0.02 }, 12);
+      b.box(0.04, 0.22, 0.01, '#f0c75e', { y: CHEST_Y + 0.04, z: 0.142 * sw });
       break;
     case 'rain-cape':
-      b.cyl(0.11 * sw, 0.27 * hw, 0.58, tc, { y: HIP_Y + 0.04, sz: 0.9 }, 12);
+      b.cyl(0.11 * sw, 0.27 * hw, 0.58, tc, { y: HIP_Y + 0.04, sz: LAYER_Z + 0.04 }, 12);
       b.torus(0.075 * HS, 0.032 * HS, shade(tc, 0.06), { y: SHOULDER_Y + 0.02, rx: Math.PI / 2 }, Math.PI * 2, 10);
       b.sphere(0.095 * HS, shade(tc, -0.06), { y: SHOULDER_Y + 0.05, z: -0.07, sx: 1.0, sy: 0.85, sz: 0.68 }, 8);
       break;
     case 'blouse':
-      b.cyl(0.156 * hw, 0.2 * hw, 0.12, tc, { y: PELVIS_Y + 0.02, sz: 0.78 }, 12);
-      b.torus(0.052 * HS, 0.013 * HS, '#f0c75e', { y: SHOULDER_Y, rx: Math.PI / 2, sz: 1.1 }, Math.PI * 2, 10);
-      for (let i = 0; i < 2; i++) b.cyl(0.168 * sw, 0.168 * sw, 0.018, shade(tc, 0.16), { y: CHEST_Y - 0.07 + i * 0.1, sz: 0.7 }, 12);
+      b.cyl(0.142 * hw, 0.2 * hw, 0.12, tc, { y: PELVIS_Y + 0.02, sz: LAYER_Z }, 12);
+      b.torus(0.046 * HS, 0.013 * HS, '#f0c75e', { y: SHOULDER_Y, rx: Math.PI / 2, sz: 1.1 }, Math.PI * 2, 12);
+      for (let i = 0; i < 2; i++) b.cyl(0.15 * sw, 0.15 * sw, 0.018, shade(tc, 0.16), { y: CHEST_Y - 0.07 + i * 0.1, sz: LAYER_Z }, 12);
       break;
     case 'ankara-shirt':
-      for (let i = 0; i < 3; i++) b.cyl(0.17 * sw, 0.158 * hw, 0.034, i % 2 ? '#f0c75e' : shade(tc, -0.2), { y: PELVIS_Y + 0.08 + i * 0.1, sz: 0.76 }, 12);
-      b.torus(0.052 * HS, 0.014 * HS, shade(tc, -0.25), { y: SHOULDER_Y, rx: Math.PI / 2, sz: 1.1 }, Math.PI * 2, 10);
+      for (let i = 0; i < 3; i++) b.cyl(0.152 * sw, 0.142 * hw, 0.034, i % 2 ? '#f0c75e' : shade(tc, -0.2), { y: PELVIS_Y + 0.08 + i * 0.1, sz: LAYER_Z }, 12);
+      b.torus(0.046 * HS, 0.014 * HS, shade(tc, -0.25), { y: SHOULDER_Y, rx: Math.PI / 2, sz: 1.1 }, Math.PI * 2, 12);
       break;
     default:
-      b.torus(0.05 * HS, 0.013 * HS, shade(tc, -0.12), { y: SHOULDER_Y, rx: Math.PI / 2, sz: 1.1 }, Math.PI * 2, 10);
+      b.torus(0.046 * HS, 0.013 * HS, shade(tc, -0.12), { y: SHOULDER_Y, rx: Math.PI / 2, sz: 1.1 }, Math.PI * 2, 12);
       break;
   }
 
   if (outfit.bottom === 'wrapper') {
-    b.cyl(0.17 * hw, 0.19 * hw, 0.2, bc, { y: HIP_Y - 0.04, sz: 0.82 }, 12);
-    b.cyl(0.19 * hw, 0.2 * hw, 0.024, shade(bc, -0.2), { y: HIP_Y - 0.12, sz: 0.82 }, 12);
+    b.cyl(0.17 * hw, 0.19 * hw, 0.2, bc, { y: HIP_Y - 0.04, sz: LAYER_Z + 0.02 }, 12);
+    b.cyl(0.19 * hw, 0.2 * hw, 0.024, shade(bc, -0.2), { y: HIP_Y - 0.12, sz: LAYER_Z + 0.02 }, 12);
   }
 
   if (look.accessory === 'bowtie') {
-    b.cone(0.026, 0.044, '#e8a87c', { x: -0.03, y: SHOULDER_Y - 0.02, z: 0.15 * sw, rz: Math.PI / 2 }, 6);
-    b.cone(0.026, 0.044, '#e8a87c', { x: 0.03, y: SHOULDER_Y - 0.02, z: 0.15 * sw, rz: -Math.PI / 2 }, 6);
-    b.sphere(0.011, '#c98a5e', { y: SHOULDER_Y - 0.02, z: 0.145 * sw }, 6);
+    b.cone(0.026, 0.044, '#e8a87c', { x: -0.03, y: SHOULDER_Y - 0.02, z: 0.132 * sw, rz: Math.PI / 2 }, 6);
+    b.cone(0.026, 0.044, '#e8a87c', { x: 0.03, y: SHOULDER_Y - 0.02, z: 0.132 * sw, rz: -Math.PI / 2 }, 6);
+    b.sphere(0.011, '#c98a5e', { y: SHOULDER_Y - 0.02, z: 0.128 * sw }, 6);
   }
   if (look.prop === 'pouch') {
     b.sphere(0.048, '#8b5a2b', { x: 0.16 * hw, y: PELVIS_Y + 0.02, z: 0.08, sy: 1.1 }, 8);
@@ -404,13 +474,15 @@ function torsoGeo(look: CharacterLook, outfit: OutfitChoice, detail: Detail): TH
 
 function armGeos(look: CharacterLook, outfit: OutfitChoice, detail: Detail) {
   const skin = look.skin;
-  const sc = outfit.top === 'hi-vis' ? skin : outfit.topColor;
+  // A sleeve in the exact torso colour welds the arm to the chest wherever the two
+  // overlap. One step down is enough to keep the edge.
+  const sc = outfit.top === 'hi-vis' ? skin : shade(outfit.topColor, -0.07);
   const [upFrac, loFrac] = sleeveSpec(outfit.top);
   const f = look.gender === 'f';
   const thin = f ? 0.9 : 1;
   const upper = new GeoBuilder();
   const lo = new GeoBuilder();
-  if (detail === 'lo') upper.segScale = lo.segScale = 0.55;
+  upper.segScale = lo.segScale = detail === 'lo' ? LO_SEG : HI_SEG;
   const upLen = 0.16;
   upper.sphere(0.052 * thin, upFrac > 0 ? sc : skin, { y: 0 }, 8);
   upper.cyl(0.046 * thin, 0.04 * thin, upLen, skin, { y: -upLen / 2 }, 8);
@@ -440,14 +512,14 @@ function legGeos(look: CharacterLook, outfit: OutfitChoice, detail: Detail) {
   const shinCol = bottom === 'shorts' || bottom === 'wrapper' ? skin : bc;
 
   const thigh = new GeoBuilder();
-  if (detail === 'lo') thigh.segScale = 0.55;
+  thigh.segScale = detail === 'lo' ? LO_SEG : HI_SEG;
   thigh.sphere(0.066 * hw, thighCol, { y: 0 }, 8);
   thigh.cyl(0.072 * hw, 0.055, THIGH, thighCol, { y: -THIGH / 2 }, 9);
   if (bottom === 'shorts') thigh.cyl(0.075 * hw, 0.062, THIGH * 0.58, bc, { y: -THIGH * 0.29 }, 9);
   if (bottom === 'work') thigh.box(0.018, 0.08, 0.06, shade(bc, -0.15), { x: 0.062 * hw, y: -0.1 });
 
   const shin = new GeoBuilder();
-  if (detail === 'lo') shin.segScale = 0.55;
+  shin.segScale = detail === 'lo' ? LO_SEG : HI_SEG;
   shin.sphere(0.054, shinCol, { y: 0 }, 8);
   shin.cyl(0.052, 0.04, SHIN - 0.03, shinCol, { y: -(SHIN - 0.03) / 2 }, 9);
   if (bottom === 'work') shin.box(0.08, 0.06, 0.028, shade(bc, -0.12), { y: -0.03, z: 0.045 });
@@ -566,7 +638,10 @@ export function buildCharacter(look: CharacterLook, outfit: OutfitChoice, detail
   const arms = armGeos(look, outfit, detail);
   const mkArm = (side: 1 | -1) => {
     const arm = new THREE.Group();
-    arm.position.set(side * 0.155 * sw, SHOULDER_Y - 0.04, 0);
+    // Outboard of SHOULDER_R, not inside it. At 0.155 the whole upper arm sat
+    // within the torso silhouette, so in any same-coloured top the character
+    // simply had no arms.
+    arm.position.set(side * ARM_X * sw, SHOULDER_Y - 0.065, 0);
     arm.add(mesh(arms.upper.clone()));
     const elbow = new THREE.Group();
     elbow.position.y = -0.16;
@@ -650,8 +725,8 @@ export function poseCharacter(rig: CharacterRig, pose: Pose, t: number, speed01 
       set(p.thighR, s * stride);
       set(p.shinL, Math.max(0, -s) * (0.3 + amt * 1.1) + 0.1);
       set(p.shinR, Math.max(0, s) * (0.3 + amt * 1.1) + 0.1);
-      set(p.armL, s * (0.2 + amt * 0.75), 0, 0.08);
-      set(p.armR, -s * (0.2 + amt * 0.75), 0, -0.08);
+      set(p.armL, s * (0.2 + amt * 0.75), 0, -0.08);
+      set(p.armR, -s * (0.2 + amt * 0.75), 0, 0.08);
       set(p.elbowL, -0.4 - amt * 0.65);
       set(p.elbowR, -0.4 - amt * 0.65);
       // secondary motion: torso/head trail the leg phase slightly (overlap),
@@ -709,9 +784,11 @@ export function poseCharacter(rig: CharacterRig, pose: Pose, t: number, speed01 
       set(p.thighR, 0, 0, 0.03);
       set(p.shinL, 0);
       set(p.shinR, 0);
-      set(p.armL, 0.04 + br * 0.02, 0, 0.1);
-      set(p.armR, -0.15 + br * 0.02, 0, -0.1);
-      set(p.elbowL, -0.18);
+      // Negative z on the left arm swings the hand AWAY from the body; the old
+      // +0.1 / -0.1 pair tucked both hands into the hips and closed the gap.
+      set(p.armL, 0.04 + br * 0.02, 0, -0.2);
+      set(p.armR, -0.15 + br * 0.02, 0, 0.2);
+      set(p.elbowL, -0.32);
       set(p.elbowR, -0.55);
       set(p.torso, br * 0.01);
       set(p.head, 0, Math.sin(t * 0.7) * 0.05);

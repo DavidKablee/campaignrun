@@ -356,7 +356,10 @@ body,
 }
 .cr-roster-hero {
   display: grid;
-  grid-template-rows: minmax(200px, 52%) 1fr;
+  /* The art row sizes itself from the art box's aspect-ratio. The old
+     `minmax(200px, 52%)` resolved against an indefinite parent, which is what
+     made the image fall back to its natural height and centre-crop (C32). */
+  grid-template-rows: auto 1fr;
   border-radius: 16px;
   overflow: hidden;
   background: linear-gradient(165deg, var(--c1, #e0902b), var(--c2, #2a6f97));
@@ -364,13 +367,25 @@ body,
   min-height: 320px;
 }
 .cr-roster-hero-art {
-  /* Fill the grid row exactly. The row is already a definite track, so the
-     absolutely-positioned image below resolves against this box. A min-height
-     here would overflow the row and bleed under the copy panel instead. */
   position: relative;
-  height: 100%;
+  /* A half-body portrait needs a box taller than it is wide to fill. Stacked
+     above the copy on a full-bleed card this box would otherwise be a 4:1
+     letterbox with the character stranded, thumbnail-sized, in the middle. */
+  aspect-ratio: 5 / 4;
   min-height: 0;
   overflow: hidden;
+}
+/* Tablet / small laptop: the card is wide but the layout has not split into two
+   columns yet, so put the art beside the copy instead of above it. */
+@media (min-width: 620px) and (max-width: 899px) {
+  .cr-roster-hero {
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    grid-template-rows: 1fr;
+  }
+  .cr-roster-hero-art {
+    aspect-ratio: auto;
+    height: 100%;
+  }
 }
 .cr-roster-hero-art img {
   position: absolute;
@@ -1104,7 +1119,11 @@ body,
   box-shadow: 0 0 0 3px var(--cr-danfo);
 }
 
-@media (min-width: 820px) and (orientation: landscape), (min-width: 1000px) {
+/* 820px was too high a floor in landscape: between 620 and 820 the stage stayed
+   stacked and full-bleed, which made it a ~760x285 letterbox with the character
+   stranded, thumbnail-sized, in the middle of it. The panel's own floor is
+   360px, so two columns still fit comfortably at 720. */
+@media (min-width: 720px) and (orientation: landscape), (min-width: 1000px) {
   .cr-studio {
     grid-template-columns: minmax(0, 1.15fr) minmax(360px, 0.85fr);
     grid-template-rows: 1fr;

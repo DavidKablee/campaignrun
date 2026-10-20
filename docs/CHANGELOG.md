@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-20 — C33 characters and city read as 3D
+
+- The flatness was lighting: hemisphere light is not put through the toon ramp, so a 1.25/1.35 floor already saturated the ramp's top step and nothing could have a shadow side. Rebalanced both rigs, added real shadow maps and contact shadows to the studio and portrait bakes. Silhouette fixes: arms now sit outboard of the shoulders (they were inside the torso, so same-coloured tops rendered a character with no arms), shoulder yoke, visible neck, and headwear scaled to the head it sits on. Also fixed an intermittent blank-portrait bug — the picker created two WebGL contexts in one tick and browsers drop the oldest past the cap.
+
 ## 2026-10-20 — C32 portraits render
 
 - Contender picker showed blank gradients: the portrait camera still used pre-chibi eye heights (C21), `headtie` was a full sphere that occluded the face plate, and the hero slot centre-cropped to the torso. Framing is now measured from the rig's bounds; the hero is a half-body shot showing each signature prop.

@@ -32,3 +32,8 @@ Work only the current chunk (`docs/STATUS.md`). Do not start later chunks early.
 - `packages/sim/src/collide.ts` keys the magnet perk off a hard-coded contender id (`captain-kobo`) instead of the perk id. Renamed in C31, not fixed.
 - Add the legal review's real-name list to `private/blocklist.plain.txt` and re-run `tools/hash-blocklist.mjs` (C31 seeded retired fictional forms only).
 - Consider deleting `RENAMED_IDS` in `contenderStore.ts` before launch to purge the retired name strings (safe while no real device holds an old save).
+- No shadow map in the gameplay world (C33 added them to the studio/portraits only). A world shadow map costs real frame time on the target device, and `patchBend`'s vertex displacement is not applied to the depth material, so shadows would misalign with the road curve — it needs the bend patched into a custom depth material first.
+- `StudioScene`'s camera still uses a literal `0.92` eye height. C32 made the portrait camera measure the rig's bounds instead; this one was left as-is and is the same shape of bug waiting on the next proportion change.
+- `RIG.widestTopR` (C33) is maintained by hand because the radii it summarises are literals inside a `switch`. Worth deriving from the geometry if the tops list grows.
+- A properly sculpted gele. C33's is a cap plus three slabs — an improvement on the pagoda brim, not a model of the real thing.
+

@@ -51,7 +51,26 @@ function lagosKit() {
   return kitPromise;
 }
 
-export const CHUNK = 40;
+export /**
+ * Daylight rig. Hemisphere light is NOT put through the toon ramp, so its value
+ * is a hard floor on every surface in the scene: at the old 1.35 the floor alone
+ * already saturated the ramp's top step and the whole city rendered as flat
+ * colour fills with no shadow side. Keeping the floor near 0.5 and the sun near
+ * 1.3 is what lets the ramp band.
+ *
+ * Night/NEPA values scale from these in applyWeather — they live here together so
+ * the pair cannot drift apart (they were previously duplicated as literals in two
+ * places).
+ */
+const DAY_HEMI = 0.58;
+const DAY_SUN = 1.3;
+// Night is not scaled down as far as day: the daytime cut was about letting the
+// toon ramp band, but at night the floor is all that keeps the road readable —
+// and NEPA multiplies it by another 0.45 on top.
+const NIGHT_HEMI = 0.22;
+const NIGHT_SUN = 0.1;
+
+const CHUNK = 40;
 const PLANE = new THREE.PlaneGeometry(1, 1);
 const SLOTS = 6; // 1 behind, 5 ahead (200 m)
 
@@ -116,9 +135,9 @@ export class World {
     this.groundGeo = new THREE.PlaneGeometry(700, CHUNK);
     this.groundGeo.rotateX(-Math.PI / 2);
 
-    this.hemi = new THREE.HemisphereLight('#fff6df', '#8d7a63', 1.35);
+    this.hemi = new THREE.HemisphereLight('#fff6df', '#7a6a55', DAY_HEMI);
     scene.add(this.hemi);
-    this.sun = new THREE.DirectionalLight('#fff1cf', 2.2);
+    this.sun = new THREE.DirectionalLight('#fff1cf', DAY_SUN);
     this.sun.position.set(-30, 50, 20);
     scene.add(this.sun);
 
@@ -157,8 +176,8 @@ export class World {
     const night = (1 + Math.cos(ctx.dayPhase * Math.PI * 2)) / 2;
     const nepaDarken = ctx.isNepaOut ? 0.45 : 1;
 
-    this.hemi.intensity = (1.35 * (1 - night) + 0.3 * night) * nepaDarken;
-    this.sun.intensity = (2.2 * (1 - night) + 0.12 * night) * nepaDarken;
+    this.hemi.intensity = (DAY_HEMI * (1 - night) + NIGHT_HEMI * night) * nepaDarken;
+    this.sun.intensity = (DAY_SUN * (1 - night) + NIGHT_SUN * night) * nepaDarken;
     this.sun.color.copy(this.daySunColor).lerp(this.nightSunColor, night);
 
     let fogColor = this.dayFogColor.clone().lerp(this.nightFogColor, night);
