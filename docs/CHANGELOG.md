@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-20 — C32 portraits render
+
+- Contender picker showed blank gradients: the portrait camera still used pre-chibi eye heights (C21), `headtie` was a full sphere that occluded the face plate, and the hero slot centre-cropped to the torso. Framing is now measured from the rig's bounds; the hero is a half-body shot showing each signature prop.
+
 ## 2026-10-20 — C31 roster names
 
 - Roster restored to the original fictional six (Mama Ankara, Engineer Spark, Captain Kobo, Sister Beacon, Uncle Boombox, Madam Metronome); the previous names were phonetic echoes. Saves migrate by id. The hashed blocklist shipped empty and is now seeded, with a test so it cannot silently empty again.

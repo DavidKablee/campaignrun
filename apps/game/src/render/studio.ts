@@ -151,30 +151,63 @@ export class CharacterStudio {
   }
 }
 
-/** One-off head-and-shoulders portraits (PNG data URLs) from the real 3D models. */
+export interface PortraitOptions {
+  width?: number;
+  height?: number;
+  /** Share of the character's full height to frame: 0.42 head-and-shoulders, ~0.95 half body. */
+  frame?: number;
+  /**
+   * Where the framed window sits relative to the top of the head, as a share of
+   * the window height. At 0.5 the window's top edge lands exactly on the crown
+   * (no headroom); below 0.5 leaves space above the head.
+   */
+  yBias?: number;
+}
+
+/** Head-and-shoulders: big enough to read a face and headwear in a 64 px chip. */
+const PORTRAIT_FRAME = 0.42;
+
+/**
+ * One-off portraits (PNG data URLs) rendered from the real 3D models.
+ * Default is a head-and-shoulders chip; pass a taller `frame` for a hero shot
+ * that includes the character's signature prop.
+ */
 export function renderPortraits(
   items: Array<{ id: string; look: CharacterLook; outfit: OutfitChoice }>,
-  size = 224,
+  opts: PortraitOptions = {},
 ): Record<string, string> {
+  const width = opts.width ?? 224;
+  const height = opts.height ?? 224;
+  const frameShare = opts.frame ?? PORTRAIT_FRAME;
+  const yBias = opts.yBias ?? 0.43;
   const canvas = document.createElement('canvas');
-  canvas.width = size;
-  canvas.height = size;
+  canvas.width = width;
+  canvas.height = height;
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
   renderer.setPixelRatio(1);
-  renderer.setSize(size, size, false);
+  renderer.setSize(width, height, false);
   renderer.setClearColor(0x000000, 0);
   const scene = new THREE.Scene();
   addLights(scene);
-  const camera = new THREE.PerspectiveCamera(22, 1, 0.1, 20);
+  const camera = new THREE.PerspectiveCamera(22, width / height, 0.1, 20);
   const out: Record<string, string> = {};
   for (const it of items) {
     const rig = buildCharacter(it.look, it.outfit);
     rig.group.rotation.y = -0.25;
     poseCharacter(rig, 'stand', 0, 1);
     scene.add(rig.group);
-    const s = it.look.height;
-    camera.position.set(0.15, 1.58 * s, 1.95);
-    camera.lookAt(0, 1.46 * s, 0);
+    // Frame head-and-shoulders from the rig's real bounds. Hard-coded eye heights
+    // drift the moment character proportions change (they did in C21, which left
+    // this camera aiming above the head), so measure instead of assuming.
+    scene.updateMatrixWorld(true);
+    const box = new THREE.Box3().setFromObject(rig.group);
+    const top = box.max.y;
+    const frameH = Math.max(0.3, (top - box.min.y) * frameShare);
+    const centreY = top - frameH * yBias;
+    const dist = frameH / (2 * Math.tan((camera.fov * Math.PI) / 360));
+    camera.position.set(0.15, centreY + 0.03, dist);
+    camera.lookAt(0, centreY, 0);
+    camera.updateProjectionMatrix();
     renderer.render(scene, camera);
     out[it.id] = canvas.toDataURL('image/png');
     scene.remove(rig.group);

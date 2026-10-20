@@ -263,10 +263,15 @@ function headGeo(look: CharacterLook, outfit: OutfitChoice, detail: Detail): Hea
   const hc = outfit.headColor;
   switch (hw) {
     case 'headtie': {
-      b.sphere(0.18 * HS, hc, { y: 0.04, z: 0.01, sx: 1.12 * fw, sy: 0.85, sz: 1.1 }, 12);
-      b.torus(0.15 * HS, 0.042 * HS, shade(hc, -0.08), { y: 0.0, rx: Math.PI / 2, sx: 1.12 * fw }, Math.PI * 2, 14);
-      b.box(0.2 * HS, 0.15 * HS, 0.045 * HS, shade(hc, -0.06), { x: 0.1 * HS, y: 0.12 * HS, z: 0.08 * HS, rz: -0.55, ry: 0.2 });
-      b.box(0.18 * HS, 0.14 * HS, 0.045 * HS, hc, { x: -0.02 * HS, y: 0.13 * HS, z: 0.09 * HS, rz: 0.45, ry: -0.15 });
+      // A cap, not a full sphere: a sphere here reaches z ~0.23 and depth-occludes
+      // the whole face plate (which sits at z = HEAD_R * 1.06), leaving a blank head.
+      // The wrap band also has to stay above the eyes — hence y ~0.1, not 0.
+      b.cap(0.149 * HS, 2.0, hc, { y: 0.016, rx: -0.62, sx: 1.12 * fw, sy: 1.0, sz: 1.06 }, 12);
+      b.torus(0.15 * HS, 0.03 * HS, shade(hc, -0.08), { y: 0.1 * HS, rx: Math.PI / 2, sx: 1.12 * fw }, Math.PI * 2, 14);
+      // Gele fan: two slim folds sitting ON TOP of the wrap. They used to sit at
+      // z ~0.09 (in front of the head), which read as a point jutting over the brow.
+      b.box(0.21 * HS, 0.125 * HS, 0.028 * HS, shade(hc, -0.06), { x: 0.055 * HS, y: 0.17 * HS, z: -0.005 * HS, rz: -0.42, ry: 0.14 });
+      b.box(0.19 * HS, 0.115 * HS, 0.028 * HS, hc, { x: -0.06 * HS, y: 0.175 * HS, z: 0.012 * HS, rz: 0.4, ry: -0.12 });
       break;
     }
     case 'cap':

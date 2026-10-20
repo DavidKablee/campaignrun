@@ -182,17 +182,27 @@ function Splash() {
   );
 }
 
+const NO_PORTRAITS: Record<string, string> = {};
+
+/**
+ * Bakes two sets of portraits once per roster: a square head-and-shoulders chip
+ * for the grid, and a taller half-body hero shot that shows the signature prop.
+ */
 function usePortraits(ids: string[]) {
   const overrides = useContenderStore((s) => s.outfits);
-  const [map, setMap] = useState<Record<string, string>>({});
+  const [map, setMap] = useState<{ chips: Record<string, string>; heroes: Record<string, string> }>({
+    chips: NO_PORTRAITS,
+    heroes: NO_PORTRAITS,
+  });
   const key = JSON.stringify([ids, overrides]);
   useEffect(() => {
     let cancelled = false;
     const id = window.setTimeout(() => {
       try {
         const items = ids.map((cid) => ({ id: cid, ...getCharacter(cid, overrides[cid]) }));
-        const out = renderPortraits(items);
-        if (!cancelled) setMap(out);
+        const chips = renderPortraits(items);
+        const heroes = renderPortraits(items, { width: 320, height: 420, frame: 1.15, yBias: 0.44 });
+        if (!cancelled) setMap({ chips, heroes });
       } catch {
         /* WebGL unavailable: cards fall back to initials */
       }
@@ -255,7 +265,11 @@ function Roster() {
           style={{ ['--c1' as string]: featured.palette[0], ['--c2' as string]: featured.palette[1] }}
         >
           <span className="cr-roster-hero-art">
-            {portraits[featured.id] ? <img src={portraits[featured.id]} alt="" /> : <b>{featured.name[0]}</b>}
+            {portraits.heroes[featured.id] ? (
+              <img src={portraits.heroes[featured.id]} alt="" />
+            ) : (
+              <b>{featured.name[0]}</b>
+            )}
           </span>
           <div className="cr-roster-hero-copy">
             <p className="cr-kicker">{featured.archetype}</p>
@@ -282,7 +296,11 @@ function Roster() {
               onClick={() => openStudio(c.id)}
             >
               <span className="cr-portrait">
-                {portraits[c.id] ? <img src={portraits[c.id]} alt={`${c.name} portrait`} /> : <b>{c.name[0]}</b>}
+                {portraits.chips[c.id] ? (
+                  <img src={portraits.chips[c.id]} alt={`${c.name} portrait`} />
+                ) : (
+                  <b>{c.name[0]}</b>
+                )}
               </span>
               <span>
                 <strong>{c.name}</strong>

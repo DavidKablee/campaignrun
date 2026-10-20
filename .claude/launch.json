@@ -6,6 +6,12 @@
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--filter", "@cr/game", "dev"],
       "port": 5173
+    },
+    {
+      "name": "game-alt",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@cr/game", "exec", "vite", "--port", "5174", "--strictPort"],
+      "port": 5174
     }
   ]
 }
