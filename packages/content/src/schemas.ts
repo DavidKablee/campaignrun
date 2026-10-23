@@ -79,6 +79,8 @@ export const simConfigSchema = z.object({
     pvcDurationTicks: int.positive(),
     /** C28 rival convoys: flat skillCrowd bonus for an unhit pass, gentle speed knock on a bump. */
     rivalOutpaceCrowd: int.nonnegative(),
+    /** C41: was inlined in App.tsx; the plausibility bound needs it too. */
+    signatureRideBonusPermille: int.positive(),
     rivalBumpSpeedPermille: int.min(0).max(1000),
     /** C30: Rally Saturday (spec: "x2 Crowd, 6-9pm WAT"). The caller decides the window is active from a real clock; sim only applies the number. */
     rallySaturdayMultiplierPermille: int.positive(),
@@ -93,6 +95,14 @@ export const simConfigSchema = z.object({
     finishPadMm: int.positive(),
     hazardGapMinMm: int.positive(),
     hazardGapMaxMm: int.positive(),
+    /**
+     * C45: the tightest a state's road may pack its spawns, as permille of the
+     * gaps above. The road clamps in road.json must not go below it, and a
+     * content test holds them to that — the plausibility bound counts how many
+     * entities can fit on a course, and that count is only safe if there is a
+     * floor on the spacing.
+     */
+    roadGapFloorPermille: int.min(100).max(1000),
   }),
   tiers: z.object({
     crowdPerCapacity: int.positive(),
@@ -125,6 +135,26 @@ export const contenderSchema = z.object({
 });
 export type Contender = z.infer<typeof contenderSchema>;
 
+/**
+ * C44: per-ride handling. Each field multiplies the matching `simConfig`
+ * number, so the sim keeps one set of base values and a ride only says how it
+ * differs from them. Integers (permille) because the sim is integer-only —
+ * see docs/ARCHITECTURE.md.
+ */
+export const rideHandlingSchema = z.object({
+  /** Lane-change rate. A bus should not slide across three lanes like a bike. */
+  laneChangePermille: int.min(200).max(2000).default(1000),
+  /** Acceleration off the brake. */
+  accelPermille: int.min(200).max(2000).default(1000),
+  /** Top speed. */
+  topSpeedPermille: int.min(500).max(1500).default(1000),
+  /** Braking rate, so a heavy ride has to brake earlier for a load zone. */
+  brakeDecelPermille: int.min(200).max(2000).default(1000),
+  /** Hop airtime — a shorter window means tighter timing over a hazard. */
+  hopPermille: int.min(400).max(2000).default(1000),
+});
+export type RideHandling = z.infer<typeof rideHandlingSchema>;
+
 export const rideSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -141,6 +171,34 @@ export const rideSchema = z.object({
   ploughsLight: z.boolean().default(false),
   freeHitPerRun: z.boolean().default(false),
   magnetBonusMm: int.nonnegative().default(0),
+  /**
+   * C44. `trait` is the upside; this is what it costs you. Every ride had an
+   * upside and no downside, which is why the ladder was only ever "the last
+   * ride plus more seats" — there was never a reason to drive a keke once the
+   * danfo unlocked.
+   */
+  tradeoff: z.string().default(''),
+  /**
+   * C44 handling, permille of the matching `simConfig` number: 1000 is "drives
+   * exactly like the config says", 700 is 70% of it. Bounded well away from 0
+   * because these are divisors of feel, not of maths — a ride at 50 permille
+   * lane change would be unsteerable rather than heavy. Defaults of 1000 mean
+   * a pack that omits the block drives exactly as it did before C44.
+   */
+  /** `.parse({})` resolves the per-field defaults, so an omitted block is a neutral ride rather than a type error. */
+  handling: rideHandlingSchema.default(rideHandlingSchema.parse({})),
+  /**
+   * Share of the carried crowd a knock scatters, permille of
+   * `simConfig.hit.dropCarriedPermille`. Above 1000 sheds more than the base
+   * (an okada has nothing holding anyone on), below it sheds less.
+   */
+  hitDropPermille: int.min(100).max(3000).default(1000),
+  /**
+   * How much rival-convoy traffic this ride attracts, permille of
+   * `simConfig.spawn.rivalChancePermille`. A Grand Convoy is the one thing on
+   * the road worth coming out for, and that is its cost.
+   */
+  rivalDrawPermille: int.min(100).max(4000).default(1000),
 });
 export type Ride = z.infer<typeof rideSchema>;
 
@@ -181,6 +239,105 @@ export const hazardSchema = z.enum([
   'switchback',
 ]);
 export type Hazard = z.infer<typeof hazardSchema>;
+
+/**
+ * C45: what a hazard does to the road. Every number is permille of a value the
+ * sim already has, so a hazard never introduces a new rule — it leans on the
+ * ones C26 and C44 built. `obstacleWeights` multiplies the spawn weight of one
+ * obstacle kind from `simConfig.obstacles` (so a flood state really is full of
+ * flood patches, which C26 already blocks size L), and `road` multiplies the
+ * player's own handling for the whole run.
+ *
+ * Note that `go-slow` sits in 37 of the 38 packs: it is the common denominator
+ * of a Nigerian road, so its numbers are deliberately mild. What makes one
+ * state's road different from another's is the other two hazards.
+ */
+export const hazardRoadSchema = z.object({
+  topSpeedPermille: int.min(500).max(1500).default(1000),
+  accelPermille: int.min(500).max(1500).default(1000),
+  brakeDecelPermille: int.min(500).max(1500).default(1000),
+  laneChangePermille: int.min(500).max(1500).default(1000),
+  /** Distance between spawns. Below 1000 is a busier road, not a slower one. */
+  gapPermille: int.min(500).max(1500).default(1000),
+  /** Chance a spawn is doubled into a second lane — the cost of seeing late. */
+  doubleChancePermille: int.min(500).max(2000).default(1000),
+});
+export type HazardRoad = z.infer<typeof hazardRoadSchema>;
+
+export const hazardEffectSchema = z.object({
+  id: hazardSchema,
+  label: z.string().min(1),
+  family: z.enum(['traffic', 'water', 'air', 'terrain']),
+  /** One short line for the briefing. A content test holds it to the mechanics. */
+  note: z.string().min(1),
+  /**
+   * Keyed by `simConfig.obstacles[].kind`. Left as a loose record because the
+   * kinds live in sim.json, not in an enum here; a content test checks every
+   * key names an obstacle that actually exists.
+   */
+  obstacleWeights: z.record(z.string(), int.min(200).max(4000)).default({}),
+  road: hazardRoadSchema.default(hazardRoadSchema.parse({})),
+});
+export type HazardEffect = z.infer<typeof hazardEffectSchema>;
+
+const permilleBound = z.object({ min: int.positive(), max: int.positive() });
+
+/**
+ * C45 road tuning. A state stacks up to three hazards and their permilles
+ * multiply, so the bounds here are what stops a three-hazard road from
+ * compounding into a run where the gas pedal does nothing. `advice` is the
+ * thresholds (and copy) the briefing uses to say out loud which ride this road
+ * suits — read from the composed profile, so the advice cannot drift from the
+ * mechanics the way a hand-written line would.
+ */
+export const roadTuningSchema = z.object({
+  clamp: z.object({
+    topSpeedPermille: permilleBound,
+    accelPermille: permilleBound,
+    brakeDecelPermille: permilleBound,
+    laneChangePermille: permilleBound,
+    gapPermille: permilleBound,
+    doubleChancePermille: permilleBound,
+    obstacleWeightPermille: permilleBound,
+  }),
+  advice: z.object({
+    floodPermille: int.positive(),
+    narrowPermille: int.positive(),
+    lightPermille: int.positive(),
+    tightLanePermille: int.positive(),
+    /** The keke: every ride's handling permille is measured against this. */
+    baselinePermille: int.positive(),
+    /** Above this, a road doubles its spawns often enough to be worth warning about. */
+    doublePermille: int.positive(),
+    /** Above this, the road is rough enough that hop airtime is the answer. */
+    roughPermille: int.positive(),
+    /** At or below this, braking distance is long enough to be worth warning about. */
+    slickPermille: int.positive(),
+    /** At or below this gap, the road is busy enough that taking a knock is likely. */
+    busyPermille: int.positive(),
+    /** The briefing has room for a few lines, not every true one. */
+    maxNotes: int.positive(),
+    copy: z.object({
+      floodBad: z.string().min(1),
+      floodGood: z.string().min(1),
+      narrowGood: z.string().min(1),
+      narrowBad: z.string().min(1),
+      lightGood: z.string().min(1),
+      lightBad: z.string().min(1),
+      tightBad: z.string().min(1),
+      doubleGood: z.string().min(1),
+      doubleBad: z.string().min(1),
+      roughGood: z.string().min(1),
+      roughBad: z.string().min(1),
+      slickGood: z.string().min(1),
+      slickBad: z.string().min(1),
+      knockGood: z.string().min(1),
+      knockBad: z.string().min(1),
+      even: z.string().min(1),
+    }),
+  }),
+});
+export type RoadTuning = z.infer<typeof roadTuningSchema>;
 
 export const stateSchema = z.object({
   id: z.string().regex(/^[a-z0-9-]+$/),
@@ -261,8 +418,53 @@ export const copySchema = z.object({
   playButton: z.string(),
   closing: z.string(),
   backSoon: z.string(),
+  /** C40: the roster says out loud that the six are balanced (guardrail 5) and
+      what the lock costs, instead of leaving both to a one-line hint. */
+  rosterFair: z.string().min(20),
+  rosterLock: z.string().min(20),
+  studioLooks: z.string().min(20),
 });
 export type Copy = z.infer<typeof copySchema>;
+
+/**
+ * C41: the abuse limits the API enforces. They live in content for the same
+ * reason the privacy floor does — the client quotes them to the player ("try
+ * again in 15 minutes", "your link lasts an hour") and a second copy of the
+ * number is a promise that drifts from what the server actually does. Each one
+ * has a `CR_*` env override for a local demo; see `api/src/limits.ts`.
+ */
+export const limitsSchema = z.object({
+  auth: z.object({
+    signupPerDayPerIp: z.number().int().positive(),
+    loginPerMinutePerIp: z.number().int().positive(),
+    loginFailuresBeforeLockout: z.number().int().positive(),
+    lockoutMinutes: z.number().int().positive(),
+    forgotPerHourPerIp: z.number().int().positive(),
+    verifyTokenHours: z.number().int().positive(),
+    resetTokenMinutes: z.number().int().positive(),
+    minPasswordLength: z.number().int().min(8),
+    // C42: name-only accounts. A name-only account costs one POST, so it gets
+    // its own ceiling rather than borrowing the signup one.
+    guestPerDayPerIp: z.number().int().positive(),
+    devicePerMinutePerIp: z.number().int().positive(),
+    /** Runs a name-only player must have banked before being asked for an email. */
+    emailPromptAfterRuns: z.number().int().positive(),
+    /**
+     * Escalating snooze, in hours: each "not now" waits the next entry, and the
+     * last one repeats forever. A ladder rather than one interval, because the
+     * prompt is the only route to a second device and so cannot be dismissed
+     * permanently — but asking at the same rate forever is nagging.
+     */
+    emailPromptSnoozeHours: z.array(z.number().int().positive()).min(1),
+  }),
+  scores: z.object({
+    perMinutePerUser: z.number().int().positive(),
+  }),
+  board: z.object({
+    maxRows: z.number().int().positive(),
+  }),
+});
+export type Limits = z.infer<typeof limitsSchema>;
 
 export const legalSchema = z.object({
   version: z.string().min(1),
@@ -279,12 +481,61 @@ export const legalSchema = z.object({
 export type LegalCopy = z.infer<typeof legalSchema>;
 
 const upgradeId = z.enum(['magnet', 'shield', 'horn', 'loading', 'value']);
-export const metaConfigSchema = z.object({
-  starts: z.array(z.object({ id: z.enum(['funded', 'grassroots']), name: z.string(), description: z.string(), coins: int.nonnegative(), following: int.nonnegative() })).length(2),
-  upgrades: z.array(z.object({ id: upgradeId, name: z.string(), description: z.string(), costs: z.array(int.positive()).length(5), step: int.positive() })).length(5),
-  rewards: z.object({ baseRun: int.nonnegative(), perDelivered: int.nonnegative(), donation: int.nonnegative(), dailyMission: int.nonnegative(), weeklyMission: int.nonnegative() }),
-  missions: z.object({ daily: z.array(z.object({ id: z.enum(['run', 'deliver', 'crowd']), label: z.string(), target: int.positive() })).length(3), weekly: z.object({ id: z.string(), label: z.string(), target: int.positive() }) }),
+/**
+ * C48: what one level of an upgrade actually does, in a form both the run and
+ * the shop can read. Before this the step lived here *and* as a literal in the
+ * client's `runModifiers()` *and* (for the payout) a third time in the store,
+ * so the shop could not state an effect without a fourth copy that would rot
+ * the first time any of them moved.
+ */
+export const upgradeEffectSchema = z.object({
+  /** How `step` moves the number, and so how a level reads in the shop. */
+  kind: z.enum(['mm-up', 'ticks-up', 'ticks-down', 'permille-up']),
+  /** The run modifier this upgrade moves. One upgrade, one stat. */
+  stat: z.enum(['magnetRadiusMm', 'shieldTicks', 'hornCooldownTicks', 'loadSpeedPermille', 'rewardPermille']),
+  /** Shown in the shop beside the current and next value. */
+  label: z.string().min(1),
+  /** Level 0: zero for an additive upgrade, the un-upgraded cooldown for a subtractive one. */
+  base: int.nonnegative(),
+  /** 'ticks-down' only: the value never falls below this however many levels are bought. */
+  floor: int.nonnegative().default(0),
 });
+export type UpgradeEffect = z.infer<typeof upgradeEffectSchema>;
+
+export const metaConfigSchema = z
+  .object({
+    /** Levels an upgrade can reach. Was a literal in the Yard component. */
+    maxLevel: int.positive(),
+    starts: z.array(z.object({ id: z.enum(['funded', 'grassroots']), name: z.string(), description: z.string(), coins: int.nonnegative(), following: int.nonnegative() })).length(2),
+    upgrades: z
+      .array(
+        z.object({
+          id: upgradeId,
+          name: z.string(),
+          description: z.string(),
+          costs: z.array(int.positive()).length(5),
+          step: int.positive(),
+          effect: upgradeEffectSchema,
+        }),
+      )
+      .length(5),
+    rewards: z.object({
+      baseRun: int.nonnegative(),
+      perDelivered: int.nonnegative(),
+      /** Following gained per supporter delivered — the only source there is. */
+      followingPerDelivered: int.nonnegative(),
+      donation: int.nonnegative(),
+      dailyMission: int.nonnegative(),
+      weeklyMission: int.nonnegative(),
+    }),
+    missions: z.object({ daily: z.array(z.object({ id: z.enum(['run', 'deliver', 'crowd']), label: z.string(), target: int.positive() })).length(3), weekly: z.object({ id: z.string(), label: z.string(), target: int.positive() }) }),
+  })
+  .refine((m) => m.upgrades.every((u) => u.costs.length === m.maxLevel), {
+    message: 'every upgrade needs one cost per level up to maxLevel',
+  })
+  .refine((m) => m.upgrades.every((u) => u.effect.kind !== 'ticks-down' || u.effect.base > u.effect.floor), {
+    message: 'a ticks-down upgrade must start above its floor',
+  });
 export type MetaConfig = z.infer<typeof metaConfigSchema>;
 export type UpgradeId = z.infer<typeof upgradeId>;
 
@@ -346,3 +597,104 @@ export const outfitsSchema = z.object({
 
 export type CharacterLook = z.infer<typeof characterLookSchema>;
 export type OutfitChoice = z.infer<typeof outfitChoiceSchema>;
+
+// ---------------------------------------------------------------------------
+// Parties + the campaign map (C35)
+// ---------------------------------------------------------------------------
+
+/**
+ * An invented faction, one per Contender. Guardrail 3 bans real party names,
+ * logos, symbols and slogans outright, so a Party carries none of those: it has
+ * a role-joke name, a map colour, and a `platform` line that describes the
+ * archetype's trade rather than a political position. There is deliberately no
+ * slogan, chant or emblem field for content to fill in later.
+ */
+export const partySchema = z.object({
+  id: z.string().regex(/^[a-z0-9-]+$/),
+  name: z.string().min(1),
+  /** Short label printed on a map tile, where the full name will not fit. */
+  tag: z.string().min(1).max(10),
+  contenderId: z.string().regex(/^[a-z0-9-]+$/),
+  color: hex,
+  /** Text colour that stays readable on `color`. */
+  ink: hex,
+  platform: z.string().min(1),
+});
+export type Party = z.infer<typeof partySchema>;
+
+/**
+ * Hex-cartogram layout. The landmass is invented — regions are laid out so the
+ * six zones stay neighbours, never traced from a real map. `col` is allowed a
+ * half step because rows of a pointy-top hex grid interlock.
+ */
+export const mapSchema = z.object({
+  hexSize: int.positive(),
+  gap: int.nonnegative(),
+  standings: z.object({
+    /** Lowest generated rival Crowd for a region. */
+    rivalCrowdMin: int.nonnegative(),
+    /** Width of the generated band; a rival lands in [min, min + span). */
+    rivalCrowdSpan: int.positive(),
+    /** Top two within this many Crowd reads as too close to call. */
+    contestedWithin: int.nonnegative(),
+    /**
+     * Distinct players a region needs before its live party split may be
+     * published (guardrail 2). The API enforces it and the About page quotes
+     * it, so it lives here rather than in either of them.
+     */
+    minPlayersPerRegion: int.positive(),
+  }),
+  regions: z
+    .array(
+      z.object({
+        id: z.string().regex(/^[a-z0-9-]+$/),
+        col: z.number().refine((n) => Number.isInteger(n * 2), 'col must be a whole or half step'),
+        row: int.nonnegative(),
+      }),
+    )
+    .min(1),
+});
+export type CampaignMapLayout = z.infer<typeof mapSchema>;
+
+/**
+ * C46: how a thumb is read. The run is driven by gestures on the glass, not by
+ * a row of pads, so every threshold a gesture is judged against lives here
+ * rather than inline in the client. Milliseconds and CSS pixels — wall-clock
+ * player-side numbers, never the sim's integer ticks.
+ */
+export const controlsSchema = z.object({
+  /**
+   * The gas pedal is gone from the screen, so the convoy drives itself and the
+   * player's only speed input is the brake. Turning this off puts the player
+   * back on manual gas (keyboard ArrowUp) and is how a desktop-only build
+   * would ship.
+   */
+  autoGas: z.boolean(),
+  /** How far a finger must travel for the move to count as a flick. */
+  swipeMinPx: int.positive(),
+  /** And how fast — a slow drag re-anchors silently instead of firing. */
+  swipeMaxMs: int.positive(),
+  /** A finger that stays inside this circle is still a tap, not a flick. */
+  tapMaxMovePx: int.positive(),
+  /** Longer than this and a press is a hold (the horn), not a tap. */
+  tapMaxMs: int.positive(),
+  /** A still finger blows the horn once it has sat this long. */
+  holdHornMs: int.positive(),
+  /**
+   * A flick down and straight off the glass still has to brake for something,
+   * so the brake stays on this long after the finger leaves. Loading at a zone
+   * wants a real hold; this is for dodging.
+   */
+  brakeGraceMs: int.positive(),
+  /** How long the gesture reminder sits on screen at the start of a run. */
+  hintMs: int.positive(),
+  /** Buzz lengths, all subject to the player's haptics setting. */
+  haptics: z.object({
+    laneMs: int.nonnegative(),
+    hopMs: int.nonnegative(),
+    brakeMs: int.nonnegative(),
+    beatMs: int.nonnegative(),
+    hornMs: int.nonnegative(),
+  }),
+});
+export type ControlTuning = z.infer<typeof controlsSchema>;

@@ -1,0 +1,162 @@
+[
+  {
+    "id": "go-slow",
+    "label": "Go-slow",
+    "family": "traffic",
+    "note": "Traffic sits in every lane",
+    "obstacleWeights": { "car": 1300, "danfo": 1250, "trailer": 1200 },
+    "road": { "topSpeedPermille": 980, "gapPermille": 950 }
+  },
+  {
+    "id": "keke-swerve",
+    "label": "Keke swerve",
+    "family": "traffic",
+    "note": "Kekes cut across without looking",
+    "obstacleWeights": { "narrow-gate": 1400, "cones": 1250 },
+    "road": { "doubleChancePermille": 1200 }
+  },
+  {
+    "id": "okada-swarm",
+    "label": "Okada swarm",
+    "family": "traffic",
+    "note": "Bikes everywhere, light clutter all over the road",
+    "obstacleWeights": { "cones": 1500, "tyres": 1250 },
+    "road": { "gapPermille": 920, "doubleChancePermille": 1250 }
+  },
+  {
+    "id": "cart-weave",
+    "label": "Cart weave",
+    "family": "traffic",
+    "note": "Hand carts drift between lanes",
+    "obstacleWeights": { "cones": 1350, "barricade": 1300 },
+    "road": { "laneChangePermille": 960 }
+  },
+  {
+    "id": "cattle-crossing",
+    "label": "Cattle crossing",
+    "family": "traffic",
+    "note": "Herds on the tarmac — slow, wide, immovable",
+    "obstacleWeights": { "tyres": 1400, "jersey": 1300 },
+    "road": { "topSpeedPermille": 950 }
+  },
+  {
+    "id": "roundabout-maze",
+    "label": "Roundabout maze",
+    "family": "traffic",
+    "note": "Kerbs and islands squeeze the lanes",
+    "obstacleWeights": { "jersey": 1400, "barricade": 1250, "narrow-gate": 1200 },
+    "road": { "laneChangePermille": 900 }
+  },
+  {
+    "id": "market-spill",
+    "label": "Market spill",
+    "family": "traffic",
+    "note": "Market goods spread into the road",
+    "obstacleWeights": { "cones": 1400, "tyres": 1250, "barricade": 1200 },
+    "road": { "gapPermille": 900 }
+  },
+  {
+    "id": "crowd-surge",
+    "label": "Crowd surge",
+    "family": "traffic",
+    "note": "People on the tarmac — barely a gap left",
+    "obstacleWeights": { "cones": 1500, "narrow-gate": 1300 },
+    "road": { "topSpeedPermille": 960, "gapPermille": 860 }
+  },
+  {
+    "id": "flash-flood",
+    "label": "Flash flood",
+    "family": "water",
+    "note": "Water fills the dips with no warning",
+    "obstacleWeights": { "flood-patch": 2200, "pothole": 1200 },
+    "road": { "brakeDecelPermille": 920 }
+  },
+  {
+    "id": "flood-sheet",
+    "label": "Flood sheet",
+    "family": "water",
+    "note": "Standing water over long stretches",
+    "obstacleWeights": { "flood-patch": 2600 },
+    "road": { "topSpeedPermille": 950, "brakeDecelPermille": 900 }
+  },
+  {
+    "id": "creek-crossing",
+    "label": "Creek crossing",
+    "family": "water",
+    "note": "Low crossings with water either side",
+    "obstacleWeights": { "flood-patch": 1800, "jersey": 1200 },
+    "road": { "laneChangePermille": 950 }
+  },
+  {
+    "id": "rain-slick",
+    "label": "Rain slick",
+    "family": "water",
+    "note": "Wet tarmac — braking takes longer",
+    "obstacleWeights": { "pothole": 1250 },
+    "road": { "brakeDecelPermille": 820, "laneChangePermille": 960 }
+  },
+  {
+    "id": "river-fog",
+    "label": "River fog",
+    "family": "water",
+    "note": "Fog off the water hides what is next",
+    "obstacleWeights": {},
+    "road": { "topSpeedPermille": 940, "doubleChancePermille": 1250 }
+  },
+  {
+    "id": "dust-plume",
+    "label": "Dust plume",
+    "family": "air",
+    "note": "Dust hangs over a rough surface",
+    "obstacleWeights": { "pothole": 1300 },
+    "road": { "topSpeedPermille": 970, "doubleChancePermille": 1150 }
+  },
+  {
+    "id": "dust-storm",
+    "label": "Dust storm",
+    "family": "air",
+    "note": "Dust closes the road down to a few metres",
+    "obstacleWeights": { "pothole": 1200 },
+    "road": { "topSpeedPermille": 910, "laneChangePermille": 940, "doubleChancePermille": 1300 }
+  },
+  {
+    "id": "heat-shimmer",
+    "label": "Heat shimmer",
+    "family": "air",
+    "note": "Heat bends the road ahead",
+    "obstacleWeights": {},
+    "road": { "topSpeedPermille": 960, "doubleChancePermille": 1200 }
+  },
+  {
+    "id": "low-visibility",
+    "label": "Low visibility",
+    "family": "air",
+    "note": "You see the next thing late",
+    "obstacleWeights": {},
+    "road": { "topSpeedPermille": 930, "doubleChancePermille": 1350 }
+  },
+  {
+    "id": "hilly-road",
+    "label": "Hilly road",
+    "family": "terrain",
+    "note": "Climbs kill your pickup",
+    "obstacleWeights": { "pothole": 1350, "roadworks": 1200 },
+    "road": { "topSpeedPermille": 960, "accelPermille": 900 }
+  },
+  {
+    "id": "rocky-ridge",
+    "label": "Rocky ridge",
+    "family": "terrain",
+    "note": "Broken, stony surface",
+    "obstacleWeights": { "pothole": 1600, "tyres": 1250 },
+    "road": { "topSpeedPermille": 950, "accelPermille": 930 }
+  },
+  {
+    "id": "switchback",
+    "label": "Switchback",
+    "family": "terrain",
+    "note": "Tight bends, one after another",
+    "obstacleWeights": { "narrow-gate": 1300, "jersey": 1200 },
+    "road": { "topSpeedPermille": 940, "laneChangePermille": 880 }
+  }
+]

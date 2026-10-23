@@ -39,6 +39,22 @@ export function contenderShareAllowed(log: ConsentEntry[]): boolean {
   return false;
 }
 
+/**
+ * What one flip of the Contender-share switch has to do.
+ *
+ * The device log is the legal record and is always written, signed in or not.
+ * The server is told only when there is an account to tell — and telling it is
+ * not optional on withdrawal: that call is what erases the Contender ids the
+ * server already stored, which is the half of guardrail 10 that works
+ * backwards.
+ */
+export function shareConsentPlan(
+  next: boolean,
+  signedIn: boolean,
+): { local: 'grant' | 'withdraw'; server: boolean | null } {
+  return { local: next ? 'grant' : 'withdraw', server: signedIn ? next : null };
+}
+
 export function latestAccepted(log: ConsentEntry[], kind: ConsentKind): ConsentEntry | null {
   for (let i = log.length - 1; i >= 0; i--) {
     const e = log[i]!;

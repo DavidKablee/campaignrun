@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { appendConsent, contenderShareAllowed, latestAccepted, scoreSubmitFields } from '../src/consent';
+import { appendConsent, contenderShareAllowed, latestAccepted, scoreSubmitFields, shareConsentPlan } from '../src/consent';
 
 describe('C11 consent log', () => {
   it('appends immutable entries', () => {
@@ -37,5 +37,26 @@ describe('C11 consent log', () => {
       consentLog: appendConsent([], 'contender-share', 'v1', true, 1),
     });
     expect(allowed.contenderId).toBe('mama-ankara');
+  });
+});
+
+describe('C39: the Contender switch and the server', () => {
+  it('always writes the device log, signed in or not', () => {
+    expect(shareConsentPlan(true, false).local).toBe('grant');
+    expect(shareConsentPlan(true, true).local).toBe('grant');
+    expect(shareConsentPlan(false, false).local).toBe('withdraw');
+    expect(shareConsentPlan(false, true).local).toBe('withdraw');
+  });
+
+  it('never calls the server for a signed-out player', () => {
+    expect(shareConsentPlan(true, false).server).toBeNull();
+    expect(shareConsentPlan(false, false).server).toBeNull();
+  });
+
+  it('tells the server on withdrawal, not only on consent', () => {
+    // The withdrawal call is what erases ids the server already holds, so a
+    // plan that skipped it would leave shared data behind.
+    expect(shareConsentPlan(false, true).server).toBe(false);
+    expect(shareConsentPlan(true, true).server).toBe(true);
   });
 });

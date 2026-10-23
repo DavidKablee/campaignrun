@@ -2,6 +2,14 @@ import { metaConfig, type UpgradeId } from '@cr/content';
 
 export type StartId = 'funded' | 'grassroots';
 export type UpgradeLevels = Record<UpgradeId, number>;
+
+/**
+ * C48: `runModifiers`, `runPayout` and `followingGain` moved into
+ * `@cr/content`, because the shop has to print the same numbers the run
+ * applies and it could not reach them here. Re-exported so every existing
+ * caller keeps its import.
+ */
+export { runModifiers, runPayout, followingGain } from '@cr/content';
 export type MissionProgress = Record<string, number>;
 
 export const emptyUpgrades = (): UpgradeLevels => ({ magnet: 0, shield: 0, horn: 0, loading: 0, value: 0 });
@@ -20,15 +28,6 @@ export function watWeek(now = Date.now()): string {
 }
 export function upgradeCost(id: UpgradeId, level: number): number | null {
   return metaConfig.upgrades.find((u) => u.id === id)?.costs[level] ?? null;
-}
-export function runModifiers(levels: UpgradeLevels) {
-  return {
-    magnetRadiusMm: levels.magnet * 250,
-    shieldTicks: levels.shield * 30,
-    hornCooldownTicks: Math.max(180, 720 - levels.horn * 90),
-    loadSpeedPermille: 1000 + levels.loading * 60,
-    rewardPermille: 1000 + levels.value * 50,
-  };
 }
 export function missionDelta(progress: MissionProgress, completed: string[], delivered: number, crowd: number, finished: boolean) {
   if (!finished) return { progress, completed };

@@ -1,0 +1,197 @@
+{
+  "hexSize": 30,
+  "gap": 2,
+  "standings": {
+    "rivalCrowdMin": 6,
+    "rivalCrowdSpan": 33,
+    "contestedWithin": 2,
+    "minPlayersPerRegion": 200
+  },
+  "regions": [
+    {
+      "id": "sokoto",
+      "col": -2,
+      "row": 0
+    },
+    {
+      "id": "katsina",
+      "col": -1,
+      "row": 0
+    },
+    {
+      "id": "jigawa",
+      "col": 0,
+      "row": 0
+    },
+    {
+      "id": "yobe",
+      "col": 1,
+      "row": 0
+    },
+    {
+      "id": "borno",
+      "col": 2,
+      "row": 0
+    },
+    {
+      "id": "kebbi",
+      "col": -2.5,
+      "row": 1
+    },
+    {
+      "id": "zamfara",
+      "col": -1.5,
+      "row": 1
+    },
+    {
+      "id": "kano",
+      "col": -0.5,
+      "row": 1
+    },
+    {
+      "id": "bauchi",
+      "col": 0.5,
+      "row": 1
+    },
+    {
+      "id": "gombe",
+      "col": 1.5,
+      "row": 1
+    },
+    {
+      "id": "niger",
+      "col": -2,
+      "row": 2
+    },
+    {
+      "id": "kaduna",
+      "col": -1,
+      "row": 2
+    },
+    {
+      "id": "plateau",
+      "col": 0,
+      "row": 2
+    },
+    {
+      "id": "adamawa",
+      "col": 1,
+      "row": 2
+    },
+    {
+      "id": "taraba",
+      "col": 2,
+      "row": 2
+    },
+    {
+      "id": "kwara",
+      "col": -1.5,
+      "row": 3
+    },
+    {
+      "id": "fct",
+      "col": -0.5,
+      "row": 3
+    },
+    {
+      "id": "nasarawa",
+      "col": 0.5,
+      "row": 3
+    },
+    {
+      "id": "benue",
+      "col": 1.5,
+      "row": 3
+    },
+    {
+      "id": "oyo",
+      "col": -2,
+      "row": 4
+    },
+    {
+      "id": "osun",
+      "col": -1,
+      "row": 4
+    },
+    {
+      "id": "kogi",
+      "col": 0,
+      "row": 4
+    },
+    {
+      "id": "enugu",
+      "col": 1,
+      "row": 4
+    },
+    {
+      "id": "ebonyi",
+      "col": 2,
+      "row": 4
+    },
+    {
+      "id": "ogun",
+      "col": -3.5,
+      "row": 5
+    },
+    {
+      "id": "lagos",
+      "col": -2.5,
+      "row": 5
+    },
+    {
+      "id": "ondo",
+      "col": -1.5,
+      "row": 5
+    },
+    {
+      "id": "ekiti",
+      "col": -0.5,
+      "row": 5
+    },
+    {
+      "id": "anambra",
+      "col": 0.5,
+      "row": 5
+    },
+    {
+      "id": "imo",
+      "col": 1.5,
+      "row": 5
+    },
+    {
+      "id": "abia",
+      "col": 2.5,
+      "row": 5
+    },
+    {
+      "id": "edo",
+      "col": -3,
+      "row": 6
+    },
+    {
+      "id": "delta",
+      "col": -2,
+      "row": 6
+    },
+    {
+      "id": "bayelsa",
+      "col": -1,
+      "row": 6
+    },
+    {
+      "id": "rivers",
+      "col": 0,
+      "row": 6
+    },
+    {
+      "id": "akwa-ibom",
+      "col": 1,
+      "row": 6
+    },
+    {
+      "id": "cross-river",
+      "col": 2,
+      "row": 6
+    }
+  ]
+}

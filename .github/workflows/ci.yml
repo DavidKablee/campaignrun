@@ -3,6 +3,28 @@ on: [push, pull_request]
 jobs:
   verify:
     runs-on: ubuntu-latest
+    # Without a database the 36 API tests skip, so everything C37 and C41 put
+    # on the server — the guardrail-10 cascade, the lockout, the reset flow,
+    # the score plausibility check — was green in CI without ever running.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: cr
+          POSTGRES_PASSWORD: cr
+          POSTGRES_DB: campaignrun_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgres://cr:cr@127.0.0.1:5432/campaignrun_test
+      # Matches the inline setting in the test:e2e script, so the install step
+      # and the run step look in the same place for the browser.
+      PLAYWRIGHT_BROWSERS_PATH: '0'
+
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v3
@@ -14,3 +36,8 @@ jobs:
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - run: pnpm verify
+      # The only tests that exercise the real UI. Not part of `pnpm verify`
+      # because it needs a browser, and so it had never run anywhere: a stale
+      # assertion survived several chunks unnoticed.
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:e2e

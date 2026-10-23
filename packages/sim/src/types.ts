@@ -126,7 +126,72 @@ export interface SimState {
   rideMagnetBonusMm: number;
   /** 1000 = no bonus, 1100 = +10% (state's signatureRide === current ride). */
   signatureRideBonusPermille: number;
+
+  /**
+   * C44 handling. Each field is permille of the matching `SimConfig` number, so
+   * the config keeps one set of base values and a ride only says how it differs
+   * from them. All 1000 means "drives exactly as the config says", which is how
+   * every ride behaved before C44.
+   */
+  rideHandling: RideHandling;
+  /**
+   * C44: permille of `config.hit.dropCarriedPermille` — the share of the
+   * carried crowd a dent scatters. Integrity hazards keep their own per-kind
+   * percentages; this is the plain knock only.
+   */
+  rideHitDropPermille: number;
+  /** C44: permille of `config.spawn.rivalChancePermille`. Read at course build. */
+  rideRivalDrawPermille: number;
+
+  /**
+   * C45: what this state's road does to the run. Captured at run start from
+   * the state pack's hazards, already composed and clamped by @cr/content — the
+   * sim never sees a hazard name, only its arithmetic.
+   */
+  road: RoadProfile;
 }
+
+/** C45. Mirrors `RoadProfile` in @cr/content; see the note on `RideHandling` above. */
+export interface RoadProfile {
+  topSpeedPermille: number;
+  accelPermille: number;
+  brakeDecelPermille: number;
+  laneChangePermille: number;
+  /** Distance between spawns. Below 1000 is a busier road. */
+  gapPermille: number;
+  doubleChancePermille: number;
+  /** Per `config.obstacles[].kind`; an absent kind is unchanged (1000). */
+  obstacleWeightPermille: Record<string, number>;
+}
+
+/** A road with no hazards: the config's own numbers, which is every run before C45. */
+export const NEUTRAL_ROAD: RoadProfile = {
+  topSpeedPermille: 1000,
+  accelPermille: 1000,
+  brakeDecelPermille: 1000,
+  laneChangePermille: 1000,
+  gapPermille: 1000,
+  doubleChancePermille: 1000,
+  obstacleWeightPermille: {},
+};
+
+/** C44. Mirrors `rideHandlingSchema` in @cr/content, declared here so the sim stays decoupled from the content package's types. */
+export interface RideHandling {
+  laneChangePermille: number;
+  accelPermille: number;
+  topSpeedPermille: number;
+  brakeDecelPermille: number;
+  hopPermille: number;
+}
+
+/** The neutral ride: the config's own numbers, unmodified. */
+export const NEUTRAL_HANDLING: RideHandling = {
+  laneChangePermille: 1000,
+  accelPermille: 1000,
+  topSpeedPermille: 1000,
+  brakeDecelPermille: 1000,
+  hopPermille: 1000,
+};
 
 export const Btn = {
   Left: 1,

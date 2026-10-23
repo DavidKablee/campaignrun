@@ -30,6 +30,8 @@ body,
   color: var(--cr-paper);
   -webkit-tap-highlight-color: transparent;
   user-select: none;
+  -webkit-user-select: none;
+  overscroll-behavior: none;
 }
 
 .cr-shell {
@@ -56,10 +58,6 @@ body,
   max-width: 560px;
   margin-left: auto;
   margin-right: auto;
-}
-
-.cr-screen--roster > * {
-  max-width: 1180px;
 }
 
 .cr-screen--splash {
@@ -316,18 +314,6 @@ body,
   box-shadow: inset 0 0 0 2px rgba(247, 241, 227, 0.35);
 }
 
-.cr-screen--roster {
-  background: linear-gradient(160deg, #142038, #0b1220 55%);
-  gap: 0.6rem;
-  overflow: auto;
-}
-
-.cr-screen--roster h2 {
-  font-family: var(--cr-font-display);
-  margin: 0;
-  color: var(--cr-danfo);
-}
-
 .cr-chrome-top {
   display: flex;
   justify-content: space-between;
@@ -341,132 +327,6 @@ body,
   gap: 0.4rem;
   flex-wrap: wrap;
   align-items: center;
-}
-.cr-roster-layout {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.85rem;
-  padding-bottom: 1rem;
-}
-@media (min-width: 900px) {
-  .cr-roster-layout {
-    grid-template-columns: minmax(280px, 0.9fr) minmax(0, 1.2fr);
-    align-items: stretch;
-  }
-}
-.cr-roster-hero {
-  display: grid;
-  /* The art row sizes itself from the art box's aspect-ratio. The old
-     `minmax(200px, 52%)` resolved against an indefinite parent, which is what
-     made the image fall back to its natural height and centre-crop (C32). */
-  grid-template-rows: auto 1fr;
-  border-radius: 16px;
-  overflow: hidden;
-  background: linear-gradient(165deg, var(--c1, #e0902b), var(--c2, #2a6f97));
-  box-shadow: 0 8px 0 rgba(0, 0, 0, 0.3);
-  min-height: 320px;
-}
-.cr-roster-hero-art {
-  position: relative;
-  /* A half-body portrait needs a box taller than it is wide to fill. Stacked
-     above the copy on a full-bleed card this box would otherwise be a 4:1
-     letterbox with the character stranded, thumbnail-sized, in the middle. */
-  aspect-ratio: 5 / 4;
-  min-height: 0;
-  overflow: hidden;
-}
-/* Tablet / small laptop: the card is wide but the layout has not split into two
-   columns yet, so put the art beside the copy instead of above it. */
-@media (min-width: 620px) and (max-width: 899px) {
-  .cr-roster-hero {
-    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
-    grid-template-rows: 1fr;
-  }
-  .cr-roster-hero-art {
-    aspect-ratio: auto;
-    height: 100%;
-  }
-}
-.cr-roster-hero-art img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  /* Half-body render: contain keeps head, prop and feet in frame and lets the
-     palette gradient fill the sides. */
-  object-fit: contain;
-}
-.cr-roster-hero-art b {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-}
-.cr-roster-hero-art b {
-  font-family: var(--cr-font-display);
-  font-size: 4rem;
-  color: rgba(11, 18, 32, 0.45);
-}
-.cr-roster-hero-copy {
-  background: rgba(11, 18, 32, 0.88);
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
-}
-.cr-roster-hero-copy h3 {
-  margin: 0;
-  font-family: var(--cr-font-display);
-  color: var(--cr-danfo);
-  font-size: 1.6rem;
-}
-.cr-roster {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 0.55rem;
-  padding-bottom: 0.25rem;
-  align-content: start;
-}
-
-.cr-contender {
-  display: grid;
-  grid-template-columns: 64px 1fr;
-  gap: 0.55rem;
-  align-items: center;
-  text-align: left;
-  background: var(--cr-indigo);
-  border: 2px solid transparent;
-  border-radius: 12px;
-  padding: 0.55rem;
-  color: var(--cr-paper);
-  cursor: pointer;
-  min-height: 72px;
-  width: 100%;
-  font: inherit;
-}
-
-.cr-contender:focus-visible,
-.cr-contender.is-active {
-  border-color: var(--cr-danfo);
-}
-
-.cr-contender strong {
-  font-family: var(--cr-font-display);
-  display: block;
-  font-size: 1.05rem;
-}
-
-.cr-contender small {
-  opacity: 0.8;
-  display: block;
-  margin-top: 0.2rem;
-}
-
-.cr-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-  margin-top: 0.4rem;
 }
 
 .cr-chip {
@@ -502,6 +362,11 @@ body,
   width: 100%;
   height: 100%;
   touch-action: none;
+  /* C46: a held finger is the horn, so the platform's text-selection and
+     link-preview callouts have to stay out of the way. */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .cr-canvas {
@@ -627,50 +492,160 @@ body,
 .cr-controls {
   pointer-events: none;
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 0.4rem;
+  grid-template-columns: 1fr auto auto;
+  gap: 0.5rem;
   align-items: end;
 }
-.cr-controls > * {
+.cr-controls > button {
   pointer-events: auto;
 }
 
+/* C46: with the pads gone, this is the only thing that says "you are braking". */
+.cr-brake-tell {
+  align-self: center;
+  justify-self: start;
+  font-family: var(--cr-font-display);
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(11, 18, 32, 0.85);
+  /* Lighter than --cr-jollof: the tell can sit over white lane paint, and the
+     brand orange only reaches 2.9:1 against that blend. */
+  color: #ffa05c;
+  box-shadow: inset 0 0 0 2px rgba(232, 93, 4, 0.7);
+  opacity: 0;
+  transition: opacity 0.1s ease;
+}
+.cr-brake-tell.is-on {
+  opacity: 1;
+}
+
 .cr-pad {
+  position: relative;
+  overflow: hidden;
+  min-width: 104px;
   min-height: 64px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.1rem;
+  padding: 0.4rem 0.6rem 0.6rem;
   border: none;
   border-radius: 14px;
   font-family: var(--cr-font-display);
   font-size: 0.95rem;
-  background: rgba(11, 18, 32, 0.75);
+  background: rgba(11, 18, 32, 0.78);
   color: var(--cr-paper);
   box-shadow: inset 0 0 0 2px rgba(245, 197, 24, 0.35);
   touch-action: none;
+  text-transform: uppercase;
 }
 
-.cr-pad:active,
-.cr-pad.is-held {
+.cr-pad small {
+  font-family: var(--cr-font-body);
+  font-size: 0.6rem;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  opacity: 0.8;
+}
+
+/* The charge/window bar. Both pads are timed against something, so both show
+   how much time is left rather than only lighting up when pressed. */
+.cr-pad > i {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 4px;
+  width: 0%;
+  background: rgba(245, 197, 24, 0.55);
+}
+
+.cr-pad:active {
   background: var(--cr-danfo);
   color: var(--cr-ink);
 }
 
-.cr-pad--brake { grid-column: 1; }
-.cr-pad--horn { grid-column: 2; }
-.cr-pad--beat { grid-column: 3; }
-.cr-pad--perk { grid-column: 4; }
-.cr-pad--gas { grid-column: 5; }
+.cr-pad--beat.is-live {
+  box-shadow: inset 0 0 0 2px var(--cr-danfo);
+  color: var(--cr-danfo);
+  animation: cr-beat-pulse 0.4s ease-in-out infinite alternate;
+}
+.cr-pad--beat.is-live > i {
+  background: var(--cr-danfo);
+}
 
-/* Landscape: left cluster + GAS right. */
-@media (min-width: 700px) {
-  .cr-controls {
-    grid-template-columns: repeat(4, minmax(90px, 140px)) 1fr minmax(180px, 260px);
+.cr-pad--perk.is-ready {
+  box-shadow: inset 0 0 0 2px var(--cr-adire);
+  color: #9fd2ee;
+}
+.cr-pad--perk.is-ready > i {
+  background: var(--cr-adire);
+}
+.cr-pad--perk.is-live {
+  background: var(--cr-adire);
+  color: var(--cr-paper);
+}
+
+@keyframes cr-beat-pulse {
+  from {
+    transform: scale(1);
   }
-  .cr-pad--brake { grid-column: 1; }
-  .cr-pad--horn { grid-column: 2; }
-  .cr-pad--beat { grid-column: 3; }
-  .cr-pad--perk { grid-column: 4; }
-  .cr-pad--gas { grid-column: 6; }
-  .cr-pad { min-height: 84px; font-size: 1rem; }
+  to {
+    transform: scale(1.05);
+  }
+}
+
+/* The gesture reminder. Holds, then fades — its duration comes from
+   controls.json via an inline animation-duration. */
+.cr-gestures {
+  /* Out of the HUD's column flow: as a flex child it took a share of the
+     space-between gap and pushed the pads 2 cm up the screen. */
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(5.5rem + var(--cr-safe-bottom));
+  max-width: min(92%, 440px);
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(11, 18, 32, 0.82);
+  font-size: 0.68rem;
+  line-height: 1.4;
+  text-align: center;
+  color: var(--cr-paper);
+  pointer-events: none;
+  animation-name: cr-gesture-hint;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+.cr-gestures b {
+  color: var(--cr-danfo);
+}
+
+@keyframes cr-gesture-hint {
+  0%,
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (min-width: 700px) {
+  .cr-pad {
+    min-width: 132px;
+    min-height: 84px;
+    font-size: 1rem;
+  }
+  .cr-pad small {
+    font-size: 0.68rem;
+  }
   .cr-hud-top { max-width: 900px; }
+  .cr-gestures {
+    font-size: 0.78rem;
+    bottom: calc(6.5rem + var(--cr-safe-bottom));
+  }
 }
 
 .cr-mini-btn {
@@ -720,6 +695,10 @@ body,
 }
 .cr-screen--map > * {
   max-width: 1180px;
+  /* The screen is a fixed-height scrolling column, so its sections must keep
+     their natural height — shrinking them collapsed the board rows into each
+     other on a phone. */
+  flex: none;
 }
 .cr-board-ticker {
   display: flex;
@@ -766,10 +745,6 @@ body,
 .cr-board-next {
   font-size: 1rem !important;
 }
-.cr-board-live-note {
-  margin: -0.15rem 0 0.25rem;
-  padding: 0 0.15rem;
-}
 .cr-board-main {
   display: grid;
   grid-template-columns: 1fr;
@@ -778,63 +753,172 @@ body,
 }
 @media (min-width: 900px) {
   .cr-board-main {
-    grid-template-columns: minmax(0, 1.4fr) minmax(240px, 0.7fr);
+    grid-template-columns: minmax(0, 1.4fr) minmax(250px, 0.75fr);
+    grid-template-areas:
+      'stage focus'
+      'picker focus';
     align-items: start;
   }
+  .cr-board-stage { grid-area: stage; }
+  .cr-board-picker { grid-area: picker; }
+  .cr-board-focus { grid-area: focus; }
 }
-.cr-board-grid {
+/* --- campaign board (C35) ------------------------------------------------ */
+.cr-board-stage {
+  position: relative;
+  /* Shape the stage to the board, not to the viewport: a fixed vh left a tall
+     empty frame around a wide, short map on a phone. */
+  aspect-ratio: 16 / 11;
+  height: auto;
+  min-height: 210px;
+  max-height: 62vh;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 2px solid rgba(245, 197, 24, 0.3);
+  background: #0a1a24;
+}
+.cr-board-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* Horizontal drag turns the board; vertical still scrolls the screen. */
+  touch-action: pan-y;
+}
+.cr-board-picker {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
-  gap: 0.35rem;
+  grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+  gap: 0.3rem;
 }
-.cr-state-cell {
+/* C47: 37 chips is seven rows — half a phone screen of list sitting between
+   the map and the state you just tapped on it. The list stays complete and
+   keyboard-reachable (the hex stage is aria-hidden, so this is the only way
+   to pick a state without a pointer); it just scrolls in its own box instead
+   of pushing the focus panel off the page. */
+@media (max-width: 619px) {
+  .cr-board-picker {
+    max-height: 36vh;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    padding-right: 0.15rem;
+  }
+  .cr-board-stage {
+    max-height: 34vh;
+  }
+}
+.cr-region-chip {
   appearance: none;
-  border: none;
-  border-radius: 8px;
-  min-height: 58px;
-  padding: 0.35rem 0.3rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.15rem;
+  border: 1px solid rgba(247, 241, 227, 0.1);
+  border-left: 4px solid var(--fill, #79838c);
+  border-radius: 7px;
+  min-height: 34px;
+  padding: 0.25rem;
   cursor: pointer;
   font: inherit;
+  font-family: var(--cr-font-display);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
   color: var(--cr-paper);
   background: rgba(247, 241, 227, 0.06);
   transition: box-shadow 0.15s ease, background 0.15s ease;
 }
-.cr-state-cell abbr {
-  font-family: var(--cr-font-display);
-  font-size: 0.85rem;
-  letter-spacing: 0.04em;
-  text-decoration: none;
+.cr-region-chip.is-locked {
+  opacity: 0.5;
 }
-.cr-state-cell span {
-  font-size: 0.62rem;
-  opacity: 0.8;
-}
-.cr-state-cell.is-open {
-  background: rgba(245, 197, 24, calc(var(--heat, 0.55)));
-  color: var(--cr-ink);
-}
-.cr-state-cell.is-open span {
-  opacity: 0.9;
-  font-weight: 700;
-}
-.cr-state-cell.is-locked {
-  opacity: 0.55;
-}
-.cr-state-cell.is-focus {
+.cr-region-chip.is-focus {
+  background: rgba(247, 241, 227, 0.16);
   box-shadow: 0 0 0 2px var(--cr-paper);
 }
-.cr-state-cell.zone-sw.is-locked { box-shadow: inset 0 -2px 0 #f5c518; }
-.cr-state-cell.zone-se.is-locked { box-shadow: inset 0 -2px 0 #2a6f97; }
-.cr-state-cell.zone-ss.is-locked { box-shadow: inset 0 -2px 0 #e85d04; }
-.cr-state-cell.zone-nw.is-locked { box-shadow: inset 0 -2px 0 #1fa45b; }
-.cr-state-cell.zone-ne.is-locked { box-shadow: inset 0 -2px 0 #7b5ea7; }
-.cr-state-cell.zone-nc.is-locked { box-shadow: inset 0 -2px 0 #2ec4b6; }
-.cr-state-cell.zone-fct.is-locked { box-shadow: inset 0 -2px 0 #f7f1e3; }
+.cr-tally {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.cr-tally-bar {
+  display: flex;
+  height: 16px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(247, 241, 227, 0.08);
+}
+.cr-tally-bar i {
+  display: block;
+  min-width: 3px;
+  transition: flex-grow 0.25s ease;
+}
+.cr-tally-bar i.is-mine {
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.85);
+}
+.cr-tally-keys {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.75rem;
+  font-size: 0.72rem;
+}
+.cr-tally-keys li {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  opacity: 0.85;
+}
+.cr-tally-keys li.is-mine {
+  opacity: 1;
+  font-weight: 700;
+}
+.cr-tally-keys i,
+.cr-tallies i,
+.cr-hold i {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex: none;
+}
+.cr-tally-keys b {
+  font-family: var(--cr-font-display);
+  color: var(--cr-danfo);
+}
+.cr-hold {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0.4rem 0.55rem;
+  border-radius: 9px;
+  font-size: 0.82rem;
+  background: color-mix(in srgb, var(--fill) 22%, transparent);
+  border-left: 4px solid var(--fill);
+}
+.cr-tallies {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.22rem;
+  font-size: 0.76rem;
+}
+.cr-tallies li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  opacity: 0.8;
+}
+.cr-tallies li.is-mine {
+  opacity: 1;
+  font-weight: 700;
+}
+.cr-tallies span {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cr-tallies b {
+  font-family: var(--cr-font-display);
+  color: var(--cr-danfo);
+}
 .cr-board-focus {
   background: rgba(11, 18, 32, 0.72);
   border: 2px solid rgba(245, 197, 24, 0.4);
@@ -874,25 +958,15 @@ body,
 }
 .cr-board-legend {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.9rem;
+  flex-direction: column;
+  gap: 0.3rem;
   font-size: 0.72rem;
-  opacity: 0.75;
+  opacity: 0.78;
+  padding-bottom: 0.4rem;
 }
 .cr-board-legend span {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
+  display: block;
 }
-.cr-leg-swatch {
-  width: 12px;
-  height: 12px;
-  border-radius: 3px;
-  display: inline-block;
-  background: rgba(247, 241, 227, 0.2);
-}
-.cr-leg-swatch.is-open { background: var(--cr-danfo); }
-.cr-leg-swatch.is-heat { background: #c9a20f; }
 .cr-icon-btn {
   pointer-events: auto;
   width: 44px;
@@ -905,27 +979,18 @@ body,
   box-shadow: inset 0 0 0 2px rgba(247, 241, 227, 0.25);
 }
 
-.cr-screen--summary,
+/* The offline fallback in main.tsx renders this screen with no React. */
 .cr-screen--settings {
   background: linear-gradient(180deg, #1b2a4a, #0b1220);
   justify-content: center;
   gap: 1rem;
   text-align: center;
 }
-
-.cr-screen--summary h2,
 .cr-screen--settings h2 {
   font-family: var(--cr-font-display);
   color: var(--cr-danfo);
   margin: 0;
   font-size: 2rem;
-}
-
-.cr-big-score {
-  font-family: var(--cr-font-display);
-  font-size: 3rem;
-  margin: 0;
-  color: var(--cr-paper);
 }
 
 .cr-row {
@@ -935,16 +1000,6 @@ body,
 
 .cr-row .cr-btn {
   flex: 1;
-}
-
-.cr-settings label {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-  padding: 0.65rem 0;
-  border-bottom: 1px solid rgba(247, 241, 227, 0.12);
-  font-size: 0.95rem;
 }
 
 .cr-debug {
@@ -966,17 +1021,23 @@ body,
   .cr-btn {
     transition: none;
   }
+  /* The beat pad still has to read as live, so it keeps the colour and loses
+     only the movement. The hint still has to leave, so it keeps its fade. */
+  .cr-pad--beat.is-live {
+    animation: none;
+  }
 }
 
-.cr-chip--trade {
-  background: rgba(232, 93, 4, 0.18);
-  color: #ffb27a;
-}
 
 /* ---------------------------------------------------------- Character studio */
 .cr-screen--studio {
   background: linear-gradient(160deg, #142038, #0b1220 60%);
   padding: calc(0.75rem + var(--cr-safe-top)) 1rem calc(0.75rem + var(--cr-safe-bottom));
+  /* `.cr-screen` is `flex: 1` inside `.cr-shell` with no min-height, so a flex
+     item's auto minimum let this screen grow taller than the shell and push its
+     own action bar off the bottom of the phone. The studio is the one screen
+     that must not grow: the stage and the panel split the height between them. */
+  min-height: 0;
 }
 .cr-screen--studio > * {
   max-width: 1200px;
@@ -986,7 +1047,11 @@ body,
 .cr-studio {
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: minmax(260px, 46%) 1fr;
+  /* `1fr` is `minmax(auto, 1fr)`: the panel track refuses to shrink below its
+     content, so the card grew past the viewport and took the action bar with
+     it — off-screen, with nothing to scroll. `minmax(0, 1fr)` lets the track
+     be short and the panel's own scroller do the work. */
+  grid-template-rows: minmax(240px, 44%) minmax(0, 1fr);
   gap: 1rem;
   height: 100%;
 }
@@ -1003,8 +1068,10 @@ body,
   content: '';
   position: absolute;
   inset: 0;
-  opacity: 0.18;
-  background: repeating-linear-gradient(45deg, #fff 0 10px, transparent 10px 26px);
+  /* Was a 45deg barber-pole at 0.18 across the whole stage, which read as
+     noise behind a character whose own stripes are the point. */
+  opacity: 0.5;
+  background: radial-gradient(ellipse at 50% 115%, rgba(255, 255, 255, 0.3), transparent 60%);
 }
 .cr-studio-host {
   position: absolute;
@@ -1023,27 +1090,31 @@ body,
 .cr-studio-hint {
   position: absolute;
   left: 12px;
-  bottom: 10px;
+  bottom: 12px;
+  margin: 0;
   font-size: 0.72rem;
-  opacity: 0.85;
-  background: rgba(11, 18, 32, 0.55);
-  padding: 0.25rem 0.55rem;
+  font-weight: 600;
+  color: #fff;
+  background: rgba(11, 18, 32, 0.5);
+  padding: 0.3rem 0.65rem;
   border-radius: 999px;
   pointer-events: none;
 }
 .cr-studio-ctrl {
   position: absolute;
-  right: 10px;
-  bottom: 10px;
+  right: 12px;
+  bottom: 12px;
   display: flex;
   gap: 0.4rem;
 }
 .cr-studio-panel {
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
   min-height: 0;
-  overflow: auto;
+  /* The panel itself does not scroll — `.cr-studio-scroll` does, so the action
+     bar underneath stays put. Scrolling the whole card is what cut the two
+     buttons off the bottom of a phone. */
+  overflow: hidden;
 }
 .cr-studio-panel h2 {
   font-family: var(--cr-font-display);
@@ -1082,42 +1153,6 @@ body,
   background: var(--cr-danfo);
   color: var(--cr-ink);
 }
-.cr-opts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-}
-.cr-opt {
-  border: 2px solid rgba(247, 241, 227, 0.18);
-  background: transparent;
-  color: var(--cr-paper);
-  font: inherit;
-  padding: 0.45rem 0.75rem;
-  border-radius: 10px;
-  cursor: pointer;
-  min-height: 40px;
-}
-.cr-opt.is-on {
-  border-color: var(--cr-danfo);
-  background: rgba(245, 197, 24, 0.14);
-}
-.cr-swatches {
-  display: grid;
-  grid-template-columns: repeat(8, 1fr);
-  gap: 0.4rem;
-  max-width: 420px;
-}
-.cr-swatch {
-  aspect-ratio: 1;
-  border-radius: 50%;
-  border: 3px solid rgba(255, 255, 255, 0.25);
-  cursor: pointer;
-  min-height: 32px;
-}
-.cr-swatch.is-on {
-  border-color: #fff;
-  box-shadow: 0 0 0 3px var(--cr-danfo);
-}
 
 /* 820px was too high a floor in landscape: between 620 and 820 the stage stayed
    stacked and full-bleed, which made it a ~760x285 letterbox with the character
@@ -1133,6 +1168,9 @@ body,
 /* ---------------------------------------------------------- Lagos briefing */
 .cr-screen--briefing {
   justify-content: safe center;
+  /* Not the C43 trap: a flex item's automatic minimum size only applies while
+     `overflow` is visible, so this `auto` is already doing the work that
+     `min-height: 0` does on the studio screen. The briefing scrolls. */
   overflow: auto;
   background:
     linear-gradient(180deg, rgba(11, 18, 32, 0.2), rgba(11, 18, 32, 0.95) 70%),
@@ -1141,12 +1179,28 @@ body,
 .cr-brief {
   background: rgba(11, 18, 32, 0.82);
   border-radius: 18px;
-  padding: 1.4rem;
+  padding: 1rem 1rem 0;
   display: flex;
   flex-direction: column;
-  gap: 0.9rem;
+  gap: 0.7rem;
   box-shadow: 0 10px 0 rgba(0, 0, 0, 0.35);
   max-width: 640px !important;
+}
+@media (min-width: 700px) {
+  .cr-brief {
+    padding: 1.4rem 1.4rem 0;
+    gap: 0.9rem;
+  }
+}
+/* C47: whatever is left to scroll, the two things you came here to do stay on
+   screen. The panel's own background is carried on the row so the briefing
+   text passes behind it rather than through it. */
+.cr-brief .cr-row {
+  position: sticky;
+  bottom: 0;
+  margin: 0 -1rem;
+  padding: 0.7rem 1rem calc(0.7rem + var(--cr-safe-bottom));
+  background: linear-gradient(180deg, rgba(11, 18, 32, 0), rgba(11, 18, 32, 0.96) 35%);
 }
 .cr-brief h2 {
   font-family: var(--cr-font-display);
@@ -1161,10 +1215,32 @@ body,
   font-size: 0.8rem;
   opacity: 0.8;
 }
+/* C47: seven rides stacked two-up was four rows deep and pushed Start the run
+   off the bottom of every phone. One row, swiped sideways, with the selected
+   ride scrolled into view on load. */
 .cr-rides {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  grid-auto-flow: column;
+  grid-auto-columns: 46%;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  overscroll-behavior-x: contain;
   gap: 0.4rem;
+  padding-bottom: 0.25rem;
+  scrollbar-width: none;
+}
+.cr-rides::-webkit-scrollbar {
+  display: none;
+}
+.cr-rides > * {
+  scroll-snap-align: start;
+}
+@media (min-width: 700px) {
+  .cr-rides {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    overflow-x: visible;
+  }
 }
 .cr-ride {
   text-align: left;
@@ -1236,9 +1312,64 @@ body,
   font-size: 0.82rem;
   opacity: 0.8;
 }
+/* C47: the trail was seven full-width cards — nearly half a phone screen for a
+   list of place names. The same seven names fit in three wrapped lines. */
 .cr-route--trail {
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  display: grid;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+.cr-route--trail li {
+  gap: 0.35rem;
+  padding: 0.22rem 0.5rem 0.22rem 0.25rem;
+  font-size: 0.82rem;
+  line-height: 1.2;
+}
+.cr-route--trail b {
+  width: 20px;
+  height: 20px;
+  font-size: 0.68rem;
+}
+
+/* C47: the menu tab strip. Sticks to the top of the scrollport so the sections
+   stay reachable even on the one panel that is still taller than a phone. */
+.cr-tabs--menu {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  margin: 0;
+  /* The strip sits over the screen's own ground once it sticks, so it carries
+     a band of it — otherwise the panel's text slides visibly between pills. */
+  padding: 0.5rem 0;
+  background: linear-gradient(180deg, #111d33 72%, rgba(17, 29, 51, 0));
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.cr-tabs--menu::-webkit-scrollbar {
+  display: none;
+}
+.cr-tabs--menu .cr-tab {
+  flex: 1 0 auto;
+  min-height: 44px;
+}
+/* Four tabs have to be visible at once on a phone: the one that explains the
+   rest is the last of them, and a strip that merely scrolls hides it. */
+@media (max-width: 619px) {
+  .cr-tabs--menu {
+    gap: 0.25rem;
+  }
+  .cr-tabs--menu .cr-tab {
+    flex: 0 1 auto;
+    padding: 0.45rem 0.55rem;
+    font-size: 0.8rem;
+    min-height: 42px;
+  }
+}
+.cr-tabpanel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
 }
 
 .cr-screen--yard {
@@ -1254,36 +1385,6 @@ body,
   font-family: var(--cr-font-display);
   color: var(--cr-danfo);
 }
-.cr-yard-block {
-  background: rgba(11, 18, 32, 0.45);
-  border-radius: 14px;
-  padding: 0.85rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.55rem;
-}
-.cr-mission-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 0.4rem;
-}
-.cr-mission-list li {
-  display: grid;
-  grid-template-columns: 1fr minmax(80px, 140px) auto;
-  gap: 0.5rem;
-  align-items: center;
-  font-size: 0.85rem;
-}
-.cr-mission-list .is-done {
-  opacity: 0.55;
-}
-.cr-mission-list b {
-  font-family: var(--cr-font-display);
-  color: var(--cr-danfo);
-  font-size: 0.85rem;
-}
 .cr-daily-chip {
   display: flex;
   flex-wrap: wrap;
@@ -1295,7 +1396,7 @@ body,
   background: rgba(245, 197, 24, 0.1);
   border: 1px solid rgba(245, 197, 24, 0.28);
   font-size: 0.88rem;
-  color: var(--cr-ink);
+  color: var(--cr-paper);
 }
 .cr-daily-chip span {
   font-family: var(--cr-font-display);
@@ -1310,37 +1411,14 @@ body,
   color: var(--cr-danfo);
 }
 .cr-daily-chip.is-done {
-  opacity: 0.7;
-  background: rgba(90, 180, 120, 0.12);
-  border-color: rgba(90, 180, 120, 0.35);
+  background: rgba(90, 180, 120, 0.14);
+  border-color: rgba(90, 180, 120, 0.4);
 }
 .cr-share-row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.6rem;
-}
-.cr-board-submit {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: end;
-  gap: 0.55rem;
-}
-.cr-board-submit label {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  font-size: 0.75rem;
-  color: rgba(247, 241, 227, 0.7);
-  flex: 1 1 140px;
-}
-.cr-board-submit input {
-  border: 1px solid rgba(247, 241, 227, 0.22);
-  background: rgba(11, 18, 32, 0.55);
-  color: var(--cr-ink);
-  border-radius: 10px;
-  padding: 0.45rem 0.6rem;
-  font: inherit;
 }
 .cr-local-board {
   margin-top: 0.75rem;
@@ -1393,26 +1471,1902 @@ body,
   font-family: var(--cr-font-display);
   color: var(--cr-danfo);
 }
-.cr-settings-card {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  text-align: left;
-}
-.cr-settings-card label {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  font-size: 0.9rem;
-}
-.cr-settings-card .cr-check {
-  flex-direction: row;
-  align-items: center;
-  gap: 0.55rem;
-}
-
 .cr-screen > .cr-tag {
   margin-left: auto;
   margin-right: auto;
+}
+
+/* Party identity at the point of choice (C35): the colour the map will use. */
+.cr-party-line {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  font-size: 0.78rem;
+  opacity: 0.9;
+}
+.cr-party-line i {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex: none;
+  background: var(--fill, #79838c);
+}
+
+/* ===========================================================================
+   Lagos Life UI chrome (C38)
+   ---------------------------------------------------------------------------
+   The 3D worlds stay dark. Everything the player touches moves to the language
+   of the reference: fully rounded pills, white surfaces with dark ink, soft
+   layered shadows instead of hard drop-bars, and generous corner radii.
+
+   Kept as an override layer at the end of the file rather than edited in place,
+   so the chrome can be tuned or lifted in one block without disturbing the
+   per-screen layout rules above.
+   ========================================================================= */
+:root {
+  --cr-green: #107a3d;
+  --cr-green-press: #0c6031;
+  --cr-surface: rgba(255, 255, 255, 0.96);
+  --cr-surface-ink: #16202b;
+  --cr-surface-dim: #5a6673;
+  --cr-ring: 0 0 0 1px rgba(0, 0, 0, 0.06);
+  --cr-lift: 0 4px 6px -1px rgba(0, 0, 0, 0.18), 0 2px 4px -2px rgba(0, 0, 0, 0.14);
+  --cr-lift-lg: 0 10px 22px -6px rgba(0, 0, 0, 0.35), 0 4px 8px -4px rgba(0, 0, 0, 0.2);
+  --cr-radius-card: 20px;
+}
+
+/* -- buttons -------------------------------------------------------------- */
+.cr-btn {
+  font-family: var(--cr-font-body);
+  font-weight: 700;
+  font-size: 1.02rem;
+  letter-spacing: 0;
+  border-radius: 999px;
+  background: var(--cr-green);
+  color: #fff;
+  box-shadow: var(--cr-ring), var(--cr-lift);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+}
+.cr-btn:active {
+  transform: translateY(1px);
+  background: var(--cr-green-press);
+  box-shadow: var(--cr-ring);
+}
+.cr-btn:disabled {
+  background: #8d9aa6;
+  box-shadow: var(--cr-ring);
+  cursor: not-allowed;
+}
+.cr-btn--ghost,
+.cr-screen--splash .cr-btn--ghost {
+  background: var(--cr-surface);
+  color: var(--cr-surface-ink);
+  box-shadow: var(--cr-ring), var(--cr-lift);
+}
+.cr-btn--ghost:active {
+  transform: translateY(1px);
+  box-shadow: var(--cr-ring);
+}
+.cr-btn--hero {
+  border-radius: 999px;
+}
+
+/* -- small floating controls ---------------------------------------------- */
+.cr-pill,
+.cr-mini-btn,
+.cr-radio-chip,
+.cr-tab {
+  border-radius: 999px;
+  background: var(--cr-surface);
+  color: var(--cr-surface-ink);
+  box-shadow: var(--cr-ring), var(--cr-lift);
+  font-family: var(--cr-font-body);
+  font-weight: 700;
+}
+.cr-pill {
+  text-transform: none;
+  letter-spacing: 0.01em;
+  padding: 0.4rem 0.8rem;
+}
+.cr-pill--live {
+  background: var(--cr-surface);
+  color: var(--cr-surface-ink);
+}
+.cr-pill--live::before {
+  background: var(--cr-green);
+}
+.cr-tab.is-on,
+.cr-tab.is-active,
+.cr-tab[aria-selected='true'] {
+  background: var(--cr-surface-ink);
+  color: #fff;
+}
+.cr-chip {
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  color: var(--cr-paper);
+  padding: 0.3rem 0.65rem;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+.cr-link {
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+/* -- floating cards ------------------------------------------------------- */
+.cr-panel,
+.cr-board-focus,
+.cr-studio-panel {
+  background: var(--cr-surface);
+  color: var(--cr-surface-ink);
+  border: none;
+  border-radius: var(--cr-radius-card);
+  box-shadow: var(--cr-ring), var(--cr-lift-lg);
+}
+/* Headings and figures inside a light card need ink, not the dark-screen yellow. */
+.cr-panel h2,
+.cr-panel h3,
+.cr-board-focus h2,
+.cr-studio-panel h2,
+.cr-board-focus .cr-tallies b,
+.cr-board-focus .cr-board-facts dd {
+  color: var(--cr-surface-ink);
+}
+.cr-board-focus .cr-kicker,
+.cr-board-focus .cr-fineprint,
+.cr-board-focus .cr-board-facts dt,
+.cr-panel .cr-fineprint,
+.cr-studio-panel .cr-tag {
+  color: var(--cr-surface-dim);
+  opacity: 1;
+}
+.cr-board-focus .cr-board-facts > div,
+.cr-board-focus .cr-local-board {
+  background: rgba(16, 32, 43, 0.05);
+  border-radius: 12px;
+}
+.cr-board-focus .cr-tallies li,
+.cr-board-focus .cr-local-board li {
+  color: var(--cr-surface-ink);
+}
+
+/* -- forms ---------------------------------------------------------------- */
+.cr-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+}
+.cr-field > span {
+  font-weight: 700;
+  color: var(--cr-surface-ink);
+}
+.cr-field input {
+  font: inherit;
+  min-height: 48px;
+  padding: 0 0.9rem;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  background: #fff;
+  color: var(--cr-surface-ink);
+}
+.cr-field input:focus-visible {
+  outline: 2px solid var(--cr-green);
+  outline-offset: 1px;
+}
+.cr-field small {
+  color: var(--cr-surface-dim);
+  font-size: 0.74rem;
+}
+.cr-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  color: var(--cr-surface-ink);
+}
+.cr-check input {
+  margin-top: 0.15rem;
+  width: 20px;
+  height: 20px;
+  accent-color: var(--cr-green);
+}
+.cr-auth {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 1.15rem;
+}
+.cr-auth-error {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #b3261e;
+}
+.cr-screen--auth {
+  background: linear-gradient(160deg, #142038, #0b1220 55%);
+  gap: 0.9rem;
+}
+
+/* ===========================================================================
+   Menu screens (C39) — About, Settings, Account, Convoy Yard
+   ---------------------------------------------------------------------------
+   These four are the pages you read rather than play, and they were still in
+   the pre-C38 language: cream cards with hard drop-bars, centred prose, and a
+   dark `.cr-card` that the C38 light-surface form rules fought with.
+
+   They now share one shell: dark ground (the worlds stay dark), white floating
+   sheets, left-aligned text, one back affordance in a fixed place. The screen
+   scrolls — the old `.cr-screen--settings` centred its children with no
+   overflow, so a long privacy notice simply had nowhere to go on a phone.
+   ========================================================================= */
+.cr-screen--menu {
+  background: linear-gradient(180deg, #1b2a4a, #0b1220 60%);
+  gap: 0.75rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  justify-content: flex-start;
+  text-align: left;
+  -webkit-overflow-scrolling: touch;
+}
+.cr-screen--menu > * {
+  max-width: 620px;
+  flex: none;
+}
+.cr-screen--yard > * {
+  max-width: 820px;
+}
+
+/* -- page head ------------------------------------------------------------ */
+.cr-menu-head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.25rem 0 0.35rem;
+}
+.cr-menu-back {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: 999px;
+  background: var(--cr-surface);
+  color: var(--cr-surface-ink);
+  box-shadow: var(--cr-ring), var(--cr-lift);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.cr-menu-back:active {
+  transform: translateY(1px);
+  box-shadow: var(--cr-ring);
+}
+.cr-menu-headings {
+  min-width: 0;
+}
+.cr-menu-title {
+  margin: 0;
+  font-family: var(--cr-font-display);
+  color: var(--cr-danfo);
+  font-size: clamp(1.5rem, 5vw, 2rem);
+  line-height: 1.1;
+}
+.cr-menu-sub {
+  margin: 0.15rem 0 0;
+  font-size: 0.78rem;
+  opacity: 0.65;
+}
+.cr-menu-trailing {
+  margin-left: auto;
+}
+
+/* -- sheets --------------------------------------------------------------- */
+.cr-sheet {
+  background: var(--cr-surface);
+  color: var(--cr-surface-ink);
+  border-radius: var(--cr-radius-card);
+  box-shadow: var(--cr-ring), var(--cr-lift-lg);
+  padding: 1rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+/* A flush sheet hands its padding to the rows, so dividers reach the edges. */
+.cr-sheet--flush {
+  padding: 0;
+  gap: 0;
+  overflow: hidden;
+}
+.cr-sheet--flush > .cr-sheet-head {
+  padding: 1rem 1.1rem 0.6rem;
+}
+.cr-sheet--flush > .cr-sheet-body {
+  padding: 0 1.1rem 0.85rem;
+  margin: 0;
+}
+.cr-sheet--flush > .cr-sheet-body + .cr-row-item {
+  border-top: 1px solid rgba(16, 32, 43, 0.09);
+}
+.cr-sheet--accent {
+  background: #eef7f1;
+  box-shadow: var(--cr-ring), var(--cr-lift);
+}
+.cr-sheet--accent .cr-eyebrow {
+  color: var(--cr-green);
+}
+.cr-sheet-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.cr-sheet-title {
+  margin: 0.1rem 0 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--cr-surface-ink);
+}
+.cr-sheet-aside {
+  flex: none;
+}
+.cr-eyebrow {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--cr-surface-dim);
+}
+.cr-sheet p {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+.cr-sheet .cr-fineprint {
+  color: var(--cr-surface-dim);
+  opacity: 1;
+  font-size: 0.74rem;
+}
+
+/* -- rows ----------------------------------------------------------------- */
+.cr-row-item {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  width: 100%;
+  padding: 0.8rem 1.1rem;
+  background: none;
+  border: none;
+  border-top: 1px solid rgba(16, 32, 43, 0.09);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+.cr-sheet--flush > .cr-row-item:first-child,
+.cr-sheet--flush > .cr-sheet-head + .cr-row-item {
+  border-top: none;
+}
+.cr-row-item--link,
+.cr-row-item--toggle {
+  cursor: pointer;
+}
+.cr-row-item--link:active {
+  background: rgba(16, 32, 43, 0.04);
+}
+.cr-row-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+  flex: 1;
+}
+.cr-row-text b {
+  font-size: 0.94rem;
+  font-weight: 700;
+}
+.cr-row-text small {
+  font-size: 0.76rem;
+  line-height: 1.35;
+  color: var(--cr-surface-dim);
+}
+.cr-row-go {
+  flex: none;
+  font-size: 1.3rem;
+  line-height: 1;
+  color: var(--cr-surface-dim);
+}
+
+/* -- switch (a real checkbox, drawn as a track and a knob) ---------------- */
+.cr-switch {
+  appearance: none;
+  -webkit-appearance: none;
+  flex: none;
+  margin: 0;
+  width: 50px;
+  height: 30px;
+  border-radius: 999px;
+  background: #ccd4dc;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.16s ease;
+}
+.cr-switch::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  transition: transform 0.16s ease;
+}
+.cr-switch:checked {
+  background: var(--cr-green);
+}
+.cr-switch:checked::after {
+  transform: translateX(20px);
+}
+.cr-switch:focus-visible {
+  outline: 2px solid var(--cr-green);
+  outline-offset: 2px;
+}
+
+/* -- sliders -------------------------------------------------------------- */
+.cr-slider header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin-bottom: 0.3rem;
+}
+.cr-slider header b {
+  font-size: 0.94rem;
+}
+.cr-slider header span {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--cr-green);
+  font-variant-numeric: tabular-nums;
+}
+.cr-slider input[type='range'] {
+  width: 100%;
+  accent-color: var(--cr-green);
+  height: 28px;
+  cursor: pointer;
+}
+
+/* -- account identity ----------------------------------------------------- */
+.cr-identity {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+.cr-avatar {
+  flex: none;
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: var(--cr-green);
+  color: #fff;
+  font-family: var(--cr-font-display);
+  font-size: 1.35rem;
+}
+.cr-identity-text {
+  min-width: 0;
+  flex: 1;
+}
+.cr-identity-text strong {
+  display: block;
+  font-size: 1.05rem;
+}
+.cr-identity-text small {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--cr-surface-dim);
+  overflow-wrap: anywhere;
+}
+.cr-status {
+  flex: none;
+  align-self: flex-start;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(16, 32, 43, 0.08);
+  color: var(--cr-surface-dim);
+}
+.cr-status--signed-in {
+  background: rgba(16, 122, 61, 0.12);
+  color: var(--cr-green);
+}
+.cr-status--offline {
+  background: rgba(232, 93, 4, 0.14);
+  color: #a8430a;
+}
+.cr-name-save {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.55rem;
+}
+.cr-name-save .cr-field {
+  flex: 1;
+}
+
+/* -- yard: wallet --------------------------------------------------------- */
+/* C48: three equal columns, not `auto-fit`, so the widest tile cannot take
+   more width than the others; `minmax(0, 1fr)` is what stops a long figure
+   from pushing its own column wider. The three rows are declared here and
+   each tile spans them with `subgrid`, so Funds, Following and Streak line
+   their label, figure and source line up with each other even when one source
+   line wraps to two lines and another to one. */
+.cr-wallet {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: auto auto auto;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+.cr-wallet article {
+  grid-row: span 3;
+  display: grid;
+  grid-template-rows: subgrid;
+  row-gap: 0.1rem;
+  align-content: start;
+}
+/* Safari before 16 and any other engine without subgrid: the tiles still
+   stretch to a common height, they just do not share row baselines. */
+@supports not (grid-template-rows: subgrid) {
+  .cr-wallet article {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+}
+.cr-wallet article {
+  background: var(--cr-surface);
+  color: var(--cr-surface-ink);
+  border-radius: 16px;
+  padding: 0.65rem 0.8rem;
+  box-shadow: var(--cr-ring), var(--cr-lift);
+}
+.cr-wallet span {
+  display: block;
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cr-surface-dim);
+}
+.cr-wallet strong {
+  font-family: var(--cr-font-display);
+  /* 3.5vw overflowed its own column at 110px once the figures grew thousands
+     separators; the cap is what keeps three tiles the same size. */
+  font-size: clamp(1.1rem, 4.6vw, 1.5rem);
+  line-height: 1.15;
+  align-self: end;
+  overflow-wrap: anywhere;
+}
+
+/* -- yard: choices, goals, upgrades, rides -------------------------------- */
+.cr-choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.5rem;
+}
+.cr-choice {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  padding: 0.75rem 0.85rem;
+  border-radius: 16px;
+  border: 1px solid rgba(16, 32, 43, 0.12);
+  background: rgba(16, 32, 43, 0.03);
+  color: var(--cr-surface-ink);
+}
+.cr-choice:active {
+  background: rgba(16, 122, 61, 0.08);
+  border-color: var(--cr-green);
+}
+.cr-choice strong {
+  font-size: 0.98rem;
+}
+.cr-choice small {
+  font-size: 0.78rem;
+  color: var(--cr-surface-dim);
+  line-height: 1.35;
+}
+.cr-choice-stats {
+  margin-top: 0.2rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--cr-green);
+}
+.cr-goals {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.7rem;
+}
+.cr-goal header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+.cr-goal header b {
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+.cr-goal header span {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--cr-surface-dim);
+  font-variant-numeric: tabular-nums;
+}
+.cr-goal .cr-bar {
+  margin-top: 0.3rem;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(16, 32, 43, 0.1);
+  overflow: hidden;
+}
+.cr-goal .cr-bar i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--cr-green);
+  transition: width 0.25s ease;
+}
+.cr-goal.is-done header span {
+  color: var(--cr-green);
+}
+.cr-upgrade .cr-row-text {
+  gap: 0.3rem;
+}
+.cr-pips {
+  display: flex;
+  gap: 4px;
+  margin-top: 0.1rem;
+}
+.cr-pips i {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: rgba(16, 32, 43, 0.16);
+}
+.cr-pips i.is-on {
+  background: var(--cr-green);
+}
+.cr-buy {
+  flex: none;
+  min-width: 72px;
+  min-height: 40px;
+  padding: 0 0.85rem;
+  border: none;
+  border-radius: 999px;
+  background: var(--cr-green);
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: var(--cr-ring), var(--cr-lift);
+}
+.cr-buy:active {
+  transform: translateY(1px);
+  box-shadow: var(--cr-ring);
+}
+.cr-buy:disabled {
+  background: rgba(16, 32, 43, 0.07);
+  color: var(--cr-surface-dim);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+.cr-ride-grid {
+  display: grid;
+  /* C44: the cards carry a handling readout now, so they need a column wide
+     enough for a label and a bar — one column on a phone, two on a desktop.
+     At the old 150px the stat labels wrapped to three lines each.
+     C47: on a phone that column is seven cards stacked — 2.8 screens of
+     scrolling to compare two rides that are then too far apart to compare.
+     Sideways instead: one card at a time, swipe to the next, and the cards
+     line up so the same stat row sits at the same height on every one. */
+  grid-auto-flow: column;
+  grid-auto-columns: min(88%, 300px);
+  grid-template-columns: none;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  gap: 0.5rem;
+  padding-bottom: 0.3rem;
+  scrollbar-width: thin;
+}
+.cr-ride-grid > * {
+  scroll-snap-align: start;
+}
+@media (min-width: 700px) {
+  .cr-ride-grid {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(auto-fill, minmax(248px, 1fr));
+    overflow-x: visible;
+    scroll-snap-type: none;
+  }
+}
+.cr-ride-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 14px;
+  background: rgba(16, 32, 43, 0.04);
+  border: 1px solid rgba(16, 32, 43, 0.08);
+}
+.cr-ride-card b {
+  font-size: 0.92rem;
+}
+.cr-ride-card small {
+  font-size: 0.74rem;
+  line-height: 1.3;
+  color: var(--cr-surface-dim);
+}
+.cr-ride-card .cr-ride-stat {
+  margin-top: 0.15rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--cr-surface-dim);
+}
+.cr-ride-card.is-on {
+  background: rgba(16, 122, 61, 0.08);
+  border-color: rgba(16, 122, 61, 0.35);
+}
+.cr-ride-card.is-on .cr-ride-stat {
+  /* C44: was var(--cr-green), which measured 4.49 against this card's own
+     tint at 0.72rem. Same fix as the stat figures. */
+  color: #0b5c2e;
+}
+
+/* The Yard's daily chip sits on a white sheet now, not a dark block. */
+.cr-sheet .cr-daily-chip {
+  background: rgba(245, 197, 24, 0.18);
+  border-color: rgba(176, 134, 11, 0.4);
+  color: var(--cr-surface-ink);
+}
+.cr-sheet .cr-daily-chip span,
+.cr-sheet .cr-daily-chip b {
+  color: #8a6508;
+}
+
+/* Destructive actions read as destructive before they are pressed, not only
+   in the confirm dialog they open. */
+.cr-mini-btn--danger {
+  background: #fdecea;
+  color: #b3261e;
+}
+
+/* ===========================================================================
+   Pick your Contender + the page after a run (C40)
+   ---------------------------------------------------------------------------
+   The last two screens a player meets on the way into and out of a run were
+   still pre-C38: dark indigo slabs with hard drop-bars, and a centred stack on
+   a screen with no `overflow` — so the result page's board field and its
+   navigation were squeezed off the bottom of a phone with nowhere to scroll.
+
+   Both now use the C39 menu ground (dark gradient, scrolls, left-aligned) with
+   white floating surfaces on top. The portraits and the worlds stay dark.
+   ========================================================================= */
+.cr-screen--pick {
+  background: linear-gradient(160deg, #1b2a4a, #0b1220 58%);
+  gap: 0.7rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  justify-content: flex-start;
+  text-align: left;
+  -webkit-overflow-scrolling: touch;
+}
+/* `.cr-screen` is a fixed-height flex column: without `flex: none` the grid
+   and the hero get squeezed instead of scrolling (the C39 trap). */
+.cr-screen--pick > * {
+  max-width: 1120px;
+  flex: none;
+}
+/* The two buttons stay together on one line at the right; the pills take what
+   is left and wrap among themselves. Left to the shared `wrap`, the buttons
+   dropped onto a line of their own on a phone. */
+.cr-screen--pick .cr-chrome-top {
+  flex-wrap: nowrap;
+  align-items: flex-start;
+}
+.cr-screen--pick .cr-pill-row {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.cr-screen--pick .cr-chrome-actions {
+  flex: none;
+  flex-wrap: nowrap;
+}
+.cr-pick-head h2 {
+  margin: 0;
+  font-family: var(--cr-font-display);
+  color: var(--cr-danfo);
+  font-size: clamp(1.5rem, 5vw, 2.1rem);
+  line-height: 1.1;
+}
+.cr-pick-sub {
+  margin: 0.2rem 0 0;
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+.cr-pick-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.7rem;
+  padding-bottom: 0.5rem;
+}
+@media (min-width: 900px) {
+  .cr-pick-layout {
+    grid-template-columns: minmax(300px, 0.95fr) minmax(0, 1.05fr);
+    align-items: start;
+  }
+  /* On a laptop the 5:4 art box alone is taller than half the viewport, which
+     pushed the perk, the trade-off and the button below the fold. */
+  .cr-pick-art {
+    /* A grid item with an aspect-ratio stops stretching to its column, so the
+       explicit width is what keeps the art the full width of the card. */
+    aspect-ratio: auto;
+    width: 100%;
+    height: clamp(230px, 36vh, 360px);
+  }
+}
+
+/* -- the featured Contender ------------------------------------------------ */
+.cr-pick-hero {
+  display: grid;
+  grid-template-rows: auto auto;
+  border-radius: var(--cr-radius-card);
+  overflow: hidden;
+  background: var(--cr-surface);
+  color: var(--cr-surface-ink);
+  box-shadow: var(--cr-ring), var(--cr-lift-lg);
+}
+.cr-pick-art {
+  position: relative;
+  /* A half-body render needs a box taller than it is wide, or the character is
+     stranded thumbnail-sized in a letterbox (the C32 bug). */
+  aspect-ratio: 5 / 4;
+  min-height: 0;
+  overflow: hidden;
+  background: linear-gradient(165deg, var(--c1, #e0902b), var(--c2, #2a6f97));
+}
+.cr-pick-art img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* contain keeps head, prop and feet in frame; the palette fills the sides. */
+  object-fit: contain;
+}
+.cr-pick-art b {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--cr-font-display);
+  font-size: 4rem;
+  color: rgba(11, 18, 32, 0.4);
+}
+@media (min-width: 620px) and (max-width: 899px) {
+  .cr-pick-hero {
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    grid-template-rows: 1fr;
+  }
+  .cr-pick-art {
+    aspect-ratio: auto;
+    height: 100%;
+  }
+}
+.cr-pick-body {
+  padding: 1rem 1.1rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.cr-pick-body h3 {
+  margin: 0;
+  font-family: var(--cr-font-display);
+  font-size: 1.55rem;
+  line-height: 1.1;
+  color: var(--cr-surface-ink);
+}
+.cr-pick-body .cr-party-line {
+  opacity: 1;
+  color: var(--cr-surface-dim);
+  font-weight: 600;
+}
+.cr-pick-quote {
+  margin: 0;
+  font-size: 0.92rem;
+  font-style: italic;
+  color: var(--cr-surface-ink);
+}
+.cr-pick-body .cr-fineprint {
+  color: var(--cr-surface-dim);
+  opacity: 1;
+  font-size: 0.73rem;
+  line-height: 1.4;
+  margin: 0;
+}
+.cr-pick-go {
+  margin-top: 0.15rem;
+}
+
+/* Perk and trade-off, named. They used to be two yellow pills that said only
+   what they did, not which was the cost. */
+.cr-traits {
+  margin: 0.1rem 0 0.2rem;
+  display: grid;
+  gap: 0.5rem;
+}
+.cr-traits > div {
+  background: rgba(16, 32, 43, 0.045);
+  border-radius: 14px;
+  padding: 0.55rem 0.7rem;
+}
+.cr-traits dt {
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cr-surface-dim);
+}
+.cr-traits dd {
+  margin: 0.15rem 0 0;
+  font-size: 0.86rem;
+  line-height: 1.35;
+}
+
+/* The one-switch warning, and the locked explanation that replaced a dead tap. */
+.cr-commit {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.75rem 0.85rem;
+  border-radius: 16px;
+  background: rgba(245, 197, 24, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(176, 134, 11, 0.35);
+}
+.cr-commit p {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: var(--cr-surface-ink);
+}
+.cr-commit--blocked {
+  background: rgba(16, 32, 43, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(16, 32, 43, 0.12);
+}
+
+/* -- the six cards --------------------------------------------------------- */
+.cr-pick-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 0.5rem;
+  align-content: start;
+}
+/* C47: on a phone the six cards stacked under the hero, so the page ran to
+   1.7 screens and the roster you are choosing from was entirely below the
+   fold. Sideways instead — the row sits right under the hero where the choice
+   is, and the selected card is scrolled into view. */
+@media (max-width: 619px) {
+  .cr-pick-grid {
+    grid-auto-flow: column;
+    grid-auto-columns: 78%;
+    grid-template-columns: none;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    overscroll-behavior-x: contain;
+    padding-bottom: 0.25rem;
+    scrollbar-width: none;
+  }
+  .cr-pick-grid::-webkit-scrollbar {
+    display: none;
+  }
+  .cr-pick-grid > * {
+    scroll-snap-align: start;
+  }
+  /* The half-body render is the biggest single block on the screen; at 5:4 it
+     alone was a third of the viewport and pushed the commit button to the
+     edge of the fold. */
+  .cr-pick-art {
+    aspect-ratio: auto;
+    height: clamp(190px, 27vh, 260px);
+  }
+}
+.cr-pick-card {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  min-height: 76px;
+  padding: 0.55rem 0.7rem 0.55rem 0.55rem;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  border: none;
+  border-radius: 18px;
+  background: var(--cr-surface);
+  color: var(--cr-surface-ink);
+  box-shadow: var(--cr-ring), var(--cr-lift);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.cr-pick-card:active {
+  transform: translateY(1px);
+  box-shadow: var(--cr-ring);
+}
+.cr-pick-card.is-sel {
+  box-shadow: 0 0 0 2.5px var(--cr-green), var(--cr-lift-lg);
+}
+.cr-pick-card:focus-visible {
+  outline: 2px solid var(--cr-green);
+  outline-offset: 2px;
+}
+/* Locked reads as unavailable but stays readable and tappable: tapping it still
+   previews the character, and the hero says why it cannot be chosen. */
+.cr-pick-card.is-locked .cr-portrait {
+  filter: saturate(0.45);
+}
+.cr-pick-card .cr-portrait {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+}
+.cr-pick-name {
+  min-width: 0;
+}
+.cr-pick-name strong {
+  display: block;
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+.cr-pick-name small {
+  display: block;
+  margin-top: 0.1rem;
+  font-size: 0.74rem;
+  color: var(--cr-surface-dim);
+}
+.cr-tagline {
+  flex: none;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(16, 32, 43, 0.08);
+  color: var(--cr-surface-dim);
+}
+.cr-tagline--yours {
+  background: rgba(16, 122, 61, 0.12);
+  color: var(--cr-green);
+}
+
+/* -- the page after a run -------------------------------------------------- */
+.cr-screen--result {
+  background: linear-gradient(180deg, #1b2a4a, #0b1220 65%);
+}
+.cr-screen--result > * {
+  max-width: 560px;
+}
+.cr-result {
+  background: var(--cr-surface);
+  color: var(--cr-surface-ink);
+  border-radius: var(--cr-radius-card);
+  box-shadow: var(--cr-ring), var(--cr-lift-lg);
+  padding: 1.1rem 1.1rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.cr-result h2 {
+  margin: 0.1rem 0 0;
+  font-family: var(--cr-font-display);
+  font-size: clamp(1.6rem, 6vw, 2.2rem);
+  line-height: 1.1;
+  color: var(--cr-green);
+}
+/* A breakdown is not a win: it keeps the card, loses the green. */
+.cr-result--down h2 {
+  color: var(--cr-surface-ink);
+}
+.cr-result-score {
+  margin: 0.35rem 0 0;
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
+}
+.cr-result-score b {
+  font-family: var(--cr-font-display);
+  font-size: clamp(2.6rem, 11vw, 3.6rem);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.cr-result-score span {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cr-surface-dim);
+}
+.cr-result-who {
+  margin: 0.3rem 0 0;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--cr-surface-ink);
+}
+.cr-result .cr-fineprint {
+  margin: 0.25rem 0 0;
+  color: var(--cr-surface-dim);
+  opacity: 1;
+  font-size: 0.74rem;
+}
+.cr-screen--result .cr-daily-chip {
+  margin: 0;
+}
+/* Four figures read as a block of two pairs, not three-and-a-stray-one. */
+.cr-screen--result .cr-wallet {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+@media (min-width: 560px) {
+  .cr-screen--result .cr-wallet {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+.cr-result-again {
+  min-height: 52px;
+}
+.cr-result-foot {
+  text-align: center;
+  padding-bottom: 0.25rem;
+}
+
+/* C41: the account-recovery forms share the auth panel's language. A notice is
+   not an error — a reset link being on its way is good news, and colouring it
+   red made the one working path look like a failure. */
+.cr-auth-title {
+  margin: 0;
+  font-family: var(--cr-font-display);
+  font-size: 1.3rem;
+  color: var(--cr-surface-ink);
+}
+.cr-auth-notice {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--cr-green);
+}
+/* On the dark menu ground the panel colours fail: #107a3d green and #b3261e
+   red are both darker than the navy behind them. Same trap as the daily chip
+   and the two invisible input fields before it — a colour defined for a white
+   card, reused on a dark screen. */
+.cr-screen--menu > .cr-auth-notice,
+.cr-screen--menu > .cr-auth-error {
+  padding: 0 0.25rem;
+}
+.cr-screen--menu > .cr-auth-notice {
+  color: #7fd6a3;
+}
+.cr-screen--menu > .cr-auth-error {
+  color: #ff9a8f;
+}
+.cr-auth-alt {
+  align-self: center;
+  color: var(--cr-surface-dim);
+  text-decoration: underline;
+}
+
+/* ======================================================== C42 · dress a Contender
+   The panel is a white card (C38) whose controls were still painted for the dark
+   ground they used to sit on: every garment name, the back link and both perk
+   chips were cream on white, so the only option you could see was the selected
+   one's outline. Everything below is on the surface palette, and the slab the
+   panel sits on keeps the stage dark so the 3D view is unchanged.           */
+
+.cr-studio-panel {
+  padding: 1rem 0 0;
+}
+/* The one scroller on the page. `flex: none` on its children is the usual
+   requirement: `.cr-screen` is a fixed-height flex column, so without it the
+   content is squeezed to fit instead of scrolling (C39, C40, and here). */
+.cr-studio-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: 0 1rem 1rem;
+}
+.cr-studio-scroll > * {
+  flex: none;
+}
+
+.cr-studio-id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.cr-studio-panel .cr-eyebrow {
+  color: var(--cr-green);
+  margin: 0;
+}
+.cr-studio-panel h2 {
+  font-size: clamp(1.5rem, 5vw, 2rem);
+  line-height: 1.1;
+}
+.cr-studio-arch {
+  margin: 0;
+  color: var(--cr-surface-dim);
+  font-weight: 600;
+}
+.cr-studio-panel .cr-party-line {
+  margin: 0.15rem 0 0;
+  color: var(--cr-surface-ink);
+}
+
+/* Perk and trade-off as a pair of labelled facts, the way the roster states
+   them. They were two `.cr-chip`s, which on this card rendered cream on white. */
+/* Compact on purpose: this is a reminder of what you picked, on the page where
+   the controls are the point. Laid out as two tall cards it filled the whole
+   scroller on a 390x844 phone and pushed the editor itself below the fold. */
+.cr-studio-facts {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0;
+  background: rgba(16, 32, 43, 0.05);
+  border-radius: 14px;
+  padding: 0.55rem 0.75rem;
+}
+.cr-studio-facts > div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.1rem 0.5rem;
+}
+.cr-studio-facts dt {
+  flex: none;
+  width: 4.6rem;
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 800;
+  color: var(--cr-green);
+}
+.cr-studio-facts dd {
+  flex: 1 1 10rem;
+  margin: 0;
+  color: var(--cr-surface-ink);
+  font-size: 0.85rem;
+  line-height: 1.35;
+}
+
+/* -- the editor ----------------------------------------------------------- */
+.cr-dress {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.cr-dress-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+.cr-dress-tab {
+  position: relative;
+  border: 2px solid rgba(16, 32, 43, 0.12);
+  background: #fff;
+  color: var(--cr-surface-ink);
+  font: inherit;
+  font-weight: 700;
+  padding: 0.5rem 0.95rem;
+  border-radius: 999px;
+  min-height: 42px;
+  cursor: pointer;
+}
+.cr-dress-tab.is-on {
+  background: var(--cr-green);
+  border-color: var(--cr-green);
+  color: #fff;
+}
+/* Which tabs you have edited. Sits outside the pill so the selected tab's fill
+   does not swallow it. */
+.cr-dress-dot {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--cr-danfo);
+  box-shadow: 0 0 0 2px #fff;
+}
+.cr-dress-tab.is-on .cr-dress-dot {
+  box-shadow: 0 0 0 2px var(--cr-green);
+}
+
+.cr-dress-opts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.cr-dress-opt {
+  border: 2px solid rgba(16, 32, 43, 0.12);
+  background: #fff;
+  color: var(--cr-surface-ink);
+  font: inherit;
+  font-weight: 600;
+  padding: 0.5rem 0.85rem;
+  border-radius: 12px;
+  min-height: 42px;
+  cursor: pointer;
+}
+.cr-dress-opt.is-on {
+  border-color: var(--cr-green);
+  background: rgba(16, 122, 61, 0.1);
+  color: var(--cr-green-press, var(--cr-green));
+  font-weight: 800;
+}
+
+.cr-dress-colors {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+/* The twelve swatches used to sit under the options with nothing saying what
+   they painted — on the Headwear tab they looked like a second palette. */
+.cr-dress-label {
+  margin: 0;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 800;
+  color: var(--cr-surface-dim);
+}
+.cr-dress-swatches {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(38px, 1fr));
+  gap: 0.45rem;
+}
+.cr-dress-swatch {
+  width: 100%;
+  aspect-ratio: 1;
+  min-height: 38px;
+  border-radius: 50%;
+  border: 2px solid rgba(16, 32, 43, 0.12);
+  background: var(--sw);
+  cursor: pointer;
+}
+.cr-dress-swatch.is-on {
+  border-color: #fff;
+  box-shadow: 0 0 0 3px var(--cr-green);
+}
+
+/* -- the action bar ------------------------------------------------------- */
+/* One action, full width. The campaign button carries a state name —
+   "Nasarawa", "Akwa Ibom" — and sharing the bar with a second button either
+   wrapped it to two lines or clipped the state off the end: the exact thing
+   this button was getting wrong before C42, when it said Lagos on all 37. */
+.cr-studio-actions {
+  flex: none;
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem calc(0.75rem + var(--cr-safe-bottom));
+  border-top: 1px solid rgba(16, 32, 43, 0.08);
+  background: var(--cr-surface);
+  border-radius: 0 0 var(--cr-radius-card) var(--cr-radius-card);
+}
+.cr-studio-actions .cr-btn {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-inline: 0.9rem;
+}
+
+/* Reset, with the controls it undoes. The count is the same signal as the dots
+   on the tabs, said once in words. */
+.cr-dress-reset {
+  align-self: flex-start;
+}
+.cr-dress-reset:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* -- the stage ------------------------------------------------------------ */
+/* The back link was `.cr-link` — cream text, which on the dark stage is fine
+   and on the white card it had been living on was invisible. It belongs here,
+   over the 3D view, where cream is legible and it does not cost panel height. */
+.cr-studio-back {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  border: none;
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: #fff;
+  background: rgba(11, 18, 32, 0.5);
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  cursor: pointer;
+  min-height: 38px;
+}
+
+/* A short phone gives the stage less, because the character is still legible at
+   200px and the clothes list is not legible at zero. */
+@media (max-height: 880px) and (orientation: portrait) {
+  .cr-studio {
+    grid-template-rows: minmax(200px, 36%) minmax(0, 1fr);
+  }
+}
+
+@media (min-width: 720px) and (orientation: landscape), (min-width: 1000px) {
+  /* Two columns: the stage is tall, so the panel scrolls on its own and the
+     action bar sits at the bottom of the card rather than after the content. */
+  .cr-studio-scroll {
+    padding-bottom: 0.5rem;
+  }
+}
+
+/* ===========================================================================
+   How a ride drives (C44)
+   ---------------------------------------------------------------------------
+   The Yard is the showroom, so this is where the numbers go: upside, what it
+   costs, and a bar per handling stat measured against the keke. Bars grow out
+   from a centre line — worse to the left, better to the right — so the shape
+   of a card is readable before any of its words are.
+
+   Surface palette throughout: these sheets have been white since C38 and the
+   pre-C38 cream ink is invisible on them.
+   ======================================================================== */
+.cr-ride-card header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.cr-ride-card header b {
+  color: var(--cr-surface-ink);
+}
+.cr-ride-card .cr-ride-stat {
+  margin: 0;
+  flex: none;
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.cr-ride-up,
+.cr-ride-down,
+.cr-ride-even {
+  display: block;
+  line-height: 1.35;
+}
+/* The upside and the cost are the two halves of the same sentence, so they are
+   told apart by a mark and a weight rather than by colour alone. */
+.cr-ride-up::before {
+  content: '+ ';
+  font-weight: 800;
+  color: #0b5c2e;
+}
+.cr-ride-down::before {
+  content: '\2212 ';
+  font-weight: 800;
+  color: #9a1c13;
+}
+.cr-ride-down {
+  color: var(--cr-surface-dim);
+}
+.cr-ride-even {
+  color: var(--cr-surface-dim);
+  font-style: italic;
+}
+
+.cr-feel {
+  list-style: none;
+  margin: 0.45rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.25rem;
+}
+.cr-feel-row {
+  display: grid;
+  grid-template-columns: 1fr 64px 44px;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  color: var(--cr-surface-dim);
+}
+.cr-feel-label {
+  line-height: 1.25;
+}
+.cr-feel-bar {
+  display: flex;
+  height: 6px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(16, 32, 43, 0.08);
+}
+/* Two halves either side of the centre line: the left one fills right-to-left,
+   so a worse stat reads as a bar leaning away from the good side. */
+.cr-feel-half {
+  display: flex;
+  flex: 1 1 50%;
+  min-width: 0;
+  justify-content: flex-end;
+}
+.cr-feel-half + .cr-feel-half {
+  justify-content: flex-start;
+  box-shadow: inset 1px 0 0 rgba(16, 32, 43, 0.18);
+}
+.cr-feel-half i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+}
+.cr-feel-delta {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.72rem;
+}
+/* Two shades per tone, because a bar and a figure are held to different
+   standards: a graphic needs 3:1 against its ground, 11px bold text needs 4.5.
+   The brighter colour fills the bar, the darker one prints the number — the
+   single shade this shipped with measured 4.49 on the card's tinted ground,
+   which is a fail by one hundredth. */
+.cr-feel-row.is-up .cr-feel-half i {
+  background: var(--cr-green);
+}
+.cr-feel-row.is-down .cr-feel-half i {
+  background: #b3261e;
+}
+.cr-feel-row.is-up .cr-feel-delta {
+  color: #0b5c2e;
+}
+.cr-feel-row.is-down .cr-feel-delta {
+  color: #9a1c13;
+}
+
+/* The briefing is still pre-C38 — dark ground, cream ink — so the one-line
+   summary of the ride you are about to drive is painted for that, not for the
+   Yard's white sheets. */
+.cr-ride-feel {
+  margin: 0.5rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: rgba(247, 241, 227, 0.78);
+}
+.cr-ride-feel b {
+  color: var(--cr-danfo);
+}
+
+/* ------------------------------------------------------------------ C45 road
+   The briefing's hazard row and the one-line verdict on the chosen ride.
+   Both sit inside `.cr-brief`, whose 0.82-alpha panel blends with whatever the
+   backdrop gradient is behind it, so these colours are measured against the
+   lightest that panel ever gets (rgb(53,56,62)) rather than against --cr-ink. */
+.cr-road {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  /* 145, not 160: the brief panel's inner width on a 390-px phone is 318, and
+     at 160 the second column never fit, so three hazards were three rows. */
+  grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+  gap: 0.35rem;
+}
+.cr-road li {
+  display: grid;
+  gap: 0.1rem;
+  background: rgba(247, 241, 227, 0.07);
+  border-left: 3px solid var(--cr-jollof);
+  padding: 0.4rem 0.6rem;
+  border-radius: 10px;
+}
+.cr-road b {
+  font-size: 0.82rem;
+  color: var(--cr-danfo);
+}
+.cr-road small {
+  font-size: 0.74rem;
+  line-height: 1.35;
+  color: rgba(247, 241, 227, 0.82);
+}
+.cr-road-fit {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.25rem;
+}
+.cr-road-fit li {
+  display: grid;
+  grid-template-columns: 1.1rem 1fr;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+.cr-road-fit li::before {
+  font-weight: 700;
+  text-align: center;
+}
+.cr-road-fit .is-bad {
+  color: #ffb4a6;
+}
+.cr-road-fit .is-bad::before {
+  content: '!';
+}
+.cr-road-fit .is-good {
+  color: #9be3b4;
+}
+.cr-road-fit .is-good::before {
+  content: '\2713';
+}
+.cr-road-fit .is-even {
+  color: rgba(247, 241, 227, 0.78);
+}
+.cr-road-fit .is-even::before {
+  content: '\2013';
+}
+
+
+/* ------------------------------------------------- C48: an explained Yard --
+   Every number on this screen now says where it comes from. The styles below
+   are all for that second line: the source under a wallet tile, the
+   now-to-next readout on an upgrade, the payout on a goal, and the two
+   reference tables on the How it works tab. */
+
+.cr-wallet small {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.66rem;
+  line-height: 1.3;
+  color: var(--cr-surface-dim);
+  text-wrap: balance;
+}
+
+/* The run of Following to the next ride, directly under the tile it explains. */
+.cr-next-ride {
+  background: var(--cr-surface);
+  color: var(--cr-surface-ink);
+  border-radius: 16px;
+  padding: 0.55rem 0.8rem 0.65rem;
+  box-shadow: var(--cr-ring), var(--cr-lift);
+}
+.cr-next-ride p {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem;
+  margin: 0 0 0.4rem;
+  font-size: 0.74rem;
+  color: var(--cr-surface-dim);
+}
+.cr-next-ride p b {
+  color: var(--cr-surface-ink);
+  font-weight: 700;
+}
+.cr-next-ride p span {
+  margin-left: auto;
+  font-weight: 700;
+  color: var(--cr-surface-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* A paragraph that opens a sheet and explains what the sheet is for. */
+.cr-lede {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--cr-surface-dim);
+}
+.cr-lede b {
+  color: var(--cr-surface-ink);
+  font-weight: 700;
+}
+/* In a `flush` sheet the rows own the padding, so the lede has to add its own. */
+.cr-lede--inset {
+  padding: 0 1.1rem 0.8rem;
+}
+
+.cr-upgrade {
+  align-items: flex-start;
+}
+.cr-upgrade-read {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.25rem;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+.cr-upgrade-stat {
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cr-surface-dim);
+}
+.cr-upgrade-read b {
+  font-weight: 700;
+}
+.cr-upgrade-read i {
+  font-style: normal;
+  color: var(--cr-surface-dim);
+}
+.cr-upgrade-read b.is-next {
+  color: #0b6b36;
+}
+.cr-upgrade-level {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.3rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--cr-surface-dim);
+}
+.cr-upgrade-level .cr-pips {
+  margin-top: 0;
+}
+.cr-upgrade-buy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+  flex: none;
+}
+.cr-upgrade-buy small {
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: var(--cr-surface-dim);
+  white-space: nowrap;
+}
+
+.cr-goal-pay {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--cr-surface-dim);
+}
+.cr-goal.is-done .cr-goal-pay {
+  color: #0b6b36;
+}
+
+.cr-ride-gate {
+  color: var(--cr-surface-dim);
+  font-weight: 700;
+}
+
+/* The run of Following towards the next ride. */
+.cr-bar--gate {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(16, 32, 43, 0.1);
+  overflow: hidden;
+  margin: 0.1rem 0 0.2rem;
+}
+.cr-bar--gate > i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--cr-green);
+}
+
+/* What a currency is, on the How it works tab. */
+.cr-explain {
+  margin: 0;
+  display: grid;
+  gap: 0.6rem;
+}
+.cr-explain > div {
+  background: rgba(16, 32, 43, 0.045);
+  border-radius: 14px;
+  padding: 0.6rem 0.75rem;
+}
+.cr-explain dt {
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cr-surface-dim);
+}
+.cr-explain dd {
+  margin: 0.2rem 0 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+/* What a run pays, line by line. */
+.cr-payline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+}
+.cr-payline li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.45rem 0;
+  border-top: 1px solid rgba(16, 32, 43, 0.09);
+  font-size: 0.82rem;
+}
+.cr-payline li:first-child {
+  border-top: none;
+}
+.cr-payline b {
+  flex: none;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* ------------------------------------------- C48: the loading state ------
+   It was a bare `<p>` inside the briefing screen, so it inherited that
+   screen's 560-px centred column and sat left-aligned against its left edge
+   while the rest of the viewport stayed empty. */
+.cr-screen--loading {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: linear-gradient(180deg, #142038, #0b1220 60%);
+}
+.cr-screen--loading > * {
+  width: auto;
+  max-width: 100%;
+  margin: 0;
+}
+.cr-loading {
+  display: grid;
+  justify-items: center;
+  gap: 0.9rem;
+}
+.cr-loading p {
+  margin: 0;
+}
+.cr-loading-spin {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 3px solid rgba(247, 241, 227, 0.2);
+  border-top-color: var(--cr-danfo);
+  animation: cr-spin 0.9s linear infinite;
+}
+@keyframes cr-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cr-loading-spin {
+    animation: none;
+    border-top-color: rgba(247, 241, 227, 0.2);
+    border-right-color: var(--cr-danfo);
+  }
 }

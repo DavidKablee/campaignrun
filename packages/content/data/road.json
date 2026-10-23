@@ -1,0 +1,41 @@
+{
+  "clamp": {
+    "topSpeedPermille": { "min": 900, "max": 1100 },
+    "accelPermille": { "min": 850, "max": 1150 },
+    "brakeDecelPermille": { "min": 780, "max": 1200 },
+    "laneChangePermille": { "min": 820, "max": 1200 },
+    "gapPermille": { "min": 700, "max": 1200 },
+    "doubleChancePermille": { "min": 400, "max": 2000 },
+    "obstacleWeightPermille": { "min": 200, "max": 4000 }
+  },
+  "advice": {
+    "floodPermille": 1500,
+    "narrowPermille": 1300,
+    "lightPermille": 1300,
+    "tightLanePermille": 930,
+    "baselinePermille": 1000,
+    "doublePermille": 1300,
+    "roughPermille": 1250,
+    "slickPermille": 930,
+    "busyPermille": 920,
+    "maxNotes": 3,
+    "copy": {
+      "floodBad": "Floodwater here stops a ride this big — you will be taking the hits.",
+      "floodGood": "Floodwater here is nothing to this ride — it drives straight through.",
+      "narrowGood": "Tight gaps everywhere, and this ride fits through them.",
+      "narrowBad": "Tight gaps everywhere, and this ride does not fit through them.",
+      "lightGood": "Plenty of light barriers to plough — they will not touch you.",
+      "lightBad": "Plenty of light barriers, and this ride has to go around every one.",
+      "tightBad": "The lanes are tight here and this ride turns slowly.",
+      "doubleGood": "Two lanes block at once here — this ride can step across in time.",
+      "doubleBad": "Two lanes block at once here, and this ride is slow to step across.",
+      "roughGood": "A broken surface, and this ride hops the holes with room to spare.",
+      "roughBad": "A broken surface, and this ride barely gets off the ground.",
+      "slickGood": "Long braking into every zone, which this ride is built for.",
+      "slickBad": "Long braking into every zone, and this ride brakes worse than most.",
+      "knockGood": "Knocks are likely here, and this ride holds its crowd through one.",
+      "knockBad": "Knocks are likely here, and a knock costs this ride more crowd than most.",
+      "even": "Nothing on this road is for or against this ride."
+    }
+  }
+}

@@ -13,7 +13,10 @@ test('flow: splash → roster → studio → Lagos briefing → game', async ({ 
   await expect(page.locator('.cr-portrait img').first()).toBeVisible({ timeout: 10_000 });
   await shot('2-roster');
 
-  await page.getByRole('button', { name: /Mama Ankara/i }).click();
+  await page.locator('.cr-pick-card', { hasText: 'Mama Ankara' }).click();
+  // C40: the card only previews. Nothing is written until the hero's button.
+  await expect(page.locator('.cr-pick-body h3')).toHaveText('Mama Ankara');
+  await page.getByRole('button', { name: /^Campaign as Mama Ankara/ }).click();
   await expect(page.locator('canvas.cr-studio-canvas')).toBeVisible();
   await page.waitForTimeout(600);
   await shot('3-studio');
@@ -25,7 +28,10 @@ test('flow: splash → roster → studio → Lagos briefing → game', async ({ 
   await shot('4-studio-edited');
 
   await page.getByRole('button', { name: /Campaign in Lagos/i }).click();
-  await expect(page.getByText('Day 1 · Lagos')).toBeVisible();
+  // The briefing's header is the state, not a day counter: "Day 1 · Lagos" has
+  // not been on this screen since the state packs landed, and nothing caught it
+  // because `pnpm verify` (and so CI) does not run the e2e suite.
+  await expect(page.getByText('Lagos open')).toBeVisible();
   await shot('5-briefing');
   await page.getByRole('button', { name: /Start the run/i }).click();
 
@@ -44,7 +50,8 @@ test('flow: splash → roster → studio → Lagos briefing → game', async ({ 
 test('canvas fills the viewport (no portrait column on landscape)', async ({ page }) => {
   await page.goto('/?debug');
   await page.getByRole('button', { name: /I'm 18\+ · Play/i }).click();
-  await page.getByRole('button', { name: /Engineer Spark/i }).click();
+  await page.locator('.cr-pick-card', { hasText: 'Engineer Spark' }).click();
+  await page.getByRole('button', { name: /^Campaign as Engineer Spark/ }).click();
   await page.getByRole('button', { name: /Campaign in Lagos/i }).click();
   await page.getByRole('button', { name: /Start the run/i }).click();
   await page.getByRole('button', { name: /Got it/i }).click({ timeout: 10_000 });
@@ -62,7 +69,8 @@ test('every Lagos segment renders (jump along the 1.4 km course)', async ({ page
   for (const [name, z] of [['ojuelegba', 120], ['bridge', 400], ['link', 640], ['market', 900], ['park', 1160], ['island', 1340]] as const) {
     await page.goto(`/?debug&debugZ=${z}`);
     await page.getByRole('button', { name: /I'm 18\+ · Play/i }).click();
-    await page.getByRole('button', { name: /Captain Kobo/i }).click();
+    await page.locator('.cr-pick-card', { hasText: 'Captain Kobo' }).click();
+    await page.getByRole('button', { name: /Captain Kobo →$/ }).click();
     await page.getByRole('button', { name: /Campaign in Lagos/i }).click();
     await page.getByRole('button', { name: /Start the run/i }).click();
     await page.waitForTimeout(1200);

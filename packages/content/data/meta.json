@@ -1,16 +1,71 @@
 {
+  "maxLevel": 5,
   "starts": [
-    { "id": "funded", "name": "Funded Start", "description": "Begin with campaign funds.", "coins": 180, "following": 0 },
-    { "id": "grassroots", "name": "Grassroots Start", "description": "Begin with a local following.", "coins": 40, "following": 35 }
+    {
+      "id": "funded",
+      "name": "Funded Start",
+      "description": "Begin with campaign funds.",
+      "coins": 180,
+      "following": 0
+    },
+    {
+      "id": "grassroots",
+      "name": "Grassroots Start",
+      "description": "Begin with a local following.",
+      "coins": 40,
+      "following": 35
+    }
   ],
   "upgrades": [
-    { "id": "magnet", "name": "Supporter Magnet", "description": "Collect supporters from farther away.", "costs": [80, 120, 180, 260, 360], "step": 250 },
-    { "id": "shield", "name": "Agbada Shield", "description": "Shield power-up lasts longer.", "costs": [80, 120, 180, 260, 360], "step": 30 },
-    { "id": "horn", "name": "Horn Kit", "description": "Horn recharges faster.", "costs": [80, 120, 180, 260, 360], "step": 90 },
-    { "id": "loading", "name": "Loading Crew", "description": "Load and unload faster.", "costs": [90, 135, 195, 280, 390], "step": 60 },
-    { "id": "value", "name": "Fundraising Desk", "description": "Earn slightly more local ₦ per run.", "costs": [100, 150, 220, 310, 430], "step": 50 }
+    {
+      "id": "magnet",
+      "name": "Supporter Magnet",
+      "description": "Collect supporters from farther away.",
+      "costs": [80, 120, 180, 260, 360],
+      "step": 250,
+      "effect": { "kind": "mm-up", "stat": "magnetRadiusMm", "label": "Pickup reach", "base": 0 }
+    },
+    {
+      "id": "shield",
+      "name": "Agbada Shield",
+      "description": "Shield power-up lasts longer.",
+      "costs": [80, 120, 180, 260, 360],
+      "step": 30,
+      "effect": { "kind": "ticks-up", "stat": "shieldTicks", "label": "Shield time", "base": 0 }
+    },
+    {
+      "id": "horn",
+      "name": "Horn Kit",
+      "description": "Horn recharges faster.",
+      "costs": [80, 120, 180, 260, 360],
+      "step": 90,
+      "effect": { "kind": "ticks-down", "stat": "hornCooldownTicks", "label": "Horn recharge", "base": 720, "floor": 180 }
+    },
+    {
+      "id": "loading",
+      "name": "Loading Crew",
+      "description": "Load and unload faster.",
+      "costs": [90, 135, 195, 280, 390],
+      "step": 60,
+      "effect": { "kind": "permille-up", "stat": "loadSpeedPermille", "label": "Load speed", "base": 1000 }
+    },
+    {
+      "id": "value",
+      "name": "Fundraising Desk",
+      "description": "Earn slightly more local ₦ per run.",
+      "costs": [100, 150, 220, 310, 430],
+      "step": 50,
+      "effect": { "kind": "permille-up", "stat": "rewardPermille", "label": "₦ per rally", "base": 1000 }
+    }
   ],
-  "rewards": { "baseRun": 60, "perDelivered": 4, "donation": 90, "dailyMission": 70, "weeklyMission": 180 },
+  "rewards": {
+    "baseRun": 60,
+    "perDelivered": 4,
+    "followingPerDelivered": 1,
+    "donation": 90,
+    "dailyMission": 70,
+    "weeklyMission": 180
+  },
   "missions": {
     "daily": [
       { "id": "run", "label": "Complete 2 rallies", "target": 2 },

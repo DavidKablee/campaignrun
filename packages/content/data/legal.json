@@ -1,12 +1,12 @@
 {
-  "version": "2026-10-08",
+  "version": "2026-10-21",
   "privacyTitle": "Privacy",
-  "privacyBody": "Campaign Run stores progress on this device by default. Contender choice is sensitive: it stays local until you give explicit consent. Scores are game scores, not polls. We do not sell Contender choice for political advertising. Lawyer review of the full privacy notice is still required before public launch.",
+  "privacyBody": "Campaign Run stores progress on this device by default. If you create an account we also store your email, your board name and your scores on our server. Contender choice is sensitive: it stays local until you give explicit consent, and it is never attached to a public score. Scores are game scores, not polls. We do not sell Contender choice for political advertising. Lawyer review of the full privacy notice is still required before public launch.",
   "termsTitle": "Terms",
   "termsBody": "This is a fictional game for players 18+. Play fair. Do not use the game to claim real election results. Disclosure applies everywhere: fictional characters and events; not affiliated with any party, aspirant, or electoral body. Lawyer review of the full terms is still required before public launch.",
   "contenderConsentTitle": "Share Contender data?",
-  "contenderConsentBody": "Your Contender choice can stay on this device forever. If you consent, future cloud features may store Contender id separately from public scores (Nigeria Data Protection Act style consent). You can withdraw consent, export, or delete your data any time in Account.",
+  "contenderConsentBody": "Your Contender choice can stay on this device forever. If you consent, and you are signed in, your Contender id is stored on the server separately from your public score so the live map can colour a state (Nigeria Data Protection Act style consent). Withdrawing consent erases the ids already stored. You can export or delete your data any time in Account.",
   "contenderConsentAccept": "I consent to Contender data leaving this device",
   "guestSaveTitle": "Save progress",
-  "guestSaveBody": "Keep playing as a guest, or save a local account name so export and consent logs stay attached to you on this device. Cloud sign-in arrives later."
+  "guestSaveBody": "Keep playing as a guest, or save a name on this device so your export and consent log stay attached to you here. A device name is separate from an account: signing in is what carries your board to another phone."
 }

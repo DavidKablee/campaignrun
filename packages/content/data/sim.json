@@ -123,7 +123,7 @@
     "max": 1500,
     "gainPerTick": 3,
     "decayPerTick": 2,
-    "fastThresholdPermille": 1050
+    "fastThresholdPermille": 950
   },
   "zones": {
     "brakeToActSpeedUm": 120000,
@@ -135,13 +135,14 @@
   "bonuses": {
     "fullHousePermille": 1250,
     "onBeatPermille": 1500,
-    "onBeatTaps": 4,
+    "onBeatTaps": 2,
     "onBeatWindowTicks": 90,
     "pvcMultiplierPermille": 1100,
     "pvcDurationTicks": 600,
     "rivalOutpaceCrowd": 6,
     "rivalBumpSpeedPermille": 850,
-    "rallySaturdayMultiplierPermille": 2000
+    "rallySaturdayMultiplierPermille": 2000,
+    "signatureRideBonusPermille": 1100
   },
   "course": {
     "borderGateMm": 20000,
@@ -152,7 +153,8 @@
     "grandRallyMm": 50000,
     "finishPadMm": 15000,
     "hazardGapMinMm": 16000,
-    "hazardGapMaxMm": 30000
+    "hazardGapMaxMm": 30000,
+    "roadGapFloorPermille": 700
   },
   "tiers": {
     "crowdPerCapacity": 4,

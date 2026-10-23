@@ -4,7 +4,7 @@ import { isRidePlayable, metaConfig, rides, type UpgradeId } from '@cr/content';
 import { useContenderStore } from './contenderStore';
 import { challengeMet, todaysChallenge } from './daily';
 import { submitLocalBoard, type LocalBoardEntry } from './localBoard';
-import { emptyUpgrades, missionDelta, type MissionProgress, type StartId, type UpgradeLevels, upgradeCost, watDay, watWeek } from './meta';
+import { emptyUpgrades, missionDelta, type MissionProgress, runPayout, type StartId, type UpgradeLevels, upgradeCost, watDay, watWeek } from './meta';
 import { canTravel, emptyTravel, noteTravel, type TravelProgress } from './travel';
 import { validateUsername } from './username';
 
@@ -19,6 +19,7 @@ export type Screen =
   | 'about'
   | 'account'
   | 'map'
+  | 'auth'
   | 'paused'
   | 'yard';
 
@@ -235,7 +236,10 @@ export const useGameStore = create<GameState>()(
         const delta = missionDelta(baseProgress, baseCompleted, r.delivered, r.crowd, r.finished);
         const newlyDone = delta.completed.filter((id) => !baseCompleted.includes(id));
         const missionReward = newlyDone.reduce((sum, id) => sum + (id === 'weekly-runs' ? metaConfig.rewards.weeklyMission : metaConfig.rewards.dailyMission), 0);
-        const reward = Math.floor((metaConfig.rewards.baseRun + r.delivered * metaConfig.rewards.perDelivered) * (1000 + st.upgrades.value * 50) / 1000) + missionReward;
+        // C48: the payout formula lives in content beside the number the Yard
+        // prints for the Fundraising Desk. The `* 50` that used to sit here was
+        // a third copy of that upgrade's step.
+        const reward = runPayout(r.delivered, st.upgrades) + missionReward;
         const travel = r.finished ? noteTravel(st.travel, st.activeStateId) : st.travel;
         if (r.finished) useContenderStore.getState().lockAfterFinish();
         return {

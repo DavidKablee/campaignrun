@@ -1,4 +1,5 @@
-import { isPlausibleRun, type RunClaim } from './plausibility';
+import { isPlausibleRun, type RunClaim } from '@cr/sim';
+import { simConfig } from '@cr/content';
 import { validateUsername } from './username';
 import { watDay } from './meta';
 
@@ -19,7 +20,7 @@ export function submitLocalBoard(
 ): { ok: true; board: LocalBoardEntry[]; name: string } | { ok: false; reason: string } {
   const nameOk = validateUsername(username);
   if (!nameOk.ok) return { ok: false, reason: nameOk.reason };
-  const scoreOk = isPlausibleRun(claim);
+  const scoreOk = isPlausibleRun(claim, simConfig);
   if (!scoreOk.ok) return { ok: false, reason: scoreOk.reason };
   if (!claim.finished) return { ok: false, reason: 'unfinished' };
 

@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { challengeMet, todaysChallenge } from '../src/daily';
 import { submitLocalBoard } from '../src/localBoard';
-import { isPlausibleRun } from '../src/plausibility';
+import { isPlausibleRun } from '@cr/sim';
+import { simConfig } from '@cr/content';
 import { validateUsername } from '../src/username';
 
 const baseClaim = {
@@ -16,16 +17,16 @@ const baseClaim = {
 
 describe('C09 plausibility', () => {
   it('accepts a normal finished run', () => {
-    expect(isPlausibleRun(baseClaim)).toEqual({ ok: true });
+    expect(isPlausibleRun(baseClaim, simConfig)).toEqual({ ok: true });
   });
   it('rejects impossible crowd', () => {
-    expect(isPlausibleRun({ ...baseClaim, skillCrowd: 50_000 }).ok).toBe(false);
+    expect(isPlausibleRun({ ...baseClaim, skillCrowd: 50_000 }, simConfig).ok).toBe(false);
   });
   it('rejects display below skill', () => {
-    expect(isPlausibleRun({ ...baseClaim, displayCrowd: 10 }).ok).toBe(false);
+    expect(isPlausibleRun({ ...baseClaim, displayCrowd: 10 }, simConfig).ok).toBe(false);
   });
   it('rejects finished with max dents', () => {
-    expect(isPlausibleRun({ ...baseClaim, dents: 3 }).ok).toBe(false);
+    expect(isPlausibleRun({ ...baseClaim, dents: 3 }, simConfig).ok).toBe(false);
   });
 });
 

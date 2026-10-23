@@ -1,5 +1,5 @@
 import { initState, step, seedRng, decodeInputLog } from '@cr/sim';
-import { rides, type SimConfig } from '@cr/content';
+import { NEUTRAL_ROAD, rideSimTraits, rides, type RoadProfile, type SimConfig } from '@cr/content';
 import { base64ToBytes, type GhostRecord } from './ghostStore';
 
 export interface GhostFrame {
@@ -13,17 +13,23 @@ export interface GhostFrame {
  * can just index into the result by the live run's own tick counter. Positional only: the ghost
  * doesn't need the same course layout as the live run (different seed is fine — it's a replay
  * of a past run on this road, not a reaction to this run's hazards).
+ *
+ * The road is not optional in the same way (C45): it changes how fast the ghost's own inputs
+ * carried it, so replaying a flood-state ghost on a neutral road would drift it ahead of where
+ * it really finished. Ghosts are stored per state, so the caller passes the current state's
+ * road and the two always agree.
  */
-export function computeGhostTrajectory(ghost: GhostRecord, config: SimConfig): GhostFrame[] {
+export function computeGhostTrajectory(
+  ghost: GhostRecord,
+  config: SimConfig,
+  road: RoadProfile = NEUTRAL_ROAD,
+): GhostFrame[] {
   const ride = rides.find((r) => r.id === ghost.rideId) ?? rides[0]!;
   const records = decodeInputLog(base64ToBytes(ghost.log));
   const state = initState(config, seedRng(ghost.seed), {
-    capacity: ride.capacity,
+    ...rideSimTraits(ride),
+    road,
     contenderId: ghost.contenderId,
-    rideSize: ride.size,
-    ridePloughsLight: ride.ploughsLight,
-    rideFreeHit: ride.freeHitPerRun,
-    rideMagnetBonusMm: ride.magnetBonusMm,
   });
   const frames: GhostFrame[] = new Array(ghost.ticks);
   let ri = 0;

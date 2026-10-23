@@ -11,6 +11,8 @@ import metaJson from '../data/meta.json';
 import integrityJson from '../data/integrity.json';
 import travelJson from '../data/travel.json';
 import legalJson from '../data/legal.json';
+import limitsJson from '../data/limits.json';
+import controlsJson from '../data/controls.json';
 import {
   calendarSchema,
   contenderSchema,
@@ -25,10 +27,19 @@ import {
   integrityEventSchema,
   travelCapsSchema,
   legalSchema,
+  limitsSchema,
+  controlsSchema,
 } from './schemas';
 
 export * from './schemas';
 export * from './state-packs';
+export * from './standings';
+export * from './mapgeo';
+export * from './ride-feel';
+export * from './road';
+export * from './yard';
+import { rideRoadFit } from './road';
+import type { Hazard } from './schemas';
 
 /** Parsed at import time: an invalid pack fails the build, not the player. */
 export const simConfig = simConfigSchema.parse(simJson);
@@ -44,6 +55,9 @@ export const metaConfig = metaConfigSchema.parse(metaJson);
 export const integrityEvents = integrityEventSchema.array().parse(integrityJson);
 export const travelCaps = travelCapsSchema.parse(travelJson);
 export const legal = legalSchema.parse(legalJson);
+export const limits = limitsSchema.parse(limitsJson);
+/** C46: gesture thresholds for the on-glass controls. */
+export const controlTuning = controlsSchema.parse(controlsJson);
 
 export const activeContenders = contenders.filter((c) => c.status === 'active');
 
@@ -54,4 +68,13 @@ export function integrityEvent(id: string) {
 /** A ride can be selected only when this chunk marks it playable and Following is met. */
 export function isRidePlayable(ride: (typeof rides)[number], following: number): boolean {
   return ride.playable && following >= ride.followingGate;
+}
+
+/**
+ * C45: `rideRoadFit` bound to the shipped obstacle table, which is where the
+ * size tags live. Callers in the game only ever want this version — the pure
+ * three-argument one exists so the road layer never has to import simConfig.
+ */
+export function roadFit(ride: (typeof rides)[number], hazards: readonly Hazard[]) {
+  return rideRoadFit(ride, hazards, { obstacles: simConfig.obstacles, hopHeightMm: simConfig.hopHeightMm });
 }

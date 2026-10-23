@@ -10,6 +10,9 @@
     "noImplicitOverride": true,
     "noFallthroughCasesInSwitch": true,
     "isolatedModules": true,
+    // api/ runs straight off TypeScript via node --experimental-strip-types,
+    // which needs the real file extension on relative imports.
+    "allowImportingTsExtensions": true,
     "jsx": "react-jsx",
     "skipLibCheck": true,
     "noEmit": true,
@@ -18,5 +21,5 @@
       "@cr/*": ["./packages/*/src", "./apps/*/src"]
     }
   },
-  "include": ["packages/*/src", "packages/*/test", "apps/*/src", "apps/*/test", "apps/*/vite.config.ts", "tools", "vitest.config.ts"]
+  "include": ["packages/*/src", "packages/*/test", "apps/*/src", "apps/*/test", "apps/*/vite.config.ts", "api/src", "api/test", "tools", "vitest.config.ts"]
 }

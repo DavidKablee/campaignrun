@@ -1,0 +1,56 @@
+[
+  {
+    "id": "market-union",
+    "name": "Market Union",
+    "tag": "Market",
+    "contenderId": "mama-ankara",
+    "color": "#D4621B",
+    "ink": "#FFF6EC",
+    "platform": "Traders, stalls, and whoever is holding the change."
+  },
+  {
+    "id": "toolbox-guild",
+    "name": "Toolbox Guild",
+    "tag": "Toolbox",
+    "contenderId": "engineer-spark",
+    "color": "#1FA98F",
+    "ink": "#F2FFFB",
+    "platform": "Repairs, rewiring, and things that nearly work."
+  },
+  {
+    "id": "ledger-society",
+    "name": "Ledger Society",
+    "tag": "Ledger",
+    "contenderId": "captain-kobo",
+    "color": "#3B6FD4",
+    "ink": "#F2F6FF",
+    "platform": "Counting every kobo twice before it moves."
+  },
+  {
+    "id": "lantern-circle",
+    "name": "Lantern Circle",
+    "tag": "Lantern",
+    "contenderId": "sister-beacon",
+    "color": "#F5CE2E",
+    "ink": "#201A05",
+    "platform": "Light on the road after dark."
+  },
+  {
+    "id": "speaker-collective",
+    "name": "Speaker Collective",
+    "tag": "Speaker",
+    "contenderId": "uncle-boombox",
+    "color": "#C23FA0",
+    "ink": "#FFF2FB",
+    "platform": "Noise, dancing, and a very large speaker."
+  },
+  {
+    "id": "chalkboard-league",
+    "name": "Chalkboard League",
+    "tag": "Chalk",
+    "contenderId": "madam-metronome",
+    "color": "#8257C8",
+    "ink": "#F7F2FF",
+    "platform": "Lessons, rhythm, and doing it properly."
+  }
+]

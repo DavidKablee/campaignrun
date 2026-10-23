@@ -8,7 +8,20 @@ import { stateSchema, type StateDef } from './schemas';
  *
  * `dummy` is a CI fixture and is never treated as a campaign state.
  */
-const packModules = import.meta.glob<{ default: unknown }>('../data/states/*.json');
+/**
+ * `import.meta.glob` is a Vite/Vitest feature. The API bundles this package too
+ * (for the state and ride ids it validates against) and would crash on import
+ * under plain Node, so the call is guarded and there are simply no lazy packs
+ * on a server — `loadStatePack` is never called there.
+ *
+ * The guard tests `import.meta.env`, not `import.meta.glob`. Vite replaces the
+ * glob *call* at build time but leaves `import.meta.glob` itself undefined at
+ * runtime, so guarding on the function emptied the pack list in the browser
+ * while still passing under Vitest.
+ */
+const packModules: Record<string, () => Promise<{ default: unknown }>> = import.meta.env
+  ? import.meta.glob<{ default: unknown }>('../data/states/*.json')
+  : {};
 
 function idFromPath(path: string): string {
   const match = path.match(/\/([a-z0-9-]+)\.json$/);

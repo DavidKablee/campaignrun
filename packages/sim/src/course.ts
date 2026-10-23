@@ -1,6 +1,7 @@
 import type { SimConfig } from '@cr/content';
 import type { Entity, SimState } from './types';
 import { rngIntRange } from './rng';
+import { applyPermille } from './fixed';
 
 function pushZone(
   state: SimState,
@@ -25,25 +26,51 @@ function pushZone(
   });
 }
 
+/**
+ * C45: the state's road reweights the table. This is the main thing hazards do
+ * — a flood state is a table where `flood-patch` is 2.6x as likely, and C26
+ * already says a flood patch blocks size L, so the road has made the Coaster
+ * the wrong ride without a single new rule. Never below 1, so a hazard can
+ * make a kind rare but never delete it from the road.
+ */
+function obstacleWeight(state: SimState, o: SimConfig['obstacles'][number]): number {
+  const permille = state.road.obstacleWeightPermille[o.kind] ?? 1000;
+  return Math.max(1, applyPermille(o.weight, permille));
+}
+
 function pickWeightedObstacle(state: SimState, config: SimConfig) {
   let total = 0;
-  for (const o of config.obstacles) total += o.weight;
+  for (const o of config.obstacles) total += obstacleWeight(state, o);
   let roll = rngIntRange(state.rng, 0, total - 1);
   for (const o of config.obstacles) {
-    if (roll < o.weight) return o;
-    roll -= o.weight;
+    const weight = obstacleWeight(state, o);
+    if (roll < weight) return o;
+    roll -= weight;
   }
   return config.obstacles[0]!;
 }
 
 function spawnHazardCluster(state: SimState, config: SimConfig, fromZ: number, toZ: number): void {
-  let z = fromZ + config.course.hazardGapMinMm;
+  // C45: a busier road is a smaller gap. Both ends move together so the spread
+  // stays a spread. How close a three-hazard state may stack things is decided
+  // in road.json's clamp, not here; the Math.max is only so a hand-built road
+  // with a zero in it cannot spin this loop forever.
+  const gapMin = Math.max(1, applyPermille(config.course.hazardGapMinMm, state.road.gapPermille));
+  const gapMax = Math.max(gapMin, applyPermille(config.course.hazardGapMaxMm, state.road.gapPermille));
+  const doubleChance = Math.min(1000, applyPermille(config.spawn.doubleChancePermille, state.road.doubleChancePermille));
+  let z = fromZ + gapMin;
   while (z < toZ - 5000) {
     const roll = rngIntRange(state.rng, 0, 999);
     const supporterCut = config.spawn.supporterChancePermille;
     const integrityCut = supporterCut + config.spawn.integrityChancePermille;
     const pvcCut = integrityCut + config.spawn.pvcChancePermille;
-    const rivalCut = pvcCut + config.spawn.rivalChancePermille;
+    // C44: a Grand Convoy is the one thing on the road worth coming out for, so
+    // it meets more rival traffic. This moves one branch cut and takes no extra
+    // roll to decide it — but the branches themselves draw different numbers of
+    // rolls, so two rides on the same seed no longer get identical courses.
+    // Determinism stays per-ride, which is all the ghost replay needs: it
+    // re-simulates with the ride that recorded it.
+    const rivalCut = pvcCut + applyPermille(config.spawn.rivalChancePermille, state.rideRivalDrawPermille);
     const isSupporter = roll < supporterCut;
     const isIntegrity = !isSupporter && roll < integrityCut;
     const isPvc = !isSupporter && !isIntegrity && roll < pvcCut;
@@ -146,7 +173,7 @@ function spawnHazardCluster(state: SimState, config: SimConfig, fromZ: number, t
         active: true,
         sizeTag: obstacle.sizeTag,
       });
-      if (rngIntRange(state.rng, 0, 999) < config.spawn.doubleChancePermille) {
+      if (rngIntRange(state.rng, 0, 999) < doubleChance) {
         const lane2 = ((lane + 1 + rngIntRange(state.rng, 0, 1)) % 3) as 0 | 1 | 2;
         const o2 = pickWeightedObstacle(state, config);
         state.entities.push({
@@ -163,7 +190,7 @@ function spawnHazardCluster(state: SimState, config: SimConfig, fromZ: number, t
       }
     }
 
-    const gap = rngIntRange(state.rng, config.course.hazardGapMinMm, config.course.hazardGapMaxMm);
+    const gap = rngIntRange(state.rng, gapMin, gapMax);
     z += gap;
   }
 }

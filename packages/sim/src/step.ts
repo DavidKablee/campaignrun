@@ -1,5 +1,5 @@
 import { type SimConfig, contenders } from '@cr/content';
-import { Btn, type SimState } from './types';
+import { Btn, NEUTRAL_HANDLING, NEUTRAL_ROAD, type RideHandling, type RoadProfile, type SimState } from './types';
 import { clamp, applyPermille } from './fixed';
 import { checkCollision, findOverlappingZone } from './collide';
 import { buildCourse } from './course';
@@ -16,6 +16,11 @@ export function initState(
     ridePloughsLight?: boolean;
     rideFreeHit?: boolean;
     rideMagnetBonusMm?: number;
+    rideHandling?: RideHandling;
+    rideHitDropPermille?: number;
+    rideRivalDrawPermille?: number;
+    /** C45: the state's composed road. `roadProfile(pack.hazards)` from @cr/content. */
+    road?: RoadProfile;
     signatureRideBonusPermille?: number;
     /** C30: Rally Saturday — decided by the caller from a real clock, sim just applies it. */
     rallySaturdayMultiplierPermille?: number;
@@ -73,6 +78,10 @@ export function initState(
     freeHitUsed: false,
     rideMagnetBonusMm: opts?.rideMagnetBonusMm ?? 0,
     signatureRideBonusPermille: opts?.signatureRideBonusPermille ?? 1000,
+    rideHandling: opts?.rideHandling ?? NEUTRAL_HANDLING,
+    rideHitDropPermille: opts?.rideHitDropPermille ?? 1000,
+    rideRivalDrawPermille: opts?.rideRivalDrawPermille ?? 1000,
+    road: opts?.road ?? NEUTRAL_ROAD,
   };
   buildCourse(state, config);
   return state;
@@ -119,13 +128,36 @@ export function step(state: SimState, input: number, config: SimConfig): void {
   const tradeoff = contender.tradeoff;
   const perkId = contender.perk.id;
 
-  let laneChangeMmPerTick = config.laneChangeMmPerTick;
-  let accelUm = config.accelUm;
-  let maxSpeedUm = config.maxSpeedUm;
+  // C44/C45: config, then the ride, then the road, then the Contender's
+  // trade-off — each multiplying what the one before it left. All three are
+  // permille, so the order only shows up in the last integer of truncation —
+  // but it is fixed, because the ghost replay has to reproduce the run tick
+  // for tick.
+  const feel = state.rideHandling;
+  const road = state.road;
+  let laneChangeMmPerTick = applyPermille(config.laneChangeMmPerTick, feel.laneChangePermille);
+  let accelUm = applyPermille(config.accelUm, feel.accelPermille);
+  let maxSpeedUm = applyPermille(config.maxSpeedUm, feel.topSpeedPermille);
+  let brakeDecelUm = applyPermille(config.brakeDecelUm, feel.brakeDecelPermille);
+
+  laneChangeMmPerTick = applyPermille(laneChangeMmPerTick, road.laneChangePermille);
+  accelUm = applyPermille(accelUm, road.accelPermille);
+  maxSpeedUm = applyPermille(maxSpeedUm, road.topSpeedPermille);
+  brakeDecelUm = applyPermille(brakeDecelUm, road.brakeDecelPermille);
 
   if (tradeoff.stat === 'laneChangeSpeed') laneChangeMmPerTick = applyPermille(laneChangeMmPerTick, tradeoff.permille);
   if (tradeoff.stat === 'acceleration') accelUm = applyPermille(accelUm, tradeoff.permille);
   if (tradeoff.stat === 'topSpeed') maxSpeedUm = applyPermille(maxSpeedUm, tradeoff.permille);
+
+  // A ride slower than the coast speed would sit above its own ceiling and snap
+  // down to it the moment the player touched the gas. No shipped ride is, on
+  // any shipped road — a content test holds that line across all 38 packs, and
+  // the road clamps in road.json are what keep it holdable. This keeps a bad
+  // pack merely slow.
+  maxSpeedUm = Math.max(maxSpeedUm, config.baseSpeedUm);
+  laneChangeMmPerTick = Math.max(1, laneChangeMmPerTick);
+  accelUm = Math.max(1, accelUm);
+  brakeDecelUm = Math.max(1, brakeDecelUm);
 
   if (state.perkCooldownTicks > 0) state.perkCooldownTicks--;
   if (state.perkActiveTicks > 0) state.perkActiveTicks--;
@@ -151,7 +183,9 @@ export function step(state: SimState, input: number, config: SimConfig): void {
   }
 
   if (rising(input, state.prevInput, Btn.Up) && state.hopT === 0) {
-    state.hopT = config.hopTicks;
+    // Heavier rides get less airtime, so clearing the same hazard is a tighter
+    // window rather than an impossibility.
+    state.hopT = Math.max(1, applyPermille(config.hopTicks, feel.hopPermille));
   }
 
   if (rising(input, state.prevInput, Btn.Tap) && state.beatWindowTicks > 0) {
@@ -181,7 +215,7 @@ export function step(state: SimState, input: number, config: SimConfig): void {
   if (input & Btn.Gas) {
     state.speed = clamp(state.speed + accelUm, 0, maxSpeedUm);
   } else if (input & Btn.Brake) {
-    state.speed = clamp(state.speed - config.brakeDecelUm, config.brakeSpeedUm, config.maxSpeedUm);
+    state.speed = clamp(state.speed - brakeDecelUm, config.brakeSpeedUm, maxSpeedUm);
   } else {
     if (state.speed > config.baseSpeedUm) {
       state.speed = clamp(state.speed - config.coastUm, config.baseSpeedUm, config.maxSpeedUm);
@@ -190,7 +224,11 @@ export function step(state: SimState, input: number, config: SimConfig): void {
     }
   }
 
-  if (state.speed > applyPermille(config.maxSpeedUm, config.momentum.fastThresholdPermille)) {
+  // Momentum builds near *this ride's* ceiling, not the config's. Measured
+  // against the config, a ride with a lower top speed could never build
+  // momentum at all — the Trek's 82% ceiling would sit permanently below the
+  // bar, which is a cliff rather than a trade-off.
+  if (state.speed > applyPermille(maxSpeedUm, config.momentum.fastThresholdPermille)) {
     state.momentum = clamp(state.momentum + config.momentum.gainPerTick, config.momentum.min, config.momentum.max);
   } else {
     state.momentum = clamp(state.momentum - config.momentum.decayPerTick, config.momentum.min, config.momentum.max);
@@ -351,7 +389,11 @@ export function step(state: SimState, input: number, config: SimConfig): void {
 
       state.speed = applyPermille(state.speed, config.hit.speedPermille);
       state.momentum = config.momentum.min;
-      const dropped = applyPermille(state.carried, config.hit.dropCarriedPermille);
+      // C44: how much of the load a knock costs is the ride's own. Capped at
+      // everything carried — a multiplier above 1000 must not shed more than
+      // the bus is holding.
+      const dropPermille = Math.min(1000, applyPermille(config.hit.dropCarriedPermille, state.rideHitDropPermille));
+      const dropped = applyPermille(state.carried, dropPermille);
       state.carried -= dropped;
       if (state.dents >= config.hit.maxDents) {
         state.phase = 'breakdown';

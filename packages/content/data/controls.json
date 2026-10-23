@@ -1,0 +1,17 @@
+{
+  "autoGas": true,
+  "swipeMinPx": 34,
+  "swipeMaxMs": 420,
+  "tapMaxMovePx": 14,
+  "tapMaxMs": 260,
+  "holdHornMs": 300,
+  "brakeGraceMs": 240,
+  "hintMs": 5000,
+  "haptics": {
+    "laneMs": 8,
+    "hopMs": 14,
+    "brakeMs": 18,
+    "beatMs": 24,
+    "hornMs": 28
+  }
+}

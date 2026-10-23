@@ -1,3 +1,5 @@
 packages:
+  # The API is a sibling of the frontend, not one of its apps.
+  - api
   - apps/*
   - packages/*

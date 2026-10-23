@@ -1,0 +1,22 @@
+{
+  "auth": {
+    "signupPerDayPerIp": 10,
+    "loginPerMinutePerIp": 10,
+    "loginFailuresBeforeLockout": 8,
+    "lockoutMinutes": 15,
+    "forgotPerHourPerIp": 5,
+    "verifyTokenHours": 48,
+    "resetTokenMinutes": 60,
+    "minPasswordLength": 10,
+    "guestPerDayPerIp": 20,
+    "devicePerMinutePerIp": 20,
+    "emailPromptAfterRuns": 3,
+    "emailPromptSnoozeHours": [24, 72, 168]
+  },
+  "scores": {
+    "perMinutePerUser": 6
+  },
+  "board": {
+    "maxRows": 100
+  }
+}
