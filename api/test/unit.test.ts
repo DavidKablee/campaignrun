@@ -3,6 +3,7 @@ import { hashPassword, hashToken, newSessionToken, verifyPassword } from '../src
 import { liveStandings, type LiveRegion } from '../src/standings';
 import { consentSchema, loginSchema, scoreSchema, signupSchema } from '../src/validate';
 import type { Db } from '../src/db';
+import { resendMailer } from '../src/mailer';
 
 describe('passwords', () => {
   it('verifies a correct password and rejects a wrong one', async () => {
@@ -118,5 +119,28 @@ describe('the standings privacy floor', () => {
 
   it('reports the player count either way, since a count names nobody', async () => {
     expect((await liveStandings(fakeDb(7), 200))[0]!.players).toBe(7);
+  });
+});
+
+describe('resendMailer', () => {
+  it('posts the message to Resend with the key as a bearer token', async () => {
+    const calls: { url: string; init: RequestInit }[] = [];
+    const fake = (async (url: string, init: RequestInit) => {
+      calls.push({ url, init });
+      return new Response('{"id":"x"}', { status: 200 });
+    }) as unknown as typeof fetch;
+    const mailer = resendMailer('re_test_key', 'Campaigner <a@b.test>', fake);
+    await mailer.send({ to: 'p@q.test', subject: 'Hi', text: 'Body' });
+    expect(calls).toHaveLength(1);
+    expect(calls[0]!.url).toBe('https://api.resend.com/emails');
+    expect((calls[0]!.init.headers as Record<string, string>).authorization).toBe('Bearer re_test_key');
+    expect(JSON.parse(calls[0]!.init.body as string)).toEqual({ from: 'Campaigner <a@b.test>', to: ['p@q.test'], subject: 'Hi', text: 'Body' });
+  });
+
+  it('throws on a refusal, with the status and no key in the message', async () => {
+    const fake = (async () => new Response('{"message":"domain not verified"}', { status: 403 })) as unknown as typeof fetch;
+    const err = await resendMailer('re_secret', 'x@y.test', fake).send({ to: 'p@q.test', subject: 's', text: 't' }).catch((e: Error) => e);
+    expect((err as Error).message).toMatch(/resend 403/);
+    expect((err as Error).message).not.toContain('re_secret');
   });
 });

@@ -7,9 +7,9 @@
   "scripts": {
     "build": "esbuild src/index.ts --bundle --platform=node --format=esm --target=node22 --external:pg --external:hono --external:hono/* --external:@hono/node-server --outfile=dist/server.js && cp src/schema.sql dist/schema.sql",
     "start": "node dist/server.js",
-    "dev": "pnpm build && node --watch dist/server.js",
+    "dev": "pnpm build && node --env-file-if-exists=../.env --watch dist/server.js",
     "migrate": "node dist/server.js --migrate-only",
-    "report": "node --experimental-strip-types src/report.ts"
+    "report": "node --env-file-if-exists=../.env --experimental-strip-types src/report.ts"
   },
   "dependencies": {
     "@cr/content": "workspace:*",

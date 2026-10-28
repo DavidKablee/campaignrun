@@ -1,15 +1,16 @@
 /**
  * Outbound email.
  *
- * There is no provider wired up, because that needs an account only the
- * project owner can create. Everything around it is real — the tokens, their
- * expiry, single use, the routes — so wiring a provider is implementing
- * `send()` and setting `CR_MAIL_FROM`/`CR_APP_URL`, not building a flow.
+ * Resend is the provider: set `RESEND_API_KEY` (and `CR_MAIL_FROM`, `CR_APP_URL`)
+ * and mail is really sent, locally or deployed. With no key the console mailer
+ * prints the link to the server log. That is usable for development and is
+ * *deliberately* refused in production: shipping with it would mean a player
+ * asking for a password reset silently gets nothing while the token sits in a
+ * log file.
  *
- * Until then the console mailer prints the link to the server log. That is
- * usable for development and is *deliberately* refused in production: shipping
- * with it would mean a player asking for a password reset silently gets
- * nothing while the token sits in a log file.
+ * Resend only lets an unverified sender (`onboarding@resend.dev`, the default
+ * here) deliver to the email address the Resend account was created with. To
+ * mail anyone else, verify a domain in Resend and set `CR_MAIL_FROM` to it.
  */
 export interface Message {
   to: string;
@@ -39,6 +40,26 @@ export const consoleMailer: Mailer = {
   },
 };
 
+const RESEND_URL = 'https://api.resend.com/emails';
+
+/** Sends through Resend's HTTP API. Throws on any non-2xx so callers can log it; never logs the key. */
+export function resendMailer(apiKey: string, from: string, fetchImpl: typeof fetch = fetch): Mailer {
+  return {
+    async send(msg) {
+      const res = await fetchImpl(RESEND_URL, {
+        method: 'POST',
+        headers: { authorization: `Bearer ${apiKey}`, 'content-type': 'application/json' },
+        body: JSON.stringify({ from, to: [msg.to], subject: msg.subject, text: msg.text }),
+        signal: AbortSignal.timeout(10_000),
+      });
+      if (!res.ok) {
+        const detail = (await res.text().catch(() => '')).slice(0, 300);
+        throw new Error(`resend ${res.status}: ${detail}`);
+      }
+    },
+  };
+}
+
 /** Collects messages instead of sending them. Used by the tests. */
 export function memoryMailer(): Mailer & { sent: Message[] } {
   const sent: Message[] = [];
@@ -51,13 +72,19 @@ export function memoryMailer(): Mailer & { sent: Message[] } {
 }
 
 export function createMailer(): Mailer {
+  const key = process.env.RESEND_API_KEY?.trim();
+  if (key) {
+    const from = process.env.CR_MAIL_FROM?.trim() || 'Campaigner <onboarding@resend.dev>';
+    console.log(`[mail] sending through Resend from ${from}`);
+    return resendMailer(key, from);
+  }
   if (process.env.NODE_ENV === 'production') {
     // Refusing to boot is deliberate. The quiet failure — starting anyway and
     // printing reset links into a log nobody reads — looks healthy from
     // outside while every locked-out player is permanently locked out.
     if (process.env.CR_ALLOW_NO_MAIL !== 'true') {
       throw new Error(
-        'No mail provider configured. Implement Mailer.send() in api/src/mailer.ts before deploying: ' +
+        'No mail provider configured. Set RESEND_API_KEY (and CR_MAIL_FROM) before deploying: ' +
           'password reset and email verification both depend on it. ' +
           'To run a staging instance without mail anyway, set CR_ALLOW_NO_MAIL=true.',
       );

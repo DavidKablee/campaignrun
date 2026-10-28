@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-28 — Resend mailer and a local backend (C80)
+
+`api/src/mailer.ts` sends verification and reset mail through Resend when `RESEND_API_KEY` is set (10 s timeout, errors logged, key never logged); mail subjects now say Campaigner. `pnpm --filter @cr/api dev` loads `../.env`. Ran the API locally on Postgres and drove signup → verify → forgot → reset → login and the new events and feedback routes with curl; all worked with the console mailer. **Not done:** a real Resend delivery (needs your key in `.env`). `docs/LOCAL-BACKEND.md` has the steps.
+
 ## 2026-10-28 — Disclaimers moved to About, a new share card, C13–C19 reviewed (C79)
 
 - **Disclaimers:** the "Fictional game / not affiliated / not a poll" lines are gone from the splash, sign-in, result, board, campaign map, Busiest Roads, share text (English and Pidgin), the share card, the link-preview image and the page descriptions. They stay in About (disclosure, "What the board means", privacy, terms) and on the waitlist page. Guardrail 1 now says so (owner decision). The terms sentence changed, so `legal.version` is 2026-10-29.

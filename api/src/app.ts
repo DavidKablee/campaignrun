@@ -194,7 +194,7 @@ export function createApp(database: Db, mailer: Mailer = createMailer(), options
       const token = await createEmailToken(database, userId, 'verify', LIMITS.verifyTokenHours * 3600_000);
       await mailer.send({
         to: email,
-        subject: 'Confirm your Campaign Run address',
+        subject: 'Confirm your Campaigner address',
         text:
           `Confirm this address to appear on the public boards:\n\n${verifyLink(token)}\n\n` +
           `The link lasts ${LIMITS.verifyTokenHours} hours. If you did not sign up, ignore this message.`,
@@ -440,7 +440,7 @@ export function createApp(database: Db, mailer: Mailer = createMailer(), options
       const token = await createEmailToken(database, row.id, 'reset', LIMITS.resetTokenMinutes * MINUTE);
       await mailer.send({
         to: body.data.email,
-        subject: 'Reset your Campaign Run password',
+        subject: 'Reset your Campaigner password',
         text:
           `Set a new password:\n\n${resetLink(token)}\n\n` +
           `The link lasts ${LIMITS.resetTokenMinutes} minutes and works once. ` +

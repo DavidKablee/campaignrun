@@ -78,7 +78,7 @@ Friends/teams, community Rally Map (C14), payments ledger, ads/sponsors, live-op
 ## Blockers
 - **The legal review is now load-bearing (C37).** The server holds email addresses and passwords, so the lawyer review of privacy/terms moved from "before public launch" to "before this server is reachable by anyone".
 - **The API is not deployed.** Hosting, a managed Postgres, TLS, backups and a real `CR_ALLOWED_ORIGINS` are all outstanding, and none of them can be set up without the user's accounts.
-- **No mail provider.** Verification and password reset are built, tested and wired through the UI, but `Mailer.send()` in `api/src/mailer.ts` is a stub and the API refuses to boot in production without one. This is the last thing between the account layer and a deploy.
+- **Mail is wired through Resend (C80).** Set `RESEND_API_KEY` (and `CR_MAIL_FROM`); with no key the dev console mailer prints links and production refuses to boot. Real delivery has not been exercised yet: it needs the key in `.env`. Until a domain is verified in Resend, mail reaches only the Resend account's own address. See `docs/LOCAL-BACKEND.md`.
 - Legal: lawyer review of privacy/terms (chunk “7.5”) still required before public launch — copy is a draft gate only.
 - Lighthouse PWA ≥90 on a real HTTPS deploy still open.
 - **Briefing, paused and the run HUD are still pre-C38.** Splash, roster, map, auth, the four menu screens (C39) and the result page (C40) are in the new language; those three are not, so the chrome is still not fully converted.
