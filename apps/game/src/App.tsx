@@ -41,7 +41,10 @@ import { campaignRows, finishSign, gateSign, legAt, stationFor } from './trail';
 import { Showcase } from './render/showcase';
 import { runModifiers } from './meta';
 import { syncTravelDay } from './travel';
-import { daysLeft } from './campaignClock';
+import { daysLeftLabel, isClosed, remoteNotice } from './campaignClock';
+import { track, trackRunStart } from './analytics';
+import { approachingZone, bumpCoachRuns, coachWanted } from './coach';
+import { t } from './i18n';
 import { useStatePack, useStateWorld } from './statePack';
 import { authLinkFromUrl, strippedUrl } from './authLink';
 import { RosterScreen } from './ui/RosterScreen';
@@ -65,6 +68,7 @@ export function App() {
       const c = decodeChallenge(window.location.hash);
       if (!c) return;
       useGameStore.getState().setIncomingChallenge(c);
+      track('challenge_open', c.stateId);
       window.history.replaceState(null, '', window.location.pathname + window.location.search);
     };
     take();
@@ -191,7 +195,7 @@ function Splash() {
             ? `${openStates[0]!.name} open`
             : `${openStates.length} states open`}
         </span>
-        <span className="cr-pill">{daysLeft()} days left</span>
+        <span className="cr-pill">{daysLeftLabel()}</span>
         {returning && <span className="cr-pill">{naira(coins)}</span>}
         {returning && (
           <span className="cr-pill cr-pill--supporters" title="Unlocks rides">
@@ -232,6 +236,16 @@ function Splash() {
             </div>
           </div>
         ) : null}
+        {remoteNotice() ? (
+          <p className="cr-notice" role="status">
+            {remoteNotice()}
+          </p>
+        ) : null}
+        {isClosed() ? (
+          <p className="cr-notice" role="status">
+            The campaign has closed. Every road is open for practice; scores are game scores.
+          </p>
+        ) : null}
         <p className="cr-tag">Drive your convoy through Nigeria. Load your people, dodge the go-slow, fill the rally.</p>
         <button className="cr-btn cr-btn--hero" type="button" onClick={start}>
           {returning ? 'Continue campaign' : copy.playButton}
@@ -260,7 +274,6 @@ function Splash() {
             <small>About</small>
           </button>
         </nav>
-        <p className="cr-fineprint">{copy.disclosure}</p>
       </div>
       <aside className="cr-splash-side">
         <p className="cr-kicker cr-on-air-label">
@@ -578,6 +591,7 @@ function GameScreen() {
   const tutorialRef = useRef(showTutorial);
   tutorialRef.current = showTutorial;
   const toastRef = useRef({ text: '', until: 0 });
+  const startedRef = useRef(false);
   const radioCalloutRef = useRef({ text: '', until: 0, coolUntil: 0, lastTo: '' });
 
   const contender = contenders.find((c) => c.id === contenderId) ?? contenders[0]!;
@@ -690,6 +704,14 @@ function GameScreen() {
     let frameId = 0;
     let hudAcc = 0;
     let lastCloseCall = -1e9;
+    // Counted once per run, whatever made this effect run again (a pack loading, a dev double-run).
+    const coaching = coachWanted();
+    if (!startedRef.current) {
+      startedRef.current = true;
+      bumpCoachRuns();
+      trackRunStart(stateId);
+      if (challenge) track('challenge_start', stateId);
+    }
 
     // C46: BEAT and PERK are the only two pads left. Everything else is a
     // gesture read off the glass by the InputController itself.
@@ -722,6 +744,8 @@ function GameScreen() {
     perkEl?.addEventListener('pointercancel', onPerkCancel);
 
     const endRun = () => {
+      track(state.phase === 'finished' ? 'run_finish' : 'run_breakdown', stateId);
+      if (challenge) track('challenge_finish', stateId);
       // C29: only a clean finish becomes your "personal best" ghost to race next time.
       if (state.phase === 'finished' && stateId && !quick && !challenge) {
         saveGhostIfBest({
@@ -808,23 +832,23 @@ function GameScreen() {
             if (ev.type === 'dent' || ev.type === 'hit') navigator.vibrate(30);
             if (ev.type === 'pickup' || ev.type === 'dropoff') navigator.vibrate(10);
           }
-          if (ev.type === 'fullHouse') toastRef.current = { text: 'FULL HOUSE', until: time + 900 };
-          if (ev.type === 'onBeat') toastRef.current = { text: 'ON BEAT', until: time + 900 };
+          if (ev.type === 'fullHouse') toastRef.current = { text: t('toast.fullHouse'), until: time + 900 };
+          if (ev.type === 'onBeat') toastRef.current = { text: t('toast.onBeat'), until: time + 900 };
           if (ev.type === 'integrityFail' && typeof ev.payload === 'string') {
-            toastRef.current = { text: `FAIL · ${integrityEvent(ev.payload).title}`, until: time + 1400 };
+            toastRef.current = { text: `${t('toast.fail')} · ${integrityEvent(ev.payload).title}`, until: time + 1400 };
           }
           if (ev.type === 'integritySuccess' && typeof ev.payload === 'string') {
-            toastRef.current = { text: `CLEAR · ${integrityEvent(ev.payload).title}`, until: time + 1100 };
+            toastRef.current = { text: `${t('toast.clear')} · ${integrityEvent(ev.payload).title}`, until: time + 1100 };
           }
-          if (ev.type === 'toll') toastRef.current = { text: 'TOLL · AGBERO', until: time + 1300 };
-          if (ev.type === 'tollDodged') toastRef.current = { text: 'DODGED THE TOLL', until: time + 1000 };
-          if (ev.type === 'stubborn') toastRef.current = { text: 'STUBBORN PASSENGER · HOLD', until: time + 1500 };
-          if (ev.type === 'weaveWarn') toastRef.current = { text: 'SWERVING AHEAD', until: time + 900 };
+          if (ev.type === 'toll') toastRef.current = { text: t('toast.toll'), until: time + 1300 };
+          if (ev.type === 'tollDodged') toastRef.current = { text: t('toast.tollDodged'), until: time + 1000 };
+          if (ev.type === 'stubborn') toastRef.current = { text: t('toast.stubborn'), until: time + 1500 };
+          if (ev.type === 'weaveWarn') toastRef.current = { text: t('toast.weaveWarn'), until: time + 900 };
           // Close calls come one after another in dense traffic: say it once in a while, not every pass.
           if (ev.type === 'closeCall') {
             if (time - lastCloseCall < 5000) continue;
             lastCloseCall = time;
-            if (toastRef.current.until < time) toastRef.current = { text: 'CLOSE CALL', until: time + 900 };
+            if (toastRef.current.until < time) toastRef.current = { text: t('toast.closeCall'), until: time + 900 };
           }
           pushCallout(time, calloutForEvent(ev, legNow.to, pack?.zone ?? 'SW', pack?.name));
         }
@@ -845,8 +869,13 @@ function GameScreen() {
         let prompt = '';
         if (state.activeZoneId !== 0) {
           const z = state.entities.find((e) => e.id === state.activeZoneId);
-          if (z?.zoneKind === 'pickup') prompt = 'FLICK DOWN & HOLD · LOAD';
-          else if (z?.zoneKind === 'venue' || z?.zoneKind === 'grand') prompt = `FLICK DOWN & HOLD · DOUBLE-TAP ×${beatMult}`;
+          if (z?.zoneKind === 'pickup') prompt = t('prompt.pickup');
+          else if (z?.zoneKind === 'venue' || z?.zoneKind === 'grand') prompt = t('prompt.venue', { beat: beatMult });
+        } else if (coaching) {
+          // The first few runs hear about a zone a few seconds early, so the brake is already in mind.
+          const next = approachingZone(state);
+          if (next === 'pickup') prompt = t('prompt.pickupAhead');
+          else if (next === 'venue') prompt = t('prompt.venueAhead');
         }
         const toast = time < toastRef.current.until ? toastRef.current.text : '';
         const leg = legAt(state.z, landmarks, gateLabel, cfg.course, world.start.label);
@@ -1088,9 +1117,12 @@ function GameScreen() {
 
         {/* Fades itself out after controlTuning.hintMs — no timer, so a HUD
             re-render can't restart it mid-run. */}
-        <div className="cr-gestures" style={{ animationDuration: `${controlTuning.hintMs}ms` }}>
-          <b>Flick</b> ◀ ▶ lane · <b>up</b> hop · <b>down</b> brake · <b>double-tap</b> beat · <b>hold</b> horn
-        </div>
+        <div
+          className="cr-gestures"
+          style={{ animationDuration: `${controlTuning.hintMs}ms` }}
+          // Static strings from i18n.ts, never player text.
+          dangerouslySetInnerHTML={{ __html: t('hint.gestures') }}
+        />
       </div>
 
       {showTutorial && (
@@ -1104,19 +1136,21 @@ function GameScreen() {
             justifyContent: 'center',
           }}
         >
-          <div className="cr-card">
-            <p>
-              The convoy drives itself. <strong>Flick left or right</strong> to change lane,{' '}
-              <strong>flick up</strong> to hop a pothole.
-            </p>
-            <p style={{ marginTop: '0.5rem' }}>
-              <strong>Flick down and keep your thumb on the screen</strong> to brake — that is how you load at a
-              pickup and unload at a venue.
-            </p>
-            <p style={{ marginTop: '0.5rem' }}>
-              At a venue, <strong>double-tap</strong> the glass on the beat for ×{beatMult} the crowd. Hold a finger
-              still to <strong>sound the horn</strong> and pull supporters to your lane.
-            </p>
+          <div className="cr-card cr-coach-card">
+            <h3>{t('tutorial.title')}</h3>
+            <div className="cr-coach-move">
+              <span className="cr-coach-demo cr-coach-demo--lane" aria-hidden="true">
+                <i />
+              </span>
+              <p>{t('tutorial.lane')}</p>
+            </div>
+            <div className="cr-coach-move">
+              <span className="cr-coach-demo cr-coach-demo--hop" aria-hidden="true">
+                <i />
+              </span>
+              <p>{t('tutorial.hop')}</p>
+            </div>
+            <p className="cr-fineprint">{t('tutorial.rest')}</p>
           </div>
           <button
             className="cr-btn"
@@ -1126,7 +1160,7 @@ function GameScreen() {
               setSeenTutorial(true);
             }}
           >
-            Got it — drive
+            {t('tutorial.go')}
           </button>
         </div>
       )}

@@ -1,0 +1,20 @@
+{
+  "events": [
+    "visit",
+    "run_start",
+    "run_second",
+    "run_finish",
+    "run_breakdown",
+    "share_whatsapp",
+    "share_native",
+    "share_copy",
+    "share_card",
+    "challenge_open",
+    "challenge_start",
+    "challenge_finish",
+    "feedback_open",
+    "feedback_sent"
+  ],
+  "maxPerSession": 150,
+  "flushAt": 10
+}

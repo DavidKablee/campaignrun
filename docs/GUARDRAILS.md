@@ -2,7 +2,7 @@
 
 These are non-negotiable legal and design constraints for Campaign Run.
 
-1. **Disclosure**: Must be on splash, About, share cards, payment screens, ad pages: "Fictional game. All characters, parties and events are invented; any resemblance to real people is coincidental. Not affiliated with or endorsed by any political party, aspirant or electoral body. Scores are game scores, not polls."
+1. **Disclosure**: Lives on the About screen, in the terms, and on payment screens and ad pages (owner decision, C79: it is not repeated on the splash, share cards, result or board screens, where it read as low confidence). Text: "Fictional game. All characters, parties and events are invented; any resemblance to real people is coincidental. Not affiliated with or endorsed by any political party, aspirant or electoral body. Scores are game scores, not polls."
 2. **Not a poll**: Score is Crowd; the community view is the Rally Map. No polling-style percentages until 200 uniques per state.
 3. **Parody names are allowed** when they joke about a role and would not make a stranger name one real person. **Never in the game:** party logos, symbols or slogans; real politicians' names or nicknames; phonetic echoes of those names; signature outfits, props, or faces; any character→person mapping; electoral-body marks; the player committing vote-buying/rigging/violence; weapons or injuries; insecurity incidents; ethnic/religious jokes; health/age/disability jokes; arrests; invented quotes from real people; home-state or ethnic bonuses.
 4. **Villains are generic**: Integrity-threat characters never wear party colours, are never tied to a state/ethnicity/religion, and appear with equal frequency everywhere.

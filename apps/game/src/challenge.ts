@@ -1,4 +1,5 @@
 import { rides, stateIndex } from '@cr/content';
+import { getLang, t, type Lang } from './i18n';
 
 /**
  * "Beat my run": a link that carries a road, not a replay.
@@ -54,9 +55,14 @@ export function challengeUrl(base: string, c: Challenge): string {
   return `${base.split('#')[0]}#${encodeChallenge(c)}`;
 }
 
-/** The line that goes with the link when it is shared. */
-export function challengeText(c: Challenge, rideName: string, stateName: string): string {
-  return `Beat my ${c.crowd} Turnout on Campaigner — same road (${stateName} · ${rideName}). Game scores, not a poll.`;
+/** The line that goes with the link when it is shared, in the sender's language. */
+export function challengeText(c: Challenge, rideName: string, stateName: string, lang: Lang = getLang()): string {
+  return t('challenge.text', { crowd: c.crowd, state: stateName, ride: rideName }, lang);
+}
+
+/** A WhatsApp "send to" link carrying the message and the challenge link. */
+export function whatsappUrl(text: string, url: string): string {
+  return `https://wa.me/?text=${encodeURIComponent(`${text} ${url}`)}`;
 }
 
 export interface ChallengeVerdict {

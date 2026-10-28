@@ -530,8 +530,38 @@ export const limitsSchema = z.object({
   board: z.object({
     maxRows: z.number().int().positive(),
   }),
+  /** C78: anonymous usage counters. */
+  events: z.object({
+    perMinutePerIp: z.number().int().positive(),
+    maxPerRequest: z.number().int().positive(),
+  }),
+  /** C78: "Is this your state?" corrections. */
+  feedback: z.object({
+    perDayPerIp: z.number().int().positive(),
+    noteMaxChars: z.number().int().positive(),
+  }),
+  /** C78: the weekly "busiest roads" tally. Hidden until the whole game has this many rallies in the window. */
+  tally: z.object({
+    windowDays: z.number().int().positive(),
+    minTotalRallies: z.number().int().positive(),
+    topStates: z.number().int().positive(),
+  }),
 });
 export type Limits = z.infer<typeof limitsSchema>;
+
+/**
+ * C78: the closed list of anonymous usage events. A counter has a name and, for run events, a state
+ * id: no identifier, no cookie, no score. Closed so a typo cannot start a new counter and so the
+ * server can refuse anything not on the list.
+ */
+export const analyticsSchema = z.object({
+  events: z.array(z.string().regex(/^[a-z_]{3,24}$/)).min(1),
+  /** Events one page load may send before it goes quiet. */
+  maxPerSession: z.number().int().positive(),
+  /** Events queued before a send. */
+  flushAt: z.number().int().positive(),
+});
+export type Analytics = z.infer<typeof analyticsSchema>;
 
 export const legalSchema = z.object({
   version: z.string().min(1),
@@ -768,3 +798,8 @@ export const controlsSchema = z.object({
   }),
 });
 export type ControlTuning = z.infer<typeof controlsSchema>;
+
+/** C78: what a player can say is wrong with their state's world. Closed so the report groups cleanly. */
+export const feedbackTopicsSchema = z.object({
+  topics: z.array(z.object({ id: z.string().regex(/^[a-z]{3,16}$/), label: z.string().min(3).max(60) })).min(1),
+});

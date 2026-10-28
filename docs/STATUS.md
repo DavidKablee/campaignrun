@@ -1,6 +1,8 @@
 # Status
 
 **Current chunk:** C48 done. C35–C48: parties and the campaign map (C35), the map as a world map (C36), accounts/API/database (C37), the Lagos Life UI chrome (C38), the four menu screens (C39), the roster and result screens (C40), the account layer made safe to expose (C41), two ways to sign in (C42), the look editor (C43), the ride ladder (C44), the road under it (C45), the thumb that drives it (C46), the screens that hold it (C47) and the economy that pays for it (C48). Next: a mail provider, then deploy — or the real-device playtest owed by every track, which C46–C48 have now made overdue rather than merely outstanding.
+**Launch plumbing (C78, 2026-10-28):** link previews, anonymous counts, first-run coaching, Challenge-first result screen, state tally, Pidgin, state corrections and a remote calendar with practice mode after the close (`docs/chunks/C78.md`). Not yet: hosted anywhere, played by real strangers (`docs/PLAYTEST-FIRST-MINUTE.md`), Pidgin-reviewed, or lawyer-reviewed.
+
 **Mobile pass (C63, 2026-10-28):** camera framing, gesture and pause fixes for phones (`docs/chunks/C63.md`); still no real-phone playtest, and Batch 4 is built (C64–C67).
 
 **Batch 6 (C73–C76, 2026-10-28):** Osun, Adamawa, Jigawa and Cross River have their own worlds (`docs/chunks/C73.md` to `C76.md`); twenty-four states now do, and the other 13 still look like Lagos.

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { contenders, copy, partyForContender, stateIndex } from '@cr/content';
 import { audio } from '../audio/engine';
-import { daysLeft } from '../campaignClock';
+import { daysLeftLabel } from '../campaignClock';
 import { getCharacter } from '../characters';
 import { useContenderStore } from '../contenderStore';
 import { renderPortraits } from '../render/studio';
@@ -93,7 +93,7 @@ export function RosterScreen() {
         <div className="cr-pill-row">
           <span className="cr-pill cr-pill--live">{stateName}</span>
           <span className="cr-pill">{following.toLocaleString('en-US')} Supporters</span>
-          <span className="cr-pill">{daysLeft()}d left</span>
+          <span className="cr-pill">{daysLeftLabel(Date.now(), true)}</span>
         </div>
         <span className="cr-chrome-actions">
           <button className="cr-mini-btn cr-mini-btn--icon" type="button" onClick={() => setScreen('map')} aria-label="Board">

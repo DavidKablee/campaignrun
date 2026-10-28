@@ -11,12 +11,29 @@
     "guestPerDayPerIp": 20,
     "devicePerMinutePerIp": 20,
     "emailPromptAfterRuns": 3,
-    "emailPromptSnoozeHours": [24, 72, 168]
+    "emailPromptSnoozeHours": [
+      24,
+      72,
+      168
+    ]
   },
   "scores": {
     "perMinutePerUser": 6
   },
   "board": {
     "maxRows": 100
+  },
+  "events": {
+    "perMinutePerIp": 30,
+    "maxPerRequest": 20
+  },
+  "feedback": {
+    "perDayPerIp": 10,
+    "noteMaxChars": 280
+  },
+  "tally": {
+    "windowDays": 7,
+    "minTotalRallies": 100,
+    "topStates": 5
   }
 }

@@ -1,4 +1,6 @@
 import type { SimEvent } from '@cr/sim';
+import { getLang, type Lang } from './i18n';
+import { PCM } from './radioPidgin';
 
 /** Pick a random element from an array. */
 function pick<T>(arr: T[]): T {
@@ -149,7 +151,14 @@ function placeLines(stateName: string | undefined): Array<(lm: string) => string
 }
 
 /** Short DJ-style lines for the in-run radio strip. Returns null for unhandled events. */
-export function calloutForEvent(ev: SimEvent, landmarkAhead: string, zone = 'SW', stateName?: string): string | null {
+export function calloutForEvent(
+  ev: SimEvent,
+  landmarkAhead: string,
+  zone = 'SW',
+  stateName?: string,
+  lang: Lang = getLang(),
+): string | null {
+  if (lang === 'pcm') return pidginCallout(ev, landmarkAhead, stateName);
   switch (ev.type) {
     case 'gate':
       return pick(GATE_LINES);
@@ -184,7 +193,46 @@ export function calloutForEvent(ev: SimEvent, landmarkAhead: string, zone = 'SW'
   }
 }
 
-export function calloutForLandmark(to: string, zone = 'SW', stateName?: string): string {
+/** The Pidgin station: the same events, answered from the Pidgin pools. */
+function pidginCallout(ev: SimEvent, landmarkAhead: string, stateName?: string): string | null {
+  switch (ev.type) {
+    case 'gate':
+      return pick(PCM.gate);
+    case 'zoneEnter': {
+      const lm = landmarkAhead || 'the next zone';
+      const place = stateName === 'Lagos' ? PCM.zoneEnterLagos : stateName ? PCM.zoneEnterPlace(stateName) : [];
+      return pick([...PCM.zoneEnter, ...place])(lm);
+    }
+    case 'dropoff':
+      return pick(PCM.dropoff);
+    case 'fullHouse':
+      return pick(PCM.fullHouse);
+    case 'onBeat':
+      return pick(PCM.onBeat);
+    case 'finish':
+      return pick(PCM.finish);
+    case 'breakdown':
+      return pick(PCM.breakdown);
+    case 'toll':
+      return pick(PCM.toll);
+    case 'tollDodged':
+      return pick(PCM.tollDodged);
+    case 'stubborn':
+      return pick(PCM.stubborn);
+    case 'weaveWarn':
+      return pick(PCM.weave);
+    case 'closeCall':
+      return pick(PCM.closeCall);
+    default:
+      return null;
+  }
+}
+
+export function calloutForLandmark(to: string, zone = 'SW', stateName?: string, lang: Lang = getLang()): string {
+  if (lang === 'pcm') {
+    if (to === 'Grand Rally') return pick(PCM.finalStretch);
+    return `${pick(stateName === 'Lagos' ? PCM.landmarkFlairLagos : PCM.landmarkFlair)} ${to}`;
+  }
   if (to === 'Grand Rally') {
     return pick([
       'Final stretch — Grand Rally ahead!',

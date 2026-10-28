@@ -1,0 +1,32 @@
+{
+  "topics": [
+    {
+      "id": "name",
+      "label": "The name is wrong"
+    },
+    {
+      "id": "shape",
+      "label": "It does not look like that"
+    },
+    {
+      "id": "colours",
+      "label": "The colours are wrong"
+    },
+    {
+      "id": "people",
+      "label": "How people dress or look"
+    },
+    {
+      "id": "ride",
+      "label": "The ride or traffic"
+    },
+    {
+      "id": "language",
+      "label": "The language or greeting"
+    },
+    {
+      "id": "other",
+      "label": "Something else"
+    }
+  ]
+}

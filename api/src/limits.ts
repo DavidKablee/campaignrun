@@ -27,6 +27,10 @@ export const LIMITS = {
   devicePerMinutePerIp: num(process.env.CR_DEVICE_PER_MIN, limits.auth.devicePerMinutePerIp),
   scoresPerMinutePerUser: num(process.env.CR_SCORES_PER_MIN, limits.scores.perMinutePerUser),
   boardMaxRows: num(process.env.CR_BOARD_MAX_ROWS, limits.board.maxRows),
+  eventsPerMinutePerIp: num(process.env.CR_EVENTS_PER_MIN, limits.events.perMinutePerIp),
+  eventsMaxPerRequest: limits.events.maxPerRequest,
+  feedbackPerDayPerIp: num(process.env.CR_FEEDBACK_PER_DAY, limits.feedback.perDayPerIp),
+  feedbackNoteMaxChars: limits.feedback.noteMaxChars,
 } as const;
 
 /**

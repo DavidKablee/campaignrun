@@ -12,6 +12,8 @@ import integrityJson from '../data/integrity.json';
 import travelJson from '../data/travel.json';
 import legalJson from '../data/legal.json';
 import limitsJson from '../data/limits.json';
+import analyticsJson from '../data/analytics.json';
+import feedbackJson from '../data/feedback.json';
 import controlsJson from '../data/controls.json';
 import {
   calendarSchema,
@@ -28,6 +30,8 @@ import {
   travelCapsSchema,
   legalSchema,
   limitsSchema,
+  analyticsSchema,
+  feedbackTopicsSchema,
   controlsSchema,
   type SimConfig,
 } from './schemas';
@@ -71,6 +75,8 @@ export const integrityEvents = integrityEventSchema.array().parse(integrityJson)
 export const travelCaps = travelCapsSchema.parse(travelJson);
 export const legal = legalSchema.parse(legalJson);
 export const limits = limitsSchema.parse(limitsJson);
+export const analytics = analyticsSchema.parse(analyticsJson);
+export const feedbackTopics = feedbackTopicsSchema.parse(feedbackJson).topics;
 /** C46: gesture thresholds for the on-glass controls. */
 export const controlTuning = controlsSchema.parse(controlsJson);
 

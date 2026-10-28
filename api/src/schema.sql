@@ -124,3 +124,31 @@ create index if not exists device_keys_user_idx on device_keys (user_id);
 -- standing. Null for scores posted before replays, or with the check off.
 alter table scores add column if not exists replay_seed bigint;
 create unique index if not exists scores_replay_once on scores (user_id, replay_seed) where replay_seed is not null;
+
+-- C78 ----------------------------------------------------------------------
+-- Anonymous usage counters and state corrections.
+--
+-- Neither table has a user, a device, a session or an address in it. A counter row is
+-- "this many of this event, on this day, for this state" and nothing finer; a correction is
+-- a note about a state's world with no way back to who wrote it. That is the point: the funnel
+-- (visit -> run -> share -> challenge opened) and the reviewer list both need only totals.
+
+create table if not exists event_counts (
+  day      date   not null,
+  name     text   not null,
+  -- '' for events that are not about a state
+  state_id text   not null default '',
+  n        bigint not null default 0 check (n >= 0),
+  primary key (day, name, state_id)
+);
+
+create table if not exists state_feedback (
+  id         bigserial   primary key,
+  state_id   text        not null,
+  landmark   text        not null default '',
+  topic      text        not null,
+  note       text        not null default '',
+  from_here  boolean     not null default false,
+  created_at timestamptz not null default now()
+);
+create index if not exists state_feedback_state_idx on state_feedback (state_id, created_at desc);

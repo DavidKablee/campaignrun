@@ -11,6 +11,8 @@ import {
 } from '@cr/content';
 import { CampaignBoard, type BoardTile } from '../render/mapBoard';
 import { apiGet } from '../api/client';
+import { BusiestRoads } from './BusiestRoads';
+import { StateCorrection } from './StateCorrection';
 import { liveRegionCount, mergeStandings, type LiveRegion } from '../liveBoard';
 import { useOnlineStore } from '../onlineStore';
 import { useContenderStore } from '../contenderStore';
@@ -157,7 +159,6 @@ export function CampaignMap() {
           ← Back
         </button>
         <span className="cr-pill cr-pill--live">{liveCount > 0 ? `Live · ${liveCount}` : 'Practice board'}</span>
-        <span className="cr-board-ticker-msg">Game scores · Not a poll</span>
         {onlineUser ? (
           <span className="cr-board-ticker-msg">{onlineUser.username}</span>
         ) : (
@@ -229,6 +230,8 @@ export function CampaignMap() {
         </ul>
       </section>
 
+      <BusiestRoads />
+
       <div className="cr-board-main">
         <div className="cr-board-stage" ref={hostRef} aria-hidden="true" />
 
@@ -281,6 +284,8 @@ export function CampaignMap() {
                   : 'Practice numbers. Nobody has posted a run here yet.'}
             </p>
           ) : null}
+
+          {focus.open ? <StateCorrection stateId={focus.id} stateName={focus.name} /> : null}
 
           <dl className="cr-board-facts">
             <div>
@@ -371,7 +376,7 @@ export function CampaignMap() {
             ? `${liveCount} ${liveCount === 1 ? 'region is' : 'regions are'} live from real play. `
             : ''}
           Regions below {liveFloor ?? 'the floor'} players show generated practice numbers, not collected ones — a
-          breakdown built from a handful of people would name them. Fictional Contenders. Game scores, not polls.
+          breakdown built from a handful of people would name them.
         </span>
       </footer>
     </div>

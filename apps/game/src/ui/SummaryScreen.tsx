@@ -2,7 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import { contenders, followingGain, partyForContender, rides, simConfig, stateIndex } from '@cr/content';
 import { starForCrowd } from '@cr/sim';
 import { useAccountStore } from '../accountStore';
-import { challengeText, challengeUrl, judgeChallenge, type Challenge } from '../challenge';
+import { track } from '../analytics';
+import { challengeText, challengeUrl, judgeChallenge, whatsappUrl, type Challenge } from '../challenge';
+import { t, useLang } from '../i18n';
 import { contenderShareAllowed } from '../consent';
 import { useContenderStore } from '../contenderStore';
 import { emailPromptDue, runsFromBest } from '../emailPrompt';
@@ -10,6 +12,7 @@ import { useOnlineStore } from '../onlineStore';
 import { type Outcome, resultExclaim } from '../exclaim';
 import { renderShareCard, shareOrDownload } from '../shareCard';
 import { useStatePack } from '../statePack';
+import { StateCorrection } from './StateCorrection';
 import { useGameStore } from '../state';
 import { DailyChip } from './DailyChip';
 import { Sheet } from './MenuChrome';
@@ -101,21 +104,27 @@ export function SummaryScreen() {
   const verdict = challenge && finished ? judgeChallenge(challenge.crowd, skill) : null;
   const [linkNote, setLinkNote] = useState('');
   const challengeStateName = stateIndex.find((x) => x.id === stateId)?.name ?? stateName;
-  // Sent from a finished run only: a breakdown has no score worth chasing.
-  const onChallengeFriend = async () => {
+  // Sent from a finished run only: a breakdown has no score worth chasing. WhatsApp is the first
+  // button because it is where a link like this actually travels; the rest are fallbacks.
+  const lang = useLang();
+  const onChallengeFriend = async (channel: 'whatsapp' | 'native' | 'copy') => {
     const link: Challenge = { seed, stateId, rideId: ride.id, crowd: skill, quick, from: username };
     const url = challengeUrl(window.location.href, link);
-    const text = challengeText(link, ride.name, challengeStateName);
+    const text = challengeText(link, ride.name, challengeStateName, lang);
+    track(channel === 'whatsapp' ? 'share_whatsapp' : channel === 'native' ? 'share_native' : 'share_copy', stateId);
     try {
-      if (typeof navigator.share === 'function') {
+      if (channel === 'whatsapp') {
+        window.open(whatsappUrl(text, url), '_blank', 'noopener,noreferrer');
+        setLinkNote(t('challenge.sent'));
+      } else if (channel === 'native' && typeof navigator.share === 'function') {
         await navigator.share({ text, url });
-        setLinkNote('Shared');
+        setLinkNote(t('challenge.shared'));
       } else {
         await navigator.clipboard.writeText(`${text} ${url}`);
-        setLinkNote('Link copied');
+        setLinkNote(t('challenge.copied'));
       }
     } catch {
-      setLinkNote('Could not share the link');
+      setLinkNote(t('challenge.failed'));
     }
   };
   /** Back to the normal campaign: no fixed road, full length. */
@@ -212,6 +221,7 @@ export function SummaryScreen() {
   }, [display, shareLabel, ride.name, shareContender, contender.name, stateName]);
 
   const onShare = async () => {
+    track('share_card', stateId);
     setShareNote('…');
     try {
       const blob = await renderShareCard({
@@ -277,6 +287,26 @@ export function SummaryScreen() {
         </p>
         {display > skill ? <p className="cr-fineprint">Celebration Turnout {display}</p> : null}
       </section>
+
+      {finished && skill > 0 ? (
+        <Sheet tone="accent" eyebrow="Challenge" title={t('challenge.title')}>
+          <p className="cr-fineprint">{t('challenge.sub', { crowd: skill })}</p>
+          <div className="cr-share-row">
+            <button className="cr-btn" type="button" onClick={() => void onChallengeFriend('whatsapp')}>
+              {t('challenge.whatsapp')}
+            </button>
+            {typeof navigator.share === 'function' ? (
+              <button className="cr-btn cr-btn--ghost" type="button" onClick={() => void onChallengeFriend('native')}>
+                {t('challenge.other')}
+              </button>
+            ) : null}
+            <button className="cr-btn cr-btn--ghost" type="button" onClick={() => void onChallengeFriend('copy')}>
+              {t('challenge.copy')}
+            </button>
+          </div>
+          {linkNote ? <p className="cr-fineprint">{linkNote}</p> : null}
+        </Sheet>
+      ) : null}
 
       <div className="cr-wallet">
         <article>
@@ -362,20 +392,6 @@ export function SummaryScreen() {
       </Sheet>
       )}
 
-      {finished && skill > 0 ? (
-        <Sheet eyebrow="Challenge" title="Beat my run">
-          <p className="cr-fineprint">
-            Sends a link to this exact road and traffic with your {skill} to beat. No account needed.
-          </p>
-          <div className="cr-share-row">
-            <button className="cr-btn" type="button" onClick={() => void onChallengeFriend()}>
-              Challenge a friend
-            </button>
-            {linkNote ? <span className="cr-fineprint">{linkNote}</span> : null}
-          </div>
-        </Sheet>
-      ) : null}
-
       <Sheet eyebrow="Share" title="Make a card">
         <p className="cr-fineprint">
           A picture of this run: tier, Turnout, ride and state.{' '}
@@ -397,6 +413,8 @@ export function SummaryScreen() {
           {shareNote ? <span className="cr-fineprint">{shareNote}</span> : null}
         </div>
       </Sheet>
+
+      <StateCorrection stateId={stateId} stateName={challengeStateName} />
 
       {challenge ? (
         <>
@@ -452,7 +470,7 @@ export function SummaryScreen() {
           <small>Home</small>
         </button>
       </nav>
-      <p className="cr-fineprint cr-result-foot">Streak {streak} · Game scores, not a poll</p>
+      <p className="cr-fineprint cr-result-foot">Streak {streak}</p>
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { activeContenders, limits, maxUpgradeLevel, rides, stateIndex } from '@cr/content';
+import { activeContenders, analytics, feedbackTopics, limits, maxUpgradeLevel, rides, stateIndex } from '@cr/content';
 
 const stateIds = stateIndex.map((s) => s.id);
 const rideIds = rides.map((r) => r.id);
@@ -112,3 +112,33 @@ export const deviceSchema = z.object({ deviceKey: z.string().min(20).max(200) })
  * device can sign in with, which is the only reason the player is being asked.
  */
 export const attachEmailSchema = z.object({ email, password });
+
+/** C78: a batch of anonymous counters. A name off the list, or a state that does not exist, rejects the batch. */
+export const eventsSchema = z.object({
+  events: z
+    .array(
+      z.object({
+        name: z.enum(analytics.events as [string, ...string[]]),
+        state: z.enum(stateIds as [string, ...string[]]).optional(),
+      }),
+    )
+    .min(1)
+    .max(limits.events.maxPerRequest),
+});
+
+/** Text that identifies someone rather than describes a state: addresses, links, phone numbers. */
+const PERSONAL = /(https?:\/\/|www\.|[\w.+-]+@[\w-]+\.[\w.]+|\+?\d[\d\s().-]{6,}\d)/i;
+
+/** C78: a note about a state's world. Anonymous by design, so it must not carry a contact detail. */
+export const feedbackSchema = z.object({
+  stateId: z.enum(stateIds as [string, ...string[]]),
+  landmark: z.string().trim().max(60).default(''),
+  topic: z.enum(feedbackTopics.map((t) => t.id) as [string, ...string[]]),
+  note: z
+    .string()
+    .trim()
+    .max(limits.feedback.noteMaxChars)
+    .refine((v) => !PERSONAL.test(v), 'no links, emails or phone numbers')
+    .default(''),
+  fromHere: z.boolean().default(false),
+});

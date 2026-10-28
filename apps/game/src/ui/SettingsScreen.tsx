@@ -1,4 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { analyticsOff, setAnalyticsOff } from '../analytics';
+import { setLang, useLang } from '../i18n';
 import { useGameStore } from '../state';
 import { audio } from '../audio/engine';
 import { MenuHead, Row, Sheet, Toggle } from './MenuChrome';
@@ -23,6 +25,8 @@ export function SettingsScreen() {
   const dataSaver = useGameStore((s) => s.dataSaver);
   const reduceMotion = useGameStore((s) => s.reduceMotion);
   const setFlags = useGameStore((s) => s.setFlags);
+  const lang = useLang();
+  const [countsOff, setCountsOff] = useState(analyticsOff);
   const leave = () => setScreen(back === 'settings' ? 'splash' : back);
 
   useEffect(() => {
@@ -84,6 +88,24 @@ export function SettingsScreen() {
           hint="Calms camera shake and background movement."
           checked={reduceMotion}
           onChange={(v) => setFlags({ reduceMotion: v })}
+        />
+      </Sheet>
+
+      <Sheet eyebrow="Language and privacy">
+        <Toggle
+          label="Naija Pidgin on the road"
+          hint="The radio, run prompts and the message you send a friend, in Pidgin. Menus and legal text stay in English."
+          checked={lang === 'pcm'}
+          onChange={(v) => setLang(v ? 'pcm' : 'en')}
+        />
+        <Toggle
+          label="Anonymous usage counts"
+          hint="Counts like “a run was finished”, with no name, account, score or identifier. Your browser's Do Not Track also switches this off."
+          checked={!countsOff}
+          onChange={(v) => {
+            setAnalyticsOff(!v);
+            setCountsOff(!v);
+          }}
         />
       </Sheet>
 

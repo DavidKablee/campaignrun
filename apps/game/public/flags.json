@@ -1,3 +1,5 @@
 {
-  "killSwitch": false
+  "killSwitch": false,
+  "notice": "",
+  "calendar": {}
 }

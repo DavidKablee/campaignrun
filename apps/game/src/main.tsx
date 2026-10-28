@@ -4,6 +4,8 @@ import { registerSW } from 'virtual:pwa-register';
 import { App } from './App';
 import { ErrorBoundary } from './ErrorBoundary';
 import { migrateContenderFromGameStorage } from './contenderStore';
+import { installFlushOnHide, track } from './analytics';
+import { applyRemoteConfig } from './campaignClock';
 import { useGameStore } from './state';
 import './ui/styles.css';
 
@@ -32,6 +34,8 @@ async function init() {
   try {
     const flagsReq = await fetch('/flags.json');
     flags = (await flagsReq.json()) as { killSwitch?: boolean };
+    // Dates and the splash notice can move without a redeploy; a malformed block is ignored.
+    applyRemoteConfig(flags);
   } catch {
     /* offline or flaky: no kill switch known, carry on */
   }
@@ -43,6 +47,8 @@ async function init() {
     return;
   }
 
+  installFlushOnHide();
+  track('visit');
   const root = createRoot(rootEl);
   root.render(
     <React.StrictMode>

@@ -2,7 +2,7 @@ import { Hono, type MiddlewareHandler } from 'hono';
 import { getCookie, setCookie, deleteCookie } from 'hono/cookie';
 import { cors } from 'hono/cors';
 import { z } from 'zod';
-import { rides, simConfig } from '@cr/content';
+import { limits, rides, simConfig } from '@cr/content';
 import { isPlausibleRun, verifyReplay } from '@cr/sim';
 import {
   SESSION_COOKIE,
@@ -34,6 +34,8 @@ import {
   attachEmailSchema,
   consentSchema,
   deviceSchema,
+  eventsSchema,
+  feedbackSchema,
   forgotSchema,
   guestSchema,
   loginSchema,
@@ -626,6 +628,69 @@ export function createApp(database: Db, mailer: Mailer = createMailer(), options
 
   app.get('/api/standings', async (c) => {
     return c.json({ floor: MIN_PLAYERS_PER_REGION, regions: await liveStandings(database) });
+  });
+
+  // -- anonymous counters, the weekly tally and state corrections (C78) ----
+
+  /**
+   * Counters only: no cookie, no user, no body beyond event names and a state. Credentials are not
+   * read, so a page on any allowed origin can send them with `credentials: 'omit'`.
+   */
+  app.post('/api/events', rateLimit('events', LIMITS.eventsPerMinutePerIp, MINUTE), async (c) => {
+    const parsed = eventsSchema.safeParse(await c.req.json().catch(() => null));
+    if (!parsed.success) return c.json({ error: 'invalid' }, 400);
+    const tally = new Map<string, { name: string; state: string; n: number }>();
+    for (const e of parsed.data.events) {
+      const key = `${e.name}|${e.state ?? ''}`;
+      const row = tally.get(key) ?? { name: e.name, state: e.state ?? '', n: 0 };
+      row.n += 1;
+      tally.set(key, row);
+    }
+    for (const row of tally.values()) {
+      await database.query(
+        `insert into event_counts (day, name, state_id, n)
+         values ((now() at time zone 'utc')::date, $1, $2, $3)
+         on conflict (day, name, state_id) do update set n = event_counts.n + excluded.n`,
+        [row.name, row.state, row.n],
+      );
+    }
+    return c.body(null, 204);
+  });
+
+  /**
+   * The busiest roads this week: finished rallies per state, counts only, no ranking by party and no
+   * percentages. Hidden until the whole game has `minTotalRallies` in the window, so a handful of
+   * test runs never reads as a result.
+   */
+  app.get('/api/tally', async (c) => {
+    const { windowDays, minTotalRallies, topStates } = limits.tally;
+    const { rows } = await database.query<{ state_id: string; n: string }>(
+      `select state_id, sum(n)::bigint as n from event_counts
+        where name = 'run_finish' and state_id <> '' and day > (now() at time zone 'utc')::date - $1::int
+        group by state_id order by sum(n) desc, state_id`,
+      [windowDays],
+    );
+    const total = rows.reduce((a, r) => a + Number(r.n), 0);
+    c.header('cache-control', 'public, max-age=300');
+    if (total < minTotalRallies) return c.json({ windowDays, hidden: true });
+    return c.json({
+      windowDays,
+      hidden: false,
+      total,
+      busiest: rows.slice(0, topStates).map((r) => ({ stateId: r.state_id, rallies: Number(r.n) })),
+    });
+  });
+
+  /** "Is this your state?" corrections. Anonymous: the reviewer list needs the note, not the writer. */
+  app.post('/api/feedback/state', rateLimit('feedback', LIMITS.feedbackPerDayPerIp, 24 * 60 * MINUTE), async (c) => {
+    const parsed = feedbackSchema.safeParse(await c.req.json().catch(() => null));
+    if (!parsed.success) return c.json({ error: 'invalid' }, 400);
+    const f = parsed.data;
+    await database.query(
+      'insert into state_feedback (state_id, landmark, topic, note, from_here) values ($1, $2, $3, $4, $5)',
+      [f.stateId, f.landmark, f.topic, f.note, f.fromHere],
+    );
+    return c.body(null, 201);
   });
 
   // -- account -------------------------------------------------------------

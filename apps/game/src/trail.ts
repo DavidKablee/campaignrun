@@ -1,4 +1,5 @@
 import { calendar, hasStatePack, lagosLaunch, simConfig, stateIndex, stations, type StateIndex } from '@cr/content';
+import { isClosed, unlockMsFor } from './campaignClock';
 
 export interface TrailLeg {
   from: string;
@@ -37,15 +38,16 @@ export function campaignRows(now = Date.now()): CampaignRow[] {
   const byId = new Map(stateIndex.map((s) => [s.id, s]));
   const rows: CampaignRow[] = [];
   for (const unlock of calendar.unlocks) {
-    const at = Date.parse(unlock.at);
     for (const id of unlock.states) {
       const row = byId.get(id);
       if (!row) continue;
-      const calendarOpen = id === 'lagos' || at <= now;
+      const at = unlockMsFor(id, unlock.at);
+      // After the close every state is open for practice, whatever week it was meant for.
+      const calendarOpen = id === 'lagos' || at <= now || isClosed(now);
       const pack = hasStatePack(id);
       rows.push({
         ...row,
-        unlocksAt: unlock.at,
+        unlocksAt: new Date(at).toISOString(),
         open: calendarOpen && pack,
         awaitingPack: calendarOpen && !pack,
         note: unlock.note,

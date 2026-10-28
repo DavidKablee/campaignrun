@@ -10,6 +10,16 @@ export default defineConfig(({ command }) => ({
   plugins: [
     react(),
     {
+      // Link previews need absolute URLs. Set VITE_PUBLIC_URL (https://your.domain, no trailing slash)
+      // when building for a host; without it og:url is dropped and the image path stays relative.
+      name: 'cr-public-url',
+      transformIndexHtml(html) {
+        const base = (process.env.VITE_PUBLIC_URL ?? '').replace(/\/+$/, '');
+        const out = base ? html : html.replace(/^.*property="og:url".*\n/m, '');
+        return out.replaceAll('%PUBLIC_URL%', base);
+      },
+    },
+    {
       // The content package sits outside this app's root, so a dev server never saw files
       // added to its data folders: the `import.meta.glob` lists of state packs and world
       // libraries went stale and a new state silently drew the Lagos world. Watching the
@@ -21,11 +31,11 @@ export default defineConfig(({ command }) => ({
     },
     VitePWA({
       registerType: 'prompt',
-      includeAssets: ['favicon.svg', 'flags.json', 'pwa-192.png', 'pwa-512.png'],
+      includeAssets: ['favicon.svg', 'pwa-192.png', 'pwa-512.png'],
       manifest: {
-        name: 'Campaign Run',
-        short_name: 'Campaign Run',
-        description: 'Fictional campaign lane runner. Game scores. Not a poll.',
+        name: 'Campaigner',
+        short_name: 'Campaigner',
+        description: 'Drive your convoy through Nigeria. Load your people, dodge the go-slow, fill the rally.',
         theme_color: '#0B1220',
         background_color: '#0B1220',
         display: 'standalone',
@@ -46,10 +56,18 @@ export default defineConfig(({ command }) => ({
         // them, then available offline from then on — same contract as the
         // existing state-pack caching below.
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,json}'],
-        globIgnores: ['**/states/**', '**/waitlist*', '**/models/**'],
+        // flags.json is the kill switch and the remote calendar: a precached copy would only ever change
+        // with a new service worker, which is exactly when it is no use.
+        globIgnores: ['**/states/**', '**/waitlist*', '**/models/**', '**/flags.json'],
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/flags\.json$/, /^\/states\//, /^\/models\//],
         runtimeCaching: [
+          {
+            urlPattern: /\/flags\.json$/i,
+            handler: 'NetworkFirst',
+            // A slow network falls back to the last copy after 3 s, so an offline player still boots.
+            options: { cacheName: 'cr-flags', networkTimeoutSeconds: 3, expiration: { maxEntries: 1 } },
+          },
           {
             urlPattern: /\/states\/.*/i,
             handler: 'CacheFirst',

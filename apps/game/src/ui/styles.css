@@ -96,7 +96,7 @@ body,
 }
 .cr-hero-scrim {
   background:
-    linear-gradient(0deg, rgba(11, 18, 32, 0.96) 0%, rgba(11, 18, 32, 0.78) 38%, rgba(11, 18, 32, 0) 70%),
+    linear-gradient(0deg, rgba(11, 18, 32, 0.96) 0%, rgba(11, 18, 32, 0.84) 48%, rgba(11, 18, 32, 0) 82%),
     linear-gradient(180deg, rgba(11, 18, 32, 0.6) 0%, rgba(11, 18, 32, 0) 22%);
 }
 .cr-splash-top {
@@ -356,6 +356,17 @@ body,
   font-size: 1rem;
   opacity: 0.9;
   margin: 0;
+}
+
+/* A line from flags.json (a date moved) or the closed-campaign message. */
+.cr-notice {
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  border-radius: 12px;
+  background: rgba(245, 197, 24, 0.16);
+  border: 1px solid rgba(245, 197, 24, 0.5);
+  font-size: 0.85rem;
+  line-height: 1.35;
 }
 
 .cr-card {
@@ -901,6 +912,13 @@ body,
   font-size: 1.6rem;
   color: var(--cr-danfo);
   text-shadow: 3px 3px 0 #000;
+  /* A dark plate keeps a toast legible over a yellow billboard, and long ones wrap inside it. */
+  width: max-content;
+  max-width: 90%;
+  text-align: center;
+  padding: 0.2rem 0.9rem;
+  border-radius: 14px;
+  background: rgba(11, 18, 32, 0.78);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s ease, transform 0.2s ease;
@@ -1900,8 +1918,9 @@ body,
   overflow: hidden;
   background: #0b1220;
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
-  aspect-ratio: 9 / 12;
-  max-height: 280px;
+  aspect-ratio: 1080 / 1300;
+  max-height: 380px;
+  margin-inline: auto;
   display: grid;
   place-items: center;
 }
@@ -1909,8 +1928,7 @@ body,
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: top center;
+  object-fit: contain;
 }
 .cr-share-preview--empty {
   color: var(--cr-surface-dim);
@@ -4040,4 +4058,141 @@ body,
 }
 .cr-result-verdict.is-win {
   color: var(--cr-green);
+}
+
+/* First-run card: two moves, each with a looping picture of the flick. */
+.cr-coach-card h3 {
+  font-family: var(--cr-font-display);
+  font-size: 1.15rem;
+  margin: 0 0 0.75rem;
+}
+.cr-coach-move {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin: 0 0 0.75rem;
+}
+.cr-coach-move p {
+  margin: 0;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.cr-coach-demo {
+  flex: none;
+  position: relative;
+  width: 84px;
+  height: 52px;
+  border-radius: 12px;
+  background: var(--cr-ink);
+  overflow: hidden;
+}
+.cr-coach-demo i {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  margin: -9px 0 0 -9px;
+  border-radius: 50%;
+  background: var(--cr-danfo);
+  box-shadow: 0 0 0 4px rgba(245, 197, 24, 0.3);
+  animation: cr-coach-lane 1.8s ease-in-out infinite;
+}
+.cr-coach-demo--hop i {
+  animation-name: cr-coach-hop;
+}
+@keyframes cr-coach-lane {
+  0%, 15% { transform: translateX(-26px); }
+  45%, 60% { transform: translateX(26px); }
+  100% { transform: translateX(-26px); }
+}
+@keyframes cr-coach-hop {
+  0%, 20%, 100% { transform: translateY(14px); }
+  50% { transform: translateY(-14px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cr-coach-demo i {
+    animation: none;
+  }
+}
+
+/* The weekly tally: finished rallies per state, bars scaled to the busiest. */
+.cr-busiest {
+  margin: 0.75rem 0;
+  padding: 0.75rem 0.9rem;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.06);
+}
+.cr-busiest ol {
+  list-style: none;
+  margin: 0.5rem 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+.cr-busiest li {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.35rem 0.6rem;
+  border-radius: 10px;
+  overflow: hidden;
+  font-weight: 600;
+}
+.cr-busiest li i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: rgba(245, 197, 24, 0.22);
+  z-index: 0;
+}
+.cr-busiest li span,
+.cr-busiest li b {
+  position: relative;
+  z-index: 1;
+}
+
+/* "Is this your state?" */
+.cr-link-btn {
+  background: none;
+  border: 0;
+  padding: 0.4rem 0;
+  color: inherit;
+  font: inherit;
+  font-size: 0.85rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  text-align: left;
+}
+.cr-correction {
+  display: grid;
+  gap: 0.6rem;
+  padding: 0.9rem 1rem;
+  border-radius: 16px;
+  /* A light card like the other sheets, so the field labels (dark by default) stay readable on the dark screens. */
+  background: #f7f6f2;
+  color: var(--cr-ink);
+}
+.cr-correction select,
+.cr-correction textarea {
+  width: 100%;
+  font: inherit;
+  padding: 0.55rem 0.7rem;
+  border-radius: 10px;
+  border: 1px solid rgba(11, 18, 32, 0.25);
+  background: #fff;
+  color: var(--cr-ink);
+}
+.cr-correction .cr-link-btn {
+  color: var(--cr-ink);
+}
+.cr-correction .cr-check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+.cr-correction .cr-error {
+  color: #a3261a;
 }

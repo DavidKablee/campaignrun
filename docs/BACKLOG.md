@@ -14,13 +14,20 @@ Work only the current chunk (`docs/STATUS.md`). Do not start later chunks early.
 | C10 | done | Weekly packs (26 Oct), travel caps (client), live counters |
 | C11 | done | Guest→save, Contender consent log, export/delete (client) |
 | **C12** | **next** | Ghosts / server verification |
-| C13–C19 | todo | Running mates, community Rally Map, ledger, rivals, ads, live-ops, finale |
+| C13–C19 | reviewed | See `docs/research/c13-c19-review.md`: build C19 and C18 in lite form, finish C14 and C16, defer C15 and C17, skip C13 and the prize flow |
 
 ## Outside the current chunk
 
 - Community Rally Map / other players’ Contenders (C14 + C11 consent).
 - Real-money / ads / server scores.
 - glTF meshopt swaps, recorded audio stems, Playwright visual baselines, Cloudflare/waitlist.
+
+## Needs a person (C78)
+
+- Run `docs/PLAYTEST-FIRST-MINUTE.md` with 8–10 Nigerian players on mid-range phones, then fix the earliest confusion first.
+- A native Pidgin speaker marks `docs/research/pidgin-review.md`.
+- A lawyer reviews the privacy text (events, corrections) before anything that collects data goes public.
+- Host the client (`docs/DEPLOY-CLIENT-ONLY.md`), then deploy the API so the tally, counts and corrections are live. Drive them from the UI once it is up.
 
 ## Every state its own world (remaining 25 states)
 

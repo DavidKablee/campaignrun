@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { copy, legal, limits } from '@cr/content';
+import { legal, limits } from '@cr/content';
 import { useGameStore } from '../state';
 import { useOnlineStore } from '../onlineStore';
 
@@ -241,7 +241,6 @@ export function AuthScreen() {
             until you do, your runs stay off the public boards.
           </p>
         ) : null}
-        <p className="cr-fineprint">{copy.disclosure}</p>
       </form>
     </div>
   );

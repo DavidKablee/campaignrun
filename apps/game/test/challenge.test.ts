@@ -39,8 +39,11 @@ describe('challenge links', () => {
     expect(url.match(/#/g)).toHaveLength(1);
   });
 
-  it('says it is a game score in the share text', () => {
-    expect(challengeText(sample, 'Okada', 'Lagos')).toMatch(/not a poll/i);
+  it('names the score, the road and the ride in the share text', () => {
+    const text = challengeText(sample, 'Okada', 'Lagos');
+    expect(text).toContain(String(sample.crowd));
+    expect(text).toContain('Lagos');
+    expect(text).toContain('Okada');
   });
 
   it('judges a result', () => {

@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-10-28 — Disclaimers moved to About, a new share card, C13–C19 reviewed (C79)
+
+- **Disclaimers:** the "Fictional game / not affiliated / not a poll" lines are gone from the splash, sign-in, result, board, campaign map, Busiest Roads, share text (English and Pidgin), the share card, the link-preview image and the page descriptions. They stay in About (disclosure, "What the board means", privacy, terms) and on the waitlist page. Guardrail 1 now says so (owner decision). The terms sentence changed, so `legal.version` is 2026-10-29.
+- **Share card:** redrawn 1080×1300: the bus on its road, the tier, a big Turnout number and "Beat my run on the same road". The old card was cropped in the preview so the number never showed; the preview now shows the whole card. The tiled "not a poll" stamp is removed.
+- **Link-preview image:** regenerated without the disclaimer.
+- **C13–C19:** reviewed in `docs/research/c13-c19-review.md`. Build C19 and C18 in lite form, finish C14 and C16, defer C15 and C17, skip C13 and the prize flow.
+
+## 2026-10-28 — Launch plumbing (C78)
+
+Items 2–6 and 8 of the platform critique, built in the client and API; none of it is hosted or playtested.
+
+- **Link previews:** Open Graph tags and a 1200×630 image, manifest renamed "Campaigner", `VITE_PUBLIC_URL` for absolute URLs.
+- **Anonymous counts:** a closed list of events counted by day, name and state; no identifiers or cookies; Do Not Track and a Settings switch turn it off. Privacy text updated (`legal.version` 2026-10-28).
+- **First minute:** three runs of coaching, a brake prompt on the approach to the first pickup, a new tutorial card, clearer toasts and splash. The playtest with real players is **not done**; the protocol is `docs/PLAYTEST-FIRST-MINUTE.md`.
+- **Challenge a friend:** the Challenge sheet is the first action after a run, with one-tap WhatsApp. A weekly state tally shows counts only, hidden under 100 total.
+- **Pidgin:** an optional Naija Pidgin mode for the radio, toasts, prompts, tutorial and share text. **Unreviewed by a native speaker** (`docs/research/pidgin-review.md`).
+- **State corrections:** "Is this your state? Correct it", anonymous, personal details refused.
+- **Remote calendar:** `flags.json` moves the close date, single unlocks and a splash notice without a redeploy; after the close the game turns into practice mode. Fixed `flags.json` being precached (the kill switch could not have reached returning players).
+- **Not done:** hosting; the playtest; native Pidgin review; lawyer review; the new API routes have not been driven from the UI against a live server. See `docs/chunks/C78.md` and `docs/DEPLOY-CLIENT-ONLY.md`.
+
 ## 2026-10-28 — The two sim decisions closed (C77)
 
 The +10% score for riding a state's signature ride is gone (`signatureRideBonusPermille` 1100 → 1000), because the guardrails forbid home-state bonuses and nothing in the game ever told players about it. No stored scores exist yet (the API is not deployed), so nothing is invalidated; once it is, any sim change needs a version. Rivers' ride is now keke (road table regenerated). See `docs/chunks/C77.md`.
