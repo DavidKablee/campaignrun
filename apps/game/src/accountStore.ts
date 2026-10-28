@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { safeStorage } from './safeStorage';
 import { legal } from '@cr/content';
 import { appendConsent, contenderShareAllowed, type ConsentEntry } from './consent';
 import { validateUsername } from './username';
@@ -85,7 +86,7 @@ export const useAccountStore = create<AccountState>()(
         termsAcceptedVersion: state.termsAcceptedVersion,
         privacyAcceptedVersion: state.privacyAcceptedVersion,
       }),
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => safeStorage),
     },
   ),
 );

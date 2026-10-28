@@ -3,18 +3,94 @@
   "name": "Kano",
   "zone": "NW",
   "biomeKit": "sahel-savanna",
-  "palette": { "sky": "#E8C48A", "fog": "#F3E2C5", "ground": "#A67C52", "accent": "#C45C26" },
+  "palette": {
+    "sky": "#E7CE9C",
+    "fog": "#EFDDBB",
+    "ground": "#B8895A",
+    "accent": "#C45C26"
+  },
   "landmarks": [
-    { "name": "Kurmi Market", "venueType": "market", "verified": false },
-    { "name": "Sabon Gari Square", "venueType": "square", "verified": false },
-    { "name": "Zoo Road Park", "venueType": "park", "verified": false },
-    { "name": "Challawa Bridge", "venueType": "bridge", "verified": false },
-    { "name": "Race Course Ground", "venueType": "stadium", "verified": false }
+    {
+      "name": "Kurmi Market",
+      "venueType": "market",
+      "verified": false
+    },
+    {
+      "name": "Kofar Mata Dye Pits",
+      "venueType": "landmark",
+      "verified": false
+    },
+    {
+      "name": "Dala Hill",
+      "venueType": "landmark",
+      "verified": false
+    },
+    {
+      "name": "Kano Race Course",
+      "venueType": "stadium",
+      "verified": false
+    },
+    {
+      "name": "Zoo Road Trade Fair Complex",
+      "venueType": "landmark",
+      "verified": false
+    }
   ],
-  "scenery": ["old city walls", "dye pits"],
-  "hazards": ["dust-plume", "cart-weave", "go-slow"],
+  "scenery": [],
+  "hazards": [
+    "dust-plume",
+    "cart-weave",
+    "go-slow"
+  ],
   "signatureRide": "keke",
-  "welcomeLines": ["Barka da zuwa Kano!"],
+  "welcomeLines": [
+    "Barka da zuwa Kano!"
+  ],
   "farewellLine": "Na gode, Kano!",
-  "audioStem": "nw-kalangu"
+  "audioStem": "nw-kalangu",
+  "world": {
+    "library": "sahel-savanna",
+    "start": {
+      "district": "kano.compound-lane",
+      "label": "Your compound lane"
+    },
+    "route": [
+      "kano.kurmi",
+      "kano.dye-quarter",
+      "kano.dala",
+      "kano.fagge",
+      "kano.boulevard",
+      "kano.sabon-gari",
+      "kano.dawanau",
+      "kano.walls"
+    ],
+    "finish": {
+      "district": "kano.walls",
+      "label": "KANO · GRAND RALLY"
+    },
+    "road": "sahel-dust",
+    "dress": "hausa-north",
+    "billboards": [
+      "MOBILE DATA 4G",
+      "CEMENT & ROOFING",
+      "NOODLES & BISCUITS",
+      "TYRES & BATTERIES",
+      "TRADE FAIR · ZOO ROAD",
+      "PURE WATER",
+      "KASUWA · MARKET",
+      "PHARMACY",
+      "SHAGO · STORES"
+    ],
+    "skyline": "dala-hills",
+    "ambient": "dust",
+    "pieces": [
+      { "landmark": 0, "piece": "kano.market-gate", "side": -1 },
+      { "landmark": 1, "piece": "kano.dye-pits", "side": -1 },
+      { "landmark": 2, "piece": "kano.city-gate", "side": 1 },
+      { "landmark": 2, "piece": "kano.dala-hill", "side": -1 },
+      { "landmark": 3, "piece": "kano.flyover", "side": 1 },
+      { "landmark": 3, "piece": "kano.race-course", "side": -1 },
+      { "landmark": 4, "piece": "kano.trade-fair", "side": -1 }
+    ]
+  }
 }

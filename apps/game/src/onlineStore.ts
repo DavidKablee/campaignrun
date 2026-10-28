@@ -44,6 +44,8 @@ interface OnlineState {
     capacity: number;
     rideId: string;
     contenderId: string | null;
+    /** Lets the server play the run again and confirm the score. */
+    replay?: { seed: number; log: string; upgrades: Record<string, number>; rallySaturday: boolean };
   }) => Promise<boolean>;
   loadBest: () => Promise<void>;
   clearError: () => void;

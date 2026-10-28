@@ -41,3 +41,15 @@ Everything below was checked in-browser (Claude Preview, desktop + mobile viewpo
 | Load window | `zones.loadTicks`, `zones.brakeSpeedUm` |
 | Momentum | `momentum.*` |
 | Spawn gaps | `spawn.gapMinMm` / `gapMaxMm` |
+
+## Real-device run — Samsung Galaxy A16 (SM-A165F), 2026-10-28
+
+Chrome on the phone, driven over USB debugging (adb port-forward + Playwright `connectOverCDP`, real touch events through Chrome's input pipeline, Vite dev server over Wi-Fi). Viewport 384×693 CSS px at DPR 2.81 (aspect 0.55), 90 Hz display.
+
+- **Framing:** the rider stays at the middle of the screen (NDC x ≈ 0.0–0.1) in every lane; the road edge shifts to show which lane it is in. Before C63 the camera lost the rider for ~40–50% of a run on a tall phone.
+- **Frame rate:** 87–90 fps in Lagos, Kano, Ogun and Enugu with the renderer at dpr 1.5; p50 11.1 ms, p99 ~22 ms, one ~78 ms hitch per 14 s run and 4–8 frames over 33 ms. Draws 65–107, tris 45–68k. No change needed on this phone.
+- **Gestures (real touch):** quick flick = one lane; press-and-wait then flick works; one long swipe = one lane; a diagonal that is mostly sideways changes lane and does not brake; a held downward push brakes (speed 268 → 70) and releases; flick up hops.
+- **Phone behaviour:** Back pauses and stays on the page; Home pauses; the pause survives returning to the app.
+- **Found and fixed during the test:** the new Back sentinel fired a spurious popstate under React's dev double-effect and paused the run at start (also reachable whenever the run effect re-ran); it is now one reused history entry, unwound after a deferred check.
+- **Not covered:** a full 2 km run by hand, Samsung Internet, iPhone/Safari, throttled or low-end phones, thumb comfort over a long session, audio after backgrounding. The swipe numbers come from synthetic strokes, so a human thumb's feel still needs your judgement.
+

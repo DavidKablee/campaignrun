@@ -1,5 +1,150 @@
 # Changelog
 
+## 2026-10-28 — The two sim decisions closed (C77)
+
+The +10% score for riding a state's signature ride is gone (`signatureRideBonusPermille` 1100 → 1000), because the guardrails forbid home-state bonuses and nothing in the game ever told players about it. No stored scores exist yet (the API is not deployed), so nothing is invalidated; once it is, any sim change needs a version. Rivers' ride is now keke (road table regenerated). See `docs/chunks/C77.md`.
+
+## 2026-10-28 — Sixth batch of worlds: Osun, Adamawa, Jigawa, Cross River (C73–C76)
+
+Four more states have their own world, built from `docs/research/batch-6-plan.md` after you approved it, with a second research pass first. Osun: indigo cloth lines, a murky river and bridge, a rail crossing, a ring-road interchange. Adamawa: a market, Mandara-style stone terraces on a granite hill, a junction flyover, a lakeside dam. Jigawa: a grain and date market, bare granite domes with an overhang (no painting, no animal), dry rice paddies, a mud-brick town gate. Cross River: a Calabar market, a plain quay with a crane, an empty carnival avenue, a trade hall.
+
+- **Rides and hazards:** Adamawa hilux → keke and Cross River danfo → keke (road table regenerated); Osun stays okada, Jigawa stays keke.
+- **Palettes:** Osun, Jigawa and Cross River drafts moved off repeated or party-adjacent colours (Jigawa accent was 20 from party orange, Cross River's was 34 from magenta).
+- **Left out on purpose:** Osun's sacred grove, Dutsen Habude paintings and cattle, Calabar's Marina Resort and Tinapa by name, and any carnival crowd.
+- **Shared:** four skylines, four roads, four facade and shop sets, four dress sets, 20 pieces. The `forest-hills` library now holds seven states. Unlocks are already in the calendar.
+- **Not done:** local review of every name, shape and line; dress, house form and ride colours are thin; no real-phone test; 13 states still look like Lagos. See `docs/chunks/C73.md` to `C76.md`.
+
+## 2026-10-28 — Batch 6 research: Osun, Adamawa, Jigawa, Cross River
+
+Research only, nothing built. `docs/research/batch-6-plan.md` and four dossiers (`docs/research/states/osun.md`, `adamawa.md`, `jigawa.md`, `cross-river.md`) cover landmarks, rides, palettes and eleven decisions. Three of the draft palettes would have failed the party-colour distance check and are replaced; Osun's sacred grove and Ife ground, Adamawa's Numan bridge and Calabar's carnival crowd are dropped or reshaped for the usual rules. Batch 5 was also checked in the portrait phone view (rider in frame, draws under 110).
+
+## 2026-10-28 — Fifth batch of worlds: Edo, Ondo, Abia, Benue (C69–C72)
+
+Four more states have their own world, built from `docs/research/batch-5-plan.md` after you approved it. Edo: red earth, a lock-up produce market, a brass casters' row (tools and metal, no heads), a road cut through the tree-lined moat bank, a big round junction with a flyover going up, rubber-tree belts. Ondo: a cocoa market with drying mats, two bare granite domes with a plain stair, a lagoon landing with stilt sheds and a ferry, a concrete river bridge in forest. Abia: a shoe cluster of low sheds, a fabric market gallery, a clear blue river landing and a concrete drain channel, on wet grey-red earth. Benue: a yam and cassava market, a long steel river bridge, a yam market of racked stacks, a riverbank landing and round thatch huts on the farm belt.
+
+- **Rides and hazards:** Edo stays danfo (hazard okada-swarm → keke-swerve); Benue hilux → keke and cattle-crossing → cart-weave; Ondo stays okada; Abia stays keke (road table regenerated).
+- **Palettes:** the gold and orange accents moved off party colours (Abia deep tan, Ondo cocoa brown, Benue river blue); the content lint caught one teal that was too close and it was changed.
+- **Shared:** four skylines, four roads, four facade and shop sets, four dress sets, 20 pieces. Unlocks are already in the calendar: Edo and Benue 23 Nov, Abia and Ondo 30 Nov.
+- **Not done:** local review of every name, shape and line; dress, house form and ride colours are thin; Benue's A'nger stripes are not drawn; no real-phone test; 17 states still look like Lagos. See `docs/chunks/C69.md` to `C72.md`.
+
+## 2026-10-28 — The known gaps, closed where they are client-only (C68)
+
+Radio lines no longer name a ride, a religion or another state, and "Lagos" lines play only in Lagos. The barrier obstacle is now a yellow and black chevron board instead of red and white rails, so it stops reading as a checkpoint. Dust, mist, heat and wet-road hazards now tint the fog (and the dust motes) in the states that have them. A swipe that starts on BEAT or PERK steers; PERK fires on release so a swipe cannot spend it. In dev, the client calls the host that served it, and the API accepts private-LAN origins outside production.
+
+- **Left for a decision:** `signatureRideBonusPermille` vs "no home-state bonuses", and Rivers' ride (danfo vs keke); both change the sim and need versioning or your call. See `docs/chunks/C68.md`.
+- **Research:** `docs/research/batch-5-plan.md` and dossiers for Edo, Abia, Benue and Ondo are ready for your decisions; nothing is built.
+
+## 2026-10-28 — Fourth batch of worlds: Bauchi, Sokoto, Akwa Ibom, Imo (C64–C67)
+
+Four more states have their own world, built from `docs/research/batch-4-plan.md` after a second, cross-checked research pass. Bauchi: sand road, pale plaster compounds, nine rock hills on the horizon, a produce market, the Yankari gate, the Wikki spring and a rebuilt old-city gate. Sokoto: pale dust road, an onion and grain market, a leather row, a river bridge with silt plots and a squat gate on a round island, tall palms on a flat horizon. Akwa Ibom: a clean planted-verge road, a market under a flyover, a fountain plaza, a white-sand beach and a raffia craft row under a green canopy line. Imo: red earth, a produce market, a lake jetty with canoes and a pontoon, a pale hotel row and a stacked-disc roundabout under oil palms.
+
+- **Landmarks replaced** in all four packs, all `verified: false`; generic fallbacks for every market, gate, bridge, jetty, roundabout and stadium that carried a person, a disaster or a sacred site. Itam Market stays named.
+- **`signatureRide`:** Bauchi hilux → keke (road table regenerated); Sokoto stays okada (the keke proposal rested on an unconfirmed ban); Akwa Ibom and Imo stay keke, with Imo flagged (Owerri bans both).
+- **Hazards:** Bauchi's cattle-crossing becomes cart-weave (no herder imagery; there are no hazard visuals yet).
+- **Shared:** four skylines, four roads, four facade and shop sets, four dress sets, 20 pieces; Bauchi's skyline is nine rock hills, not Yankari.
+- **Research corrections:** Sokoto's gates are real; Bauchi has nine gates and nine hills; Owerri and Uyo restrict keke and okada.
+- **Not done:** local review of every name, shape and line; dress and house form are thin everywhere; the Imo ride; no hazard visuals; no real-phone test; the other 21 states still look like Lagos. See `docs/chunks/C64.md` to `C67.md`.
+
+## 2026-10-28 — Mobile gameplay pass (C63)
+
+The rider no longer slides off a phone screen: the chase camera followed half the lane offset and yawed ±17° on a straight road, which put the rider off-screen for much of a run on tall phones. Portrait now follows fully and widens the view; landscape is unchanged.
+
+- **Input:** slow-start swipes register, thresholds scale to the screen, one long swipe is one lane, brake needs a clearly vertical push, and the tutorial and pause card no longer leave gestures to replay.
+- **Phone behaviour:** auto-pause when the page is hidden, Back pauses instead of leaving, bigger pause and radio targets (the radio strip button now works), left/right safe areas, resize observer.
+- **Resilience:** a failing localStorage no longer freezes the run end, an error screen replaces a blank page, the auth screen scrolls.
+- **Not done:** real-phone playtest and performance profiling; SW auto-update reload mid-run; the root `.env` API URL is not read by the Vite app. See `docs/chunks/C63.md`.
+
+## 2026-10-28 — Third batch of worlds: Enugu, Plateau, Katsina, Ogun (C59–C62)
+
+Four more states have their own world, built from `docs/research/batch-3-plan.md` after the plan's six recommendations were approved. Enugu: iron-brown hillside terraces, a glazed sky bridge, Nike Lake and a rock-cut hairpin road under pines, with a layered escarpment horizon. Plateau: cool pale-grass highlands, cream sandcrete bungalows, boulder walls, a pine park gate, a tripod-monument roundabout and bare granite domes. Katsina: rose and cream relief-render compounds, a tall red city wall, a red-brick college hall, a roundabout interchange and irrigated lakeside plots. Ogun: a pale concrete road, indigo adire yards, granite domes among zinc and rust roofs, an old truss and a new beam bridge, silos and a flyover.
+
+- **Landmarks replaced** in all four packs, all `verified: false`; the generic fallbacks are Hillside Market, Township Stadium (Enugu and Ogun), Highland Produce Market, Grain Market and Interchange Park. Olumo Rock is skyline-only and unmarked.
+- **`signatureRide`:** Plateau hilux → keke, Katsina okada → keke, Ogun danfo → keke (road table regenerated). Rivers is still danfo.
+- **Shared:** `stadiumBlock` in `states/common.ts`; generic `plainFacade` and `tradeShop` painters; pine, eucalyptus and granite flora; four skylines.
+- **Not done:** local review of every name, shape and line; Katsina is the thinnest on evidence; the keke is now the signature ride of nine of the twelve built states, so livery carries the difference; no hazard visuals; no real-phone test; the other 25 states still look like Lagos. See `docs/chunks/C59.md` to `C62.md`.
+
+## 2026-10-27 — Second batch of worlds: Delta, Kwara, Oyo, Borno (C55–C58)
+
+Four more states have their own world, planned in `docs/research/batch-2-plan.md`. Delta: red-earth bluff, Niger Bridge approach, timber quarter, Effurun roundabout, creek market. Kwara: Ilorin pottery quarter, post-office junction, stadium, zoo gate, bare Sobi twin-cone hill. Oyo: Ibadan's rust-roof hillside, Dugbe market, Mokola flyover, Cocoa House. Borno: a generic Kanuri-sahel town of clay and sand, with a cap-and-cloth market, flyover, plain city gate, stadium and a dry riverbank.
+
+- **Landmarks replaced** in all four packs; all `verified: false`. Borno's `signatureRide` okada → keke.
+- **Shared:** `render/world/states/common.ts` (flyover, steel truss, boards), library `forest-hills.json`, 14 lot styles/flora/kerbside additions, three skylines for the first three states and `chad-plain` for Borno.
+- **Pitfall:** legacy `scenery` strings in `world.ts` still draw big shapes; new packs use unmatched strings.
+- **Not done:** local review of every name, shape and line (the Kwara market name and Delta's Ogheye opening especially); a possible checkpoint reading from the shared barrier obstacle in Borno; no hazard visuals; no real-phone test; the other 29 states still look like Lagos. See `docs/chunks/C55.md` to `C58.md`.
+
+## 2026-10-27 — Kaduna gets its own world (C54)
+
+Fourth state after Lagos; the first batch (Kano, Rivers, Anambra, Kaduna) is built. Kaduna is a planned colonial city: GRA avenue with hipped-roof bungalows under big trees, Tudun Wada produce lanes, a stadium roundabout with a ball-on-cup monument, a level crossing and steel truss rail bridge over the river, Splash Park with its iron footbridge and slide, Matsirga Falls over granite, a southern hill village, Kakuri mill walls and a plaza-block city centre; granite inselberg skyline; `hausa-guinea` dress.
+
+- **Landmarks replaced:** Bakin Dogo Market, Kaduna Township Stadium, River Kaduna Rail Bridge, Splash Park, Matsirga Waterfalls. Accent moved off party red. All `verified: false`.
+- **Anambra review fixes:** container ribs, bigger toll booths, lighter bank.
+- **Dev fix:** a selected state could still draw Lagos in a dev server started before its library file existed (stale Vite glob, silent fallback). The dev watcher now covers `packages/content/data`, and the fallback logs an error.
+- **Not done:** Hausa wording, the Splash Park name and every shape are unverified; no hazard visuals; no real-phone test; the other 33 states still look like Lagos. See `docs/chunks/C54.md` and the per-state recipe in `docs/BACKLOG.md`.
+
+## 2026-10-27 — Anambra gets its own world (C53)
+
+Third state after Lagos. Onitsha's stacked market plazas, the bridgehead toll plaza and Niger deck, the river port with cranes and a barge, Nnewi's roundabout and spare-parts streets, Awka's stadium and town blocks, Agulu/Nanka red-earth country with return-home mansions and cashew, Ekwulobia, and the Omor rice floodplain with yam barns; a laterite-washed road; `igbo-southeast` dress; Niger far-bank skyline.
+
+- **Landmarks replaced:** Onitsha Main Market, Second Niger Bridge, Onitsha River Port, Nnewi City Centre Roundabout, Awka Township Stadium, each with a set piece. All `verified: false`.
+- **Rivers review fixes:** water recoloured so it reads as water, lighthouse moved closer.
+- **Not done:** Igbo wording and every shape are unverified; no gully, no sacred sites, no old truss bridge; no real-phone test. Kaduna is researched, not built. See `docs/chunks/C53.md`.
+
+## 2026-10-27 — Rivers gets its own world (C52)
+
+Second state after Lagos. Rivers now draws a Port Harcourt of its own: Aba Road and Diobu market streets, Creek Road with stilt houses and canoes on a creek edge, a Pleasure Park avenue, Garrison, the Bonny estuary, colonial Old G.R.A., Trans-Amadi tank farms and an Okrika creek village; a wet puddled road with muddy shoulders; `delta-south` dress; oil-flare skyline (skyline only).
+
+- **Landmarks replaced:** Mile One Market, Creek Road Waterfront, Port Harcourt Pleasure Park, Garrison Flyover, Bonny River Lighthouse, each with a set piece (a flyover deck crosses the road overhead). All `verified: false`.
+- **New:** `waterEdge` op, kerbside bole stands and basins, mango/oil palm/nipa/mangrove/banana/cassava, four lot styles; side ops can be limited to one side.
+- **Not done:** Pidgin welcome/farewell and sign words need a native read; shapes are inferred; `signatureRide` is still danfo (dossier says keke); no flood visual; no real-phone test. Anambra and Kaduna are researched, not built, and wait for review of Kano and Rivers. See `docs/chunks/C52.md`.
+
+## 2026-10-27 — every state gets its own world (foundation + Kano)
+
+Every state rendered the same Lagos road: same start, same shops, same people, a venue stage that read "LAGOS" everywhere. A state now carries a `world` block and draws its own. Kano is the first (C50 foundation, C51 Kano); Rivers, Anambra and Kaduna follow one at a time after review. See ADR-0010.
+
+- **No photographs ship.** Photos and descriptions are research (a dossier per state in `docs/research/states/`); the game draws original low-poly models from primitives, as it does everything else.
+- **Foundation:** content-driven districts, road styles and dress sets (`packages/content/src/world.ts`, `data/world/<biome>.json`, lazy-loaded with the state); a district-driven `World` with a registry of lot styles, flora, crops, walls, bazaars, kerbside items, landmark set pieces, skylines and venue-type backdrops; per-state RNG salt so Lagos draws exactly what it always did (a golden test fingerprints Lagos). New NPC garments (riga, isiagu, kube, hijab, turban) are not in the Studio lists. Venue stages carry the state's name.
+- **Kano:** earthen compounds with corner cones, relief bands and pointed doors; sahel-dust road with packed-earth shoulders; Hausa-dress roadside people; eight districts along the real route (Kurmi, Kofar Mata, Dala and the walls, Nassarawa/Fagge, Zoo Road, Sabon Gari, Dawanau, the walls) and a millet-field start lane; set pieces for the five landmarks (market gate, dye pits, city gate with Dala Hill, race course with stand and white rails, trade-fair hall); a red laterite Dala skyline and ambient dust; shop boards and awnings in ochre/indigo/sand only.
+- **Landmarks replaced** after research: Kurmi Market, Kofar Mata Dye Pits, Dala Hill, Kano Race Course, Zoo Road Trade Fair Complex (the old pack's "Challawa Bridge" and "Sabon Gari Square" could not be found; the zoo and Sabon Gari Market are person-named). All `verified: false`.
+- **Fixed on the way:** ground and water materials were keyed by theme, so the first state built in a session fixed every later one's ground colour; the initial fog colour was a hex string; `flood-patch` and `narrow-gate` obstacles had no model (they drew as a sedan).
+- **Review aids** (need `?debug`): `debugState`, `debugWeather=day|night|harmattan|rainy`, `debugSeed`, `debugZ`. `apps/game/e2e/states.spec.ts` photographs the course at every place and checks the frame budget.
+- **Not done:** the other 33 states still look like Lagos (recipe in `BACKLOG.md`); Rivers, Anambra and Kaduna dossiers are written but their worlds are not built; nothing has been looked at on a real phone; Hausa shop words, dress, architecture and the five landmarks need a Kano reviewer. Flagged and untouched: zone billboard lists in `world.ts` for other states carry personal names and religious phrases; `radioCallouts.ts` has an NW line with a religious phrase and "Lagos crowd" for every SW state; `signatureRideBonusPermille` sits awkwardly with "no home-state bonuses".
+
+## 2026-10-27 — real traffic
+
+The cars were scenery. Every vehicle in a lane stood still, and the "traffic" that moved was a pool of boxes driving on the shoulders that the sim never saw. Now the road is the game.
+
+- **Vehicles and people move, in the sim** (`packages/sim/src/traffic.ts`, integers only, no clock, no extra RNG draws once a mover exists). Four behaviours, all numbers in the `traffic` block of `sim.json`: **oncoming** okadas, keke and the odd car against the flow; **slow same-direction** danfos, lorries, keke and cars you overtake or brake behind; **weavers** (okada, keke) that blink, honk, then slide one lane; **walkers** — the hostile Integrity cast now crosses the road instead of standing in it. Rival convoys are slow movers, so "Draft & Overtake" means overtaking.
+- **Fair by construction.** A mover sleeps until you are 130 m away and is not drawn until then; oncoming traffic is only placed 60 m or more into a window and slow traffic only in its first 90 m (never in a venue's unload zone); a weaver warns for 30 ticks and a test asserts at least 60 ticks of room before it enters your lane and 150 before it can hit you. Low vehicles (okada) can be hopped, solid ones cannot; the horn scatters low movers only. New `okada` and `keke` obstacles; `okada-swarm` and `keke-swerve` raise their weights.
+- **New events:** `weaveWarn` (two horn blasts, "SWERVING AHEAD") and `closeCall` (a vehicle passed within 3.9 m laterally; toast and radio line at most once per 5 s, no score effect).
+- **Better-built vehicles** (`render/vehicles.ts`, replaces `render/traffic.ts`): danfo (stripes, windows, roof rack, conductor on the step), keke in three liveries with driver and passengers, okada with rider (and pillion), saloon and hatch in six colours, container lorry and sack lorry. Spoked wheels spin at ground speed, bodies sway, weavers yaw and lean into the move and blink an amber indicator on the side they are going to, oncoming traffic carries glowing headlights (bigger at night and in a NEPA outage). Beyond 60 m a vehicle is drawn as one merged mesh; under Data Saver always. Movers are interpolated between sim ticks, so a 26 m/s head-on closer does not stutter.
+- **The ambient shoulder traffic is gone** — everything that moves on the road is real.
+- Ghosts are stored as `cr-ghosts-v2`, and old challenge links replay a different road than the one they were made on (the course RNG changed).
+- Pidgin that fits the moment: the result card shouted "WAHALA!" on every win, but wahala means trouble. `exclaim.ts` now picks by outcome (landslide "No be small!", "E choke!"; majority "Well done o!", "Sharp sharp!"; foothold "Small small!"; breakdown keeps "Wahala!"/"Chai!"), stable per score. The near-miss radio line opens with "Chai!"/"Omo!" and a pidgin finish line was added.
+- Tests: 377 pass against the test Postgres (was 359); 11 e2e pass (e2e last run before the pidgin change). 13 new sim tests (determinism, wake, head-on, hop, horn, overtake, reaction time, bot clear-rate) and one content test; replay tests now use a dodge bot because a straight-line bot cannot play moving traffic. A bot that looks ahead finishes ~96–98% of Lagos/Kano rallies with <0.7 dents on average.
+- **Not done:** real-phone performance (draw calls sit around 90–135 in the desktop preview; never measured on a device) and a human difficulty playtest — the bot is a perfect looker-ahead, a person is not. `traffic.chancePermille` is the dial if it is too hard or too easy.
+
+## 2026-10-27 — the critique, built
+
+Everything from the platform critique that could be built without an account, a host or a device.
+
+- **"Beat my run" links.** The result page makes a link that carries the road (seed, state, ride) and the score to beat — no account, no server, and no Contender id (guardrail 10). Opening one shows a banner on the splash behind the 18+ confirmation, strips the hash from the address bar, and starts the same road and traffic; the result then says by how much you won or lost, and offers a rematch or a link back. Challenge runs use a neutral Rally Saturday multiplier and race no ghost.
+- **Quick rally (~90 s).** `quickSegmentCount` in `sim.json`, applied through `runConfig()` so the sim, renderer and trail all agree where the finish is. A first-timer's trial run is a quick one (the result and the Contender pick arrive inside two minutes); the briefing offers one too. Quick runs pay for what they delivered and a share of the finishing money, are tiered per segment, and never reach a board, a personal best, the streak or the daily.
+- **Chaos moments** (`chaos` in `sim.json`, placed from the segment number with no roll, so every seed meets the same ones and the rest of the course does not move). An **agbero** collecting a toll stands in a lane every other segment: a hit costs a quarter of the load and half the speed but never a dent; a clean pass pays 4 Turnout. A **stubborn passenger** makes every third venue 50% slower to unload. New props, sounds, toasts and radio lines; `maxCrowdFor` counts the dodge bonus.
+- **A rally streak that does something.** Each finished rally in a row lifts the next payout by 5%, up to +25% at 5. A breakdown ends the streak unless this week's freeze is unspent (the freeze existed in the store and was never used). Funds only — never Turnout. The Yard's "buys nothing" sheet now says what it buys; its "crash pays nothing" line was wrong (a breakdown has always paid for what it delivered) and is corrected.
+- **Server-side replay verification (the owed half of C12).** `replayRun`/`verifyReplay` in `@cr/sim` play a seed and an input log back through the same setup the game uses. `POST /api/scores` now requires a replay and rejects a score the replay does not produce exactly (`replay-mismatch`), a malformed log (`bad-replay`), a Rally Saturday claim outside the real window, and a receipt posted twice (`409`, unique on user + seed). Without consent the server tries every Contender and records none; with consent the replay is pinned to the claimed one. The server cannot load state packs, so `packages/content/data/state-roads.json` (generated by `pnpm content:roads`, drift-tested) carries each state's hazards and signature ride. `CR_REQUIRE_REPLAY=false` turns the requirement off for a local demo only.
+- Watermark ("game scores, not a poll") tiled across the share card; `prefers-reduced-data` now turns Data Saver on by default; a first-timer's splash and tagline reworded.
+- Tests: 359 pass against the real test Postgres (was 276 + 50 skipped without it); 12 e2e (challenge link, bad link, quick-rally result). New: `challenge`, `streak`, `deviceTier`, `chaos`, `replay` (sim and API), `stateRoads`.
+- **Not built, and why:** deploying the API; a mail provider and Google sign-in (both need accounts only the owner can create); a real-device playtest; legal review of three Contender names that echo real public figures; a clock-gated unlock cosmetic. Upgrades are replayed as the client claims them (the server has no save to check them against), so a replay proves a run was played, not that the upgrades were earned.
+
+## 2026-10-26 — first-minute friction
+
+- **A brand-new player now goes Play → straight into the run** (Lagos, default Contender, on-foot ride). Roster, studio and briefing no longer sit in front of the first run; they come after it, from the result page ("Pick your Candidate"). Returning players and anyone who already picked a Contender keep the old path.
+- **A trial run never locks a Contender.** `recordMetaRun` only calls `lockAfterFinish()` when a Contender has actually been chosen; otherwise the lock would have spent the one free switch on the player's first real pick.
+- **The sim waits under the tutorial.** The run loop read `showTutorial` nowhere, so the convoy drove into hazards while the instructions were on screen. It reads a ref now (the loop's effect must not restart) and still draws the world behind the card.
+- **A breakdown has a result.** The page says "Convoy broke down", keeps the Turnout figure, and adds how far the convoy got ("Made it 34% of the road · past Ojuelegba"); the share card carries the same line instead of "No tier yet". Local-board posting is unchanged: only finished runs post.
+- Roster lock banner text was dark ink on the dark screen; now `--cr-paper`.
+- New `apps/game/test/trialRun.test.ts` (3 tests); the e2e smoke spec follows the new first-timer path.
+
 ## 2026-10-23 — C48 a Convoy Yard that explains itself
 
 - **The only economy screen in the game named no source for any number on it.** Two currencies, five priced upgrades, a streak, a donation and seven gated rides, all bare figures. Following has exactly one source — one per supporter delivered — and the Yard never said so, which made "20000 Following" on the Danfo card a number with no action attached to it.

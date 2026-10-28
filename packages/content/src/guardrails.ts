@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -63,5 +63,7 @@ export function readJsonDir(sub: string): { file: string; json: unknown }[] {
 }
 
 export function readAllDataFiles(): { file: string; json: unknown }[] {
-  return [...readJsonDir('.'), ...readJsonDir('states')];
+  // `world/` holds sign text and district labels; it only exists once a state ships a look.
+  const world = existsSync(join(dataDir, 'world')) ? readJsonDir('world') : [];
+  return [...readJsonDir('.'), ...readJsonDir('states'), ...world];
 }

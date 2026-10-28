@@ -116,7 +116,7 @@ export function StudioScreen() {
               {party ? (
                 <p className="cr-party-line" style={{ ['--fill' as string]: party.color }}>
                   <i />
-                  {party.name}
+                  {party.platform}
                 </p>
               ) : null}
             </header>

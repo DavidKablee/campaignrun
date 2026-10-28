@@ -3,18 +3,116 @@
   "name": "Imo",
   "zone": "SE",
   "biomeKit": "rainforest",
-  "palette": { "sky": "#8CC5E2", "fog": "#DCEBDF", "ground": "#3F6B3A", "accent": "#D98324" },
+  "palette": {
+    "sky": "#8CC5E2",
+    "fog": "#DCEBDF",
+    "ground": "#8A5A3A",
+    "accent": "#2E6E73"
+  },
   "landmarks": [
-    { "name": "Relief Market", "venueType": "market", "verified": false },
-    { "name": "Oguta Lake", "venueType": "waterfront", "verified": false },
-    { "name": "Mbari Cultural Centre", "venueType": "landmark", "verified": false },
-    { "name": "Wetheral Square", "venueType": "square", "verified": false },
-    { "name": "Owerri Township Stadium", "venueType": "stadium", "verified": false }
+    {
+      "name": "Produce Market",
+      "venueType": "market",
+      "verified": false
+    },
+    {
+      "name": "Lake Jetty",
+      "venueType": "waterfront",
+      "verified": false
+    },
+    {
+      "name": "Hotel Row",
+      "venueType": "landmark",
+      "verified": false
+    },
+    {
+      "name": "Central Roundabout",
+      "venueType": "square",
+      "verified": false
+    },
+    {
+      "name": "Township Stadium",
+      "venueType": "stadium",
+      "verified": false
+    }
   ],
-  "scenery": ["palm belt", "lake jetty"],
-  "hazards": ["rain-slick", "keke-swerve", "go-slow"],
+  "scenery": [
+    "oil-palm belt",
+    "lake jetty"
+  ],
+  "hazards": [
+    "rain-slick",
+    "keke-swerve",
+    "go-slow"
+  ],
   "signatureRide": "keke",
-  "welcomeLines": ["Nnọọ! Welcome to Owerri."],
+  "welcomeLines": [
+    "Nnọọ! Welcome to Owerri."
+  ],
   "farewellLine": "Daalụ, Imo!",
-  "audioStem": "se-highlife"
+  "audioStem": "se-highlife",
+  "world": {
+    "library": "farmland-river",
+    "start": {
+      "district": "imo.market",
+      "label": "Your street"
+    },
+    "route": [
+      "imo.market",
+      "imo.lake-road",
+      "imo.hotel-row",
+      "imo.centre",
+      "imo.stadium-road",
+      "imo.palm-belt",
+      "imo.farm-lane",
+      "imo.plaza-street"
+    ],
+    "finish": {
+      "district": "imo.plaza-street",
+      "label": "IMO · GRAND RALLY"
+    },
+    "road": "imo-red",
+    "dress": "igbo-city",
+    "billboards": [
+      "WELCOME TO IMO",
+      "GARRI · TOMATOES",
+      "ONIONS · PEPPER",
+      "PURE WATER",
+      "PROVISIONS",
+      "RECHARGE CARDS",
+      "POS · AIRTIME",
+      "DATA 4G · BIG SAVER",
+      "TAILORING",
+      "PHARMACY"
+    ],
+    "skyline": "imo-palms",
+    "ambient": "none",
+    "pieces": [
+      {
+        "landmark": 0,
+        "piece": "imo.produce-market",
+        "side": -1
+      },
+      {
+        "landmark": 1,
+        "piece": "imo.lake-jetty",
+        "side": -1
+      },
+      {
+        "landmark": 2,
+        "piece": "imo.hotel-row",
+        "side": -1
+      },
+      {
+        "landmark": 3,
+        "piece": "imo.roundabout",
+        "side": -1
+      },
+      {
+        "landmark": 4,
+        "piece": "imo.stadium",
+        "side": -1
+      }
+    ]
+  }
 }

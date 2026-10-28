@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { safeStorage } from './safeStorage';
 import type { OutfitChoice } from '@cr/content';
 
 /**
@@ -81,7 +82,7 @@ export const useContenderStore = create<ContenderState>()(
         contenderGraceUsed: state.contenderGraceUsed,
         outfits: state.outfits,
       }),
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => safeStorage),
     },
   ),
 );

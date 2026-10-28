@@ -1,0 +1,3761 @@
+{
+  "districts": {
+    "kano.compound-lane": {
+      "label": "COMPOUND LANE",
+      "ground": null,
+      "water": null,
+      "facade": "mud",
+      "shops": "sahel",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "crops",
+          "kind": "millet",
+          "x": [
+            12,
+            30
+          ]
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "mudbrick-compound",
+              4
+            ],
+            [
+              "flatroof-shopfront",
+              1
+            ]
+          ],
+          "floors": [
+            1,
+            2
+          ],
+          "spacing": 3,
+          "palette": [
+            "#c9a06e",
+            "#d8b07a",
+            "#c98f58"
+          ]
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "acacia",
+              3
+            ],
+            [
+              "neem",
+              2
+            ],
+            [
+              "scrub",
+              2
+            ]
+          ],
+          "n": 2,
+          "x": [
+            7,
+            14
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "pots",
+              2
+            ],
+            [
+              "sacks",
+              1
+            ]
+          ],
+          "n": 2
+        }
+      ]
+    },
+    "kano.kurmi": {
+      "label": "KURMI & THE OLD CITY",
+      "ground": null,
+      "water": null,
+      "facade": "mud",
+      "shops": "sahel",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "mudbrick-compound",
+              6
+            ],
+            [
+              "flatroof-shopfront",
+              2
+            ]
+          ],
+          "floors": [
+            1,
+            2
+          ],
+          "palette": [
+            "#c9a06e",
+            "#d8b07a",
+            "#bf8a60",
+            "#c98f58"
+          ]
+        },
+        {
+          "op": "bazaar",
+          "density": 1.2,
+          "palette": [
+            "#c98f3a",
+            "#2d3c73",
+            "#f4f1ea",
+            "#8a5a2b",
+            "#8ea4ae"
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "barrow",
+              2
+            ],
+            [
+              "pots",
+              2
+            ],
+            [
+              "sacks",
+              1
+            ]
+          ],
+          "n": 3
+        }
+      ]
+    },
+    "kano.dye-quarter": {
+      "label": "KOFAR MATA",
+      "ground": null,
+      "water": null,
+      "facade": "mud",
+      "shops": "sahel",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "mudbrick-compound",
+              5
+            ],
+            [
+              "flatroof-shopfront",
+              2
+            ]
+          ],
+          "floors": [
+            1,
+            2
+          ],
+          "palette": [
+            "#b87e4a",
+            "#c9a06e",
+            "#a8693c"
+          ]
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "neem",
+              2
+            ],
+            [
+              "datepalm",
+              1
+            ]
+          ],
+          "n": 2,
+          "x": [
+            7,
+            12
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "pots",
+              3
+            ]
+          ],
+          "n": 3
+        }
+      ]
+    },
+    "kano.dala": {
+      "label": "DALA & THE WALLS",
+      "ground": null,
+      "water": null,
+      "facade": "mud",
+      "shops": "sahel",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "mudbrick-compound",
+              6
+            ],
+            [
+              "flatroof-shopfront",
+              1
+            ]
+          ],
+          "floors": [
+            1,
+            2
+          ],
+          "palette": [
+            "#c9a06e",
+            "#bf8a60",
+            "#b87e4a"
+          ]
+        },
+        {
+          "op": "wall",
+          "kind": "earthen",
+          "x": [
+            24,
+            30
+          ]
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "neem",
+              2
+            ],
+            [
+              "scrub",
+              3
+            ],
+            [
+              "baobab",
+              1
+            ]
+          ],
+          "n": 2,
+          "x": [
+            7,
+            12
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "barrow",
+              1
+            ],
+            [
+              "pots",
+              1
+            ]
+          ],
+          "n": 2
+        }
+      ]
+    },
+    "kano.fagge": {
+      "label": "NASSARAWA & FAGGE",
+      "ground": null,
+      "water": null,
+      "facade": "block",
+      "shops": "sahel",
+      "kerb": "none",
+      "median": true,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "flatroof-shopfront",
+              4
+            ],
+            [
+              "shophouse",
+              3
+            ],
+            [
+              "mudbrick-compound",
+              1
+            ]
+          ],
+          "floors": [
+            1,
+            3
+          ],
+          "setback": 10.5
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "neem",
+              3
+            ],
+            [
+              "datepalm",
+              2
+            ]
+          ],
+          "n": 2,
+          "x": [
+            7,
+            12
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "crates",
+              2
+            ],
+            [
+              "sacks",
+              1
+            ]
+          ],
+          "n": 2
+        }
+      ]
+    },
+    "kano.boulevard": {
+      "label": "ZOO ROAD",
+      "ground": null,
+      "water": null,
+      "facade": "block",
+      "shops": "sahel",
+      "kerb": "none",
+      "median": true,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "shophouse",
+              7
+            ],
+            [
+              "flatroof-shopfront",
+              1
+            ]
+          ],
+          "floors": [
+            3,
+            5
+          ],
+          "setback": 12.5
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "neem",
+              3
+            ],
+            [
+              "datepalm",
+              3
+            ]
+          ],
+          "n": 3,
+          "x": [
+            8.6,
+            11
+          ]
+        }
+      ]
+    },
+    "kano.sabon-gari": {
+      "label": "SABON GARI",
+      "ground": null,
+      "water": null,
+      "facade": "block",
+      "shops": "sahel",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "shophouse",
+              5
+            ],
+            [
+              "flatroof-shopfront",
+              3
+            ]
+          ],
+          "floors": [
+            1,
+            3
+          ]
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "neem",
+              3
+            ],
+            [
+              "datepalm",
+              1
+            ]
+          ],
+          "n": 2,
+          "x": [
+            7,
+            12
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "barrow",
+              2
+            ],
+            [
+              "crates",
+              2
+            ],
+            [
+              "sacks",
+              1
+            ]
+          ],
+          "n": 3
+        }
+      ]
+    },
+    "kano.dawanau": {
+      "label": "DAWANAU",
+      "ground": null,
+      "water": null,
+      "facade": "mud",
+      "shops": "sahel",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "crops",
+          "kind": "millet",
+          "x": [
+            14,
+            34
+          ]
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "flatroof-shopfront",
+              3
+            ],
+            [
+              "mudbrick-compound",
+              1
+            ]
+          ],
+          "floors": [
+            1,
+            2
+          ],
+          "spacing": 3,
+          "palette": [
+            "#b6ae9f",
+            "#d8b07a"
+          ]
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "acacia",
+              3
+            ],
+            [
+              "baobab",
+              1
+            ],
+            [
+              "scrub",
+              3
+            ]
+          ],
+          "n": 3,
+          "x": [
+            8,
+            36
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "sacks",
+              3
+            ],
+            [
+              "barrow",
+              1
+            ]
+          ],
+          "n": 3
+        }
+      ]
+    },
+    "kano.walls": {
+      "label": "THE WALLS",
+      "ground": null,
+      "water": null,
+      "facade": "mud",
+      "shops": "sahel",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "wall",
+          "kind": "earthen",
+          "x": [
+            16,
+            20
+          ]
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "mudbrick-compound",
+              3
+            ]
+          ],
+          "floors": [
+            1,
+            2
+          ],
+          "spacing": 3,
+          "setback": 22,
+          "palette": [
+            "#c9a06e",
+            "#bf8a60"
+          ]
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "neem",
+              3
+            ],
+            [
+              "acacia",
+              2
+            ]
+          ],
+          "n": 2,
+          "x": [
+            7,
+            12
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "pots",
+              2
+            ]
+          ],
+          "n": 2
+        }
+      ]
+    },
+    "borno.yerwa": {
+      "label": "YERWA MARKET LANE",
+      "ground": "#c9b38c",
+      "water": null,
+      "facade": "sand-clay",
+      "shops": "borno",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "kanuri-compound",
+              4
+            ],
+            [
+              "lockup-row",
+              3
+            ]
+          ],
+          "floors": [
+            1,
+            2
+          ],
+          "setback": 10.5,
+          "spacing": 0.8,
+          "palette": [
+            "#e6dcc4",
+            "#d3bf98",
+            "#ddd0b0",
+            "#cdb98f"
+          ]
+        },
+        {
+          "op": "bazaar",
+          "density": 1.1,
+          "palette": [
+            "#2f4560",
+            "#f4f1ea",
+            "#d3bf98",
+            "#b58e62",
+            "#bdb8aa"
+          ]
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "neem",
+              3
+            ],
+            [
+              "acacia",
+              1
+            ]
+          ],
+          "n": 2,
+          "x": [
+            8,
+            13
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "caprack",
+              3
+            ],
+            [
+              "clothbolts",
+              3
+            ],
+            [
+              "waterbags",
+              2
+            ],
+            [
+              "matscreen",
+              1
+            ]
+          ],
+          "n": 3
+        }
+      ]
+    },
+    "borno.flyover": {
+      "label": "FLYOVER ROAD",
+      "ground": "#c9b38c",
+      "water": null,
+      "facade": "sand-clay",
+      "shops": "borno",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "lockup-row",
+              3
+            ],
+            [
+              "kanuri-compound",
+              3
+            ],
+            [
+              "flatroof-shopfront",
+              1
+            ]
+          ],
+          "floors": [
+            1,
+            2
+          ],
+          "setback": 11,
+          "spacing": 1.5,
+          "palette": [
+            "#e6dcc4",
+            "#d3bf98",
+            "#ddd0b0",
+            "#cdb98f"
+          ]
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "neem",
+              3
+            ],
+            [
+              "acacia",
+              2
+            ]
+          ],
+          "n": 3,
+          "x": [
+            8,
+            16
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "kekerank",
+              2
+            ],
+            [
+              "waterbags",
+              2
+            ],
+            [
+              "jerrycans",
+              1
+            ]
+          ],
+          "n": 2
+        }
+      ]
+    },
+    "borno.gate": {
+      "label": "OLD CITY GATE",
+      "ground": "#c9b38c",
+      "water": null,
+      "facade": "sand-clay",
+      "shops": "borno",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "wall",
+          "kind": "clay-low",
+          "x": [
+            11,
+            14
+          ]
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "kanuri-compound",
+              5
+            ],
+            [
+              "lockup-row",
+              1
+            ]
+          ],
+          "floors": [
+            1,
+            2
+          ],
+          "setback": 13,
+          "spacing": 2,
+          "palette": [
+            "#e6dcc4",
+            "#d3bf98",
+            "#ddd0b0",
+            "#cdb98f"
+          ]
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "neem",
+              3
+            ],
+            [
+              "acacia",
+              2
+            ],
+            [
+              "scrub",
+              1
+            ]
+          ],
+          "n": 2,
+          "x": [
+            8,
+            16
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "matscreen",
+              2
+            ],
+            [
+              "donkeycart",
+              1
+            ],
+            [
+              "waterbags",
+              1
+            ]
+          ],
+          "n": 2
+        }
+      ]
+    },
+    "borno.stadium": {
+      "label": "STADIUM ROAD",
+      "ground": "#c4b289",
+      "water": null,
+      "facade": "sand-clay",
+      "shops": "borno",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "lockup-row",
+              3
+            ],
+            [
+              "kanuri-compound",
+              2
+            ],
+            [
+              "flatroof-shopfront",
+              2
+            ]
+          ],
+          "floors": [
+            1,
+            2
+          ],
+          "setback": 12,
+          "spacing": 2.5,
+          "palette": [
+            "#e6dcc4",
+            "#d3bf98",
+            "#ddd0b0",
+            "#cdb98f"
+          ]
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "neem",
+              3
+            ],
+            [
+              "acacia",
+              2
+            ]
+          ],
+          "n": 3,
+          "x": [
+            8,
+            16
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "kekerank",
+              2
+            ],
+            [
+              "waterbags",
+              2
+            ],
+            [
+              "caprack",
+              1
+            ]
+          ],
+          "n": 3
+        }
+      ]
+    },
+    "borno.riverbank": {
+      "label": "NGADDA RIVERBANK",
+      "ground": "#cbb68f",
+      "water": null,
+      "facade": "sand-clay",
+      "shops": "borno",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "waterEdge",
+          "x": [
+            26,
+            150
+          ],
+          "boats": 0,
+          "color": "#8aa3a8",
+          "side": 1
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "kanuri-compound",
+              3
+            ],
+            [
+              "lockup-row",
+              1
+            ]
+          ],
+          "floors": [
+            1,
+            1
+          ],
+          "setback": 12,
+          "spacing": 3,
+          "palette": [
+            "#e6dcc4",
+            "#d3bf98",
+            "#ddd0b0",
+            "#cdb98f"
+          ],
+          "side": -1
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "reedbed",
+              3
+            ],
+            [
+              "neem",
+              2
+            ],
+            [
+              "acacia",
+              1
+            ]
+          ],
+          "n": 3,
+          "x": [
+            8,
+            20
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "donkeycart",
+              2
+            ],
+            [
+              "matscreen",
+              1
+            ],
+            [
+              "jerrycans",
+              1
+            ]
+          ],
+          "n": 2,
+          "side": -1
+        }
+      ]
+    },
+    "borno.neem-avenue": {
+      "label": "NEEM AVENUE",
+      "ground": "#c9b38c",
+      "water": null,
+      "facade": "sand-clay",
+      "shops": "borno",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "kanuri-compound",
+              4
+            ],
+            [
+              "veranda-range",
+              1
+            ]
+          ],
+          "floors": [
+            1,
+            2
+          ],
+          "setback": 12.5,
+          "spacing": 2.5,
+          "palette": [
+            "#e6dcc4",
+            "#d3bf98",
+            "#ddd0b0",
+            "#cdb98f"
+          ]
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "neem",
+              5
+            ],
+            [
+              "acacia",
+              1
+            ]
+          ],
+          "n": 4,
+          "x": [
+            6.5,
+            9
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "waterbags",
+              2
+            ],
+            [
+              "caprack",
+              1
+            ],
+            [
+              "kekerank",
+              1
+            ]
+          ],
+          "n": 2
+        }
+      ]
+    },
+    "borno.firgi": {
+      "label": "FIRGI FARM EDGE",
+      "ground": "#c2b387",
+      "water": null,
+      "facade": "sand-clay",
+      "shops": "borno",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "crops",
+          "kind": "masakwa",
+          "x": [
+            13,
+            34
+          ],
+          "side": -1
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "kanuri-compound",
+              2
+            ],
+            [
+              "thatch-hut",
+              1
+            ]
+          ],
+          "floors": [
+            1,
+            1
+          ],
+          "setback": 12,
+          "spacing": 4,
+          "palette": [
+            "#e6dcc4",
+            "#d3bf98",
+            "#ddd0b0",
+            "#cdb98f"
+          ],
+          "side": 1
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "acacia",
+              3
+            ],
+            [
+              "scrub",
+              3
+            ],
+            [
+              "neem",
+              2
+            ]
+          ],
+          "n": 3,
+          "x": [
+            8,
+            30
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "donkeycart",
+              2
+            ],
+            [
+              "sacks",
+              2
+            ],
+            [
+              "jerrycans",
+              1
+            ]
+          ],
+          "n": 2
+        }
+      ]
+    },
+    "borno.centre": {
+      "label": "CITY CENTRE",
+      "ground": "#c9b38c",
+      "water": null,
+      "facade": "sand-clay",
+      "shops": "borno",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "lockup-row",
+              3
+            ],
+            [
+              "flatroof-shopfront",
+              3
+            ],
+            [
+              "kanuri-compound",
+              2
+            ]
+          ],
+          "floors": [
+            2,
+            3
+          ],
+          "setback": 11,
+          "spacing": 1.2,
+          "palette": [
+            "#e6dcc4",
+            "#d3bf98",
+            "#ddd0b0",
+            "#cdb98f",
+            "#bdb8aa"
+          ]
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "neem",
+              3
+            ],
+            [
+              "acacia",
+              1
+            ]
+          ],
+          "n": 2,
+          "x": [
+            7.5,
+            10
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "kekerank",
+              2
+            ],
+            [
+              "waterbags",
+              1
+            ],
+            [
+              "caprack",
+              1
+            ]
+          ],
+          "n": 2
+        }
+      ]
+    },
+    "katsina.kasuwa": {
+      "label": "KASUWA MARKET QUARTER",
+      "ground": "#ab7f66",
+      "water": null,
+      "facade": "relief-render",
+      "shops": "katsina",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "relief-compound",
+              5
+            ],
+            [
+              "flatroof-shopfront",
+              3
+            ],
+            [
+              "market-shed",
+              1
+            ]
+          ],
+          "floors": [
+            1,
+            2
+          ],
+          "setback": 10.5,
+          "spacing": 0.8,
+          "palette": [
+            "#efe6d3",
+            "#d9b5a0",
+            "#b0694e",
+            "#d8cdb9"
+          ]
+        },
+        {
+          "op": "bazaar",
+          "density": 1.0,
+          "palette": [
+            "#e3d8c0",
+            "#c9967f",
+            "#5b6b73",
+            "#d6bd7a",
+            "#bdb8aa"
+          ]
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "faidherbia",
+              2
+            ],
+            [
+              "neem",
+              2
+            ]
+          ],
+          "n": 2,
+          "x": [
+            8,
+            13
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "sacks",
+              2
+            ],
+            [
+              "barrow",
+              2
+            ],
+            [
+              "kekecream",
+              1
+            ],
+            [
+              "watertub",
+              1
+            ]
+          ],
+          "n": 3
+        }
+      ]
+    },
+    "katsina.wall": {
+      "label": "OLD WALL QUARTER",
+      "ground": "#ab7f66",
+      "water": null,
+      "facade": "relief-render",
+      "shops": "katsina",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "relief-compound",
+              4
+            ],
+            [
+              "zinc-bungalow",
+              2
+            ],
+            [
+              "mudbrick-compound",
+              1
+            ]
+          ],
+          "floors": [
+            1,
+            2
+          ],
+          "setback": 11.5,
+          "spacing": 2,
+          "palette": [
+            "#efe6d3",
+            "#d9b5a0",
+            "#b0694e",
+            "#d8cdb9"
+          ]
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "neem",
+              3
+            ],
+            [
+              "faidherbia",
+              2
+            ]
+          ],
+          "n": 3,
+          "x": [
+            8,
+            15
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "barrow",
+              2
+            ],
+            [
+              "watertub",
+              1
+            ],
+            [
+              "sacks",
+              1
+            ]
+          ],
+          "n": 2
+        }
+      ]
+    },
+    "katsina.college": {
+      "label": "COLLEGE QUARTER",
+      "ground": "#b8896c",
+      "water": null,
+      "facade": "relief-render",
+      "shops": "katsina",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "redbrick-hall",
+              2
+            ],
+            [
+              "relief-compound",
+              2
+            ]
+          ],
+          "floors": [
+            1,
+            1
+          ],
+          "setback": 13,
+          "spacing": 6,
+          "palette": [
+            "#efe6d3",
+            "#d9b5a0",
+            "#b0694e",
+            "#d8cdb9"
+          ],
+          "side": -1
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "neem",
+              4
+            ],
+            [
+              "faidherbia",
+              1
+            ]
+          ],
+          "n": 4,
+          "x": [
+            8,
+            16
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "watertub",
+              1
+            ],
+            [
+              "kekecream",
+              1
+            ]
+          ],
+          "n": 2
+        }
+      ]
+    },
+    "katsina.gra": {
+      "label": "GRA AND THE INTERCHANGE",
+      "ground": "#ab7f66",
+      "water": null,
+      "facade": "relief-render",
+      "shops": "katsina",
+      "kerb": "none",
+      "median": true,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "tiled-villa",
+              3
+            ],
+            [
+              "plaza-block",
+              3
+            ],
+            [
+              "colonial-bungalow",
+              1
+            ]
+          ],
+          "floors": [
+            1,
+            3
+          ],
+          "setback": 13,
+          "spacing": 2,
+          "palette": [
+            "#efe6d3",
+            "#d9b5a0",
+            "#b0694e",
+            "#d8cdb9"
+          ]
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "datepalm",
+              3
+            ],
+            [
+              "neem",
+              2
+            ]
+          ],
+          "n": 3,
+          "x": [
+            8,
+            13
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "kekecream",
+              2
+            ],
+            [
+              "watertub",
+              1
+            ]
+          ],
+          "n": 2
+        }
+      ]
+    },
+    "katsina.ajiwa-road": {
+      "label": "AJIWA ROAD",
+      "ground": "#b79a7a",
+      "water": null,
+      "facade": "relief-render",
+      "shops": "katsina",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "waterEdge",
+          "x": [
+            34,
+            150
+          ],
+          "boats": 0,
+          "color": "#7e9490",
+          "side": 1
+        },
+        {
+          "op": "crops",
+          "kind": "irrigation",
+          "x": [
+            13,
+            28
+          ],
+          "side": -1
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "relief-compound",
+              2
+            ],
+            [
+              "mudbrick-compound",
+              1
+            ]
+          ],
+          "floors": [
+            1,
+            1
+          ],
+          "setback": 14,
+          "spacing": 5,
+          "palette": [
+            "#efe6d3",
+            "#d9b5a0",
+            "#b0694e",
+            "#d8cdb9"
+          ],
+          "side": -1
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "faidherbia",
+              4
+            ],
+            [
+              "neem",
+              1
+            ],
+            [
+              "scrub",
+              2
+            ]
+          ],
+          "n": 4,
+          "x": [
+            8,
+            30
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "sacks",
+              2
+            ],
+            [
+              "watertub",
+              1
+            ]
+          ],
+          "n": 2,
+          "side": -1
+        }
+      ]
+    },
+    "katsina.industrial": {
+      "label": "INDUSTRIAL EDGE AND RING ROAD",
+      "ground": "#ab7f66",
+      "water": null,
+      "facade": "relief-render",
+      "shops": "katsina",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "factory-shed",
+              3
+            ],
+            [
+              "works-shed",
+              2
+            ],
+            [
+              "flatroof-shopfront",
+              1
+            ]
+          ],
+          "floors": [
+            1,
+            2
+          ],
+          "setback": 12,
+          "spacing": 3,
+          "palette": [
+            "#efe6d3",
+            "#d9b5a0",
+            "#b0694e",
+            "#d8cdb9"
+          ]
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "neem",
+              2
+            ],
+            [
+              "scrub",
+              3
+            ]
+          ],
+          "n": 3,
+          "x": [
+            8,
+            16
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "sacks",
+              1
+            ],
+            [
+              "tyres",
+              2
+            ],
+            [
+              "barrow",
+              1
+            ]
+          ],
+          "n": 2
+        }
+      ]
+    },
+    "katsina.farm": {
+      "label": "FARM BELT",
+      "ground": "#b79a7a",
+      "water": null,
+      "facade": "relief-render",
+      "shops": "katsina",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "crops",
+          "kind": "millet",
+          "x": [
+            13,
+            34
+          ],
+          "side": -1
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "mudbrick-compound",
+              2
+            ],
+            [
+              "relief-compound",
+              1
+            ]
+          ],
+          "floors": [
+            1,
+            1
+          ],
+          "setback": 12,
+          "spacing": 4,
+          "palette": [
+            "#efe6d3",
+            "#d9b5a0",
+            "#b0694e",
+            "#d8cdb9"
+          ],
+          "side": 1
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "baobab",
+              1
+            ],
+            [
+              "faidherbia",
+              3
+            ],
+            [
+              "scrub",
+              3
+            ]
+          ],
+          "n": 4,
+          "x": [
+            8,
+            32
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "barrow",
+              2
+            ],
+            [
+              "sacks",
+              1
+            ]
+          ],
+          "n": 2
+        }
+      ]
+    },
+    "katsina.centre": {
+      "label": "CITY CENTRE",
+      "ground": "#ab7f66",
+      "water": null,
+      "facade": "relief-render",
+      "shops": "katsina",
+      "kerb": "none",
+      "median": true,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "plaza-block",
+              4
+            ],
+            [
+              "shophouse",
+              3
+            ],
+            [
+              "relief-compound",
+              1
+            ]
+          ],
+          "floors": [
+            3,
+            5
+          ],
+          "setback": 12.5,
+          "spacing": 1.2,
+          "palette": [
+            "#efe6d3",
+            "#d9b5a0",
+            "#b0694e",
+            "#d8cdb9"
+          ]
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "datepalm",
+              3
+            ],
+            [
+              "neem",
+              1
+            ]
+          ],
+          "n": 3,
+          "x": [
+            8.6,
+            11
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "kekecream",
+              2
+            ],
+            [
+              "watertub",
+              1
+            ]
+          ],
+          "n": 2
+        }
+      ]
+    },
+    "sokoto.kasuwa": {
+      "label": "GRAIN MARKET QUARTER",
+      "ground": "#c79b63",
+      "water": null,
+      "facade": "sokoto-render",
+      "shops": "sokoto",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "flatroof-shopfront",
+              3
+            ],
+            [
+              "relief-compound",
+              3
+            ],
+            [
+              "market-shed",
+              1
+            ]
+          ],
+          "floors": [
+            1,
+            2
+          ],
+          "setback": 10.5,
+          "spacing": 0.8,
+          "palette": [
+            "#eee0c6",
+            "#dcc79f",
+            "#c9ad84",
+            "#d8cdb9"
+          ]
+        },
+        {
+          "op": "bazaar",
+          "density": 1.0,
+          "palette": [
+            "#e3d8c0",
+            "#c08a52",
+            "#5b6b73",
+            "#d6bd7a",
+            "#bdb8aa"
+          ]
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "neem",
+              2
+            ],
+            [
+              "datepalm",
+              2
+            ]
+          ],
+          "n": 2,
+          "x": [
+            8,
+            13
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "sacks",
+              2
+            ],
+            [
+              "okada",
+              2
+            ],
+            [
+              "barrow",
+              1
+            ],
+            [
+              "watertub",
+              1
+            ]
+          ],
+          "n": 3
+        }
+      ]
+    },
+    "sokoto.leather-road": {
+      "label": "LEATHER QUARTER",
+      "ground": "#c9a06a",
+      "water": null,
+      "facade": "sokoto-render",
+      "shops": "sokoto",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "relief-compound",
+              3
+            ],
+            [
+              "mudbrick-compound",
+              1
+            ],
+            [
+              "flatroof-shopfront",
+              1
+            ]
+          ],
+          "floors": [
+            1,
+            2
+          ],
+          "setback": 11,
+          "spacing": 1.5,
+          "palette": [
+            "#eee0c6",
+            "#dcc79f",
+            "#c9ad84",
+            "#d8cdb9"
+          ]
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "neem",
+              2
+            ],
+            [
+              "datepalm",
+              2
+            ]
+          ],
+          "n": 3,
+          "x": [
+            8,
+            14
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "caprack",
+              1
+            ],
+            [
+              "clothbolts",
+              1
+            ],
+            [
+              "matscreen",
+              1
+            ],
+            [
+              "okada",
+              1
+            ]
+          ],
+          "n": 3
+        }
+      ]
+    },
+    "sokoto.river": {
+      "label": "RIVER ROAD",
+      "ground": "#c9a06a",
+      "water": null,
+      "facade": "sokoto-render",
+      "shops": "sokoto",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "waterEdge",
+          "x": [
+            34,
+            150
+          ],
+          "boats": 0,
+          "color": "#8fa8a6",
+          "side": 1
+        },
+        {
+          "op": "crops",
+          "kind": "irrigation",
+          "x": [
+            13,
+            28
+          ],
+          "side": -1
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "relief-compound",
+              2
+            ],
+            [
+              "mudbrick-compound",
+              1
+            ]
+          ],
+          "floors": [
+            1,
+            1
+          ],
+          "setback": 14,
+          "spacing": 5,
+          "palette": [
+            "#eee0c6",
+            "#dcc79f",
+            "#c9ad84",
+            "#d8cdb9"
+          ],
+          "side": -1
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "datepalm",
+              3
+            ],
+            [
+              "neem",
+              1
+            ],
+            [
+              "scrub",
+              2
+            ]
+          ],
+          "n": 4,
+          "x": [
+            8,
+            30
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "sacks",
+              2
+            ],
+            [
+              "watertub",
+              1
+            ]
+          ],
+          "n": 2,
+          "side": -1
+        }
+      ]
+    },
+    "sokoto.gate": {
+      "label": "GATE QUARTER",
+      "ground": "#c79b63",
+      "water": null,
+      "facade": "sokoto-render",
+      "shops": "sokoto",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "relief-compound",
+              3
+            ],
+            [
+              "mudbrick-compound",
+              2
+            ],
+            [
+              "shophouse",
+              1
+            ]
+          ],
+          "floors": [
+            1,
+            2
+          ],
+          "setback": 12,
+          "spacing": 2,
+          "palette": [
+            "#eee0c6",
+            "#dcc79f",
+            "#c9ad84",
+            "#d8cdb9"
+          ]
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "datepalm",
+              3
+            ],
+            [
+              "neem",
+              2
+            ]
+          ],
+          "n": 3,
+          "x": [
+            8,
+            13
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "okada",
+              2
+            ],
+            [
+              "watertub",
+              1
+            ]
+          ],
+          "n": 2
+        }
+      ]
+    },
+    "sokoto.stadium-road": {
+      "label": "STADIUM ROAD",
+      "ground": "#c79b63",
+      "water": null,
+      "facade": "sokoto-render",
+      "shops": "sokoto",
+      "kerb": "none",
+      "median": true,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "plaza-block",
+              2
+            ],
+            [
+              "shophouse",
+              2
+            ],
+            [
+              "relief-compound",
+              1
+            ]
+          ],
+          "floors": [
+            2,
+            3
+          ],
+          "setback": 12.5,
+          "spacing": 2,
+          "palette": [
+            "#eee0c6",
+            "#dcc79f",
+            "#c9ad84",
+            "#d8cdb9"
+          ]
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "datepalm",
+              3
+            ],
+            [
+              "neem",
+              2
+            ]
+          ],
+          "n": 3,
+          "x": [
+            8,
+            13
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "okada",
+              2
+            ],
+            [
+              "watertub",
+              1
+            ]
+          ],
+          "n": 2
+        }
+      ]
+    },
+    "sokoto.plots": {
+      "label": "RIVER PLOTS",
+      "ground": "#c9a06a",
+      "water": null,
+      "facade": "sokoto-render",
+      "shops": "sokoto",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "crops",
+          "kind": "irrigation",
+          "x": [
+            13,
+            34
+          ],
+          "side": -1
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "mudbrick-compound",
+              2
+            ],
+            [
+              "relief-compound",
+              1
+            ]
+          ],
+          "floors": [
+            1,
+            1
+          ],
+          "setback": 12,
+          "spacing": 4,
+          "palette": [
+            "#eee0c6",
+            "#dcc79f",
+            "#c9ad84",
+            "#d8cdb9"
+          ],
+          "side": 1
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "datepalm",
+              3
+            ],
+            [
+              "faidherbia",
+              2
+            ],
+            [
+              "scrub",
+              3
+            ]
+          ],
+          "n": 5,
+          "x": [
+            8,
+            32
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "donkeycart",
+              1
+            ],
+            [
+              "sacks",
+              1
+            ]
+          ],
+          "n": 2
+        }
+      ]
+    },
+    "sokoto.quarter": {
+      "label": "OLD QUARTER",
+      "ground": "#c79b63",
+      "water": null,
+      "facade": "sokoto-render",
+      "shops": "sokoto",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "mudbrick-compound",
+              3
+            ],
+            [
+              "relief-compound",
+              3
+            ],
+            [
+              "flatroof-shopfront",
+              1
+            ]
+          ],
+          "floors": [
+            1,
+            2
+          ],
+          "setback": 9.5,
+          "spacing": 1,
+          "palette": [
+            "#eee0c6",
+            "#dcc79f",
+            "#c9ad84",
+            "#d8cdb9"
+          ]
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "neem",
+              3
+            ],
+            [
+              "datepalm",
+              1
+            ]
+          ],
+          "n": 3,
+          "x": [
+            8,
+            13
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "pots",
+              1
+            ],
+            [
+              "watertub",
+              1
+            ],
+            [
+              "okada",
+              1
+            ],
+            [
+              "sacks",
+              1
+            ]
+          ],
+          "n": 3
+        }
+      ]
+    },
+    "sokoto.centre": {
+      "label": "CITY CENTRE",
+      "ground": "#c79b63",
+      "water": null,
+      "facade": "sokoto-render",
+      "shops": "sokoto",
+      "kerb": "none",
+      "median": true,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "plaza-block",
+              4
+            ],
+            [
+              "shophouse",
+              3
+            ],
+            [
+              "relief-compound",
+              1
+            ]
+          ],
+          "floors": [
+            3,
+            5
+          ],
+          "setback": 12.5,
+          "spacing": 1.2,
+          "palette": [
+            "#eee0c6",
+            "#dcc79f",
+            "#c9ad84",
+            "#d8cdb9"
+          ]
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "datepalm",
+              3
+            ],
+            [
+              "neem",
+              1
+            ]
+          ],
+          "n": 3,
+          "x": [
+            8.6,
+            11
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "okada",
+              2
+            ],
+            [
+              "watertub",
+              1
+            ]
+          ],
+          "n": 2
+        }
+      ]
+    },
+    "jigawa.market": {
+      "label": "MARKET QUARTER",
+      "ground": null,
+      "water": null,
+      "facade": "jigawa-render",
+      "shops": "jigawa",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "shophouse",
+              3
+            ],
+            [
+              "flatroof-shopfront",
+              2
+            ],
+            [
+              "market-shed",
+              2
+            ]
+          ],
+          "floors": [
+            1,
+            2
+          ],
+          "setback": 10.5,
+          "spacing": 0.8,
+          "palette": [
+            "#ecdfc4",
+            "#d8c08c",
+            "#c9ab7a",
+            "#d8cdb9"
+          ]
+        },
+        {
+          "op": "bazaar",
+          "density": 1.0,
+          "palette": [
+            "#c98f3a",
+            "#f4f1ea",
+            "#2f3a66",
+            "#a8553b",
+            "#8c5a2b"
+          ]
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "datepalm",
+              2
+            ],
+            [
+              "neem",
+              2
+            ]
+          ],
+          "n": 2,
+          "x": [
+            8,
+            13
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "sacks",
+              2
+            ],
+            [
+              "produce",
+              1
+            ],
+            [
+              "keke",
+              2
+            ],
+            [
+              "handcart",
+              1
+            ]
+          ],
+          "n": 3
+        }
+      ]
+    },
+    "jigawa.rock-road": {
+      "label": "ROCK ROAD",
+      "ground": "#b09468",
+      "water": null,
+      "facade": "jigawa-render",
+      "shops": "jigawa",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "wall",
+          "kind": "boulder-wall",
+          "x": [
+            10.4,
+            10.8
+          ],
+          "side": -1
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "boulder-house",
+              1
+            ],
+            [
+              "mudbrick-compound",
+              2
+            ],
+            [
+              "sandcrete-hip",
+              1
+            ]
+          ],
+          "floors": [
+            1,
+            1
+          ],
+          "setback": 13,
+          "spacing": 4,
+          "palette": [
+            "#ecdfc4",
+            "#d8c08c",
+            "#c9ab7a",
+            "#d8cdb9"
+          ],
+          "side": -1
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "granitedome",
+              1
+            ],
+            [
+              "boulder",
+              2
+            ],
+            [
+              "scrub",
+              3
+            ],
+            [
+              "datepalm",
+              2
+            ]
+          ],
+          "n": 5,
+          "x": [
+            10,
+            34
+          ],
+          "side": 1
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "keke",
+              1
+            ],
+            [
+              "sacks",
+              1
+            ]
+          ],
+          "n": 2,
+          "side": -1
+        }
+      ]
+    },
+    "jigawa.paddy-road": {
+      "label": "PADDY ROAD",
+      "ground": "#a89a5c",
+      "water": null,
+      "facade": "jigawa-render",
+      "shops": "jigawa",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "crops",
+          "kind": "rice",
+          "x": [
+            13,
+            34
+          ],
+          "side": 1
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "mudbrick-compound",
+              2
+            ],
+            [
+              "sandcrete-hip",
+              1
+            ]
+          ],
+          "floors": [
+            1,
+            1
+          ],
+          "setback": 13,
+          "spacing": 5,
+          "palette": [
+            "#ecdfc4",
+            "#d8c08c",
+            "#c9ab7a",
+            "#d8cdb9"
+          ],
+          "side": -1
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "datepalm",
+              2
+            ],
+            [
+              "reedbed",
+              2
+            ],
+            [
+              "acacia",
+              1
+            ]
+          ],
+          "n": 4,
+          "x": [
+            8,
+            30
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "handcart",
+              1
+            ],
+            [
+              "sacks",
+              1
+            ]
+          ],
+          "n": 2,
+          "side": -1
+        }
+      ]
+    },
+    "jigawa.gate-road": {
+      "label": "GATE ROAD",
+      "ground": null,
+      "water": null,
+      "facade": "jigawa-render",
+      "shops": "jigawa",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "relief-compound",
+              2
+            ],
+            [
+              "mudbrick-compound",
+              2
+            ],
+            [
+              "shophouse",
+              1
+            ]
+          ],
+          "floors": [
+            1,
+            2
+          ],
+          "setback": 12,
+          "spacing": 2,
+          "palette": [
+            "#ecdfc4",
+            "#d8c08c",
+            "#c9ab7a",
+            "#d8cdb9"
+          ]
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "datepalm",
+              3
+            ],
+            [
+              "neem",
+              2
+            ]
+          ],
+          "n": 3,
+          "x": [
+            8,
+            13
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "keke",
+              2
+            ],
+            [
+              "watertub",
+              1
+            ]
+          ],
+          "n": 2
+        }
+      ]
+    },
+    "jigawa.stadium-road": {
+      "label": "STADIUM ROAD",
+      "ground": null,
+      "water": null,
+      "facade": "jigawa-render",
+      "shops": "jigawa",
+      "kerb": "none",
+      "median": true,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "plaza-block",
+              2
+            ],
+            [
+              "shophouse",
+              2
+            ],
+            [
+              "sandcrete-hip",
+              1
+            ]
+          ],
+          "floors": [
+            2,
+            3
+          ],
+          "setback": 12.5,
+          "spacing": 2,
+          "palette": [
+            "#ecdfc4",
+            "#d8c08c",
+            "#c9ab7a",
+            "#d8cdb9"
+          ]
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "datepalm",
+              2
+            ],
+            [
+              "neem",
+              1
+            ]
+          ],
+          "n": 3,
+          "x": [
+            8,
+            13
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "keke",
+              2
+            ],
+            [
+              "sachets",
+              1
+            ]
+          ],
+          "n": 2
+        }
+      ]
+    },
+    "jigawa.date-belt": {
+      "label": "DATE BELT",
+      "ground": "#b4a064",
+      "water": null,
+      "facade": "jigawa-render",
+      "shops": "jigawa",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "crops",
+          "kind": "millet",
+          "x": [
+            13,
+            34
+          ],
+          "side": -1
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "mudbrick-compound",
+              2
+            ],
+            [
+              "flatroof-shopfront",
+              1
+            ]
+          ],
+          "floors": [
+            1,
+            1
+          ],
+          "setback": 12,
+          "spacing": 4,
+          "palette": [
+            "#ecdfc4",
+            "#d8c08c",
+            "#c9ab7a",
+            "#d8cdb9"
+          ],
+          "side": 1
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "datepalm",
+              4
+            ],
+            [
+              "neem",
+              2
+            ],
+            [
+              "faidherbia",
+              1
+            ],
+            [
+              "scrub",
+              1
+            ]
+          ],
+          "n": 6,
+          "x": [
+            8,
+            32
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "sacks",
+              1
+            ],
+            [
+              "handcart",
+              1
+            ]
+          ],
+          "n": 2
+        }
+      ]
+    },
+    "jigawa.farm-lane": {
+      "label": "FARM LANE",
+      "ground": null,
+      "water": null,
+      "facade": "jigawa-render",
+      "shops": "jigawa",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "mudbrick-compound",
+              2
+            ],
+            [
+              "sandcrete-hip",
+              2
+            ],
+            [
+              "flatroof-shopfront",
+              1
+            ]
+          ],
+          "floors": [
+            1,
+            2
+          ],
+          "setback": 11.5,
+          "spacing": 1.2,
+          "palette": [
+            "#ecdfc4",
+            "#d8c08c",
+            "#c9ab7a",
+            "#d8cdb9"
+          ]
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "neem",
+              2
+            ],
+            [
+              "datepalm",
+              1
+            ],
+            [
+              "acacia",
+              1
+            ]
+          ],
+          "n": 3,
+          "x": [
+            8,
+            13
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "keke",
+              2
+            ],
+            [
+              "teastall",
+              1
+            ],
+            [
+              "sachets",
+              1
+            ]
+          ],
+          "n": 3
+        }
+      ]
+    },
+    "jigawa.plaza-street": {
+      "label": "PLAZA STREET",
+      "ground": null,
+      "water": null,
+      "facade": "jigawa-render",
+      "shops": "jigawa",
+      "kerb": "none",
+      "median": true,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "plaza-block",
+              4
+            ],
+            [
+              "shophouse",
+              3
+            ],
+            [
+              "tiled-villa",
+              1
+            ]
+          ],
+          "floors": [
+            3,
+            5
+          ],
+          "setback": 12.5,
+          "spacing": 1.2,
+          "palette": [
+            "#ecdfc4",
+            "#d8c08c",
+            "#c9ab7a",
+            "#d8cdb9"
+          ]
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "datepalm",
+              2
+            ],
+            [
+              "neem",
+              1
+            ]
+          ],
+          "n": 3,
+          "x": [
+            8.6,
+            11
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "keke",
+              2
+            ],
+            [
+              "sachets",
+              1
+            ]
+          ],
+          "n": 2
+        }
+      ]
+    }
+  },
+  "roads": {
+    "sahel-dust": {
+      "texture": "sahel-dust",
+      "shoulder": "#b98a5c"
+    },
+    "sahel-sand": {
+      "texture": "sahel-sand",
+      "shoulder": "#cbb68f"
+    },
+    "katsina-rose": {
+      "texture": "katsina-rose",
+      "shoulder": "#ab7f66"
+    },
+    "sokoto-pale": {
+      "texture": "sokoto-pale",
+      "shoulder": "#d3b98f"
+    },
+    "jigawa-sand": {
+      "texture": "jigawa-sand",
+      "shoulder": "#c9b080"
+    }
+  },
+  "dress": {
+    "hausa-north": {
+      "men": {
+        "tops": [
+          "riga",
+          "riga",
+          "riga",
+          "kaftan",
+          "tee",
+          "ankara-shirt"
+        ],
+        "bottoms": [
+          "trousers",
+          "trousers",
+          "jeans"
+        ],
+        "headwear": [
+          "kube",
+          "kube",
+          "turban",
+          "none",
+          "cap"
+        ],
+        "footwear": [
+          "sandals",
+          "slippers",
+          "shoes"
+        ]
+      },
+      "women": {
+        "tops": [
+          "blouse",
+          "ankara-shirt",
+          "kaftan"
+        ],
+        "bottoms": [
+          "wrapper",
+          "wrapper",
+          "wrapper"
+        ],
+        "headwear": [
+          "hijab",
+          "hijab",
+          "hijab",
+          "headtie"
+        ],
+        "footwear": [
+          "sandals",
+          "slippers"
+        ]
+      },
+      "femalePermille": 380,
+      "colors": [
+        "#F4F1EA",
+        "#E9E2D0",
+        "#C9B58A",
+        "#8F6B4A",
+        "#5B7F6A",
+        "#2D3C73",
+        "#9A9A94",
+        "#B88A5E",
+        "#6B5A3A",
+        "#D9CDB0",
+        "#8EA4AE"
+      ],
+      "count": 14
+    },
+    "kanuri-north": {
+      "men": {
+        "tops": [
+          "riga",
+          "riga",
+          "kaftan",
+          "kaftan",
+          "tee",
+          "ankara-shirt"
+        ],
+        "bottoms": [
+          "trousers",
+          "trousers",
+          "jeans"
+        ],
+        "headwear": [
+          "turban",
+          "turban",
+          "cap",
+          "none",
+          "kube"
+        ],
+        "footwear": [
+          "sandals",
+          "slippers",
+          "shoes"
+        ]
+      },
+      "women": {
+        "tops": [
+          "blouse",
+          "kaftan",
+          "ankara-shirt"
+        ],
+        "bottoms": [
+          "wrapper",
+          "wrapper",
+          "wrapper"
+        ],
+        "headwear": [
+          "hijab",
+          "hijab",
+          "headtie",
+          "headtie"
+        ],
+        "footwear": [
+          "sandals",
+          "slippers"
+        ]
+      },
+      "femalePermille": 400,
+      "colors": [
+        "#F4F1EA",
+        "#E9E2D0",
+        "#D9CDB0",
+        "#C9B58A",
+        "#B58E62",
+        "#2F4560",
+        "#8EA4AE",
+        "#9A9A94",
+        "#6B5A3A",
+        "#E6DCC4"
+      ],
+      "count": 14
+    },
+    "hausa-katsina": {
+      "men": {
+        "tops": [
+          "riga",
+          "kaftan",
+          "kaftan",
+          "tee",
+          "kaftan"
+        ],
+        "bottoms": [
+          "trousers",
+          "trousers",
+          "jeans"
+        ],
+        "headwear": [
+          "kube",
+          "kube",
+          "turban",
+          "none"
+        ],
+        "footwear": [
+          "sandals",
+          "slippers",
+          "shoes"
+        ]
+      },
+      "women": {
+        "tops": [
+          "blouse",
+          "ankara-shirt",
+          "kaftan"
+        ],
+        "bottoms": [
+          "wrapper",
+          "wrapper",
+          "wrapper"
+        ],
+        "headwear": [
+          "hijab",
+          "hijab",
+          "headtie",
+          "headtie"
+        ],
+        "footwear": [
+          "sandals",
+          "slippers"
+        ]
+      },
+      "femalePermille": 380,
+      "colors": [
+        "#EFE6D3",
+        "#D8CDB9",
+        "#C9B58A",
+        "#C9967F",
+        "#7A4A5A",
+        "#5B6B73",
+        "#8C8458",
+        "#E9E2D0",
+        "#B0694E",
+        "#8EA4AE"
+      ],
+      "count": 14
+    },
+    "hausa-sokoto": {
+      "men": {
+        "tops": [
+          "riga",
+          "kaftan",
+          "kaftan",
+          "tee",
+          "kaftan"
+        ],
+        "bottoms": [
+          "trousers",
+          "trousers",
+          "jeans"
+        ],
+        "headwear": [
+          "kube",
+          "kube",
+          "turban",
+          "none"
+        ],
+        "footwear": [
+          "sandals",
+          "slippers",
+          "shoes"
+        ]
+      },
+      "women": {
+        "tops": [
+          "blouse",
+          "ankara-shirt",
+          "kaftan"
+        ],
+        "bottoms": [
+          "wrapper",
+          "wrapper",
+          "wrapper"
+        ],
+        "headwear": [
+          "hijab",
+          "hijab",
+          "headtie",
+          "headtie"
+        ],
+        "footwear": [
+          "sandals",
+          "slippers"
+        ]
+      },
+      "femalePermille": 380,
+      "colors": [
+        "#F1E7D0",
+        "#E6DCC4",
+        "#2F3F5A",
+        "#3A4048",
+        "#8A6A4A",
+        "#C9B58A",
+        "#5B6B73",
+        "#7A4A2B",
+        "#D9CDB0",
+        "#4F5E6B"
+      ],
+      "count": 14
+    },
+    "jigawa-city": {
+      "men": {
+        "tops": [
+          "riga",
+          "riga",
+          "kaftan",
+          "kaftan",
+          "tee"
+        ],
+        "bottoms": [
+          "trousers",
+          "trousers",
+          "jeans"
+        ],
+        "headwear": [
+          "kube",
+          "kube",
+          "turban",
+          "none"
+        ],
+        "footwear": [
+          "sandals",
+          "slippers",
+          "shoes"
+        ]
+      },
+      "women": {
+        "tops": [
+          "blouse",
+          "ankara-shirt",
+          "kaftan"
+        ],
+        "bottoms": [
+          "wrapper",
+          "wrapper",
+          "wrapper"
+        ],
+        "headwear": [
+          "hijab",
+          "hijab",
+          "hijab",
+          "headtie"
+        ],
+        "footwear": [
+          "sandals",
+          "slippers"
+        ]
+      },
+      "femalePermille": 400,
+      "colors": [
+        "#F4F1EA",
+        "#E9E2D0",
+        "#C9B58A",
+        "#8F6B4A",
+        "#2F3A66",
+        "#9A9A94",
+        "#B88A5E",
+        "#6B5A3A",
+        "#D9CDB0",
+        "#8C5A2B",
+        "#5B6B73",
+        "#A67C52"
+      ],
+      "count": 14
+    }
+  }
+}

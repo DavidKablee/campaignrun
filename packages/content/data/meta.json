@@ -64,7 +64,9 @@
     "followingPerDelivered": 1,
     "donation": 90,
     "dailyMission": 70,
-    "weeklyMission": 180
+    "weeklyMission": 180,
+    "streakBonusPermillePerStep": 50,
+    "streakBonusMaxSteps": 5
   },
   "missions": {
     "daily": [

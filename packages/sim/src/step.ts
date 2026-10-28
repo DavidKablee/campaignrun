@@ -3,6 +3,7 @@ import { Btn, NEUTRAL_HANDLING, NEUTRAL_ROAD, type RideHandling, type RoadProfil
 import { clamp, applyPermille } from './fixed';
 import { checkCollision, findOverlappingZone } from './collide';
 import { buildCourse } from './course';
+import { updateTraffic } from './traffic';
 import { applyMarketWeave, blastHorn } from './perks';
 
 export function initState(
@@ -240,6 +241,7 @@ export function step(state: SimState, input: number, config: SimConfig): void {
     zDelta = applyPermille(zDelta, 700);
   }
   state.z += zDelta;
+  updateTraffic(state, config);
 
   if (state.hopT > 0) state.hopT--;
   if (state.invulnTicks > 0) state.invulnTicks--;
@@ -262,6 +264,10 @@ export function step(state: SimState, input: number, config: SimConfig): void {
             state.upgrades.loadSpeedPermille,
         ),
       );
+      if (zone.stubborn) {
+        state.zoneNeeded = Math.floor((state.zoneNeeded * (1000 + config.chaos.stubbornExtraPermille)) / 1000);
+        state.events.push({ type: 'stubborn' });
+      }
       if (zone.zoneKind !== 'pickup') {
         state.beatTaps = 0;
         state.beatWindowTicks = config.bonuses.onBeatWindowTicks;
@@ -333,6 +339,12 @@ export function step(state: SimState, input: number, config: SimConfig): void {
       const add = clamp(amount, 0, free);
       state.carried += add;
       state.events.push({ type: 'pickup', payload: add });
+    } else if (hitEnt.isToll) {
+      // Pay up or pay with the load: a bad bargain, but not a dent.
+      state.carried -= applyPermille(state.carried, config.chaos.tollDropPermille);
+      state.speed = applyPermille(state.speed, config.chaos.tollSpeedPermille);
+      state.momentum = config.momentum.min;
+      state.events.push({ type: 'toll', payload: hitEnt.id });
     } else if (hitEnt.isRivalConvoy) {
       // C28: rivals are traffic, never a run-ending hazard — a small speed knock only.
       state.speed = applyPermille(state.speed, config.bonuses.rivalBumpSpeedPermille);
@@ -411,6 +423,10 @@ export function step(state: SimState, input: number, config: SimConfig): void {
     if (e.active && e.isIntegrityHazard) {
       state.integrity = Math.min(100, state.integrity + 8);
       state.events.push({ type: 'integritySuccess', payload: e.kind });
+    } else if (e.active && e.isToll) {
+      state.skillCrowd += config.chaos.tollDodgeCrowd;
+      state.displayCrowd += config.chaos.tollDodgeCrowd;
+      state.events.push({ type: 'tollDodged', payload: e.id });
     } else if (e.active && e.isRivalConvoy) {
       // C28: passed a rival without a bump — the "Draft & Overtake" bonus (spec §4.6).
       state.skillCrowd += config.bonuses.rivalOutpaceCrowd;

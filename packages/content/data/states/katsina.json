@@ -3,18 +3,116 @@
   "name": "Katsina",
   "zone": "NW",
   "biomeKit": "sahel-savanna",
-  "palette": { "sky": "#E8C48A", "fog": "#F3E2C5", "ground": "#A67C52", "accent": "#C45C26" },
+  "palette": {
+    "sky": "#CFDBE0",
+    "fog": "#EFE0CC",
+    "ground": "#AB7F66",
+    "accent": "#A0564A"
+  },
   "landmarks": [
-    { "name": "Katsina Central Market", "venueType": "market", "verified": false },
-    { "name": "Kofar Durbi Gate", "venueType": "landmark", "verified": false },
-    { "name": "Gobarau Minaret", "venueType": "landmark", "verified": false },
-    { "name": "Ajiwa Lakeside", "venueType": "waterfront", "verified": false },
-    { "name": "Katsina Township Stadium", "venueType": "stadium", "verified": false }
+    {
+      "name": "Grain Market",
+      "venueType": "market",
+      "verified": false
+    },
+    {
+      "name": "Old City Wall and Gate",
+      "venueType": "landmark",
+      "verified": false
+    },
+    {
+      "name": "Old Katsina College",
+      "venueType": "landmark",
+      "verified": false
+    },
+    {
+      "name": "GRA Flyover",
+      "venueType": "bridge",
+      "verified": false
+    },
+    {
+      "name": "Ajiwa Lakeside",
+      "venueType": "waterfront",
+      "verified": false
+    }
   ],
-  "scenery": ["mud-brick city walls", "durbar horse lines"],
-  "hazards": ["dust-plume", "cart-weave", "go-slow"],
-  "signatureRide": "okada",
-  "welcomeLines": ["Barka da zuwa Katsina!"],
+  "scenery": [
+    "flat sahel horizon",
+    "red clay and cream render"
+  ],
+  "hazards": [
+    "dust-plume",
+    "cart-weave",
+    "go-slow"
+  ],
+  "signatureRide": "keke",
+  "welcomeLines": [
+    "Barka da zuwa Katsina!"
+  ],
   "farewellLine": "Na gode, Katsina!",
-  "audioStem": "nw-kalangu"
+  "audioStem": "nw-kalangu",
+  "world": {
+    "library": "sahel-savanna",
+    "start": {
+      "district": "katsina.kasuwa",
+      "label": "Your street"
+    },
+    "route": [
+      "katsina.kasuwa",
+      "katsina.wall",
+      "katsina.college",
+      "katsina.gra",
+      "katsina.ajiwa-road",
+      "katsina.industrial",
+      "katsina.farm",
+      "katsina.centre"
+    ],
+    "finish": {
+      "district": "katsina.centre",
+      "label": "KATSINA · GRAND RALLY"
+    },
+    "road": "katsina-rose",
+    "dress": "hausa-katsina",
+    "billboards": [
+      "WELCOME TO KATSINA",
+      "GRAIN · BEANS",
+      "CAPS · CLOTH",
+      "PROVISIONS",
+      "WATER · TEA",
+      "RECHARGE CARDS",
+      "POS · AIRTIME",
+      "DATA 4G · BIG SAVER",
+      "TAILORING",
+      "PHARMACY"
+    ],
+    "skyline": "katsina-flat",
+    "ambient": "none",
+    "pieces": [
+      {
+        "landmark": 0,
+        "piece": "katsina.grain-market",
+        "side": -1
+      },
+      {
+        "landmark": 1,
+        "piece": "katsina.city-wall",
+        "side": -1
+      },
+      {
+        "landmark": 2,
+        "piece": "katsina.college",
+        "side": -1
+      },
+      {
+        "landmark": 3,
+        "piece": "katsina.interchange",
+        "side": -1
+      },
+      {
+        "landmark": 4,
+        "piece": "katsina.ajiwa",
+        "side": -1
+      }
+    ]
+  }
 }

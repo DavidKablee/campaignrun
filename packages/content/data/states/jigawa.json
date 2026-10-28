@@ -3,18 +3,116 @@
   "name": "Jigawa",
   "zone": "NW",
   "biomeKit": "sahel-savanna",
-  "palette": { "sky": "#E8C48A", "fog": "#F3E2C5", "ground": "#9E7B4F", "accent": "#C45C26" },
+  "palette": {
+    "sky": "#E8C48A",
+    "fog": "#F3E2C5",
+    "ground": "#9E7B4F",
+    "accent": "#8C5A2B"
+  },
   "landmarks": [
-    { "name": "Dutse Central Market", "venueType": "market", "verified": false },
-    { "name": "Birnin Kudu Rock Shelters", "venueType": "landmark", "verified": false },
-    { "name": "Hadejia Wetlands", "venueType": "waterfront", "verified": false },
-    { "name": "Kazaure Gate", "venueType": "square", "verified": false },
-    { "name": "Dutse Township Stadium", "venueType": "stadium", "verified": false }
+    {
+      "name": "Market",
+      "venueType": "market",
+      "verified": false
+    },
+    {
+      "name": "Rock Shelter",
+      "venueType": "landmark",
+      "verified": false
+    },
+    {
+      "name": "Wetland Paddies",
+      "venueType": "waterfront",
+      "verified": false
+    },
+    {
+      "name": "Town Gate",
+      "venueType": "square",
+      "verified": false
+    },
+    {
+      "name": "Township Stadium",
+      "venueType": "stadium",
+      "verified": false
+    }
   ],
-  "scenery": ["inselberg rocks", "wetland reed beds"],
-  "hazards": ["dust-plume", "cart-weave", "go-slow"],
+  "scenery": [
+    "granite domes",
+    "rice paddies"
+  ],
+  "hazards": [
+    "dust-plume",
+    "cart-weave",
+    "go-slow"
+  ],
   "signatureRide": "keke",
-  "welcomeLines": ["Barka da zuwa Jigawa!"],
+  "welcomeLines": [
+    "Barka da zuwa Jigawa!"
+  ],
   "farewellLine": "Na gode, Jigawa!",
-  "audioStem": "nw-kalangu"
+  "audioStem": "nw-kalangu",
+  "world": {
+    "library": "sahel-savanna",
+    "start": {
+      "district": "jigawa.market",
+      "label": "Your street"
+    },
+    "route": [
+      "jigawa.market",
+      "jigawa.rock-road",
+      "jigawa.paddy-road",
+      "jigawa.gate-road",
+      "jigawa.stadium-road",
+      "jigawa.date-belt",
+      "jigawa.farm-lane",
+      "jigawa.plaza-street"
+    ],
+    "finish": {
+      "district": "jigawa.plaza-street",
+      "label": "JIGAWA · GRAND RALLY"
+    },
+    "road": "jigawa-sand",
+    "dress": "jigawa-city",
+    "billboards": [
+      "WELCOME TO JIGAWA",
+      "RICE · GRAIN",
+      "DATES · SPICES",
+      "PURE WATER",
+      "PROVISIONS",
+      "RECHARGE CARDS",
+      "POS · AIRTIME",
+      "DATA 4G · BIG SAVER",
+      "TAILORING",
+      "COTTON · CLOTH"
+    ],
+    "skyline": "jigawa-inselbergs",
+    "ambient": "none",
+    "pieces": [
+      {
+        "landmark": 0,
+        "piece": "jigawa.market",
+        "side": -1
+      },
+      {
+        "landmark": 1,
+        "piece": "jigawa.rock-shelter",
+        "side": -1
+      },
+      {
+        "landmark": 2,
+        "piece": "jigawa.wetland-paddies",
+        "side": -1
+      },
+      {
+        "landmark": 3,
+        "piece": "jigawa.town-gate",
+        "side": -1
+      },
+      {
+        "landmark": 4,
+        "piece": "jigawa.stadium",
+        "side": -1
+      }
+    ]
+  }
 }

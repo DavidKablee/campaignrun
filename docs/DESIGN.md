@@ -30,3 +30,5 @@
 ## Models
 
 Procedural builders in `apps/game/src/render/models/`. Registry: `assetId → builder | glTF`. Swap assets without code changes.
+
+Road vehicles (danfo, keke, okada, car, lorry) are built in `apps/game/src/render/vehicles.ts`: one merged body per variant, one small pivoted mesh per axle so the wheels turn, lamp halos as additive quads. Models face -z; oncoming traffic is the same model with its root turned round. Anything that moves on the road is a sim entity (`packages/sim/src/traffic.ts`) — never decoration — so a player can read it as a threat.

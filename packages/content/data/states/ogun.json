@@ -3,18 +3,116 @@
   "name": "Ogun",
   "zone": "SW",
   "biomeKit": "rainforest",
-  "palette": { "sky": "#8CC5E2", "fog": "#DCEBDF", "ground": "#6B5B3E", "accent": "#D98324" },
+  "palette": {
+    "sky": "#B4C8D2",
+    "fog": "#E3E0D3",
+    "ground": "#9A8E7C",
+    "accent": "#2B3045"
+  },
   "landmarks": [
-    { "name": "Olumo Rock", "venueType": "landmark", "verified": false },
-    { "name": "Kuto Market", "venueType": "market", "verified": false },
-    { "name": "Ogun River Crossing", "venueType": "bridge", "verified": false },
-    { "name": "Itoku Adire Row", "venueType": "square", "verified": false },
-    { "name": "Abeokuta Sports Ground", "venueType": "stadium", "verified": false }
+    {
+      "name": "Kemta-Itoku Adire Market",
+      "venueType": "market",
+      "verified": false
+    },
+    {
+      "name": "Ogun River Bridges",
+      "venueType": "waterfront",
+      "verified": false
+    },
+    {
+      "name": "Interchange Park",
+      "venueType": "park",
+      "verified": false
+    },
+    {
+      "name": "Ibara Flyover and Footbridge",
+      "venueType": "bridge",
+      "verified": false
+    },
+    {
+      "name": "Township Stadium",
+      "venueType": "stadium",
+      "verified": false
+    }
   ],
-  "scenery": ["granite outcrops", "adire dye yards"],
-  "hazards": ["rocky-ridge", "okada-swarm", "go-slow"],
-  "signatureRide": "danfo",
-  "welcomeLines": ["Ẹ káàbọ̀ sí Ògùn!"],
-  "farewellLine": "Ẹ ṣeun, Ogun!",
-  "audioStem": "sw-fuji"
+  "scenery": [
+    "pale concrete corridor",
+    "grey granite domes"
+  ],
+  "hazards": [
+    "rocky-ridge",
+    "okada-swarm",
+    "go-slow"
+  ],
+  "signatureRide": "keke",
+  "welcomeLines": [
+    "Ẹ káàbọ̀ sí Ògùn!"
+  ],
+  "farewellLine": "Ẹ ṣeun, Ògùn!",
+  "audioStem": "sw-fuji",
+  "world": {
+    "library": "forest-hills",
+    "start": {
+      "district": "ogun.itoku",
+      "label": "Your street"
+    },
+    "route": [
+      "ogun.itoku",
+      "ogun.riverbank",
+      "ogun.gateway",
+      "ogun.ibara",
+      "ogun.ilaro",
+      "ogun.ofada",
+      "ogun.quarry",
+      "ogun.civic"
+    ],
+    "finish": {
+      "district": "ogun.civic",
+      "label": "OGUN · GRAND RALLY"
+    },
+    "road": "ogun-slab",
+    "dress": "yoruba-egba",
+    "billboards": [
+      "WELCOME TO OGUN",
+      "ADIRE · ASO OKE",
+      "CEMENT · BLOCKS",
+      "PURE WATER",
+      "PROVISIONS",
+      "RECHARGE CARDS",
+      "POS · AIRTIME",
+      "DATA 4G · BIG SAVER",
+      "BUKA · CHOP",
+      "KOLA · FRESH FRUITS"
+    ],
+    "skyline": "ogun-domes",
+    "ambient": "none",
+    "pieces": [
+      {
+        "landmark": 0,
+        "piece": "ogun.adire-market",
+        "side": -1
+      },
+      {
+        "landmark": 1,
+        "piece": "ogun.river-bridges",
+        "side": -1
+      },
+      {
+        "landmark": 2,
+        "piece": "ogun.interchange-park",
+        "side": -1
+      },
+      {
+        "landmark": 3,
+        "piece": "ogun.flyover",
+        "side": -1
+      },
+      {
+        "landmark": 4,
+        "piece": "ogun.stadium",
+        "side": -1
+      }
+    ]
+  }
 }

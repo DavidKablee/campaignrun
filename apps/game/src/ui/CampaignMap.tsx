@@ -3,6 +3,7 @@ import {
   boardTotals,
   campaignMap,
   campaignStandings,
+  candidateName,
   parties,
   partyById,
   partyForContender,
@@ -147,7 +148,7 @@ export function CampaignMap() {
 
   const heldOrder = parties
     .map((p) => ({ party: p, held: totals.held[p.id] ?? 0 }))
-    .sort((a, b) => b.held - a.held || a.party.name.localeCompare(b.party.name));
+    .sort((a, b) => b.held - a.held || candidateName(a.party).localeCompare(candidateName(b.party)));
 
   return (
     <div className="cr-screen cr-screen--map">
@@ -196,7 +197,7 @@ export function CampaignMap() {
                 key={party.id}
                 style={{ flexGrow: held, background: party.color }}
                 className={party.id === myParty?.id ? 'is-mine' : undefined}
-                title={`${party.name} · ${held} region${held === 1 ? '' : 's'}`}
+                title={`${candidateName(party)} · ${held} region${held === 1 ? '' : 's'}`}
               />
             ) : null,
           )}
@@ -211,7 +212,7 @@ export function CampaignMap() {
           {heldOrder.map(({ party, held }) => (
             <li key={party.id} className={party.id === myParty?.id ? 'is-mine' : undefined}>
               <i style={{ background: party.color }} />
-              <span>{party.tag}</span>
+              <span>{candidateName(party)}</span>
               <b>{held}</b>
             </li>
           ))}
@@ -236,6 +237,8 @@ export function CampaignMap() {
             const standing = standings.find((s) => s.stateId === r.id);
             const leader = standing?.leaderPartyId ? partyById(standing.leaderPartyId) : undefined;
             const fill = !standing?.open ? CLOSED_FILL : (leader?.color ?? CONTESTED_FILL);
+            const who = leader ? candidateName(leader) : 'too close to call';
+            const title = r.open ? `${r.name} · ${who}` : `${r.name} · ${formatUnlock(r.unlocksAt)}`;
             return (
               <button
                 key={r.id}
@@ -244,11 +247,7 @@ export function CampaignMap() {
                 style={{ ['--fill' as string]: fill }}
                 onClick={() => setFocusId(r.id)}
                 aria-pressed={focusId === r.id}
-                title={
-                  r.open
-                    ? `${r.name} · ${leader ? leader.name : 'too close to call'}`
-                    : `${r.name} · ${formatUnlock(r.unlocksAt)}`
-                }
+                title={title}
               >
                 {abbr(r.name)}
               </button>
@@ -265,7 +264,7 @@ export function CampaignMap() {
               <i />
               {focusLeader ? (
                 <span>
-                  <b>{focusLeader.name}</b> leads by {focusStanding?.margin}
+                  <b>{candidateName(focusLeader)}</b> leads by {focusStanding?.margin}
                 </span>
               ) : (
                 <span>Too close to call</span>
@@ -309,7 +308,7 @@ export function CampaignMap() {
                 return (
                   <li key={t.partyId} className={t.isPlayer ? 'is-mine' : undefined}>
                     <i style={{ background: p.color }} />
-                    <span>{p.name}</span>
+                    <span>{candidateName(p)}</span>
                     <b>{t.crowd}</b>
                   </li>
                 );
@@ -356,10 +355,10 @@ export function CampaignMap() {
         <span>
           {myParty ? (
             <>
-              Campaigning for <b style={{ color: myParty.color }}>{myParty.name}</b> — {myParty.platform}
+              Campaigning for <b style={{ color: myParty.color }}>{candidateName(myParty)}</b> — {myParty.platform}
             </>
           ) : (
-            'Pick a Contender to put your Party on the board.'
+            'Pick a Contender to put them on the board.'
           )}
         </span>
         <span className="cr-fineprint">
@@ -372,7 +371,7 @@ export function CampaignMap() {
             ? `${liveCount} ${liveCount === 1 ? 'region is' : 'regions are'} live from real play. `
             : ''}
           Regions below {liveFloor ?? 'the floor'} players show generated practice numbers, not collected ones — a
-          breakdown built from a handful of people would name them. Fictional parties. Game scores, not polls.
+          breakdown built from a handful of people would name them. Fictional Contenders. Game scores, not polls.
         </span>
       </footer>
     </div>

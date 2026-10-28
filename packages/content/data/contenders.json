@@ -56,55 +56,55 @@
   {
     "id": "sister-beacon",
     "status": "active",
-    "name": "Sister Beacon",
-    "archetype": "The Lamp-Bearer",
+    "name": "Oga Tikoko",
+    "archetype": "The Unbowed",
     "perk": { "id": "beacon-horn", "description": "Horn cone is doubled.", "cooldownSec": 12, "durationSec": 2 },
     "tradeoff": { "stat": "hornCooldown", "permille": 1100, "description": "Longer horn cooldown" },
     "palette": ["#F5C518", "#2EC4B6", "#F4EFE6"],
     "barks": [
-      "Light dey here!",
-      "Follow my lamp.",
-      "Dark road no fear us.",
-      "I go shine am for you.",
-      "Hold the lantern high.",
-      "Nobody waka alone."
+      "We no dey give up!",
+      "Down no be out!",
+      "Dem think say we don finish?",
+      "Tikoko no know how to stop.",
+      "One more time — we go pass!",
+      "We rise again."
     ],
-    "catchphrase": "Shine your eye, make we shine road."
+    "catchphrase": "You can knock us — we bounce back!"
   },
   {
     "id": "uncle-boombox",
     "status": "active",
-    "name": "Uncle Boombox",
-    "archetype": "The Party Starter",
+    "name": "Baba Teee",
+    "archetype": "The Main Man",
     "perk": { "id": "street-party", "description": "8 seconds of confetti that turns hazards into crowd.", "cooldownSec": 35, "durationSec": 8 },
     "tradeoff": { "stat": "perkCharge", "permille": 1150, "description": "Perk meter takes longer to charge" },
     "palette": ["#E85D04", "#C23FA0", "#FFE66D"],
     "barks": [
-      "Oya, dance enter!",
-      "The speaker dey work!",
-      "Make noise!",
-      "Sound check — we ready.",
-      "Bass dey shake road!",
-      "Party on wheels!"
+      "E don tey we dey wait for this!",
+      "Baba Teee don land, my people!",
+      "Make way, the main man dey move!",
+      "This road belong to us!",
+      "Who want make we party?",
+      "Load up, the main man say go!"
     ],
-    "catchphrase": "Turn the volume up!"
+    "catchphrase": "If I enter, everywhere shake!"
   },
   {
     "id": "madam-metronome",
     "status": "active",
-    "name": "Madam Metronome",
-    "archetype": "The Teacher",
+    "name": "Uncle Show",
+    "archetype": "The Activist",
     "perk": { "id": "steady-beat", "description": "World slows 30% for 6 seconds.", "cooldownSec": 30, "durationSec": 6 },
     "tradeoff": { "stat": "firstVenueMultiplier", "permille": 980, "description": "Lower multiplier at the first venue" },
     "palette": ["#7B5EA7", "#E9E2D0", "#161616"],
     "barks": [
-      "Eyes on the road, class.",
-      "Keep the beat.",
-      "No rush — rhythm.",
-      "Count am with me.",
-      "Steady pace wins.",
-      "Good! Next lesson."
+      "We no dey tire!",
+      "Every road na our road!",
+      "The people don speak!",
+      "Show them we serious!",
+      "We dey march — no stop us.",
+      "This na our moment!"
     ],
-    "catchphrase": "One, two, three: steady!"
+    "catchphrase": "The street don talk. Now we move."
   }
 ]

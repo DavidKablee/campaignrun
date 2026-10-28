@@ -6,8 +6,18 @@
  * why there is no token to store: there is nothing for this module to keep.
  */
 
+/**
+ * `VITE_API_URL` wins when set. In dev with it unset, the API is assumed to be on the same machine
+ * that served the page, so a phone loading the dev server over the LAN reaches the laptop's API
+ * instead of its own "localhost".
+ */
+function defaultApiBase(): string {
+  const host = typeof location !== 'undefined' && location.hostname ? location.hostname : 'localhost';
+  return `http://${host}:8787`;
+}
+
 export const API_BASE: string =
-  (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, '') ?? 'http://localhost:8787';
+  (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, '') ?? defaultApiBase();
 
 export class ApiError extends Error {
   constructor(

@@ -75,6 +75,17 @@ export class InputController {
     this.engine.reset();
   }
 
+  /**
+   * Drop everything in flight: fingers, queued one-shots, held keys. The tutorial and the
+   * pause card sit over the glass, so what is pressed behind them must not replay on resume.
+   */
+  reset() {
+    this.engine.reset();
+    this.queue = [];
+    this.spacer = false;
+    this.levelBits = 0;
+  }
+
   /** Respects the player's haptics setting — the old swipe buzz ignored it. */
   setHaptics(on: boolean) {
     this.haptics = on;
@@ -165,14 +176,21 @@ export class InputController {
     e.preventDefault();
   };
 
-  private isPad(target: EventTarget | null): boolean {
-    return !!(target as HTMLElement | null)?.closest?.('button, a, input, [data-control]');
+  /** 'ignore' for ordinary buttons; 'pad' for BEAT / PERK, which a swipe may start on; null for the glass. */
+  private touchTarget(target: EventTarget | null): 'ignore' | 'pad' | null {
+    const el = target as HTMLElement | null;
+    if (el?.closest?.('[data-control]')) return 'pad';
+    return el?.closest?.('button, a, input') ? 'ignore' : null;
   }
 
   private onPointerDown = (e: PointerEvent) => {
-    if (this.isPad(e.target)) return;
-    this.down(e.pointerId, e.clientX, e.clientY, e.timeStamp);
-    this.el?.setPointerCapture(e.pointerId);
+    const hit = this.touchTarget(e.target);
+    if (hit === 'ignore') return;
+    if (this.el) this.engine.setViewport(this.el.clientWidth, this.el.clientHeight);
+    // A swipe that starts under the right thumb on a pad still counts. No capture there: the pad
+    // keeps its own pointer stream, and the move/up events bubble up to us either way.
+    this.down(e.pointerId, e.clientX, e.clientY, e.timeStamp, hit === 'pad');
+    if (hit === null) this.el?.setPointerCapture(e.pointerId);
   };
 
   private onPointerMove = (e: PointerEvent) => {
@@ -189,8 +207,8 @@ export class InputController {
 
   // The four below are what the pointer handlers call. They are public so the
   // whole chain — glass to input bits — can be driven by a test without a DOM.
-  down(id: number, x: number, y: number, now: number) {
-    this.engine.down(id, x, y, now);
+  down(id: number, x: number, y: number, now: number, pad = false) {
+    this.engine.down(id, x, y, now, pad);
   }
 
   move(id: number, x: number, y: number, now: number) {

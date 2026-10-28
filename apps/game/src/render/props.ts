@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { outfits } from '@cr/content';
+import { outfits, type ResolvedDress } from '@cr/content';
 import { bakeCharacter, randomPerson, type Pose } from './character';
 import { GeoBuilder, mulberry, shade } from './geo';
 import { flatMat, glowMat, unlitMat, vcMat } from './materials';
@@ -21,10 +21,12 @@ const planeGeo = new THREE.PlaneGeometry(1, 1);
 
 // ---------------------------------------------------------------- people
 const PEOPLE_N = 24;
-export function personGeo(seed: number, pose: Pose): THREE.BufferGeometry {
-  const s = ((seed % PEOPLE_N) + PEOPLE_N) % PEOPLE_N;
-  return cached(`person:${s}:${pose}`, () => {
-    const p = randomPerson(s, outfits.options);
+export function personGeo(seed: number, pose: Pose, dress?: ResolvedDress | null): THREE.BufferGeometry {
+  const n = dress ? dress.count : PEOPLE_N;
+  const s = ((seed % n) + n) % n;
+  // The default set keeps the key it has always had; a regional set is namespaced by id.
+  return cached(dress ? `person:${dress.id}:${s}:${pose}` : `person:${s}:${pose}`, () => {
+    const p = randomPerson(s, outfits.options, dress ?? undefined);
     return bakeCharacter(p.look, p.outfit, pose, s * 0.37, 'lo');
   });
 }
@@ -149,14 +151,15 @@ function barricadeGeo() {
     const b = new GeoBuilder();
     const w = 2.4;
     const n = 8;
-    for (const [y, off] of [[0.88, 0], [0.54, 1]] as const) {
-      for (let i = 0; i < n; i++) {
-        b.box(w / n, 0.2, 0.05, (i + off) % 2 ? '#f2f2ee' : '#c8281e', { x: -w / 2 + (i + 0.5) * (w / n), y });
-      }
+    // a yellow/black chevron roadworks board on A-frame legs: reads as "work ahead", not a checkpoint
+    for (let i = 0; i < n; i++) {
+      b.box(w / n, 0.36, 0.06, i % 2 ? '#161616' : '#f5c518', { x: -w / 2 + (i + 0.5) * (w / n), y: 0.8 });
     }
+    b.box(w + 0.06, 0.04, 0.07, '#161616', { y: 0.99 });
+    b.box(w + 0.06, 0.04, 0.07, '#161616', { y: 0.61 });
     for (const s of [-1, 1]) {
-      b.box(0.07, 1.05, 0.07, '#e8e8e4', { x: s * 1.1, y: 0.52, z: -0.18, rx: -0.2 });
-      b.box(0.07, 1.05, 0.07, '#e8e8e4', { x: s * 1.1, y: 0.52, z: 0.18, rx: 0.2 });
+      b.box(0.07, 1.0, 0.07, '#8a8a84', { x: s * 1.1, y: 0.5, z: -0.2, rx: -0.2 });
+      b.box(0.07, 1.0, 0.07, '#8a8a84', { x: s * 1.1, y: 0.5, z: 0.2, rx: 0.2 });
       b.box(0.3, 0.06, 0.55, '#3a3a3a', { x: s * 1.1, y: 0.03 });
     }
     return b.build();
@@ -246,7 +249,6 @@ export function buildObstacle(kind: string, seed: number): THREE.Group {
     case 'barricade': {
       const g = group(barricadeGeo());
       g.add(amberLamp(-1.1, 1.18, 0), amberLamp(1.1, 1.18, 0));
-      g.add(warnSign(0, 6));
       return g;
     }
     case 'jersey':
@@ -276,9 +278,69 @@ export function buildObstacle(kind: string, seed: number): THREE.Group {
       return group(integrityGeo(kind, seed));
     case 'pvc-pickup':
       return buildPvcCard(seed);
+    case 'agbero':
+      return group(agberoGeo(seed));
+    case 'flood-patch':
+      return group(floodPatchGeo(seed));
+    case 'narrow-gate':
+      return group(narrowGateGeo());
     default:
       return group(sedanGeo(seed));
   }
+}
+
+/**
+ * Standing water across the lane: a shallow sheet with a brown rim of washed-in
+ * mud, a few ripples and a floating bottle. Low enough to read as "wet road" at a
+ * glance and big enough (2.6 x 3.2 m) that it is plainly a thing to steer round.
+ */
+function floodPatchGeo(seed: number): THREE.BufferGeometry {
+  return cached(`flood:${seed % 3}`, () => {
+    const b = new GeoBuilder();
+    const r = mulberry(seed % 3 + 41);
+    b.cyl(1.55, 1.55, 0.05, '#7a5c3b', { y: 0.025, sz: 1.2 }, 14);
+    b.cyl(1.4, 1.4, 0.07, '#5b8fa0', { y: 0.05, sz: 1.2 }, 14);
+    for (let i = 0; i < 3; i++) b.torus(r.range(0.25, 0.6), 0.015, '#d8ebf0', { x: r.range(-0.8, 0.8), y: 0.09, z: r.range(-0.9, 0.9), rx: Math.PI / 2 }, Math.PI * 2, 12);
+    b.cyl(0.05, 0.05, 0.22, '#2ec4b6', { x: r.range(-0.5, 0.5), y: 0.16, z: r.range(-0.6, 0.6), rz: 1.4 }, 6);
+    return b.build();
+  });
+}
+
+/** Two pillars and a bar: a gateway just wide enough for a small ride, with the bar low enough to matter. */
+function narrowGateGeo(): THREE.BufferGeometry {
+  return cached('narrow-gate', () => {
+    const b = new GeoBuilder();
+    for (const s of [-1, 1]) {
+      b.box(0.5, 1.5, 0.5, '#9b8f7d', { x: s * 1.1, y: 0.75 });
+      b.box(0.62, 0.14, 0.62, '#7d7263', { x: s * 1.1, y: 1.55 });
+    }
+    b.box(2.9, 0.12, 0.14, '#c8281e', { y: 1.28 });
+    b.box(2.9, 0.12, 0.14, '#f4f1ea', { y: 1.06 });
+    return b.build();
+  });
+}
+
+/** An area boy collecting a toll: hand out, ticket roll, a bucket for the money. Reads as "stop" without being a sign. */
+function agberoGeo(seed: number): THREE.BufferGeometry {
+  return cached(`agbero:${seed % 2}`, () => {
+    const b = new GeoBuilder();
+    const skin = seed % 2 ? '#5c3a24' : '#3b2417';
+    b.cyl(0.6, 0.6, 0.02, '#161616', { y: 0.01 }, 12);
+    b.cyl(0.1, 0.11, 0.6, '#2d3a4d', { x: -0.13, y: 0.38 }, 6);
+    b.cyl(0.1, 0.11, 0.6, '#2d3a4d', { x: 0.13, y: 0.38 }, 6);
+    b.box(0.58, 0.72, 0.3, '#c8e84a', { y: 1.05 });
+    b.box(0.6, 0.06, 0.32, '#f5c518', { y: 1.15 });
+    b.sphere(0.22, skin, { y: 1.62 }, 10);
+    b.box(0.44, 0.1, 0.4, '#1a1a1a', { y: 1.84 });
+    // the outstretched hand and the ticket roll
+    b.box(0.12, 0.12, 0.7, '#c8e84a', { x: 0.42, y: 1.2, z: 0.35, rx: -0.2 });
+    b.sphere(0.07, skin, { x: 0.42, y: 1.22, z: 0.72 }, 6);
+    b.cyl(0.07, 0.07, 0.14, '#f7f1e3', { x: -0.38, y: 1.0, z: 0.22, rz: Math.PI / 2 }, 8);
+    // bucket
+    b.cyl(0.16, 0.13, 0.26, '#e85d04', { x: -0.55, y: 0.14, z: 0.3 }, 8);
+    b.cyl(0.8, 0.8, 0.04, '#e85d04', { y: 0.04 }, 18);
+    return b.build()!;
+  });
 }
 
 /** C28: a glowing collectible card — never a hazard, so visually distinct from the integrity cast. */
@@ -346,21 +408,6 @@ function integrityGeo(kind: string, seed: number): THREE.BufferGeometry {
     b.cyl(0.7, 0.7, 0.04, '#e85d04', { y: 0.04 }, 16);
     return b.build()!;
   });
-}
-
-function warnSign(x: number, z: number): THREE.Group {
-  const g = new THREE.Group();
-  const b = cached('warn', () => {
-    const bb = new GeoBuilder();
-    bb.cyl(0.03, 0.03, 0.8, '#444', { y: 0.4 }, 5);
-    bb.prism(0.75, 0.65, 0.04, '#c8281e', { y: 0.85, rx: 0 });
-    bb.prism(0.5, 0.42, 0.05, '#f7f1e3', { y: 0.93 });
-    bb.box(0.06, 0.2, 0.06, '#161616', { y: 1.05, z: 0.03 });
-    return bb.build();
-  });
-  g.add(new THREE.Mesh(b, vcMat()));
-  g.position.set(x - 2.6, 0, z);
-  return g;
 }
 
 // ---------------------------------------------------------------- public: supporters on the road
@@ -438,7 +485,14 @@ export function buildPickupZone(count: number, seed: number): THREE.Group {
   return g;
 }
 
-export function buildVenue(grand: boolean, seed: number): THREE.Group {
+/** What a venue stage says about where it is. Absent: the Lagos stage it has always been. */
+export interface VenueDress {
+  stateName: string;
+  /** Extra scenery behind the stage for this kind of landmark (market, stadium, bridge...). */
+  backdrop?: THREE.BufferGeometry | null;
+}
+
+export function buildVenue(grand: boolean, seed: number, dress?: VenueDress): THREE.Group {
   const g = new THREE.Group();
   const geo = cached(`venue:${grand ? 'g' : 'v'}:${seed % 3}`, () => {
     const b = new GeoBuilder();
@@ -477,12 +531,14 @@ export function buildVenue(grand: boolean, seed: number): THREE.Group {
   carpet.scale.set(8.4, 8, 1);
   carpet.position.y = 0.03;
   g.add(carpet);
-  const banner = sign(grand ? 'GRAND RALLY' : 'RALLY POINT', '#1b2a4a', '#f5c518', 9.4, 1.5, grand ? 'Lagos is listening' : 'Brake to unload your crowd', 1024, 256);
+  const place = dress?.stateName ?? 'Lagos';
+  const banner = sign(grand ? 'GRAND RALLY' : 'RALLY POINT', '#1b2a4a', '#f5c518', 9.4, 1.5, grand ? `${place} is listening` : 'Brake to unload your crowd', 1024, 256);
   banner.position.set(0, 5.3, 3.76);
   g.add(banner);
-  const back = sign('LAGOS', '#c23fa0', '#fff', 4.0, 1.4, undefined, 512, 192);
+  const back = sign(place.toUpperCase(), '#c23fa0', '#fff', 4.0, 1.4, undefined, 512, 192);
   back.position.set(7.4, 3.0, -1.9);
   g.add(back);
+  if (dress?.backdrop) g.add(new THREE.Mesh(dress.backdrop, vcMat()));
   return g;
 }
 

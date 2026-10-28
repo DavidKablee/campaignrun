@@ -22,6 +22,21 @@ Work only the current chunk (`docs/STATUS.md`). Do not start later chunks early.
 - Real-money / ads / server scores.
 - glTF meshopt swaps, recorded audio stems, Playwright visual baselines, Cloudflare/waitlist.
 
+## Every state its own world (remaining 25 states)
+
+Kano (C51), Rivers (C52), Anambra (C53), Kaduna (C54), Delta (C55), Kwara (C56), Oyo (C57), Borno (C58), Enugu (C59), Plateau (C60), Katsina (C61), Ogun (C62), Bauchi (C64), Sokoto (C65), Akwa Ibom (C66), Imo (C67), Edo (C69), Ondo (C70), Abia (C71), Benue (C72), Osun (C73), Adamawa (C74), Jigawa (C75) and Cross River (C76) are built; every one still needs a local reviewer. Dossiers exist for all four in `docs/research/states/`; each is a draft to be checked against the template before building (the Kaduna one suggests accent `#B9663A`). Do one state at a time, with screenshots for review before the next. Both sim questions are closed in C77 (Rivers keke; ride bonus removed). Batch 5 is built (C69–C72); Batch 6 is built (C73–C76); twelve real states are left without worlds (Batch 7 candidates: Niger, Gombe, Ebonyi, Kebbi, Ekiti, Kogi, Taraba, Bayelsa, Nasarawa, Yobe, Zamfara, FCT). Do not write `scenery` strings for a new state without checking the `case` list in `world.ts`.
+
+Recipe per state:
+1. Write `docs/research/states/<id>.md` from `_TEMPLATE.md` (sources, built form, road, vegetation, dress, avoid list, landmark shortlist with rule flags, route table, welcome/farewell in a language the state speaks). Cross-check; mark single-source claims.
+2. Replace weak landmarks with the five chosen (all `verified: false`; closed `venueType` list; no palace/religious/person-named/disaster).
+3. Add the district/road/dress entries to `data/world/<biomeKit>.json` (or a new library); add a `world` block to `data/states/<id>.json` (8 route districts, start/finish, `billboards`, skyline, ambient, `pieces` on side -1 for venue pieces: the rally stage stands on the right).
+4. Write any new builder: lot style, flora, set pieces (`render/world/states/<id>.ts`, registered in `world.ts`), skyline, road/facade/shop painters in `regionalTextures.ts`. The registry test fails if data names a builder that does not exist.
+5. Keep shop boards, awnings and dress colours clear of the party colours (a content test checks district/dress palettes; textures are by eye) and avoid saturated red/green/royal blue and green-and-white anywhere.
+6. Run `states.spec.ts` for the id (add it to `STATES`), read the screenshots, check the draw/triangle numbers, run the Lagos golden.
+7. Every state keeps one contemporary city district; never regionalise villains or Contenders.
+
+Known gaps in the foundation: pickup and venue crowds and Contenders are not dressed regionally; `flatroof-shopfront`'s kerbside goods and the `bazaar` default palette are neutral rather than per-state; the `hazardCues` ops of the plan are partly built (C68 tints fog and dust per hazard; wet-road sheen, flood sheets and parked barrows are not); Data Saver does not yet skip optional layers beyond the dust cloud; a sky for harmattan is a tint only.
+
 ## Polish notes
 
 - denser Lagos set-pieces; Border Gate welcome beat; coin arcs / hit-stop.

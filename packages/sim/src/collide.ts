@@ -27,11 +27,14 @@ export function checkCollision(state: SimState, config: SimConfig): Entity | nul
     const eFront = ent.z + ent.halfLenMm;
     const eBack = ent.z - ent.halfLenMm;
     if (pFront < eBack || pBack > eFront) continue;
+    // Asleep means not in play yet.
+    if (ent.awake === false) continue;
 
-    const eX = laneCenterMm(ent.lane, config);
+    // A weaving vehicle or a walker is wherever it has got to, not in its lane.
+    const eX = ent.xMm ?? laneCenterMm(ent.lane, config);
     const eLeft = eX - ent.halfWidthMm;
     const eRight = eX + ent.halfWidthMm;
-    
+
     if (ent.isPickup) {
       if (pRight + magnetRadius < eLeft || pLeft - magnetRadius > eRight) continue;
     } else {

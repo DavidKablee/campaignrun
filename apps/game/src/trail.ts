@@ -10,10 +10,12 @@ export function legAt(
   zMm: number,
   landmarks: readonly string[] = lagosLaunch.landmarks,
   gateLabel = 'Border gate',
+  course: typeof simConfig.course = simConfig.course,
+  startLabel = 'Your street',
 ): TrailLeg {
-  const c = simConfig.course;
+  const c = course;
   const into = zMm - c.borderGateMm;
-  if (into < 0) return { from: 'Your street', to: gateLabel };
+  if (into < 0) return { from: startLabel, to: gateLabel };
   const seg = Math.floor(into / c.segmentLengthMm);
   if (seg >= c.segmentCount) return { from: landmarks[landmarks.length - 1] ?? gateLabel, to: 'Grand Rally' };
   return {

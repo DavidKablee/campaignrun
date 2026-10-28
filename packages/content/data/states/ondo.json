@@ -3,18 +3,116 @@
   "name": "Ondo",
   "zone": "SW",
   "biomeKit": "rainforest",
-  "palette": { "sky": "#8CC5E2", "fog": "#DCEBDF", "ground": "#3F6B3A", "accent": "#D98324" },
+  "palette": {
+    "sky": "#8CC5E2",
+    "fog": "#DCEBDF",
+    "ground": "#3A5F34",
+    "accent": "#6B4226"
+  },
   "landmarks": [
-    { "name": "Oja Oba Akure", "venueType": "market", "verified": false },
-    { "name": "Idanre Hills", "venueType": "landmark", "verified": false },
-    { "name": "Igbokoda Waterside", "venueType": "waterfront", "verified": false },
-    { "name": "Owena River Crossing", "venueType": "bridge", "verified": false },
-    { "name": "Akure Township Stadium", "venueType": "stadium", "verified": false }
+    {
+      "name": "Cocoa Market",
+      "venueType": "market",
+      "verified": false
+    },
+    {
+      "name": "Hill Steps",
+      "venueType": "landmark",
+      "verified": false
+    },
+    {
+      "name": "Lagoon Landing",
+      "venueType": "waterfront",
+      "verified": false
+    },
+    {
+      "name": "River Crossing",
+      "venueType": "bridge",
+      "verified": false
+    },
+    {
+      "name": "Township Stadium",
+      "venueType": "stadium",
+      "verified": false
+    }
   ],
-  "scenery": ["cocoa belt", "hill staircase"],
-  "hazards": ["hilly-road", "rain-slick", "go-slow"],
+  "scenery": [
+    "cocoa rows",
+    "forest canopy"
+  ],
+  "hazards": [
+    "hilly-road",
+    "rain-slick",
+    "go-slow"
+  ],
   "signatureRide": "okada",
-  "welcomeLines": ["Ẹ káàbọ̀ sí Oǹdó!"],
+  "welcomeLines": [
+    "Ẹ káàbọ̀ sí Oǹdó!"
+  ],
   "farewellLine": "Ẹ ṣeun, Ondo!",
-  "audioStem": "sw-fuji"
+  "audioStem": "sw-fuji",
+  "world": {
+    "library": "forest-hills",
+    "start": {
+      "district": "ondo.market",
+      "label": "Your street"
+    },
+    "route": [
+      "ondo.market",
+      "ondo.hill-road",
+      "ondo.lagoon",
+      "ondo.river-road",
+      "ondo.stadium-road",
+      "ondo.cocoa-belt",
+      "ondo.drying-yard",
+      "ondo.plaza-street"
+    ],
+    "finish": {
+      "district": "ondo.plaza-street",
+      "label": "ONDO · GRAND RALLY"
+    },
+    "road": "ondo-green",
+    "dress": "ondo-city",
+    "billboards": [
+      "WELCOME TO ONDO",
+      "COCOA · KOLA",
+      "YAM · CASSAVA",
+      "PURE WATER",
+      "PROVISIONS",
+      "RECHARGE CARDS",
+      "POS · AIRTIME",
+      "DATA 4G · BIG SAVER",
+      "TAILORING",
+      "FRESH FISH"
+    ],
+    "skyline": "ondo-inselbergs",
+    "ambient": "none",
+    "pieces": [
+      {
+        "landmark": 0,
+        "piece": "ondo.cocoa-market",
+        "side": -1
+      },
+      {
+        "landmark": 1,
+        "piece": "ondo.hill-steps",
+        "side": -1
+      },
+      {
+        "landmark": 2,
+        "piece": "ondo.lagoon-landing",
+        "side": -1
+      },
+      {
+        "landmark": 3,
+        "piece": "ondo.river-crossing",
+        "side": -1
+      },
+      {
+        "landmark": 4,
+        "piece": "ondo.stadium",
+        "side": -1
+      }
+    ]
+  }
 }

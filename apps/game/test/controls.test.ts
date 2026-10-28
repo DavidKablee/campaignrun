@@ -54,8 +54,45 @@ describe('C46: the road is driven with a thumb', () => {
   it('says nothing about a slow drag, so a braking thumb cannot drift into a lane', () => {
     const e = new GestureEngine(T);
     e.down(1, 200, 400, 1000);
-    e.move(1, 200 + T.swipeMinPx + 10, 400, 1000 + T.swipeMaxMs + 50);
+    // A real drag reports a stream of small moves; this one crawls well past the flick window.
+    for (let i = 1; i <= 20; i++) e.move(1, 200 + i * 3, 400, 1000 + i * 50);
     expect(e.drain()).toEqual([]);
+  });
+
+  it('counts the flick from when the thumb starts moving, not from touch-down', () => {
+    const e = new GestureEngine(T);
+    e.down(1, 200, 400, 1000);
+    // Press, hold still for a beat, then flick.
+    e.move(1, 200 + T.swipeMinPx + 10, 400, 1000 + T.swipeMaxMs + 300);
+    expect(e.drain()).toEqual(['right']);
+  });
+
+  it('treats one long swipe as one lane, and a reversal as the next', () => {
+    const e = new GestureEngine(T);
+    e.down(1, 200, 400, 1000);
+    e.move(1, 200 + T.swipeMinPx + 10, 400, 1030);
+    e.move(1, 200 + 2 * (T.swipeMinPx + 10), 400, 1060);
+    expect(e.drain()).toEqual(['right']);
+    e.move(1, 200 + (T.swipeMinPx + 10), 400, 1090);
+    expect(e.drain()).toEqual(['left']);
+  });
+
+  it('does not brake on a diagonal that is mostly sideways', () => {
+    const e = new GestureEngine(T);
+    e.down(1, 200, 400, 1000);
+    e.move(1, 200 + T.swipeMinPx + 6, 400 + T.swipeMinPx, 1040);
+    expect(e.drain()).toEqual(['right']);
+    expect(e.isBraking(1040)).toBe(false);
+  });
+
+  it('scales its thresholds with the screen', () => {
+    const e = new GestureEngine(T);
+    e.setViewport(780, 1560); // twice the reference width -> clamped scale 1.4
+    e.down(1, 200, 400, 1000);
+    e.move(1, 200 + T.swipeMinPx + 10, 400, 1040);
+    expect(e.drain()).toEqual([]);
+    e.move(1, 200 + T.swipeMinPx * 1.4 + 12, 400, 1080);
+    expect(e.drain()).toEqual(['right']);
   });
 
   it('still changes lane while the brake is held', () => {
@@ -121,9 +158,9 @@ describe('C46: gestures become sim input bits', () => {
     const c = new InputController();
     c.down(1, 200, 400, 1000);
     c.move(1, 200 + T.swipeMinPx + 10, 400, 1030);
-    c.move(1, 200 + 2 * (T.swipeMinPx + 10), 400, 1060);
+    c.move(1, 200, 400, 1060);
     const seen: number[] = [];
-    for (let i = 0; i < 6; i++) seen.push(c.sample(1060 + i) & Btn.Right);
+    for (let i = 0; i < 6; i++) seen.push(c.sample(1060 + i) & (Btn.Right | Btn.Left));
     // On, off, on: the blank tick between them is what makes the second flick
     // a rising edge the sim can see.
     expect(seen.map((b) => (b ? 1 : 0))).toEqual([1, 0, 1, 0, 0, 0]);
@@ -160,5 +197,26 @@ describe('C46: gestures become sim input bits', () => {
     expect(c.sample(1004) & Btn.Brake).toBeFalsy();
     c.key(true, 'h');
     expect(c.sample(1006) & Btn.Horn).toBeTruthy();
+  });
+});
+
+describe('swipes that start on a pad', () => {
+  it('still steer, because the right thumb rests on BEAT and PERK', () => {
+    const e = new GestureEngine(T);
+    e.down(1, 200, 400, 1000, true);
+    e.move(1, 200 - (T.swipeMinPx + 10), 400, 1060);
+    e.up(1, 1070);
+    expect(e.drain()).toEqual(['left']);
+  });
+
+  it('do not turn a still press on a pad into a tap or a horn', () => {
+    const e = new GestureEngine(T);
+    e.down(1, 200, 400, 1000, true);
+    e.poll(1000 + T.holdHornMs + 50);
+    e.up(1, 1000 + T.holdHornMs + 60);
+    expect(e.drain()).toEqual([]);
+    e.down(2, 200, 400, 3000, true);
+    e.up(2, 3040);
+    expect(e.drain()).toEqual([]);
   });
 });

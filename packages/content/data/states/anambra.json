@@ -3,18 +3,122 @@
   "name": "Anambra",
   "zone": "SE",
   "biomeKit": "farmland-river",
-  "palette": { "sky": "#87B7E0", "fog": "#D5E6F5", "ground": "#7A8B5C", "accent": "#D4A017" },
+  "palette": {
+    "sky": "#8FB4CE",
+    "fog": "#DCE6E6",
+    "ground": "#7A8B5C",
+    "accent": "#D4A017"
+  },
   "landmarks": [
-    { "name": "Onitsha Main Market", "venueType": "market", "verified": false },
-    { "name": "Bridgehead Crossing", "venueType": "bridge", "verified": false },
-    { "name": "Ekwulobia Square", "venueType": "square", "verified": false },
-    { "name": "Nkisi Park", "venueType": "park", "verified": false },
-    { "name": "Awka Civic Ground", "venueType": "landmark", "verified": false }
+    {
+      "name": "Onitsha Main Market",
+      "venueType": "market",
+      "verified": false
+    },
+    {
+      "name": "Second Niger Bridge",
+      "venueType": "bridge",
+      "verified": false
+    },
+    {
+      "name": "Onitsha River Port",
+      "venueType": "waterfront",
+      "verified": false
+    },
+    {
+      "name": "Nnewi City Centre Roundabout",
+      "venueType": "square",
+      "verified": false
+    },
+    {
+      "name": "Awka Township Stadium",
+      "venueType": "stadium",
+      "verified": false
+    }
   ],
-  "scenery": ["river barges", "market canopies"],
-  "hazards": ["market-spill", "go-slow", "keke-swerve"],
+  "scenery": [],
+  "hazards": [
+    "market-spill",
+    "go-slow",
+    "keke-swerve"
+  ],
   "signatureRide": "keke",
-  "welcomeLines": ["Nnọọ! Anambra is open."],
+  "welcomeLines": [
+    "Nnọọ! Anambra is open."
+  ],
   "farewellLine": "Daalụ, Anambra!",
-  "audioStem": "se-highlife"
+  "audioStem": "se-highlife",
+  "world": {
+    "library": "farmland-river",
+    "start": {
+      "district": "anambra.junction",
+      "label": "Your street"
+    },
+    "route": [
+      "anambra.onitsha-market",
+      "anambra.bridgehead",
+      "anambra.port",
+      "anambra.nnewi",
+      "anambra.awka",
+      "anambra.agulu-nanka",
+      "anambra.ekwulobia",
+      "anambra.omor-floodplain"
+    ],
+    "finish": {
+      "district": "anambra.omor-floodplain",
+      "label": "ANAMBRA · GRAND RALLY"
+    },
+    "road": "laterite-wash",
+    "dress": "igbo-southeast",
+    "billboards": [
+      "SPARE PARTS · NNEWI",
+      "TYRES & BATTERIES",
+      "MAMA PUT · CHOP HERE",
+      "MINI MART",
+      "BUREAU DE CHANGE",
+      "BOUTIQUE",
+      "PURE WATER",
+      "PHONE ACCESSORIES",
+      "WELCOME TO ANAMBRA"
+    ],
+    "skyline": "niger-bluffs",
+    "ambient": "none",
+    "pieces": [
+      {
+        "landmark": 0,
+        "piece": "anambra.main-market",
+        "side": -1
+      },
+      {
+        "landmark": 1,
+        "piece": "anambra.toll-plaza",
+        "side": 1
+      },
+      {
+        "landmark": 1,
+        "piece": "anambra.toll-clear",
+        "side": -1
+      },
+      {
+        "landmark": 1,
+        "piece": "anambra.bridge-deck",
+        "side": -1
+      },
+      {
+        "landmark": 2,
+        "piece": "anambra.river-port",
+        "side": -1
+      },
+      {
+        "landmark": 3,
+        "piece": "anambra.nnewi-roundabout",
+        "side": -1
+      },
+      {
+        "landmark": 4,
+        "piece": "anambra.awka-stadium",
+        "side": -1
+      }
+    ]
+  }
 }

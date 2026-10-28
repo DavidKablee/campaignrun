@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { activeContenders, limits, rides, stateIndex } from '@cr/content';
+import { activeContenders, limits, maxUpgradeLevel, rides, stateIndex } from '@cr/content';
 
 const stateIds = stateIndex.map((s) => s.id);
 const rideIds = rides.map((r) => r.id);
@@ -34,6 +34,27 @@ export const loginSchema = z.object({
   password: z.string().min(1).max(200),
 });
 
+const level = z.number().int().min(0).max(maxUpgradeLevel);
+
+/**
+ * The run itself, so the server can play it again (C12). The course is a pure
+ * function of the seed, so seed + inputs + the convoy the player drove is the
+ * whole run. The Contender is deliberately not here: it is only ever sent as
+ * `contenderId`, with consent (guardrail 10), and otherwise the server tries
+ * every Contender and learns nothing it was not told.
+ */
+export const replaySchema = z.object({
+  seed: z.number().int().min(0).max(0xffffffff),
+  /** base64 of `encodeInputLog` — a few hundred bytes to a few KB. */
+  log: z
+    .string()
+    .min(1)
+    .max(60_000)
+    .regex(/^[A-Za-z0-9+/]*={0,2}$/),
+  upgrades: z.object({ magnet: level, shield: level, horn: level, loading: level, value: level }),
+  rallySaturday: z.boolean(),
+});
+
 export const scoreSchema = z.object({
   stateId: z.enum(stateIds as [string, ...string[]]),
   crowd: z.number().int().min(0).max(100_000),
@@ -48,6 +69,7 @@ export const scoreSchema = z.object({
    * never inferred from anything else on the request.
    */
   contenderId: z.enum(contenderIds as [string, ...string[]]).nullish(),
+  replay: replaySchema.optional(),
 });
 
 export const consentSchema = z.object({

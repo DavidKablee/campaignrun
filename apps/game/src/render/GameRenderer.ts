@@ -1,11 +1,14 @@
 import * as THREE from 'three';
 import type { SimState, SimEvent } from '@cr/sim';
 import { laneCenterMm } from '@cr/sim';
-import type { CharacterLook, OutfitChoice, SimConfig } from '@cr/content';
+import type { CharacterLook, OutfitChoice, ResolvedWorld, SimConfig } from '@cr/content';
 import { MM_TO_UNITS, ghostMat, vcMat } from './materials';
+import { GeoBuilder } from './geo';
 import type { GhostFrame } from '../ghostReplay';
 import type { WeatherContext } from '../weather';
-import { World } from './world';
+import { World, type StatePalette } from './world';
+import { cameraFor } from './camera';
+import { venueBackdrop } from './world/venues';
 import { buildCharacter, disposeRig, poseCharacter, type CharacterRig } from './character';
 import {
   AMBER,
@@ -22,8 +25,18 @@ import {
   buildPickupZone,
   buildSupporterGroup,
   buildVenue,
+  type VenueDress,
   personGeo,
 } from './props';
+import {
+  animateVehicle,
+  buildVehicle,
+  isVehicleKind,
+  prewarmVehicles,
+  setVehicleNear,
+  type VehicleKind,
+  type VehicleRig,
+} from './vehicles';
 
 /**
  * Per-ride vehicle visuals (C26). Rides not listed here (Trek) render the
@@ -57,6 +70,20 @@ export interface RenderOpts {
   ghostTrajectory?: GhostFrame[];
   /** C30: time-of-day/NEPA/harmattan/rainy-season, decided once from a real clock before the run starts. */
   weather?: WeatherContext;
+  /** State-specific sky/fog/ground/accent colours from the content pack. */
+  palette?: StatePalette;
+  /** Geo zone for billboard copy (SW | NW | NE | SE | SS | NC | FCT). */
+  zone?: string;
+  /** State-specific scenery element names from the content pack. */
+  scenery?: string[];
+  /** The state's look (districts, road, dress). Absent: the stock Lagos world. */
+  world?: ResolvedWorld;
+  /** The state's road hazard ids, for fog tint and dust. */
+  hazards?: readonly string[];
+  /** State name for the venue stages. */
+  stateName?: string;
+  /** The five landmarks' venue types, for the stage backdrop. */
+  venueTypes?: string[];
 }
 
 interface Follower {
@@ -75,8 +102,18 @@ interface Streak {
   ttl: number;
 }
 
+/** Beyond this distance a vehicle is drawn as one merged mesh, without spinning wheels. */
+const NEAR_DETAIL_MM = 60_000;
+
 const AMBER_ON = new THREE.Color('#ffb020');
 const AMBER_OFF = new THREE.Color('#5a3200');
+
+const PLAYER_PROBE = new THREE.Vector3();
+
+/** Window aspect before the canvas is attached; resize() corrects it from the real host box. */
+function hostAspect(): number {
+  return window.innerHeight > 0 ? window.innerWidth / window.innerHeight : 16 / 9;
+}
 
 export class GameRenderer {
   readonly canvas: HTMLCanvasElement;
@@ -102,6 +139,12 @@ export class GameRenderer {
   private shadow = blobShadow(1.3, 1.1);
   private t0 = performance.now();
   private onResize = () => this.resize();
+  private resizeObs: ResizeObserver | null = null;
+  /** Moving and parked road vehicles, keyed by entity id (their meshes live in entityMeshes). */
+  private rigs = new Map<number, VehicleRig>();
+  /** Last two sim-tick lateral positions per entity, so weavers and walkers interpolate exactly. */
+  private xTrack = new Map<number, { x: number; px: number }>();
+  private xTick = -1;
   // camera: eased follow instead of a hard snap-to-target every frame (C22)
   private camX = 0;
   private camY = 3.3;
@@ -123,10 +166,11 @@ export class GameRenderer {
     });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, this.dprCap));
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
-    this.camera = new THREE.PerspectiveCamera(60, 16 / 9, 0.1, 180);
+    this.camera = new THREE.PerspectiveCamera(60, hostAspect(), 0.1, 180);
 
-    this.world = new World(this.scene, opts.config, opts.landmarks, opts.weather);
+    this.world = new World(this.scene, opts.config, opts.landmarks, opts.weather, opts.palette, opts.zone, opts.scenery, opts.world, opts.dataSaver, opts.hazards);
     this.world.update(0, true);
+    prewarmVehicles(opts.dataSaver);
 
     this.scene.add(this.playerRoot);
     this.scene.add(this.shadow);
@@ -154,6 +198,15 @@ export class GameRenderer {
     }
     this.canvas.addEventListener('webglcontextlost', (e) => e.preventDefault());
     window.addEventListener('resize', this.onResize);
+    // Rotation and a collapsing mobile toolbar can change the host box without a reliable window resize.
+    window.visualViewport?.addEventListener('resize', this.onResize);
+    if (typeof ResizeObserver !== 'undefined') {
+      this.resizeObs = new ResizeObserver(this.onResize);
+      queueMicrotask(() => {
+        const host = this.canvas.parentElement;
+        if (host && this.resizeObs) this.resizeObs.observe(host);
+      });
+    }
   }
 
   private buildPlayer() {
@@ -193,7 +246,7 @@ export class GameRenderer {
 
   notifyEvents(events: SimEvent[]) {
     for (const e of events) {
-      if (e.type === 'dent' || e.type === 'hit') this.shakeT = this.opts.reduceMotion ? 0.05 : 0.28;
+      if (e.type === 'dent' || e.type === 'hit' || e.type === 'toll') this.shakeT = this.opts.reduceMotion ? 0.05 : 0.28;
       if (e.type === 'fullHouse' || e.type === 'onBeat') this.spawnConfetti();
     }
   }
@@ -371,8 +424,8 @@ export class GameRenderer {
     }
 
     // camera chase: eased follow (lag, not a hard snap) + FOV kick + lane-change lean + landing dip
-    const fovTarget = 58 + speed01 * (this.opts.reduceMotion ? 2 : 8);
-    this.camera.fov += (fovTarget - this.camera.fov) * Math.min(1, dt * 7);
+    const rig = cameraFor(this.camera.aspect, pX, pZ, speed01, this.opts.reduceMotion);
+    this.camera.fov += (rig.fov - this.camera.fov) * Math.min(1, dt * 7);
     this.camera.updateProjectionMatrix();
 
     let sx = 0;
@@ -385,16 +438,23 @@ export class GameRenderer {
     }
     const camLerp = Math.min(1, dt * 9);
     const dip = this.squashT > 0 ? (this.squashT / 0.16) ** 2 * 0.12 : 0;
-    this.camX += (pX * 0.5 - this.camX) * camLerp;
-    this.camY += (3.3 - dip - this.camY) * camLerp;
-    this.camZ += (pZ + 7.2 - this.camZ) * camLerp;
+    this.camX += (rig.x - this.camX) * Math.min(1, dt * rig.followRate);
+    this.camY += (rig.y - dip - this.camY) * camLerp;
+    this.camZ += (pZ + rig.back - this.camZ) * camLerp;
     this.camera.position.set(this.camX + sx, this.camY + sy, this.camZ);
-    this.camera.lookAt(pX * 0.3, 1.25, pZ - 10);
+    // Framing (portrait follows the player fully; the road-bend sway is bounded) lives in camera.ts
+    this.camera.lookAt(rig.lookX, rig.lookY, pZ - rig.ahead);
     const leanTarget = -(curr.targetLane - 1) * (this.opts.reduceMotion ? 0.006 : 0.03);
     this.camLean += (leanTarget - this.camLean) * Math.min(1, dt * 6);
     this.camera.rotateZ(this.camLean);
+    if (this.debugEl) {
+      // ?debug only: where the rider lands on screen (NDC, -1..1), for the mobile framing e2e.
+      this.camera.updateMatrixWorld();
+      const ndc = PLAYER_PROBE.set(pX, 0.9, pZ).project(this.camera);
+      (window as unknown as { __crPlayerNdc?: unknown }).__crPlayerNdc = { x: ndc.x, y: ndc.y, lane: curr.targetLane, speed: curr.speed };
+    }
 
-    this.syncEntities(curr, zMm, t);
+    this.syncEntities(curr, zMm, t, dt, alpha);
 
     AMBER().color.copy(AMBER_OFF).lerp(AMBER_ON, 0.5 + 0.5 * Math.sin(t * 9));
 
@@ -406,11 +466,19 @@ export class GameRenderer {
     this.renderer.render(this.scene, this.camera);
   }
 
-  private syncEntities(curr: SimState, zMm: number, t: number) {
+  private syncEntities(curr: SimState, zMm: number, t: number, dt: number, alpha: number) {
     const seen = new Set<number>();
+    const cfg = this.opts.config;
+    const newTick = curr.tick !== this.xTick;
+    this.xTick = curr.tick;
     for (const ent of curr.entities) {
       if (!ent.active && !ent.isZone) continue;
-      const rel = ent.z - zMm;
+      // Dormant movers have not started moving yet: drawing them would show traffic frozen in the road.
+      if (ent.mover && ent.awake === false) continue;
+      const vz = ent.mover ? (ent.vz ?? 0) : 0;
+      // Movers advanced a whole tick since the previous sim state; draw them part-way along it.
+      const zRender = ent.z - vz * (1 - alpha);
+      const rel = zRender - zMm;
       if (rel < -30000 || rel > 150000) continue;
       seen.add(ent.id);
       let obj = this.entityMeshes.get(ent.id);
@@ -419,20 +487,81 @@ export class GameRenderer {
         this.scene.add(obj);
         this.entityMeshes.set(ent.id, obj);
       }
-      const x = laneCenterMm(ent.lane, this.opts.config) * MM_TO_UNITS;
-      obj.position.set(x, 0, -ent.z * MM_TO_UNITS);
+
+      const targetX = ent.xMm ?? laneCenterMm(ent.lane, cfg);
+      let tr = this.xTrack.get(ent.id);
+      if (!tr) {
+        tr = { x: targetX, px: targetX };
+        this.xTrack.set(ent.id, tr);
+      } else if (newTick) {
+        tr.px = tr.x;
+        tr.x = targetX;
+      }
+      const xMm = tr.px + (tr.x - tr.px) * alpha;
+      obj.position.set(xMm * MM_TO_UNITS, 0, -zRender * MM_TO_UNITS);
+
       if (ent.isZone && ent.consumed) {
         const fx = obj.getObjectByName('zonefx');
         if (fx) fx.visible = false;
       }
       if (ent.isPickup) obj.rotation.y = Math.sin(t * 2 + ent.id) * 0.1;
+
+      const rig = this.rigs.get(ent.id);
+      if (rig) setVehicleNear(rig, rel < NEAR_DETAIL_MM);
+      if (rig && ent.mover) {
+        const vxMps = (tr.x - tr.px) * MM_TO_UNITS * 60;
+        let indicator: -1 | 0 | 1 = 0;
+        if (ent.weaveState === 1 || ent.weaveState === 2) {
+          indicator = laneCenterMm(ent.weaveTo ?? ent.lane, cfg) >= xMm ? 1 : -1;
+        }
+        animateVehicle(rig, {
+          dt,
+          t,
+          speedMps: Math.abs(vz) * MM_TO_UNITS * 60,
+          vxMps,
+          indicator,
+          reduceMotion: this.opts.reduceMotion,
+        });
+      } else if (ent.mover === 'walker') {
+        // A hostile on foot: faces the way they are walking, bobbing; square to camera when still.
+        const vx = (tr.x - tr.px) * MM_TO_UNITS * 60;
+        const face = Math.abs(vx) > 0.2 ? Math.sign(vx) * (Math.PI / 2) : 0;
+        obj.rotation.y += (face - obj.rotation.y) * Math.min(1, dt * 10);
+        obj.position.y = Math.abs(vx) > 0.2 && !this.opts.reduceMotion ? Math.abs(Math.sin(t * 9 + ent.id)) * 0.08 : 0;
+      }
     }
     for (const [id, mesh] of this.entityMeshes) {
       if (!seen.has(id)) {
         this.scene.remove(mesh);
         this.entityMeshes.delete(id);
+        this.rigs.delete(id);
+        this.xTrack.delete(id);
       }
     }
+  }
+
+  private vehicleFor(ent: SimState['entities'][number], kind: VehicleKind): THREE.Object3D {
+    const night = !!(this.opts.weather?.isNight || this.opts.weather?.isNepaOut);
+    const rig = buildVehicle(kind, ent.id, {
+      oncoming: (ent.vz ?? 0) < 0,
+      night,
+      dataSaver: this.opts.dataSaver,
+    });
+    this.rigs.set(ent.id, rig);
+    return rig.root;
+  }
+
+  /**
+   * The stage says the state's name, not Lagos', and the landmark the segment carries
+   * decides what stands behind it (a market, a stadium, a bridge rail...).
+   */
+  private venueDress(ent: SimState['entities'][number]): VenueDress | undefined {
+    const name = this.opts.stateName;
+    if (!name || !this.opts.world || this.opts.world.stateId === null) return undefined;
+    const c = this.opts.config.course;
+    const seg = Math.floor((ent.z - c.borderGateMm) / c.segmentLengthMm);
+    const type = this.opts.venueTypes?.[Math.max(0, Math.min(seg, 4))];
+    return { stateName: name, backdrop: type ? venueBackdrop(type, this.opts.world, ent.id) : null };
   }
 
   private makeEntity(ent: SimState['entities'][number]): THREE.Object3D {
@@ -441,9 +570,9 @@ export class GameRenderer {
         case 'pickup':
           return tagFx(buildPickupZone(ent.groupSize ?? ent.value ?? 4, ent.id));
         case 'venue':
-          return tagFx(buildVenue(false, ent.id));
+          return tagFx(buildVenue(false, ent.id, this.venueDress(ent)));
         case 'grand':
-          return tagFx(buildVenue(true, ent.id));
+          return tagFx(buildVenue(true, ent.id, this.venueDress(ent)));
         case 'finish':
           return buildFinish(this.opts.finish.label, this.opts.finish.sub);
         default:
@@ -451,14 +580,15 @@ export class GameRenderer {
       }
     }
     if (ent.isRivalConvoy) {
-      // C28: reuse the C26 ride models for visual variety — a rival is just another campaign vehicle.
-      const models = [buildOkada, buildKeke, buildHilux, buildDanfo];
-      const build = models[(ent.value ?? 0) % models.length]!;
-      const g = build();
-      g.scale.setScalar(1.15); // read clearly as "another convoy", not the player's own ride
-      return g;
+      // C28: a rival is another campaign vehicle on the road, now one that really drives.
+      const kinds: VehicleKind[] = ['okada', 'keke', 'car', 'danfo'];
+      const kind = kinds[(ent.value ?? 0) % kinds.length]!;
+      const root = this.vehicleFor(ent, kind);
+      root.add(rivalFlag(kind, this.opts.palette?.accent ?? '#c8e84a'));
+      return root;
     }
     if (ent.isPickup) return buildSupporterGroup(ent.value ?? 1, ent.id);
+    if (typeof ent.kind === 'string' && isVehicleKind(ent.kind)) return this.vehicleFor(ent, ent.kind);
     return buildObstacle(ent.kind, ent.id);
   }
 
@@ -476,6 +606,8 @@ export class GameRenderer {
 
   dispose() {
     window.removeEventListener('resize', this.onResize);
+    window.visualViewport?.removeEventListener('resize', this.onResize);
+    this.resizeObs?.disconnect();
     if (this.rig) disposeRig(this.rig);
     if (this.ghostMesh) this.scene.remove(this.ghostMesh); // geometry/material are cached singletons — not owned here
     this.world.dispose();
@@ -484,6 +616,23 @@ export class GameRenderer {
     this.debugEl?.remove();
     this.canvas.remove();
   }
+}
+
+const flagGeos = new Map<string, THREE.BufferGeometry>();
+const FLAG_BASE: Record<string, number> = { okada: 1.5, keke: 1.8, car: 1.5, danfo: 2.8 };
+/** A pennant on a pole: what tells a rival's convoy vehicle apart from ordinary traffic. */
+function rivalFlag(kind: string, color: string): THREE.Mesh {
+  let geo = flagGeos.get(color);
+  if (!geo) {
+    const b = new GeoBuilder();
+    b.cyl(0.02, 0.02, 1.0, '#2a2a2c', { y: 0.5 }, 5);
+    b.box(0.5, 0.3, 0.02, color, { x: 0.25, y: 0.85 });
+    geo = b.build()!;
+    flagGeos.set(color, geo);
+  }
+  const m = new THREE.Mesh(geo, vcMat());
+  m.position.set(0, FLAG_BASE[kind] ?? 1.6, 0.2);
+  return m;
 }
 
 /** Mark the painted road box (last plane child) so it can be hidden once used. */

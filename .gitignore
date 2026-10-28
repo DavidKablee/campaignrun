@@ -11,3 +11,4 @@ private/
 blocklist.plain.*
 
 .superdesign/tmp/
+test-results

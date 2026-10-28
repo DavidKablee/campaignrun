@@ -3,17 +3,56 @@
   "name": "Rivers",
   "zone": "SS",
   "biomeKit": "creek-delta",
-  "palette": { "sky": "#6BB3C9", "fog": "#B7DCE6", "ground": "#4A6B5A", "accent": "#E09F3E" },
+  "palette": { "sky": "#93B4BB", "fog": "#C6D3D0", "ground": "#4F6B4B", "accent": "#E09F3E" },
   "landmarks": [
     { "name": "Mile One Market", "venueType": "market", "verified": false },
     { "name": "Creek Road Waterfront", "venueType": "waterfront", "verified": false },
-    { "name": "Liberation Stadium", "venueType": "stadium", "verified": false },
-    { "name": "Garden City Park", "venueType": "park", "verified": false },
-    { "name": "Amadi Bridge", "venueType": "bridge", "verified": false }
+    { "name": "Port Harcourt Pleasure Park", "venueType": "park", "verified": false },
+    { "name": "Garrison Flyover", "venueType": "bridge", "verified": false },
+    { "name": "Bonny River Lighthouse", "venueType": "landmark", "verified": false }
   ],
-  "scenery": ["creek stilts", "waterfront cranes"],
+  "scenery": [],
   "hazards": ["flood-sheet", "keke-swerve", "go-slow"],
-  "signatureRide": "danfo",
-  "welcomeLines": ["Welcome to Garden City!"],
-  "audioStem": "ss-brass"
+  "signatureRide": "keke",
+  "welcomeLines": ["Una welcome to Garden City o!"],
+  "farewellLine": "Go well o! Make we see again.",
+  "audioStem": "ss-brass",
+  "world": {
+    "library": "creek-delta",
+    "start": { "district": "rivers.aba-road", "label": "Your street" },
+    "route": [
+      "rivers.diobu",
+      "rivers.creek-road",
+      "rivers.pleasure-park",
+      "rivers.garrison",
+      "rivers.estuary",
+      "rivers.old-gra",
+      "rivers.trans-amadi",
+      "rivers.creek-village"
+    ],
+    "finish": { "district": "rivers.creek-village", "label": "RIVERS · GRAND RALLY" },
+    "road": "delta-wet",
+    "dress": "delta-south",
+    "billboards": [
+      "BOLE & FISH · HOT HOT",
+      "OKRIKA CLOTHES",
+      "FRESH FISH · CREEK ROAD",
+      "MOBILE DATA 4G",
+      "PURE WATER",
+      "BARBING SALON",
+      "PHONE CHARGING",
+      "WELCOME TO GARDEN CITY",
+      "KEKE PARK · ABEG PARK WELL"
+    ],
+    "skyline": "oil-flares",
+    "ambient": "none",
+    "pieces": [
+      { "landmark": 0, "piece": "rivers.mile-one", "side": -1 },
+      { "landmark": 1, "piece": "rivers.creek-jetty", "side": -1 },
+      { "landmark": 2, "piece": "rivers.pleasure-park", "side": -1 },
+      { "landmark": 3, "piece": "rivers.flyover", "side": 1 },
+      { "landmark": 3, "piece": "rivers.flyover-clear", "side": -1 },
+      { "landmark": 4, "piece": "rivers.lighthouse", "side": -1 }
+    ]
+  }
 }

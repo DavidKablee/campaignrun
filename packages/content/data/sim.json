@@ -75,6 +75,20 @@
       "heightMm": 1800
     },
     {
+      "kind": "okada",
+      "weight": 10,
+      "halfWidthMm": 450,
+      "halfLenMm": 1000,
+      "heightMm": 1300
+    },
+    {
+      "kind": "keke",
+      "weight": 8,
+      "halfWidthMm": 700,
+      "halfLenMm": 1300,
+      "heightMm": 1700
+    },
+    {
       "kind": "car",
       "weight": 14,
       "halfWidthMm": 900,
@@ -112,6 +126,80 @@
       "sizeTag": "flood"
     }
   ],
+  "traffic": {
+    "chancePermille": 200,
+    "wakeMm": 130000,
+    "oncomingMinOffsetMm": 60000,
+    "slowMaxOffsetMm": 90000,
+    "closeCallMm": 3900,
+    "rivalVzMin": 80,
+    "rivalVzMax": 120,
+    "kinds": [
+      {
+        "kind": "okada",
+        "weight": 16,
+        "oncoming": [
+          -200,
+          -140
+        ],
+        "slow": [
+          100,
+          140
+        ],
+        "weaverChancePermille": 650
+      },
+      {
+        "kind": "keke",
+        "weight": 12,
+        "oncoming": [
+          -150,
+          -100
+        ],
+        "slow": [
+          60,
+          100
+        ],
+        "weaverChancePermille": 500
+      },
+      {
+        "kind": "car",
+        "weight": 14,
+        "oncoming": [
+          -190,
+          -130
+        ],
+        "slow": [
+          80,
+          130
+        ]
+      },
+      {
+        "kind": "danfo",
+        "weight": 10,
+        "slow": [
+          70,
+          110
+        ]
+      },
+      {
+        "kind": "trailer",
+        "weight": 6,
+        "slow": [
+          40,
+          80
+        ]
+      }
+    ],
+    "weave": {
+      "triggerMm": 90000,
+      "warnTicks": 30,
+      "mmPerTick": 60
+    },
+    "walker": {
+      "triggerMm": 55000,
+      "mmPerTick": 22
+    }
+  },
   "hit": {
     "speedPermille": 450,
     "invulnTicks": 90,
@@ -142,12 +230,21 @@
     "rivalOutpaceCrowd": 6,
     "rivalBumpSpeedPermille": 850,
     "rallySaturdayMultiplierPermille": 2000,
-    "signatureRideBonusPermille": 1100
+    "signatureRideBonusPermille": 1000
+  },
+  "chaos": {
+    "agberoEverySegments": 2,
+    "tollDropPermille": 250,
+    "tollSpeedPermille": 500,
+    "tollDodgeCrowd": 4,
+    "stubbornEverySegments": 3,
+    "stubbornExtraPermille": 500
   },
   "course": {
     "borderGateMm": 20000,
-    "segmentLengthMm": 260000,
-    "segmentCount": 5,
+    "segmentLengthMm": 340000,
+    "segmentCount": 8,
+    "quickSegmentCount": 3,
     "pickupOffsetMm": 30000,
     "venueOffsetMm": 230000,
     "grandRallyMm": 50000,

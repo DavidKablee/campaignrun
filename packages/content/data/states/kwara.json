@@ -3,18 +3,116 @@
   "name": "Kwara",
   "zone": "NC",
   "biomeKit": "hills-plateau",
-  "palette": { "sky": "#9ED0D8", "fog": "#EFE3C8", "ground": "#8D6E4A", "accent": "#6B8E4E" },
+  "palette": {
+    "sky": "#A6C3CF",
+    "fog": "#E6DDC8",
+    "ground": "#8A8A55",
+    "accent": "#A9573A"
+  },
   "landmarks": [
-    { "name": "Sobi Hill", "venueType": "landmark", "verified": false },
-    { "name": "Owu Falls", "venueType": "landmark", "verified": false },
-    { "name": "Kwara State Stadium", "venueType": "stadium", "verified": false },
-    { "name": "Oja Oba Market", "venueType": "market", "verified": false },
-    { "name": "Post Office Roundabout", "venueType": "square", "verified": false }
+    {
+      "name": "Okelele Pottery Market",
+      "venueType": "market",
+      "verified": false
+    },
+    {
+      "name": "Post Office Junction",
+      "venueType": "square",
+      "verified": false
+    },
+    {
+      "name": "Ilorin Township Stadium",
+      "venueType": "stadium",
+      "verified": false
+    },
+    {
+      "name": "University Zoological Garden",
+      "venueType": "park",
+      "verified": false
+    },
+    {
+      "name": "Sobi Hill",
+      "venueType": "landmark",
+      "verified": false
+    }
   ],
-  "scenery": ["rocky escarpment", "Yoruba-Hausa blended architecture"],
-  "hazards": ["rocky-ridge", "switchback", "go-slow"],
+  "scenery": [
+    "rocky escarpment",
+    "Yoruba-Hausa blended architecture"
+  ],
+  "hazards": [
+    "rocky-ridge",
+    "switchback",
+    "go-slow"
+  ],
   "signatureRide": "keke",
-  "welcomeLines": ["Ẹ káàbọ̀ sí Kwara!"],
-  "farewellLine": "Ẹ ṣeun, Kwara!",
-  "audioStem": "nc-drums"
+  "welcomeLines": [
+    "Ẹ káàbọ̀ sí Kwara!"
+  ],
+  "farewellLine": "Ẹ ṣé, Kwara!",
+  "audioStem": "nc-drums",
+  "world": {
+    "library": "guinea-savanna",
+    "start": {
+      "district": "kwara.okelele",
+      "label": "Your street"
+    },
+    "route": [
+      "kwara.okelele",
+      "kwara.post-office",
+      "kwara.stadium-road",
+      "kwara.tanke",
+      "kwara.sobi-road",
+      "kwara.asa-dam",
+      "kwara.farm-belt",
+      "kwara.escarpment"
+    ],
+    "finish": {
+      "district": "kwara.escarpment",
+      "label": "KWARA · GRAND RALLY"
+    },
+    "road": "kwara-red",
+    "dress": "ilorin-blend",
+    "billboards": [
+      "WELCOME TO KWARA",
+      "TOMATO · PEPPER",
+      "POTS · BOWLS",
+      "ASO OKE · CLOTH",
+      "PURE WATER",
+      "RECHARGE CARDS",
+      "POS · AIRTIME",
+      "DATA 4G · BIG SAVER",
+      "VULCANIZER · TYRES",
+      "FRESH FRUITS"
+    ],
+    "skyline": "sobi-twin-cone",
+    "ambient": "none",
+    "pieces": [
+      {
+        "landmark": 0,
+        "piece": "kwara.pottery-market",
+        "side": -1
+      },
+      {
+        "landmark": 1,
+        "piece": "kwara.post-office-junction",
+        "side": -1
+      },
+      {
+        "landmark": 2,
+        "piece": "kwara.township-stadium",
+        "side": -1
+      },
+      {
+        "landmark": 3,
+        "piece": "kwara.zoo-garden",
+        "side": -1
+      },
+      {
+        "landmark": 4,
+        "piece": "kwara.sobi-hill",
+        "side": -1
+      }
+    ]
+  }
 }

@@ -11,6 +11,8 @@ export type EntityKind =
   | 'pothole'
   | 'cones'
   | 'car'
+  | 'okada'
+  | 'keke'
   | 'trailer'
   | 'pickup-zone'
   | 'venue'
@@ -30,6 +32,10 @@ export interface Entity {
   isPickup?: boolean;
   isZone?: boolean;
   isIntegrityHazard?: boolean;
+  /** An agbero collecting a toll: costs load and speed, never a dent. */
+  isToll?: boolean;
+  /** A venue where one passenger will not get down: unloading takes longer. */
+  stubborn?: boolean;
   zoneKind?: 'pickup' | 'venue' | 'grand' | 'finish' | 'gate';
   /** C26 ride size-class rules. See SimConfig obstacles[].sizeTag for the full rule. */
   sizeTag?: 'narrow' | 'flood' | 'light';
@@ -39,6 +45,23 @@ export interface Entity {
   /** Group size reserved for pickup zones (integer). */
   groupSize?: number;
   consumed?: boolean;
+
+  /**
+   * Moving traffic. `vz` is mm per tick along the road (negative = toward the
+   * player); `xMm` is the vehicle's own lateral position while it weaves or
+   * walks, otherwise the lane centre is used. A mover is dormant (`awake`
+   * false) until the player is within `traffic.wakeMm` behind it.
+   */
+  mover?: 'oncoming' | 'slow' | 'weaver' | 'walker';
+  vz?: number;
+  xMm?: number;
+  awake?: boolean;
+  /** Already passed by the player (so a close call is only counted once). */
+  passed?: boolean;
+  /** Weaver / walker: lane it is heading for, and where it is in the manoeuvre. */
+  weaveTo?: 0 | 1 | 2;
+  weaveState?: 0 | 1 | 2 | 3;
+  weaveWait?: number;
 }
 
 export type SimEventType =
@@ -59,7 +82,12 @@ export type SimEventType =
   | 'perk'
   | 'rivalBump'
   | 'rivalOutpace'
-  | 'pvcActive';
+  | 'pvcActive'
+  | 'toll'
+  | 'tollDodged'
+  | 'stubborn'
+  | 'weaveWarn'
+  | 'closeCall';
 
 export interface SimEvent {
   type: SimEventType;

@@ -24,7 +24,7 @@ export function MenuHead({
   return (
     <header className="cr-menu-head">
       <button className="cr-menu-back" type="button" onClick={onBack} aria-label="Back">
-        <span aria-hidden="true">←</span>
+        <span aria-hidden="true">‹</span>
       </button>
       <div className="cr-menu-headings">
         <h2 className="cr-menu-title">{title}</h2>

@@ -3,18 +3,116 @@
   "name": "Enugu",
   "zone": "SE",
   "biomeKit": "hills-plateau",
-  "palette": { "sky": "#92CCE6", "fog": "#EFE1C4", "ground": "#7A4A2E", "accent": "#3F3F3F" },
+  "palette": {
+    "sky": "#9FBACB",
+    "fog": "#CCD6CE",
+    "ground": "#7A4A2E",
+    "accent": "#34383B"
+  },
   "landmarks": [
-    { "name": "Ogbete Main Market", "venueType": "market", "verified": false },
-    { "name": "Milken Hill", "venueType": "landmark", "verified": false },
-    { "name": "Nike Lake Waterside", "venueType": "waterfront", "verified": false },
-    { "name": "Coal Camp", "venueType": "square", "verified": false },
-    { "name": "Enugu Township Stadium", "venueType": "stadium", "verified": false }
+    {
+      "name": "Hillside Market",
+      "venueType": "market",
+      "verified": false
+    },
+    {
+      "name": "Central Station Sky Bridge",
+      "venueType": "bridge",
+      "verified": false
+    },
+    {
+      "name": "Township Stadium",
+      "venueType": "stadium",
+      "verified": false
+    },
+    {
+      "name": "Nike Lake",
+      "venueType": "waterfront",
+      "verified": false
+    },
+    {
+      "name": "Udi Hills Lookout",
+      "venueType": "landmark",
+      "verified": false
+    }
   ],
-  "scenery": ["coal-camp sheds", "escarpment hairpins"],
-  "hazards": ["hilly-road", "switchback", "go-slow"],
+  "scenery": [
+    "layered ridge wall",
+    "rock-cut hill road"
+  ],
+  "hazards": [
+    "hilly-road",
+    "switchback",
+    "go-slow"
+  ],
   "signatureRide": "keke",
-  "welcomeLines": ["Nnọọ! Welcome to Coal City."],
+  "welcomeLines": [
+    "Nnọọ, Enugu!"
+  ],
   "farewellLine": "Daalụ, Enugu!",
-  "audioStem": "se-highlife"
+  "audioStem": "se-highlife",
+  "world": {
+    "library": "forest-hills",
+    "start": {
+      "district": "enugu.ogui",
+      "label": "Your street"
+    },
+    "route": [
+      "enugu.ogui",
+      "enugu.station",
+      "enugu.stadium-road",
+      "enugu.nike",
+      "enugu.udi-road",
+      "enugu.coal-workshops",
+      "enugu.ngwo-farm",
+      "enugu.centre"
+    ],
+    "finish": {
+      "district": "enugu.centre",
+      "label": "ENUGU · GRAND RALLY"
+    },
+    "road": "enugu-hill",
+    "dress": "igbo-enugu",
+    "billboards": [
+      "WELCOME TO ENUGU",
+      "SPARE PARTS",
+      "WELDING · FABRICATION",
+      "PURE WATER",
+      "GARRI · PROVISIONS",
+      "RECHARGE CARDS",
+      "POS · AIRTIME",
+      "DATA 4G · BIG SAVER",
+      "TAILORING",
+      "FRESH PALM WINE"
+    ],
+    "skyline": "udi-cuesta",
+    "ambient": "none",
+    "pieces": [
+      {
+        "landmark": 0,
+        "piece": "enugu.market",
+        "side": -1
+      },
+      {
+        "landmark": 1,
+        "piece": "enugu.skybridge",
+        "side": -1
+      },
+      {
+        "landmark": 2,
+        "piece": "enugu.stadium",
+        "side": -1
+      },
+      {
+        "landmark": 3,
+        "piece": "enugu.lake",
+        "side": -1
+      },
+      {
+        "landmark": 4,
+        "piece": "enugu.lookout",
+        "side": -1
+      }
+    ]
+  }
 }

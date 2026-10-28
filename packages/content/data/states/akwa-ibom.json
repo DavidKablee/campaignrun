@@ -3,17 +3,115 @@
   "name": "Akwa Ibom",
   "zone": "SS",
   "biomeKit": "rainforest",
-  "palette": { "sky": "#86BBD8", "fog": "#DCEBDF", "ground": "#3F6B3A", "accent": "#D98324" },
+  "palette": {
+    "sky": "#86BBD8",
+    "fog": "#DCEBDF",
+    "ground": "#3F6B3A",
+    "accent": "#B89C5A"
+  },
   "landmarks": [
-    { "name": "Itam Market", "venueType": "market", "verified": false },
-    { "name": "Ibom Plaza", "venueType": "square", "verified": false },
-    { "name": "Ibeno Beach", "venueType": "waterfront", "verified": false },
-    { "name": "Ikot Ekpene Raffia Row", "venueType": "landmark", "verified": false },
-    { "name": "Uyo Township Stadium", "venueType": "stadium", "verified": false }
+    {
+      "name": "Itam Market",
+      "venueType": "market",
+      "verified": false
+    },
+    {
+      "name": "Ibom Plaza",
+      "venueType": "square",
+      "verified": false
+    },
+    {
+      "name": "Ibeno Beach",
+      "venueType": "waterfront",
+      "verified": false
+    },
+    {
+      "name": "Raffia Craft Row",
+      "venueType": "landmark",
+      "verified": false
+    },
+    {
+      "name": "Township Stadium",
+      "venueType": "stadium",
+      "verified": false
+    }
   ],
-  "scenery": ["raffia palm stands", "coastal rain squalls"],
-  "hazards": ["rain-slick", "keke-swerve", "go-slow"],
+  "scenery": [
+    "raffia palm stands",
+    "coastal rain squalls"
+  ],
+  "hazards": [
+    "rain-slick",
+    "keke-swerve",
+    "go-slow"
+  ],
   "signatureRide": "keke",
-  "welcomeLines": ["Welcome to Uyo — Akwa Ibom is open."],
-  "audioStem": "ss-brass"
+  "welcomeLines": [
+    "Welcome to Uyo — Akwa Ibom is open."
+  ],
+  "audioStem": "ss-brass",
+  "world": {
+    "library": "creek-delta",
+    "start": {
+      "district": "akwa-ibom.itam",
+      "label": "Your street"
+    },
+    "route": [
+      "akwa-ibom.itam",
+      "akwa-ibom.plaza",
+      "akwa-ibom.beach-road",
+      "akwa-ibom.craft-road",
+      "akwa-ibom.stadium-road",
+      "akwa-ibom.palm-belt",
+      "akwa-ibom.creek",
+      "akwa-ibom.avenue"
+    ],
+    "finish": {
+      "district": "akwa-ibom.avenue",
+      "label": "AKWA IBOM · GRAND RALLY"
+    },
+    "road": "ibom-clean",
+    "dress": "ibibio-city",
+    "billboards": [
+      "WELCOME TO AKWA IBOM",
+      "GARRI · PROVISIONS",
+      "RAFFIA · CRAFTS",
+      "FISH · CRAYFISH",
+      "PURE WATER",
+      "RECHARGE CARDS",
+      "POS · AIRTIME",
+      "DATA 4G · BIG SAVER",
+      "TAILORING",
+      "PHARMACY"
+    ],
+    "skyline": "ibom-treeline",
+    "ambient": "none",
+    "pieces": [
+      {
+        "landmark": 0,
+        "piece": "akwa-ibom.itam-market",
+        "side": -1
+      },
+      {
+        "landmark": 1,
+        "piece": "akwa-ibom.ibom-plaza",
+        "side": -1
+      },
+      {
+        "landmark": 2,
+        "piece": "akwa-ibom.ibeno-beach",
+        "side": -1
+      },
+      {
+        "landmark": 3,
+        "piece": "akwa-ibom.raffia-row",
+        "side": -1
+      },
+      {
+        "landmark": 4,
+        "piece": "akwa-ibom.stadium",
+        "side": -1
+      }
+    ]
+  }
 }

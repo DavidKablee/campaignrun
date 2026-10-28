@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { worldRefSchema } from './world';
 
 const int = z.number().int();
 const isoDate = z.string().refine((s) => !Number.isNaN(Date.parse(s)), 'invalid ISO date');
@@ -49,6 +50,53 @@ export const simConfigSchema = z.object({
       }),
     )
     .min(1),
+  /**
+   * Traffic that moves. A kind listed here is spawned as a vehicle with a
+   * velocity of its own (mm per sim tick, 60 Hz: 100 mm/tick is 6 m/s) instead
+   * of a prop in the road, and takes its size from the `obstacles` row of the
+   * same kind. Movers sleep until the player is `wakeMm` behind them, so they
+   * start moving already in view and the course stays a pure function of the
+   * seed and the player's own inputs.
+   */
+  traffic: z.object({
+    /** Share of hazard slots rolled as moving traffic, on top of the obstacle table's own vehicles. */
+    chancePermille: int.min(0).max(1000),
+    wakeMm: int.positive(),
+    /** Oncoming traffic is never placed closer than this to the stop it follows, so a convoy leaving a pickup is not met head-on. */
+    oncomingMinOffsetMm: int.nonnegative(),
+    /** Same-direction traffic is only placed this near the window start, so it cannot crawl into the unload zone. */
+    slowMaxOffsetMm: int.positive(),
+    /** A vehicle passed this close sideways (and not hit) is a close call. */
+    closeCallMm: int.positive(),
+    /** Rival convoys in the first part of a window travel at this speed (mm/tick, same direction as the player). */
+    rivalVzMin: int.nonnegative(),
+    rivalVzMax: int.nonnegative(),
+    kinds: z
+      .array(
+        z.object({
+          kind: z.string().min(1),
+          weight: int.positive(),
+          /** [min, max] mm/tick, negative = toward the player. Absent = this kind never drives the wrong way. */
+          oncoming: z.tuple([z.number().int(), z.number().int()]).optional(),
+          /** [min, max] mm/tick, positive = away from the player, slower than it. Absent = never crawls ahead. */
+          slow: z.tuple([z.number().int(), z.number().int()]).optional(),
+          /** Chance this vehicle swerves into a neighbouring lane as the player closes in. */
+          weaverChancePermille: int.min(0).max(1000).optional(),
+        }),
+      )
+      .min(1),
+    weave: z.object({
+      /** Distance to the player at which a weaver starts its warning. */
+      triggerMm: int.positive(),
+      /** Ticks of indicator and horn before it moves. */
+      warnTicks: int.positive(),
+      mmPerTick: int.positive(),
+    }),
+    walker: z.object({
+      triggerMm: int.positive(),
+      mmPerTick: int.positive(),
+    }),
+  }),
   hit: z.object({
     speedPermille: int.min(0).max(1000),
     invulnTicks: int.nonnegative(),
@@ -85,10 +133,27 @@ export const simConfigSchema = z.object({
     /** C30: Rally Saturday (spec: "x2 Crowd, 6-9pm WAT"). The caller decides the window is active from a real clock; sim only applies the number. */
     rallySaturdayMultiplierPermille: int.positive(),
   }),
+  /**
+   * Unscheduled trouble, placed by segment number rather than by the hazard
+   * roll, so it adds the same moments to every seed without moving the rest of
+   * the course. An agbero collecting a toll stands in a lane every Nth segment
+   * (a hit costs load and speed, never a dent; a clean pass is worth a little
+   * Turnout), and a stubborn passenger makes every Nth venue slower to unload.
+   */
+  chaos: z.object({
+    agberoEverySegments: int.positive(),
+    tollDropPermille: int.min(0).max(1000),
+    tollSpeedPermille: int.min(0).max(1000),
+    tollDodgeCrowd: int.nonnegative(),
+    stubbornEverySegments: int.positive(),
+    stubbornExtraPermille: int.nonnegative(),
+  }),
   course: z.object({
     borderGateMm: int.positive(),
     segmentLengthMm: int.positive(),
     segmentCount: int.positive(),
+    /** A quick rally runs this many segments of the same road: a ~90 s run for a first go or a short break. */
+    quickSegmentCount: int.positive(),
     pickupOffsetMm: int.positive(),
     venueOffsetMm: int.positive(),
     grandRallyMm: int.positive(),
@@ -368,6 +433,8 @@ export const stateSchema = z.object({
    */
   farewellLine: z.string().min(1).optional(),
   audioStem: z.string(),
+  /** What the state looks like (C50). Absent: the stock Lagos world. */
+  world: worldRefSchema.optional(),
 });
 export type StateDef = z.infer<typeof stateSchema>;
 
@@ -527,6 +594,9 @@ export const metaConfigSchema = z
       donation: int.nonnegative(),
       dailyMission: int.nonnegative(),
       weeklyMission: int.nonnegative(),
+      /** Rally streak: each finished rally in a row lifts the next payout by this much, up to the step cap. */
+      streakBonusPermillePerStep: int.nonnegative(),
+      streakBonusMaxSteps: int.nonnegative(),
     }),
     missions: z.object({ daily: z.array(z.object({ id: z.enum(['run', 'deliver', 'crowd']), label: z.string(), target: int.positive() })).length(3), weekly: z.object({ id: z.string(), label: z.string(), target: int.positive() }) }),
   })

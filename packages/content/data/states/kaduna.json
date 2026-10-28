@@ -3,18 +3,122 @@
   "name": "Kaduna",
   "zone": "NW",
   "biomeKit": "sahel-savanna",
-  "palette": { "sky": "#B9C9D9", "fog": "#E4EBF2", "ground": "#8B7355", "accent": "#C0392B" },
+  "palette": {
+    "sky": "#AFC4D4",
+    "fog": "#E4E8E4",
+    "ground": "#9B6A4C",
+    "accent": "#B9663A"
+  },
   "landmarks": [
-    { "name": "Kawo Market", "venueType": "market", "verified": false },
-    { "name": "River Kaduna Bridge", "venueType": "bridge", "verified": false },
-    { "name": "Centenary Park", "venueType": "park", "verified": false },
-    { "name": "Rigasa Square", "venueType": "square", "verified": false },
-    { "name": "Central Stadium Ground", "venueType": "stadium", "verified": false }
+    {
+      "name": "Bakin Dogo Market",
+      "venueType": "market",
+      "verified": false
+    },
+    {
+      "name": "Kaduna Township Stadium",
+      "venueType": "stadium",
+      "verified": false
+    },
+    {
+      "name": "River Kaduna Rail Bridge",
+      "venueType": "bridge",
+      "verified": false
+    },
+    {
+      "name": "Splash Park",
+      "venueType": "park",
+      "verified": false
+    },
+    {
+      "name": "Matsirga Waterfalls",
+      "venueType": "waterfront",
+      "verified": false
+    }
   ],
-  "scenery": ["rail yards", "harmattan haze"],
-  "hazards": ["dust-plume", "go-slow", "cart-weave"],
+  "scenery": [],
+  "hazards": [
+    "dust-plume",
+    "go-slow",
+    "cart-weave"
+  ],
   "signatureRide": "hilux",
-  "welcomeLines": ["Barka da zuwa Kaduna!"],
+  "welcomeLines": [
+    "Barka da zuwa Kaduna!"
+  ],
   "farewellLine": "Na gode, Kaduna!",
-  "audioStem": "nw-kalangu"
+  "audioStem": "nw-kalangu",
+  "world": {
+    "library": "guinea-savanna",
+    "start": {
+      "district": "kaduna.gra-avenue",
+      "label": "Your street"
+    },
+    "route": [
+      "kaduna.tudun-wada",
+      "kaduna.stadium-roundabout",
+      "kaduna.river-crossing",
+      "kaduna.riverside-park",
+      "kaduna.falls-road",
+      "kaduna.hill-village",
+      "kaduna.works-road",
+      "kaduna.city-avenue"
+    ],
+    "finish": {
+      "district": "kaduna.city-avenue",
+      "label": "KADUNA · GRAND RALLY"
+    },
+    "road": "redbrown-avenue",
+    "dress": "hausa-guinea",
+    "billboards": [
+      "DATA 4G · BIG SAVER",
+      "COLD DRINKS",
+      "ROOFING SHEETS",
+      "PURE WATER",
+      "RECHARGE CARDS",
+      "FRESH FRUITS",
+      "BUKA · SUYA",
+      "BURGLAR-PROOF & GATES",
+      "WELCOME TO KADUNA"
+    ],
+    "skyline": "inselberg-ridge",
+    "ambient": "none",
+    "pieces": [
+      {
+        "landmark": 0,
+        "piece": "kaduna.bakin-dogo",
+        "side": -1
+      },
+      {
+        "landmark": 1,
+        "piece": "kaduna.stadium",
+        "side": -1
+      },
+      {
+        "landmark": 2,
+        "piece": "kaduna.level-crossing",
+        "side": 1
+      },
+      {
+        "landmark": 2,
+        "piece": "kaduna.crossing-clear",
+        "side": -1
+      },
+      {
+        "landmark": 2,
+        "piece": "kaduna.rail-bridge",
+        "side": -1
+      },
+      {
+        "landmark": 3,
+        "piece": "kaduna.splash-park",
+        "side": -1
+      },
+      {
+        "landmark": 4,
+        "piece": "kaduna.matsirga-falls",
+        "side": -1
+      }
+    ]
+  }
 }

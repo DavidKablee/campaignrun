@@ -38,11 +38,31 @@ export function runModifiers(levels: UpgradeLevels) {
   return out;
 }
 
-/** ₦ for a finished rally, before mission payouts. */
-export function runPayout(delivered: number, levels: UpgradeLevels): number {
+/**
+ * The rally streak's lift on the next payout, permille. It reads the streak the
+ * player walks in with, steps up with each rally in a row and stops at a cap —
+ * a thank-you for coming back, not a reason to grind. It touches Funds only,
+ * never Turnout, so no board is ever affected by how long someone has played.
+ */
+export function streakBonusPermille(streak: number): number {
   const r = metaConfig.rewards;
-  const base = r.baseRun + Math.max(0, delivered) * r.perDelivered;
-  return Math.floor((base * runModifiers(levels).rewardPermille) / 1000);
+  return Math.min(Math.max(0, streak), r.streakBonusMaxSteps) * r.streakBonusPermillePerStep;
+}
+
+/**
+ * ₦ for a rally, before mission payouts. `baseShare` is the part of the
+ * finishing pay a short run earns (1000 = all of it), so a quick rally cannot
+ * out-earn the full road by being repeated.
+ */
+export function runPayout(
+  delivered: number,
+  levels: UpgradeLevels,
+  opts: { streak?: number; baseSharePermille?: number } = {},
+): number {
+  const r = metaConfig.rewards;
+  const base = Math.floor((r.baseRun * (opts.baseSharePermille ?? 1000)) / 1000) + Math.max(0, delivered) * r.perDelivered;
+  const boosted = Math.floor((base * runModifiers(levels).rewardPermille) / 1000);
+  return Math.floor((boosted * (1000 + streakBonusPermille(opts.streak ?? 0))) / 1000);
 }
 
 /** Following for a finished rally. Delivering supporters is the only source. */

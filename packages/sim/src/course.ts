@@ -2,6 +2,7 @@ import type { SimConfig } from '@cr/content';
 import type { Entity, SimState } from './types';
 import { rngIntRange } from './rng';
 import { applyPermille } from './fixed';
+import { laneCenterMm } from './geometry';
 
 function pushZone(
   state: SimState,
@@ -9,6 +10,7 @@ function pushZone(
   kind: Entity['zoneKind'],
   z: number,
   groupSize?: number,
+  stubborn = false,
 ): void {
   state.entities.push({
     id: state.entityIdSeq++,
@@ -23,6 +25,7 @@ function pushZone(
     zoneKind: kind,
     groupSize,
     consumed: false,
+    ...(stubborn ? { stubborn: true } : {}),
   });
 }
 
@@ -50,6 +53,113 @@ function pickWeightedObstacle(state: SimState, config: SimConfig) {
   return config.obstacles[0]!;
 }
 
+/** Does the traffic table know how to move this obstacle kind? */
+function trafficKind(config: SimConfig, kind: string) {
+  return config.traffic.kinds.find((k) => k.kind === kind);
+}
+
+function pickTrafficKind(state: SimState, config: SimConfig) {
+  const weight = (k: SimConfig['traffic']['kinds'][number]) =>
+    Math.max(1, applyPermille(k.weight, state.road.obstacleWeightPermille[k.kind] ?? 1000));
+  let total = 0;
+  for (const k of config.traffic.kinds) total += weight(k);
+  let roll = rngIntRange(state.rng, 0, total - 1);
+  for (const k of config.traffic.kinds) {
+    const w = weight(k);
+    if (roll < w) return k;
+    roll -= w;
+  }
+  return config.traffic.kinds[0]!;
+}
+
+/**
+ * Lays down one vehicle that moves. Where it may drive depends on where it
+ * sits in the window: oncoming traffic stays clear of the stop it follows
+ * (`oncomingMinOffsetMm`) and slow same-direction traffic stays in the first
+ * part (`slowMaxOffsetMm`) so it cannot crawl into the unload zone. Returns
+ * false when this kind has nowhere legal to go here, and the caller falls back
+ * to an ordinary obstacle.
+ *
+ * Every random draw happens whether or not it is used, so the course after
+ * this slot is the same however the slot resolved.
+ */
+function spawnMover(
+  state: SimState,
+  config: SimConfig,
+  kindDef: SimConfig['traffic']['kinds'][number],
+  lane: 0 | 1 | 2,
+  z: number,
+  offsetMm: number,
+): boolean {
+  const t = config.traffic;
+  const dims = config.obstacles.find((o) => o.kind === kindDef.kind);
+  const directionRoll = rngIntRange(state.rng, 0, 1);
+  const speedRoll = rngIntRange(state.rng, 0, 999);
+  const weaverRoll = rngIntRange(state.rng, 0, 999);
+  const sideRoll = rngIntRange(state.rng, 0, 1);
+  if (!dims) return false;
+
+  const canSlow = kindDef.slow !== undefined && offsetMm <= t.slowMaxOffsetMm;
+  const canOncoming = kindDef.oncoming !== undefined && offsetMm >= t.oncomingMinOffsetMm;
+  if (!canSlow && !canOncoming) return false;
+
+  // Half of what can go either way goes oncoming; what can only go one way does.
+  const oncoming = canOncoming && (!canSlow || directionRoll === 0);
+  const range = (oncoming ? kindDef.oncoming : kindDef.slow)!;
+  const vz = range[0] + Math.floor(((range[1] - range[0]) * speedRoll) / 999);
+  const weaver = weaverRoll < (kindDef.weaverChancePermille ?? 0);
+
+  const ent: Entity = {
+    id: state.entityIdSeq++,
+    kind: kindDef.kind,
+    lane,
+    z,
+    halfWidthMm: dims.halfWidthMm,
+    halfLenMm: dims.halfLenMm,
+    heightMm: dims.heightMm,
+    active: true,
+    mover: weaver ? 'weaver' : oncoming ? 'oncoming' : 'slow',
+    vz,
+    xMm: laneCenterMm(lane, config),
+    awake: false,
+  };
+  if (weaver) {
+    // Edge lanes drift toward the middle, the middle one picks a side.
+    ent.weaveTo = lane === 1 ? ((sideRoll === 0 ? 0 : 2) as 0 | 2) : 1;
+    ent.weaveState = 0;
+  }
+  state.entities.push(ent);
+  return true;
+}
+
+/**
+ * One entry from the obstacle table. A vehicle kind drives if it has somewhere
+ * legal to go at this spot; everything else (and a vehicle with nowhere to go)
+ * is a prop in the road as before.
+ */
+function pushObstacle(
+  state: SimState,
+  config: SimConfig,
+  obstacle: SimConfig['obstacles'][number],
+  lane: 0 | 1 | 2,
+  z: number,
+  offsetMm: number,
+): void {
+  const driver = trafficKind(config, obstacle.kind);
+  if (driver && spawnMover(state, config, driver, lane, z, offsetMm)) return;
+  state.entities.push({
+    id: state.entityIdSeq++,
+    kind: obstacle.kind,
+    lane,
+    z,
+    halfWidthMm: obstacle.halfWidthMm,
+    halfLenMm: obstacle.halfLenMm,
+    heightMm: obstacle.heightMm,
+    active: true,
+    sizeTag: obstacle.sizeTag,
+  });
+}
+
 function spawnHazardCluster(state: SimState, config: SimConfig, fromZ: number, toZ: number): void {
   // C45: a busier road is a smaller gap. Both ends move together so the spread
   // stays a spread. How close a three-hazard state may stack things is decided
@@ -60,6 +170,7 @@ function spawnHazardCluster(state: SimState, config: SimConfig, fromZ: number, t
   const doubleChance = Math.min(1000, applyPermille(config.spawn.doubleChancePermille, state.road.doubleChancePermille));
   let z = fromZ + gapMin;
   while (z < toZ - 5000) {
+    const offsetMm = z - fromZ;
     const roll = rngIntRange(state.rng, 0, 999);
     const supporterCut = config.spawn.supporterChancePermille;
     const integrityCut = supporterCut + config.spawn.integrityChancePermille;
@@ -75,6 +186,7 @@ function spawnHazardCluster(state: SimState, config: SimConfig, fromZ: number, t
     const isIntegrity = !isSupporter && roll < integrityCut;
     const isPvc = !isSupporter && !isIntegrity && roll < pvcCut;
     const isRival = !isSupporter && !isIntegrity && !isPvc && roll < rivalCut;
+    const isTraffic = !isSupporter && !isIntegrity && !isPvc && !isRival && roll < rivalCut + config.traffic.chancePermille;
     const lane = rngIntRange(state.rng, 0, 2) as 0 | 1 | 2;
 
     if (isSupporter) {
@@ -120,6 +232,11 @@ function spawnHazardCluster(state: SimState, config: SimConfig, fromZ: number, t
         'spot-the-fake',
       ] as const;
       const kind = kinds[state.integritySpawnSeq % kinds.length]!;
+      // The ones that are people on their feet cross the road once the player
+      // is close; a slumped voter and a crate of materials stay where they are.
+      // The side comes from the spawn counter, so this costs no random draw.
+      const walks = kind !== 'sleepy-voter' && kind !== 'late-materials';
+      const side = state.integritySpawnSeq % 2;
       state.integritySpawnSeq++;
       state.entities.push({
         id: state.entityIdSeq++,
@@ -131,6 +248,16 @@ function spawnHazardCluster(state: SimState, config: SimConfig, fromZ: number, t
         heightMm: 1200,
         active: true,
         isIntegrityHazard: true,
+        ...(walks
+          ? {
+              mover: 'walker' as const,
+              vz: 0,
+              xMm: laneCenterMm(lane, config),
+              awake: false,
+              weaveTo: lane === 1 ? ((side === 0 ? 0 : 2) as 0 | 2) : (1 as const),
+              weaveState: 0 as const,
+            }
+          : {}),
       });
     } else if (isPvc) {
       // C28: a free-standing collectible, not a pickup zone — grants a temporary Crowd buff.
@@ -144,10 +271,17 @@ function spawnHazardCluster(state: SimState, config: SimConfig, fromZ: number, t
         heightMm: 900,
         active: true,
       });
+    } else if (isTraffic && spawnMover(state, config, pickTrafficKind(state, config), lane, z, offsetMm)) {
+      // a vehicle that drives: placed by spawnMover
     } else if (isRival) {
       // C28: an NPC convoy of another Contender — round-robin so every ride model shows equally.
       const model = state.rivalSpawnSeq % 4;
       state.rivalSpawnSeq++;
+      const t = config.traffic;
+      // Early in a window a rival is on the move (slower than the player, so
+      // passing one is an overtake); further on it keeps its old place in the road.
+      const rivalSpeedRoll = rngIntRange(state.rng, 0, 999);
+      const driving = offsetMm <= t.slowMaxOffsetMm;
       state.entities.push({
         id: state.entityIdSeq++,
         kind: 'rival-convoy',
@@ -159,34 +293,20 @@ function spawnHazardCluster(state: SimState, config: SimConfig, fromZ: number, t
         active: true,
         isRivalConvoy: true,
         value: model,
+        ...(driving
+          ? {
+              mover: 'slow' as const,
+              vz: t.rivalVzMin + Math.floor(((t.rivalVzMax - t.rivalVzMin) * rivalSpeedRoll) / 999),
+              xMm: laneCenterMm(lane, config),
+              awake: false,
+            }
+          : {}),
       });
     } else {
-      const obstacle = pickWeightedObstacle(state, config);
-      state.entities.push({
-        id: state.entityIdSeq++,
-        kind: obstacle.kind,
-        lane,
-        z,
-        halfWidthMm: obstacle.halfWidthMm,
-        halfLenMm: obstacle.halfLenMm,
-        heightMm: obstacle.heightMm,
-        active: true,
-        sizeTag: obstacle.sizeTag,
-      });
+      pushObstacle(state, config, pickWeightedObstacle(state, config), lane, z, offsetMm);
       if (rngIntRange(state.rng, 0, 999) < doubleChance) {
         const lane2 = ((lane + 1 + rngIntRange(state.rng, 0, 1)) % 3) as 0 | 1 | 2;
-        const o2 = pickWeightedObstacle(state, config);
-        state.entities.push({
-          id: state.entityIdSeq++,
-          kind: o2.kind,
-          lane: lane2,
-          z: z + 800,
-          halfWidthMm: o2.halfWidthMm,
-          halfLenMm: o2.halfLenMm,
-          heightMm: o2.heightMm,
-          active: true,
-          sizeTag: o2.sizeTag,
-        });
+        pushObstacle(state, config, pickWeightedObstacle(state, config), lane2, z + 800, offsetMm + 800);
       }
     }
 
@@ -213,7 +333,24 @@ export function buildCourse(state: SimState, config: SimConfig): void {
 
     spawnHazardCluster(state, config, pickupZ + config.zones.halfLenMm, venueZ - config.zones.halfLenMm);
 
-    pushZone(state, config, 'venue', venueZ);
+    // Chaos is placed from the segment number alone: no roll, so it never moves
+    // the rest of the course, and every seed meets the same number of moments.
+    const chaos = config.chaos;
+    if (s % chaos.agberoEverySegments === chaos.agberoEverySegments - 1) {
+      state.entities.push({
+        id: state.entityIdSeq++,
+        kind: 'agbero',
+        lane: ((s * 2 + 1) % 3) as 0 | 1 | 2,
+        z: Math.floor((pickupZ + venueZ) / 2),
+        halfWidthMm: 450,
+        halfLenMm: 500,
+        heightMm: 1700,
+        active: true,
+        isToll: true,
+      });
+    }
+
+    pushZone(state, config, 'venue', venueZ, undefined, s % chaos.stubbornEverySegments === chaos.stubbornEverySegments - 1);
     cursor = segEnd;
   }
 

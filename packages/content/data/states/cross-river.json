@@ -3,17 +3,116 @@
   "name": "Cross River",
   "zone": "SS",
   "biomeKit": "rainforest",
-  "palette": { "sky": "#8CC5E2", "fog": "#DCEBDF", "ground": "#3F6B3A", "accent": "#E0319A" },
+  "palette": {
+    "sky": "#8CC5E2",
+    "fog": "#DCEBDF",
+    "ground": "#2F5D3A",
+    "accent": "#7A2E4A"
+  },
   "landmarks": [
-    { "name": "Marina Waterfront", "venueType": "waterfront", "verified": false },
-    { "name": "Carnival Route", "venueType": "square", "verified": false },
-    { "name": "Watt Market", "venueType": "market", "verified": false },
-    { "name": "Tinapa Grounds", "venueType": "landmark", "verified": false },
-    { "name": "Calabar Township Stadium", "venueType": "stadium", "verified": false }
+    {
+      "name": "Central Market",
+      "venueType": "market",
+      "verified": false
+    },
+    {
+      "name": "River Quay",
+      "venueType": "waterfront",
+      "verified": false
+    },
+    {
+      "name": "Carnival Road",
+      "venueType": "square",
+      "verified": false
+    },
+    {
+      "name": "Trade Hall",
+      "venueType": "landmark",
+      "verified": false
+    },
+    {
+      "name": "Township Stadium",
+      "venueType": "stadium",
+      "verified": false
+    }
   ],
-  "scenery": ["carnival floats", "rainforest canopy"],
-  "hazards": ["crowd-surge", "rain-slick", "go-slow"],
-  "signatureRide": "danfo",
-  "welcomeLines": ["Welcome to Calabar — carnival city!"],
-  "audioStem": "ss-brass"
+  "scenery": [
+    "rainforest canopy",
+    "harbour crane"
+  ],
+  "hazards": [
+    "crowd-surge",
+    "rain-slick",
+    "go-slow"
+  ],
+  "signatureRide": "keke",
+  "welcomeLines": [
+    "Welcome to Calabar — carnival city!"
+  ],
+  "audioStem": "ss-brass",
+  "farewellLine": "Thank you, Cross River!",
+  "world": {
+    "library": "creek-delta",
+    "start": {
+      "district": "cross-river.market",
+      "label": "Your street"
+    },
+    "route": [
+      "cross-river.market",
+      "cross-river.quay-road",
+      "cross-river.carnival-road",
+      "cross-river.hall-road",
+      "cross-river.stadium-road",
+      "cross-river.raffia-belt",
+      "cross-river.tailors-lane",
+      "cross-river.plaza-street"
+    ],
+    "finish": {
+      "district": "cross-river.plaza-street",
+      "label": "CROSS RIVER · GRAND RALLY"
+    },
+    "road": "calabar-wet",
+    "dress": "calabar-city",
+    "billboards": [
+      "WELCOME TO CALABAR",
+      "FRESH FISH",
+      "PLANTAIN · YAM",
+      "PURE WATER",
+      "PROVISIONS",
+      "RECHARGE CARDS",
+      "POS · AIRTIME",
+      "DATA 4G · BIG SAVER",
+      "TAILORING",
+      "TRADE HALL"
+    ],
+    "skyline": "calabar-canopy",
+    "ambient": "none",
+    "pieces": [
+      {
+        "landmark": 0,
+        "piece": "cross-river.market",
+        "side": -1
+      },
+      {
+        "landmark": 1,
+        "piece": "cross-river.river-quay",
+        "side": -1
+      },
+      {
+        "landmark": 2,
+        "piece": "cross-river.carnival-road",
+        "side": -1
+      },
+      {
+        "landmark": 3,
+        "piece": "cross-river.trade-hall",
+        "side": -1
+      },
+      {
+        "landmark": 4,
+        "piece": "cross-river.stadium",
+        "side": -1
+      }
+    ]
+  }
 }

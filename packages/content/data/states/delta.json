@@ -3,17 +3,56 @@
   "name": "Delta",
   "zone": "SS",
   "biomeKit": "creek-delta",
-  "palette": { "sky": "#A8D8D8", "fog": "#D8ECE8", "ground": "#4A6B5A", "accent": "#2A6F97" },
+  "palette": { "sky": "#A9C4C8", "fog": "#DCE5E1", "ground": "#55744A", "accent": "#4D6F86" },
   "landmarks": [
     { "name": "Niger Bridge (Asaba head)", "venueType": "bridge", "verified": false },
+    { "name": "Sapele Timber Wharf", "venueType": "waterfront", "verified": false },
     { "name": "Effurun Roundabout", "venueType": "square", "verified": false },
-    { "name": "Sapele Waterside", "venueType": "waterfront", "verified": false },
-    { "name": "Warri Township Stadium", "venueType": "stadium", "verified": false },
-    { "name": "Nelson Mandela Gardens", "venueType": "park", "verified": false }
+    { "name": "Warri Stadium", "venueType": "stadium", "verified": false },
+    { "name": "Ogheye Floating Market", "venueType": "market", "verified": false }
   ],
-  "scenery": ["mangrove tree line", "riverine stilt houses"],
+  "scenery": ["creek and mangrove edge", "timber yards", "oil palm belt"],
   "hazards": ["creek-crossing", "roundabout-maze", "go-slow"],
   "signatureRide": "keke",
   "welcomeLines": ["Welcome o! Na Delta we dey!"],
-  "audioStem": "ss-brass"
+  "farewellLine": "E go bi nah, Delta!",
+  "audioStem": "ss-brass",
+  "world": {
+    "library": "creek-delta",
+    "start": { "district": "delta.bridge-approach", "label": "Your street" },
+    "route": [
+      "delta.niger-bluff",
+      "delta.timber-quarter",
+      "delta.effurun",
+      "delta.warri-streets",
+      "delta.creek-market",
+      "delta.warri-river",
+      "delta.palm-belt",
+      "delta.okpanam-road"
+    ],
+    "finish": { "district": "delta.okpanam-road", "label": "DELTA · GRAND RALLY" },
+    "road": "asaba-red",
+    "dress": "delta-warri",
+    "billboards": [
+      "WELCOME TO DELTA",
+      "GARRI · BEANS · PALM OIL",
+      "TIMBER · PLANKS · BOARDS",
+      "PURE WATER",
+      "RECHARGE CARDS",
+      "POS · CASH OUT",
+      "FRESH FISH · CREEK",
+      "KEKE PARK · PAY WELL",
+      "BARBING SALON",
+      "DATA 4G · BIG SAVER"
+    ],
+    "skyline": "delta-horizon",
+    "ambient": "none",
+    "pieces": [
+      { "landmark": 0, "piece": "delta.niger-bridge", "side": -1 },
+      { "landmark": 1, "piece": "delta.timber-wharf", "side": -1 },
+      { "landmark": 2, "piece": "delta.effurun-roundabout", "side": -1 },
+      { "landmark": 3, "piece": "delta.warri-stadium", "side": -1 },
+      { "landmark": 4, "piece": "delta.ogheye-market", "side": -1 }
+    ]
+  }
 }

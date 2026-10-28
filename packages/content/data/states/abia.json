@@ -3,18 +3,116 @@
   "name": "Abia",
   "zone": "SE",
   "biomeKit": "rainforest",
-  "palette": { "sky": "#8CC5E2", "fog": "#DCEBDF", "ground": "#3F6B3A", "accent": "#D98324" },
+  "palette": {
+    "sky": "#8CC5E2",
+    "fog": "#DCEBDF",
+    "ground": "#8B6F5A",
+    "accent": "#9A6A3C"
+  },
   "landmarks": [
-    { "name": "Ariaria International Market", "venueType": "market", "verified": false },
-    { "name": "Ngwa Road Square", "venueType": "square", "verified": false },
-    { "name": "Azumini Blue River", "venueType": "waterfront", "verified": false },
-    { "name": "Aba River Crossing", "venueType": "bridge", "verified": false },
-    { "name": "Umuahia Township Stadium", "venueType": "stadium", "verified": false }
+    {
+      "name": "Shoe Cluster Market",
+      "venueType": "market",
+      "verified": false
+    },
+    {
+      "name": "Fabric Market",
+      "venueType": "market",
+      "verified": false
+    },
+    {
+      "name": "Blue River Landing",
+      "venueType": "waterfront",
+      "verified": false
+    },
+    {
+      "name": "Drain Channel Bridge",
+      "venueType": "bridge",
+      "verified": false
+    },
+    {
+      "name": "Township Stadium",
+      "venueType": "stadium",
+      "verified": false
+    }
   ],
-  "scenery": ["shoemakers' sheds", "tailoring rows"],
-  "hazards": ["market-spill", "keke-swerve", "go-slow"],
+  "scenery": [
+    "shoe sheds",
+    "tailoring rows"
+  ],
+  "hazards": [
+    "market-spill",
+    "keke-swerve",
+    "go-slow"
+  ],
   "signatureRide": "keke",
-  "welcomeLines": ["Nnọọ! Aba is open for business."],
+  "welcomeLines": [
+    "Nnọọ! Aba is open for business."
+  ],
   "farewellLine": "Daalụ, Abia!",
-  "audioStem": "se-highlife"
+  "audioStem": "se-highlife",
+  "world": {
+    "library": "farmland-river",
+    "start": {
+      "district": "abia.shoe-cluster",
+      "label": "Your street"
+    },
+    "route": [
+      "abia.shoe-cluster",
+      "abia.fabric-market",
+      "abia.blue-river",
+      "abia.flood-channel",
+      "abia.stadium-road",
+      "abia.shed-belt",
+      "abia.tailors-lane",
+      "abia.plaza-street"
+    ],
+    "finish": {
+      "district": "abia.plaza-street",
+      "label": "ABIA · GRAND RALLY"
+    },
+    "road": "abia-wet",
+    "dress": "abia-city",
+    "billboards": [
+      "WELCOME TO ABIA",
+      "SHOES · SANDALS",
+      "FABRICS · LACE",
+      "PURE WATER",
+      "PROVISIONS",
+      "RECHARGE CARDS",
+      "POS · AIRTIME",
+      "DATA 4G · BIG SAVER",
+      "TAILORING",
+      "BELTS · BAGS"
+    ],
+    "skyline": "abia-sheds",
+    "ambient": "none",
+    "pieces": [
+      {
+        "landmark": 0,
+        "piece": "abia.shoe-cluster",
+        "side": -1
+      },
+      {
+        "landmark": 1,
+        "piece": "abia.fabric-market",
+        "side": -1
+      },
+      {
+        "landmark": 2,
+        "piece": "abia.blue-river",
+        "side": -1
+      },
+      {
+        "landmark": 3,
+        "piece": "abia.flood-channel",
+        "side": -1
+      },
+      {
+        "landmark": 4,
+        "piece": "abia.stadium",
+        "side": -1
+      }
+    ]
+  }
 }

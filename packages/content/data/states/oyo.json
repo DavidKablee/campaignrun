@@ -3,18 +3,116 @@
   "name": "Oyo",
   "zone": "SW",
   "biomeKit": "hills-plateau",
-  "palette": { "sky": "#8FD0E8", "fog": "#F0E0C0", "ground": "#A0522D", "accent": "#2E7D32" },
+  "palette": {
+    "sky": "#A7C2D2",
+    "fog": "#E7DCC6",
+    "ground": "#98583C",
+    "accent": "#6F4A2E"
+  },
   "landmarks": [
-    { "name": "Cocoa House", "venueType": "landmark", "verified": false },
-    { "name": "Bower's Tower", "venueType": "landmark", "verified": false },
-    { "name": "Agodi Gardens", "venueType": "park", "verified": false },
-    { "name": "Mapo Hall", "venueType": "square", "verified": false },
-    { "name": "Bodija Market", "venueType": "market", "verified": false }
+    {
+      "name": "Dugbe Market",
+      "venueType": "market",
+      "verified": false
+    },
+    {
+      "name": "Mokola Flyover",
+      "venueType": "bridge",
+      "verified": false
+    },
+    {
+      "name": "Agodi Gardens",
+      "venueType": "park",
+      "verified": false
+    },
+    {
+      "name": "Cocoa House",
+      "venueType": "landmark",
+      "verified": false
+    },
+    {
+      "name": "Asejire Reservoir",
+      "venueType": "waterfront",
+      "verified": false
+    }
   ],
-  "scenery": ["seven hills skyline", "cocoa warehouses"],
-  "hazards": ["okada-swarm", "hilly-road", "go-slow"],
+  "scenery": [
+    "sea of rust roofs",
+    "hill-and-valley roads"
+  ],
+  "hazards": [
+    "okada-swarm",
+    "hilly-road",
+    "go-slow"
+  ],
   "signatureRide": "okada",
-  "welcomeLines": ["Ẹ káàbọ̀ sí Oyo!"],
-  "farewellLine": "Ẹ ṣeun, Oyo!",
-  "audioStem": "sw-fuji"
+  "welcomeLines": [
+    "Ẹ káàbọ̀ sí Ọ̀yọ́!"
+  ],
+  "farewellLine": "Ẹ ṣeun, Ọ̀yọ́!",
+  "audioStem": "sw-fuji",
+  "world": {
+    "library": "forest-hills",
+    "start": {
+      "district": "oyo.fringe",
+      "label": "Your street"
+    },
+    "route": [
+      "oyo.dugbe",
+      "oyo.mokola",
+      "oyo.agodi",
+      "oyo.corridor",
+      "oyo.osun-valley",
+      "oyo.farm-belt",
+      "oyo.hills",
+      "oyo.ridge"
+    ],
+    "finish": {
+      "district": "oyo.ridge",
+      "label": "OYO · GRAND RALLY"
+    },
+    "road": "hill-asphalt",
+    "dress": "yoruba-southwest",
+    "billboards": [
+      "WELCOME TO OYO",
+      "ADIRE · COCOA · KOLA",
+      "PURE WATER",
+      "RECHARGE CARDS",
+      "POS · AIRTIME",
+      "DATA 4G · BIG SAVER",
+      "IRON · BEANS · GARRI",
+      "FRESH FRUITS",
+      "TYRES · BATTERIES",
+      "PHONE CHARGING"
+    ],
+    "skyline": "ibadan-roofsea",
+    "ambient": "none",
+    "pieces": [
+      {
+        "landmark": 0,
+        "piece": "oyo.dugbe-market",
+        "side": -1
+      },
+      {
+        "landmark": 1,
+        "piece": "oyo.mokola-flyover",
+        "side": -1
+      },
+      {
+        "landmark": 2,
+        "piece": "oyo.agodi-gardens",
+        "side": -1
+      },
+      {
+        "landmark": 3,
+        "piece": "oyo.cocoa-house",
+        "side": -1
+      },
+      {
+        "landmark": 4,
+        "piece": "oyo.asejire-reservoir",
+        "side": -1
+      }
+    ]
+  }
 }

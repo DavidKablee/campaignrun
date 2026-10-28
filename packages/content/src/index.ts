@@ -29,20 +29,35 @@ import {
   legalSchema,
   limitsSchema,
   controlsSchema,
+  type SimConfig,
 } from './schemas';
 
 export * from './schemas';
 export * from './state-packs';
+export * from './world';
+export * from './world-library';
 export * from './standings';
 export * from './mapgeo';
 export * from './ride-feel';
 export * from './road';
+export * from './state-roads';
 export * from './yard';
 import { rideRoadFit } from './road';
 import type { Hazard } from './schemas';
 
 /** Parsed at import time: an invalid pack fails the build, not the player. */
 export const simConfig = simConfigSchema.parse(simJson);
+/**
+ * The config a run is played under. A quick rally is the same road with fewer
+ * segments — everything that reads the course (sim, renderer, ghost, the
+ * trail labels) has to be handed this, not the global, or it disagrees about
+ * where the finish is.
+ */
+export function runConfig(config: SimConfig, quick: boolean): SimConfig {
+  if (!quick) return config;
+  const segmentCount = Math.min(config.course.segmentCount, config.course.quickSegmentCount);
+  return { ...config, course: { ...config.course, segmentCount } };
+}
 export const contenders = contenderSchema.array().parse(contendersJson);
 export const rides = rideSchema.array().parse(ridesJson);
 export const calendar = calendarSchema.parse(calendarJson);
@@ -60,6 +75,12 @@ export const limits = limitsSchema.parse(limitsJson);
 export const controlTuning = controlsSchema.parse(controlsJson);
 
 export const activeContenders = contenders.filter((c) => c.status === 'active');
+
+/** Player-facing label for a party slot: the Candidate who leads it, not the group name. */
+export function candidateName(party: { contenderId: string; name: string } | undefined): string {
+  if (!party) return '';
+  return contenders.find((c) => c.id === party.contenderId)?.name ?? party.name;
+}
 
 export function integrityEvent(id: string) {
   return integrityEvents.find((e) => e.id === id) ?? integrityEvents[0]!;

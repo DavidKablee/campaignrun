@@ -56,7 +56,8 @@ export function isPlausibleRun(r: RunClaim, config: SimConfig): { ok: true } | {
  *
  * This is a sanity bound, not proof. It catches a claim the simulation could
  * not have produced; it does not catch a plausible claim that was never
- * played. Only server-side replay does that, and that is still owed from C12.
+ * played. Only replay does that: `verifyReplay` (replay.ts) is what the API
+ * runs, and this bound stays as the cheap pre-check and the local board's guard.
  */
 export function maxCrowdFor(delivered: number, config: SimConfig): number {
   const b = config.bonuses;
@@ -79,5 +80,6 @@ export function maxCrowdFor(delivered: number, config: SimConfig): number {
   const tightestGapMm = Math.max(1, Math.floor((config.spawn.gapMinMm * c.roadGapFloorPermille) / 1000));
   const maxEntities = Math.ceil(courseMm / tightestGapMm) + 2;
 
-  return Math.ceil(delivered * multiplier) + maxEntities * b.rivalOutpaceCrowd;
+  const tolls = Math.ceil(c.segmentCount / config.chaos.agberoEverySegments);
+  return Math.ceil(delivered * multiplier) + maxEntities * b.rivalOutpaceCrowd + tolls * config.chaos.tollDodgeCrowd;
 }

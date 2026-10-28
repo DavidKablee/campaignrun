@@ -92,15 +92,15 @@ export function RosterScreen() {
       <div className="cr-chrome-top">
         <div className="cr-pill-row">
           <span className="cr-pill cr-pill--live">{stateName}</span>
-          <span className="cr-pill">{following} Following</span>
+          <span className="cr-pill">{following.toLocaleString('en-US')} Supporters</span>
           <span className="cr-pill">{daysLeft()}d left</span>
         </div>
         <span className="cr-chrome-actions">
-          <button className="cr-mini-btn" type="button" onClick={() => setScreen('map')}>
-            Board
+          <button className="cr-mini-btn cr-mini-btn--icon" type="button" onClick={() => setScreen('map')} aria-label="Board">
+            ⊙
           </button>
-          <button className="cr-mini-btn" type="button" onClick={openSettings}>
-            Settings
+          <button className="cr-mini-btn cr-mini-btn--icon" type="button" onClick={openSettings} aria-label="Settings">
+            ⚙
           </button>
         </span>
       </div>
@@ -115,6 +115,13 @@ export function RosterScreen() {
             : 'Your choice stays on this device.'}
         </p>
       </header>
+
+      {!locked && (
+        <div className="cr-lock-alert" role="alert">
+          <strong>First run = permanent lock.</strong>
+          {' '}Your Contender choice is fixed after your first completed run. Pick carefully — you get one switch after, then it&apos;s fixed for the campaign.
+        </div>
+      )}
 
       <div className="cr-pick-layout">
         <aside className="cr-pick-hero">
@@ -134,7 +141,7 @@ export function RosterScreen() {
             {featuredParty ? (
               <p className="cr-party-line" style={{ ['--fill' as string]: featuredParty.color }}>
                 <i />
-                {featuredParty.name} — {featuredParty.platform}
+                {featuredParty.platform}
               </p>
             ) : null}
             <p className="cr-pick-quote">“{featured.catchphrase}”</p>
@@ -183,7 +190,7 @@ export function RosterScreen() {
                 type="button"
                 onClick={() => (commit.kind === 'confirm-switch' ? setConfirming(true) : open())}
               >
-                {active === featured.id ? `Dress ${featured.name} →` : `Campaign as ${featured.name} →`}
+                {active === featured.id ? `Style ${featured.name} →` : `Campaign as ${featured.name} →`}
               </button>
             )}
 

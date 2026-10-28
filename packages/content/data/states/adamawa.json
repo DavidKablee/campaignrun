@@ -3,18 +3,116 @@
   "name": "Adamawa",
   "zone": "NE",
   "biomeKit": "hills-plateau",
-  "palette": { "sky": "#92CCE6", "fog": "#EFE1C4", "ground": "#8A6038", "accent": "#5E8A46" },
+  "palette": {
+    "sky": "#92CCE6",
+    "fog": "#EFE1C4",
+    "ground": "#8A6038",
+    "accent": "#5E8A46"
+  },
   "landmarks": [
-    { "name": "Jimeta Modern Market", "venueType": "market", "verified": false },
-    { "name": "Sukur Hill Terraces", "venueType": "landmark", "verified": false },
-    { "name": "Numan Bridge", "venueType": "bridge", "verified": false },
-    { "name": "Kiri Lakeside", "venueType": "waterfront", "verified": false },
-    { "name": "Yola Township Stadium", "venueType": "stadium", "verified": false }
+    {
+      "name": "Market",
+      "venueType": "market",
+      "verified": false
+    },
+    {
+      "name": "Mandara Terraces",
+      "venueType": "landmark",
+      "verified": false
+    },
+    {
+      "name": "Junction Flyover",
+      "venueType": "bridge",
+      "verified": false
+    },
+    {
+      "name": "Lakeside Dam",
+      "venueType": "waterfront",
+      "verified": false
+    },
+    {
+      "name": "Township Stadium",
+      "venueType": "stadium",
+      "verified": false
+    }
   ],
-  "scenery": ["terraced hillsides", "mountain haze"],
-  "hazards": ["switchback", "rocky-ridge", "go-slow"],
-  "signatureRide": "hilux",
-  "welcomeLines": ["Barka da zuwa Adamawa!"],
+  "scenery": [
+    "granite ridge",
+    "stone terraces"
+  ],
+  "hazards": [
+    "switchback",
+    "rocky-ridge",
+    "go-slow"
+  ],
+  "signatureRide": "keke",
+  "welcomeLines": [
+    "Barka da zuwa Adamawa!"
+  ],
   "farewellLine": "Na gode, Adamawa!",
-  "audioStem": "ne-algaita"
+  "audioStem": "ne-algaita",
+  "world": {
+    "library": "guinea-savanna",
+    "start": {
+      "district": "adamawa.market",
+      "label": "Your street"
+    },
+    "route": [
+      "adamawa.market",
+      "adamawa.terrace-road",
+      "adamawa.flyover-road",
+      "adamawa.lake-road",
+      "adamawa.stadium-road",
+      "adamawa.farm-belt",
+      "adamawa.quarter-lane",
+      "adamawa.plaza-street"
+    ],
+    "finish": {
+      "district": "adamawa.plaza-street",
+      "label": "ADAMAWA · GRAND RALLY"
+    },
+    "road": "adamawa-dust",
+    "dress": "adamawa-city",
+    "billboards": [
+      "WELCOME TO ADAMAWA",
+      "GRAIN · ONIONS",
+      "COTTON · CLOTH",
+      "PURE WATER",
+      "PROVISIONS",
+      "RECHARGE CARDS",
+      "POS · AIRTIME",
+      "DATA 4G · BIG SAVER",
+      "TAILORING",
+      "KEKE PARK"
+    ],
+    "skyline": "adamawa-mandara",
+    "ambient": "none",
+    "pieces": [
+      {
+        "landmark": 0,
+        "piece": "adamawa.market",
+        "side": -1
+      },
+      {
+        "landmark": 1,
+        "piece": "adamawa.terraces",
+        "side": -1
+      },
+      {
+        "landmark": 2,
+        "piece": "adamawa.junction-flyover",
+        "side": -1
+      },
+      {
+        "landmark": 3,
+        "piece": "adamawa.lakeside-dam",
+        "side": -1
+      },
+      {
+        "landmark": 4,
+        "piece": "adamawa.stadium",
+        "side": -1
+      }
+    ]
+  }
 }

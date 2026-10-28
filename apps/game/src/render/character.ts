@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import type { CharacterLook, OutfitChoice } from '@cr/content';
+import type { CharacterLook, DressSet, OutfitChoice } from '@cr/content';
 import { GeoBuilder, mix, mulberry, shade } from './geo';
 import { outlineMat, texMat, vcMat } from './materials';
 
@@ -99,8 +99,10 @@ function sleeveSpec(top: string) {
     case 'jacket':
     case 'ankara-shirt':
     case 'rain-cape':
+    case 'riga':
       return [1, 1] as const;
     case 'kaftan':
+    case 'isiagu':
       return [1, 0.55] as const;
     case 'blouse':
       return [0.6, 0] as const;
@@ -335,6 +337,27 @@ function headGeo(look: CharacterLook, outfit: OutfitChoice, detail: Detail): Hea
       });
       break;
     }
+    case 'kube':
+      // The stiff round-topped cap worn level on the head: a short drum, a slightly wider
+      // flat crown and a darker band, sitting clear of the face plate.
+      b.cyl(0.128 * HS, 0.14 * HS, 0.1 * HS, hc, { y: 0.1 * HS, z: -0.012 * HS, sx: 1.0 * fw }, 14);
+      b.cyl(0.134 * HS, 0.134 * HS, 0.016 * HS, shade(hc, -0.18), { y: 0.15 * HS, z: -0.012 * HS, sx: 1.0 * fw }, 14);
+      b.cyl(0.142 * HS, 0.142 * HS, 0.018 * HS, shade(hc, -0.22), { y: 0.056 * HS, z: -0.012 * HS, sx: 1.0 * fw }, 14);
+      break;
+    case 'hijab':
+      // A headscarf: a close cap over the crown and ears and a soft drape falling behind
+      // the neck onto the shoulders, leaving the face open.
+      b.cap(0.15 * HS, 2.0, hc, { y: 0.0, rx: -0.3, sx: 1.04 * fw, sy: 1.04, sz: 1.06 }, 14);
+      b.sphere(0.14 * HS, shade(hc, -0.08), { y: -0.1 * HS, z: -0.07 * HS, sx: 1.1 * fw, sy: 1.1, sz: 0.8 }, 10);
+      b.torus(0.126 * HS, 0.028 * HS, shade(hc, -0.14), { y: 0.0, rx: Math.PI / 2, sx: 1.04 * fw, sz: 1.0 }, Math.PI * 1.55, 14);
+      break;
+    case 'turban':
+      // Wound cloth: two layered rings around the crown and a loose tail at the back.
+      b.cap(0.138 * HS, 1.85, hc, { y: 0.02, rx: -0.45, sx: 1.0 * fw, sy: 1.02, sz: 1.05 }, 12);
+      b.torus(0.135 * HS, 0.032 * HS, shade(hc, -0.1), { y: 0.06 * HS, rx: Math.PI / 2 - 0.2, sx: 1.04 * fw }, Math.PI * 2, 14);
+      b.torus(0.12 * HS, 0.03 * HS, shade(hc, 0.08), { y: 0.11 * HS, rx: Math.PI / 2 - 0.1, sx: 1.0 * fw }, Math.PI * 2, 14);
+      b.box(0.05 * HS, 0.14 * HS, 0.03 * HS, shade(hc, -0.06), { x: 0.07 * HS, y: -0.01, z: -0.12 * HS, rz: 0.3 });
+      break;
     case 'cap':
       b.cap(0.148 * HS, 1.7, hc, { y: 0.015, rx: -0.5, sx: 0.98 * fw, sy: 1.05, sz: 1.04 }, 12);
       b.box(0.14 * HS, 0.012 * HS, 0.1 * HS, shade(hc, -0.1), { y: 0.05 * HS, z: 0.13 * HS, rx: 0.15 });
@@ -431,6 +454,21 @@ function torsoGeo(look: CharacterLook, outfit: OutfitChoice, detail: Detail): TH
       b.cyl(0.152 * sw, 0.2 * hw, 0.56, tc, { y: HIP_Y + 0.02, sz: LAYER_Z + 0.02 }, 12);
       b.cyl(0.2 * hw, 0.2 * hw, 0.03, '#f0c75e', { y: HIP_Y - 0.12, sz: LAYER_Z + 0.02 }, 12);
       b.box(0.04, 0.22, 0.01, '#f0c75e', { y: CHEST_Y + 0.04, z: 0.142 * sw });
+      break;
+    case 'riga':
+      // The long wide-sleeved gown: a column from the shoulder to the shin, flaring a little
+      // at the hem, with a contrast hem band and a stitched neckline panel.
+      b.cyl(0.154 * sw, 0.235 * hw, 0.74, tc, { y: HIP_Y - 0.08, sz: LAYER_Z + 0.03 }, 12);
+      b.cyl(0.236 * hw, 0.236 * hw, 0.03, shade(tc, -0.18), { y: HIP_Y - 0.44, sz: LAYER_Z + 0.03 }, 12);
+      b.box(0.1, 0.2, 0.012, shade(tc, 0.24), { y: CHEST_Y + 0.06, z: 0.15 * sw });
+      b.box(0.1, 0.012, 0.012, shade(tc, -0.2), { y: CHEST_Y + 0.15, z: 0.155 * sw });
+      break;
+    case 'isiagu':
+      // A short patterned top over the hips, with a wide band at the hem and a frogged collar.
+      b.cyl(0.152 * sw, 0.17 * hw, 0.42, tc, { y: CHEST_Y - 0.06, sz: LAYER_Z + 0.01 }, 12);
+      b.cyl(0.172 * hw, 0.172 * hw, 0.03, '#f0c75e', { y: CHEST_Y - 0.26, sz: LAYER_Z + 0.01 }, 12);
+      for (let i = 0; i < 3; i++) b.sphere(0.022, '#f0c75e', { x: (i - 1) * 0.06, y: CHEST_Y + 0.03 - i * 0.0, z: 0.14 * sw }, 5);
+      b.torus(0.046 * HS, 0.016 * HS, '#f0c75e', { y: SHOULDER_Y, rx: Math.PI / 2, sz: 1.1 }, Math.PI * 2, 12);
       break;
     case 'rain-cape':
       b.cyl(0.11 * sw, 0.27 * hw, 0.58, tc, { y: HIP_Y + 0.04, sz: LAYER_Z + 0.04 }, 12);
@@ -827,7 +865,9 @@ export function bakeCharacter(look: CharacterLook, outfit: OutfitChoice, pose: P
 export function randomPerson(
   seed: number,
   options: { colors: string[] },
+  dress?: DressSet,
 ): { look: CharacterLook; outfit: OutfitChoice } {
+  if (dress) return dressedPerson(seed, dress);
   const r = mulberry(seed * 7919 + 17);
   const female = r.chance(0.5);
   const skins = ['#3B2417', '#4A2C1B', '#5C3A24', '#6A4129', '#7A4B2E', '#8D5A3B'];
@@ -862,3 +902,52 @@ export function randomPerson(
   };
   return { look, outfit };
 }
+
+/**
+ * A roadside person dressed from a regional set. Same body and face variety as
+ * `randomPerson`, but the garments come only from the set, so a Kano street
+ * is in gowns and caps and a creek-side one is not. Its own RNG stream, so the
+ * default people (and Lagos' crowds) are unaffected.
+ */
+function dressedPerson(seed: number, dress: DressSet): { look: CharacterLook; outfit: OutfitChoice } {
+  const r = mulberry(seed * 6151 + 29);
+  const female = r.chance(dress.femalePermille / 1000);
+  const g = female ? dress.women : dress.men;
+  const skins = ['#3B2417', '#4A2C1B', '#5C3A24', '#6A4129', '#7A4B2E', '#8D5A3B'];
+  const look: CharacterLook = {
+    gender: female ? 'f' : 'm',
+    skin: r.pick(skins),
+    hair: female ? r.pick(['braids', 'natural', 'short'] as const) : r.pick(['short', 'short', 'bald'] as const),
+    hairColor: '#15100d',
+    facialHair: !female && r.chance(0.4) ? r.pick(['moustache', 'goatee', 'beard'] as const) : 'none',
+    face: {
+      width: r.range(0.92, 1.1),
+      jaw: r.range(0.9, 1.1),
+      nose: r.range(0.9, 1.2),
+      lips: r.range(0.9, 1.2),
+      brow: r.range(0.9, 1.1),
+      eye: r.range(0.95, 1.1),
+    },
+    height: female ? r.range(0.9, 0.99) : r.range(0.96, 1.05),
+    build: r.range(0.9, 1.15),
+    prop: 'none',
+    accessory: 'none',
+  };
+  const outfit: OutfitChoice = {
+    top: r.pick(g.tops),
+    topColor: r.pick(dress.colors),
+    bottom: r.pick(g.bottoms),
+    bottomColor: r.pick(['#2f4a6b', '#1b2b3a', '#3A4A5A', '#161616', '#2A6F97', '#8B5A2B', '#e9e2d0']),
+    footwear: r.pick(g.footwear),
+    footColor: r.pick(['#F3E3C3', '#161616', '#E0902B', '#1F5F8B']),
+    headwear: r.pick(g.headwear),
+    headColor: r.pick(dress.colors),
+  };
+  return { look, outfit };
+}
+
+/** The garments the builder implements beyond the Studio's own lists: NPC-only, never offered to the player. */
+export const NPC_GARMENTS = {
+  tops: ['riga', 'isiagu'],
+  headwear: ['kube', 'hijab', 'turban'],
+} as const;

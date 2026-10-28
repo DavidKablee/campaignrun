@@ -3,18 +3,116 @@
   "name": "Bauchi",
   "zone": "NE",
   "biomeKit": "sahel-savanna",
-  "palette": { "sky": "#E8C48A", "fog": "#F3E2C5", "ground": "#A67C52", "accent": "#C45C26" },
+  "palette": {
+    "sky": "#E2C99A",
+    "fog": "#F3E2C5",
+    "ground": "#A67C52",
+    "accent": "#8E6B3E"
+  },
   "landmarks": [
-    { "name": "Bauchi Central Market", "venueType": "market", "verified": false },
-    { "name": "Yankari Reserve Gate", "venueType": "park", "verified": false },
-    { "name": "Wikki Warm Spring", "venueType": "waterfront", "verified": false },
-    { "name": "Railway Quarters Square", "venueType": "square", "verified": false },
-    { "name": "Bauchi Township Stadium", "venueType": "stadium", "verified": false }
+    {
+      "name": "Grain & Produce Market",
+      "venueType": "market",
+      "verified": false
+    },
+    {
+      "name": "Yankari Reserve Gate",
+      "venueType": "park",
+      "verified": false
+    },
+    {
+      "name": "Wikki Warm Spring",
+      "venueType": "waterfront",
+      "verified": false
+    },
+    {
+      "name": "Old City Gate",
+      "venueType": "landmark",
+      "verified": false
+    },
+    {
+      "name": "Township Stadium",
+      "venueType": "stadium",
+      "verified": false
+    }
   ],
-  "scenery": ["game-reserve escarpment", "baobab line"],
-  "hazards": ["dust-plume", "cattle-crossing", "go-slow"],
-  "signatureRide": "hilux",
-  "welcomeLines": ["Barka da zuwa Bauchi!"],
+  "scenery": [
+    "nine rock hills",
+    "baobab line"
+  ],
+  "hazards": [
+    "dust-plume",
+    "cart-weave",
+    "go-slow"
+  ],
+  "signatureRide": "keke",
+  "welcomeLines": [
+    "Barka da zuwa Bauchi!"
+  ],
   "farewellLine": "Na gode, Bauchi!",
-  "audioStem": "ne-algaita"
+  "audioStem": "ne-algaita",
+  "world": {
+    "library": "guinea-savanna",
+    "start": {
+      "district": "bauchi.kasuwa",
+      "label": "Your street"
+    },
+    "route": [
+      "bauchi.kasuwa",
+      "bauchi.reserve-road",
+      "bauchi.spring",
+      "bauchi.gate",
+      "bauchi.stadium-road",
+      "bauchi.farm",
+      "bauchi.lane",
+      "bauchi.centre"
+    ],
+    "finish": {
+      "district": "bauchi.centre",
+      "label": "BAUCHI · GRAND RALLY"
+    },
+    "road": "bauchi-sand",
+    "dress": "hausa-bauchi",
+    "billboards": [
+      "WELCOME TO BAUCHI",
+      "GRAIN · GROUNDNUTS",
+      "CAPS · CLOTH",
+      "PROVISIONS",
+      "WATER · TEA",
+      "RECHARGE CARDS",
+      "POS · AIRTIME",
+      "DATA 4G · BIG SAVER",
+      "TAILORING",
+      "PHARMACY"
+    ],
+    "skyline": "bauchi-hills",
+    "ambient": "none",
+    "pieces": [
+      {
+        "landmark": 0,
+        "piece": "bauchi.produce-market",
+        "side": -1
+      },
+      {
+        "landmark": 1,
+        "piece": "bauchi.reserve-gate",
+        "side": -1
+      },
+      {
+        "landmark": 2,
+        "piece": "bauchi.warm-spring",
+        "side": -1
+      },
+      {
+        "landmark": 3,
+        "piece": "bauchi.old-gate",
+        "side": -1
+      },
+      {
+        "landmark": 4,
+        "piece": "bauchi.stadium",
+        "side": -1
+      }
+    ]
+  }
 }

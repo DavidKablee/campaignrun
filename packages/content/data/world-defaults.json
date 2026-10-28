@@ -1,0 +1,93 @@
+{
+  "districts": {
+    "lagos.ojuelegba": {
+      "label": "OJUELEGBA",
+      "ground": null,
+      "water": null,
+      "facade": "lagos",
+      "shops": "lagos",
+      "kerb": "yellow-black",
+      "median": true,
+      "pre": [],
+      "side": [
+        { "op": "furniture" },
+        { "op": "people" },
+        { "op": "lagos.buildings", "minF": 2, "maxF": 4, "shops": 0.85 },
+        { "op": "lagos.stalls", "density": 0.6 }
+      ],
+      "post": [{ "op": "footbridge", "every": 4, "offset": 2 }]
+    },
+    "lagos.bridge": {
+      "label": "THIRD MAINLAND BRIDGE",
+      "ground": null,
+      "water": { "y": -4.6, "color": "#2f93ad" },
+      "facade": "lagos",
+      "shops": "lagos",
+      "kerb": "none",
+      "median": false,
+      "pre": [{ "op": "bridge" }],
+      "side": [{ "op": "furniture" }, { "op": "people" }, { "op": "lagos.towers", "near": false }],
+      "post": [{ "op": "boats" }]
+    },
+    "lagos.link": {
+      "label": "LEKKI–IKOYI LINK BRIDGE",
+      "ground": null,
+      "water": { "y": -4.6, "color": "#2f93ad" },
+      "facade": "lagos",
+      "shops": "lagos",
+      "kerb": "none",
+      "median": false,
+      "pre": [{ "op": "bridge" }],
+      "side": [{ "op": "furniture" }, { "op": "people" }, { "op": "lagos.towers", "near": false }],
+      "post": [{ "op": "pylons" }]
+    },
+    "lagos.market": {
+      "label": "BALOGUN MARKET",
+      "ground": null,
+      "water": null,
+      "facade": "lagos",
+      "shops": "lagos",
+      "kerb": "yellow-black",
+      "median": true,
+      "pre": [],
+      "side": [
+        { "op": "furniture" },
+        { "op": "people" },
+        { "op": "lagos.buildings", "minF": 1, "maxF": 2, "shops": 1 },
+        { "op": "lagos.stalls", "density": 2.2 }
+      ],
+      "post": []
+    },
+    "lagos.park": {
+      "label": "FREEDOM PARK",
+      "ground": "#5d9a45",
+      "water": null,
+      "facade": "lagos",
+      "shops": "lagos",
+      "kerb": "yellow-black",
+      "median": false,
+      "pre": [],
+      "side": [{ "op": "furniture" }, { "op": "people" }, { "op": "lagos.trees", "n": 5 }, { "op": "lagos.parkBits" }],
+      "post": []
+    },
+    "lagos.island": {
+      "label": "VICTORIA ISLAND",
+      "ground": "#b9a27a",
+      "water": null,
+      "facade": "lagos",
+      "shops": "lagos",
+      "kerb": "yellow-black",
+      "median": false,
+      "pre": [],
+      "side": [{ "op": "furniture" }, { "op": "people" }, { "op": "lagos.towers", "near": true }, { "op": "lagos.palms", "n": 5 }],
+      "post": []
+    }
+  },
+  "roads": {
+    "lagos": { "texture": "lagos", "shoulder": null }
+  },
+  "dress": {},
+  "route": ["lagos.ojuelegba", "lagos.bridge", "lagos.link", "lagos.market", "lagos.park", "lagos.park", "lagos.park", "lagos.park"],
+  "start": { "district": "lagos.ojuelegba", "label": "Your street" },
+  "finish": { "district": "lagos.island", "label": "VICTORIA ISLAND" }
+}

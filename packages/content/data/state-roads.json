@@ -1,0 +1,298 @@
+{
+  "abia": {
+    "hazards": [
+      "market-spill",
+      "keke-swerve",
+      "go-slow"
+    ],
+    "signatureRide": "keke"
+  },
+  "adamawa": {
+    "hazards": [
+      "switchback",
+      "rocky-ridge",
+      "go-slow"
+    ],
+    "signatureRide": "keke"
+  },
+  "akwa-ibom": {
+    "hazards": [
+      "rain-slick",
+      "keke-swerve",
+      "go-slow"
+    ],
+    "signatureRide": "keke"
+  },
+  "anambra": {
+    "hazards": [
+      "market-spill",
+      "go-slow",
+      "keke-swerve"
+    ],
+    "signatureRide": "keke"
+  },
+  "bauchi": {
+    "hazards": [
+      "dust-plume",
+      "cart-weave",
+      "go-slow"
+    ],
+    "signatureRide": "keke"
+  },
+  "bayelsa": {
+    "hazards": [
+      "flood-sheet",
+      "creek-crossing",
+      "go-slow"
+    ],
+    "signatureRide": "keke"
+  },
+  "benue": {
+    "hazards": [
+      "cart-weave",
+      "river-fog",
+      "go-slow"
+    ],
+    "signatureRide": "keke"
+  },
+  "borno": {
+    "hazards": [
+      "dust-storm",
+      "low-visibility",
+      "go-slow"
+    ],
+    "signatureRide": "keke"
+  },
+  "cross-river": {
+    "hazards": [
+      "crowd-surge",
+      "rain-slick",
+      "go-slow"
+    ],
+    "signatureRide": "keke"
+  },
+  "delta": {
+    "hazards": [
+      "creek-crossing",
+      "roundabout-maze",
+      "go-slow"
+    ],
+    "signatureRide": "keke"
+  },
+  "ebonyi": {
+    "hazards": [
+      "dust-plume",
+      "keke-swerve",
+      "go-slow"
+    ],
+    "signatureRide": "keke"
+  },
+  "edo": {
+    "hazards": [
+      "keke-swerve",
+      "rain-slick",
+      "go-slow"
+    ],
+    "signatureRide": "danfo"
+  },
+  "ekiti": {
+    "hazards": [
+      "hilly-road",
+      "switchback",
+      "go-slow"
+    ],
+    "signatureRide": "okada"
+  },
+  "enugu": {
+    "hazards": [
+      "hilly-road",
+      "switchback",
+      "go-slow"
+    ],
+    "signatureRide": "keke"
+  },
+  "fct": {
+    "hazards": [
+      "roundabout-maze",
+      "crowd-surge",
+      "go-slow"
+    ],
+    "signatureRide": "grand-convoy"
+  },
+  "gombe": {
+    "hazards": [
+      "dust-plume",
+      "rocky-ridge",
+      "go-slow"
+    ],
+    "signatureRide": "okada"
+  },
+  "imo": {
+    "hazards": [
+      "rain-slick",
+      "keke-swerve",
+      "go-slow"
+    ],
+    "signatureRide": "keke"
+  },
+  "jigawa": {
+    "hazards": [
+      "dust-plume",
+      "cart-weave",
+      "go-slow"
+    ],
+    "signatureRide": "keke"
+  },
+  "kaduna": {
+    "hazards": [
+      "dust-plume",
+      "go-slow",
+      "cart-weave"
+    ],
+    "signatureRide": "hilux"
+  },
+  "kano": {
+    "hazards": [
+      "dust-plume",
+      "cart-weave",
+      "go-slow"
+    ],
+    "signatureRide": "keke"
+  },
+  "katsina": {
+    "hazards": [
+      "dust-plume",
+      "cart-weave",
+      "go-slow"
+    ],
+    "signatureRide": "keke"
+  },
+  "kebbi": {
+    "hazards": [
+      "river-fog",
+      "cart-weave",
+      "go-slow"
+    ],
+    "signatureRide": "keke"
+  },
+  "kogi": {
+    "hazards": [
+      "river-fog",
+      "hilly-road",
+      "go-slow"
+    ],
+    "signatureRide": "hilux"
+  },
+  "kwara": {
+    "hazards": [
+      "rocky-ridge",
+      "switchback",
+      "go-slow"
+    ],
+    "signatureRide": "keke"
+  },
+  "lagos": {
+    "hazards": [
+      "go-slow",
+      "keke-swerve",
+      "flash-flood"
+    ],
+    "signatureRide": "danfo"
+  },
+  "nasarawa": {
+    "hazards": [
+      "cattle-crossing",
+      "cart-weave",
+      "go-slow"
+    ],
+    "signatureRide": "keke"
+  },
+  "niger": {
+    "hazards": [
+      "rocky-ridge",
+      "cart-weave",
+      "go-slow"
+    ],
+    "signatureRide": "hilux"
+  },
+  "ogun": {
+    "hazards": [
+      "rocky-ridge",
+      "okada-swarm",
+      "go-slow"
+    ],
+    "signatureRide": "keke"
+  },
+  "ondo": {
+    "hazards": [
+      "hilly-road",
+      "rain-slick",
+      "go-slow"
+    ],
+    "signatureRide": "okada"
+  },
+  "osun": {
+    "hazards": [
+      "okada-swarm",
+      "rain-slick",
+      "go-slow"
+    ],
+    "signatureRide": "okada"
+  },
+  "oyo": {
+    "hazards": [
+      "okada-swarm",
+      "hilly-road",
+      "go-slow"
+    ],
+    "signatureRide": "okada"
+  },
+  "plateau": {
+    "hazards": [
+      "rocky-ridge",
+      "low-visibility",
+      "go-slow"
+    ],
+    "signatureRide": "keke"
+  },
+  "rivers": {
+    "hazards": [
+      "flood-sheet",
+      "keke-swerve",
+      "go-slow"
+    ],
+    "signatureRide": "keke"
+  },
+  "sokoto": {
+    "hazards": [
+      "dust-storm",
+      "heat-shimmer",
+      "go-slow"
+    ],
+    "signatureRide": "okada"
+  },
+  "taraba": {
+    "hazards": [
+      "switchback",
+      "low-visibility",
+      "go-slow"
+    ],
+    "signatureRide": "hilux"
+  },
+  "yobe": {
+    "hazards": [
+      "dust-storm",
+      "cattle-crossing",
+      "go-slow"
+    ],
+    "signatureRide": "hilux"
+  },
+  "zamfara": {
+    "hazards": [
+      "dust-plume",
+      "rocky-ridge",
+      "go-slow"
+    ],
+    "signatureRide": "okada"
+  }
+}

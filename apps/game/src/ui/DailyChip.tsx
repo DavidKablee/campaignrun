@@ -8,8 +8,8 @@ export function DailyChip() {
   const done = claimed === ch.id;
   return (
     <p className={`cr-daily-chip${done ? ' is-done' : ''}`}>
-      <span>Daily</span>
-      {ch.label}
+      <span className="cr-daily-chip__tag">Daily</span>
+      <span className="cr-daily-chip__label">{ch.label}</span>
       <b>₦{ch.reward}</b>
     </p>
   );

@@ -15,11 +15,15 @@ import {
   roadLines,
   roadProfile,
   travelCaps,
+  partyForContender,
+  runConfig,
+  stateIndex,
 } from '@cr/content';
 import { initState, step, seedRng, encodeInputLog, type SimState, type InputRecord } from '@cr/sim';
 import { loadGhost, saveGhostIfBest, bytesToBase64 } from './ghostStore';
 import { computeGhostTrajectory } from './ghostReplay';
-import { computeWeather } from './weather';
+import { computeWeather, debugWeather } from './weather';
+import { decodeChallenge } from './challenge';
 import { GameRenderer } from './render/GameRenderer';
 import { InputController } from './input/controls';
 import { audio } from './audio/engine';
@@ -33,22 +37,40 @@ import { AccountScreen } from './ui/AccountScreen';
 import { ConvoyYard } from './ui/ConvoyYard';
 import { DailyChip } from './ui/DailyChip';
 import { useOnlineStore } from './onlineStore';
-import { finishSign, gateSign, legAt, stationFor } from './trail';
+import { campaignRows, finishSign, gateSign, legAt, stationFor } from './trail';
 import { Showcase } from './render/showcase';
 import { runModifiers } from './meta';
 import { syncTravelDay } from './travel';
 import { daysLeft } from './campaignClock';
-import { useStatePack } from './statePack';
+import { useStatePack, useStateWorld } from './statePack';
 import { authLinkFromUrl, strippedUrl } from './authLink';
 import { RosterScreen } from './ui/RosterScreen';
 import { StudioScreen } from './ui/StudioScreen';
 import { SummaryScreen } from './ui/SummaryScreen';
+import { CALLOUT_COOLDOWN_MS, CALLOUT_MS, calloutForEvent, calloutForLandmark, stationForZone } from './radioCallouts';
+
+/** Live run screens that hold a Back sentinel (more than one only while React re-runs the effect). */
+let runEffects = 0;
 
 export function App() {
   const screen = useGameStore((s) => s.screen);
   const activeStateId = useGameStore((s) => s.activeStateId);
   const inRun = screen === 'game' || screen === 'paused';
   const refreshOnline = useOnlineStore((s) => s.refresh);
+
+  // A "beat my run" link lands here with the road in the hash. Read it, hold it
+  // until the player says they are 18+, and take it out of the address bar.
+  useEffect(() => {
+    const take = () => {
+      const c = decodeChallenge(window.location.hash);
+      if (!c) return;
+      useGameStore.getState().setIncomingChallenge(c);
+      window.history.replaceState(null, '', window.location.pathname + window.location.search);
+    };
+    take();
+    window.addEventListener('hashchange', take);
+    return () => window.removeEventListener('hashchange', take);
+  }, []);
 
   // C41: a confirmation or reset link lands here with its token in the query.
   // Read it once, act on it, and take it out of the address bar — a reset
@@ -93,6 +115,9 @@ export function App() {
   );
 }
 
+const fmt = (v: number) => v.toLocaleString('en-US');
+const naira = (v: number) => `₦${fmt(v)}`;
+
 function Splash() {
   const setScreen = useGameStore((s) => s.setScreen);
   const following = useGameStore((s) => s.following);
@@ -106,6 +131,9 @@ function Splash() {
   const heroRef = useRef<HTMLDivElement>(null);
   const [live, setLive] = useState(false);
   const returning = following > 0 || !!best;
+  const allStates = useMemo(() => campaignRows(), []);
+  const openStates = useMemo(() => allStates.filter((r) => r.open), [allStates]);
+  const pendingStates = allStates.length - openStates.length;
 
   useEffect(() => {
     if (!heroRef.current) return;
@@ -126,8 +154,30 @@ function Splash() {
     return () => show?.dispose();
   }, [contenderId, overrides, reduceMotion, dataSaver]);
 
+  const chosen = useContenderStore((s) => s.activeContenderId);
+  const incoming = useGameStore((s) => s.incomingChallenge);
+  const incomingOpen = incoming ? openStates.some((r) => r.id === incoming.stateId) : false;
+  const incomingRide = incoming ? rides.find((r) => r.id === incoming.rideId) : undefined;
+  const incomingState = incoming ? stateIndex.find((r) => r.id === incoming.stateId) : undefined;
+  const takeChallenge = () => {
+    if (!incoming) return;
+    void audio.unlock();
+    useGameStore.getState().setChallenge(incoming);
+    useGameStore.getState().setIncomingChallenge(null);
+    setScreen('game');
+  };
   const start = () => {
     void audio.unlock();
+    // A brand-new player drives first and picks a Contender afterwards: Lagos,
+    // the default Contender and the on-foot ride, straight into the run.
+    if (!returning && chosen === null) {
+      // ...and the first go is a quick rally, so the result and the pick come
+      // inside two minutes rather than after a three-minute run.
+      useGameStore.getState().setChallenge(null);
+      useGameStore.getState().setQuickRun(true);
+      setScreen('game');
+      return;
+    }
     setScreen(returning ? 'briefing' : 'roster');
   };
 
@@ -136,69 +186,114 @@ function Splash() {
       <div className="cr-hero" ref={heroRef} aria-hidden="true" />
       <div className="cr-hero-scrim" aria-hidden="true" />
       <div className="cr-splash-top">
-        <span className="cr-pill cr-pill--live">Lagos open</span>
+        <span className="cr-pill cr-pill--live">
+          {openStates.length === 1
+            ? `${openStates[0]!.name} open`
+            : `${openStates.length} states open`}
+        </span>
         <span className="cr-pill">{daysLeft()} days left</span>
-        {returning && <span className="cr-pill">₦{coins}</span>}
+        {returning && <span className="cr-pill">{naira(coins)}</span>}
+        {returning && (
+          <span className="cr-pill cr-pill--supporters" title="Unlocks rides">
+            {fmt(following)} Supporters
+          </span>
+        )}
         <button
           className="cr-icon-btn cr-splash-gear"
           type="button"
           aria-label="Settings"
           onClick={() => useGameStore.getState().openSettings()}
         >
-          Set
+          ⚙
         </button>
       </div>
       <div className="cr-splash-copy">
-        <p className="cr-kicker">{returning ? `Welcome back · ${following} Following` : 'Day 1 · You start in Lagos'}</p>
-        <h1 className="cr-brand">
-          <span>Campaign</span>
-          <span>Run</span>
-        </h1>
-        <p className="cr-tag">Load the bus stops. Own the Lagos road. Land the grand rally.</p>
+        <p className="cr-kicker">{returning ? `Welcome back · ${fmt(following)} Supporters` : 'Day 1 · You start in Lagos'}</p>
+        <h1 className="cr-brand">Campaigner</h1>
+        {incoming ? (
+          <div className="cr-challenge-banner" role="status">
+            <p>
+              <b>{incoming.from || 'A friend'}</b> got <b>{incoming.crowd}</b> Turnout on {incomingState?.name ?? 'this road'}
+              {incomingRide ? ` · ${incomingRide.name}` : ''}
+              {incoming.quick ? ' (quick rally)' : ''}. Same road, same traffic. Beat it.
+            </p>
+            {incomingOpen ? null : <p className="cr-fineprint">That state is not open yet.</p>}
+            <div className="cr-row">
+              <button className="cr-btn" type="button" disabled={!incomingOpen} onClick={takeChallenge}>
+                I'm 18+ · Take the challenge
+              </button>
+              <button
+                className="cr-btn cr-btn--ghost"
+                type="button"
+                onClick={() => useGameStore.getState().setIncomingChallenge(null)}
+              >
+                Not now
+              </button>
+            </div>
+          </div>
+        ) : null}
+        <p className="cr-tag">Drive your convoy through Nigeria. Load your people, dodge the go-slow, fill the rally.</p>
         <button className="cr-btn cr-btn--hero" type="button" onClick={start}>
           {returning ? 'Continue campaign' : copy.playButton}
         </button>
-        <div className="cr-row">
-          <button className="cr-btn cr-btn--ghost" type="button" onClick={() => setScreen('map')}>
-            Live board
+        <nav className="cr-splash-nav">
+          <button type="button" onClick={() => setScreen('map')}>
+            <span aria-hidden="true">⊙</span>
+            <small>Board</small>
           </button>
-          <button className="cr-btn cr-btn--ghost" type="button" onClick={() => setScreen('yard')}>
-            Convoy Yard
+          <button type="button" onClick={() => setScreen('yard')}>
+            <span aria-hidden="true">⊞</span>
+            <small>Yard</small>
           </button>
           {returning && (
-            <button className="cr-btn cr-btn--ghost" type="button" onClick={() => setScreen('roster')}>
-              Change Contender
+            <button type="button" onClick={() => setScreen('roster')}>
+              <span aria-hidden="true">↻</span>
+              <small>Contender</small>
             </button>
           )}
-          <button className="cr-btn cr-btn--ghost" type="button" onClick={() => setScreen('account')}>
-            Account
+          <button type="button" onClick={() => setScreen('account')}>
+            <span aria-hidden="true">◌</span>
+            <small>Account</small>
           </button>
-          <button className="cr-btn cr-btn--ghost" type="button" onClick={() => setScreen('about')}>
-            About
+          <button type="button" onClick={() => setScreen('about')}>
+            <span aria-hidden="true">ℹ</span>
+            <small>About</small>
           </button>
-        </div>
+        </nav>
         <p className="cr-fineprint">{copy.disclosure}</p>
       </div>
       <aside className="cr-splash-side">
-        <p className="cr-kicker">On air</p>
+        <p className="cr-kicker cr-on-air-label">
+          <span className="cr-on-air-dot" aria-hidden="true" />
+          On air
+        </p>
         <h2>{station.name}</h2>
+        <div className="cr-on-air-waves" aria-hidden="true">
+          <span /><span /><span />
+        </div>
         <div className="cr-statrow">
           <div>
-            <strong>1</strong>
-            <span>open</span>
+            <strong>{openStates.length}</strong>
+            <span>Open states</span>
           </div>
           <div>
-            <strong>36</strong>
-            <span>pending</span>
+            <strong>{pendingStates}</strong>
+            <span>Pending</span>
           </div>
           <div>
-            <strong>{best ? best.crowd : '—'}</strong>
-            <span>Crowd</span>
+            <strong>{best ? best.crowd : '0'}</strong>
+            <span>{best ? 'Best turnout' : 'Your best: go set it'}</span>
           </div>
         </div>
       </aside>
     </div>
   );
+}
+
+/** A `?debug` review parameter, or null. Nothing here does anything without `?debug` in the URL. */
+function debugParam(name: string): string | null {
+  const q = new URLSearchParams(window.location.search);
+  return q.has('debug') ? q.get(name) : null;
 }
 
 function Briefing() {
@@ -231,14 +326,20 @@ function Briefing() {
       <div className="cr-brief">
         <div className="cr-chrome-top">
           <p className="cr-kicker">{pack?.name ?? 'Lagos'} open</p>
-          <button type="button" className="cr-radio-chip" onClick={() => setRadioOn(!radioOn)}>
-            {radioOn ? station.name : 'Radio off'}
+          <button
+            type="button"
+            className={`cr-radio-chip${radioOn ? ' is-live' : ''}`}
+            onClick={() => setRadioOn(!radioOn)}
+            aria-pressed={radioOn}
+          >
+            <i className="cr-radio-dot" aria-hidden="true" />
+            <span>{radioOn ? station.name : 'Radio off'}</span>
           </button>
         </div>
         <h2>{welcome}</h2>
         <p className="cr-tag">
-          {contender.name} · {chosen.name} · Following {following}
-          {nextRide ? ` · ${nextRide.followingGate - following} to ${nextRide.name}` : ''}
+          {contender.name} · {chosen.name} · {fmt(following)} Supporters
+          {nextRide ? ` · ${fmt(nextRide.followingGate - following)} to ${nextRide.name}` : ''}
         </p>
 
         <p className="cr-kicker">Today&apos;s Road</p>
@@ -289,7 +390,7 @@ function Briefing() {
                 onClick={() => setRide(r.id)}
               >
                 <strong>{r.name}</strong>
-                <small>{open ? `${r.capacity} seats` : r.playable ? `${r.followingGate} Fol.` : 'Later'}</small>
+                <small>{open ? `${r.capacity} seats` : r.playable ? `${fmt(r.followingGate)} Sup.` : 'Later'}</small>
               </button>
             );
           })}
@@ -329,8 +430,21 @@ function Briefing() {
           </p>
         )}
         <div className="cr-row">
-          <button className="cr-btn cr-btn--ghost" type="button" onClick={() => setScreen('map')}>
-            Board
+          <button
+            className="cr-btn cr-btn--ghost"
+            type="button"
+            disabled={!gate.ok}
+            onClick={() => {
+              setRide(chosen.id);
+              useGameStore.getState().setChallenge(null);
+              useGameStore.getState().setQuickRun(true);
+              setScreen('game');
+            }}
+          >
+            Quick rally · ~90 s
+          </button>
+          <button className="cr-btn cr-btn--ghost cr-btn--icon-label" type="button" onClick={() => setScreen('map')}>
+            <span aria-hidden="true">⊙</span> Board
           </button>
           <button
             className="cr-btn"
@@ -338,6 +452,8 @@ function Briefing() {
             disabled={!gate.ok}
             onClick={() => {
               setRide(chosen.id);
+              useGameStore.getState().setChallenge(null);
+              useGameStore.getState().setQuickRun(false);
               setScreen('game');
             }}
           >
@@ -358,14 +474,22 @@ function Paused() {
         <p className="cr-kicker">Paused</p>
         <h2>Hold the road</h2>
         <div className="cr-row">
-          <button className="cr-btn" type="button" onClick={() => setScreen('game')}>
+          <button
+            className="cr-btn"
+            type="button"
+            onClick={() => {
+              // iOS leaves the audio context interrupted after a call or a tab switch.
+              void audio.unlock();
+              setScreen('game');
+            }}
+          >
             Resume
           </button>
           <button className="cr-btn cr-btn--ghost" type="button" onClick={() => setScreen('briefing')}>
             Quit
           </button>
         </div>
-        {crowd > 0 && <p className="cr-fineprint">Last Crowd {crowd}</p>}
+        {crowd > 0 && <p className="cr-fineprint">Last Turnout {crowd}</p>}
       </div>
     </div>
   );
@@ -389,6 +513,8 @@ type HudSnapshot = {
   toast: string;
   from: string;
   to: string;
+  /** DJ-style radio line while music is ducked. */
+  radioLine: string;
   // C46: the gestures replaced the pads, so the pads can no longer be what
   // tells the player their input landed. These do.
   braking: boolean;
@@ -406,9 +532,15 @@ function GameScreen() {
   const setScreen = useGameStore((s) => s.setScreen);
   const contenderId = useContenderStore((s) => s.activeContenderId) ?? 'mama-ankara';
   const outfitOverrides = useContenderStore((s) => s.outfits[contenderId]);
-  const rideId = useGameStore((s) => s.activeRideId);
-  const stateId = useGameStore((s) => s.activeStateId);
+  const activeRideId = useGameStore((s) => s.activeRideId);
+  const activeStateId = useGameStore((s) => s.activeStateId);
+  // A challenge being played decides the road; otherwise it is the player's own choice.
+  const challengeNow = useGameStore((s) => s.challenge);
+  const rideId = challengeNow?.rideId ?? activeRideId;
+  // Review aid: `?debug&debugState=kano` plays that state without unlocking or travelling.
+  const stateId = debugParam('debugState') ?? challengeNow?.stateId ?? activeStateId;
   const pack = useStatePack(stateId);
+  const world = useStateWorld(pack);
   const reduceMotion = useGameStore((s) => s.reduceMotion);
   const dataSaver = useGameStore((s) => s.dataSaver);
   const upgrades = useGameStore((s) => s.upgrades);
@@ -430,8 +562,9 @@ function GameScreen() {
     progress: 0,
     prompt: '',
     toast: '',
-    from: 'Your street',
-    to: 'Lagos gate',
+    from: '',
+    to: '',
+    radioLine: '',
     braking: false,
     beatOpen: 0,
     beatTaps: 0,
@@ -440,9 +573,15 @@ function GameScreen() {
     perkActive: false,
   });
   const [showTutorial, setShowTutorial] = useState(!seenTutorial);
+  // The run loop lives in an effect that must not restart, so it reads this ref
+  // instead of the state: the convoy waits while the instructions are up.
+  const tutorialRef = useRef(showTutorial);
+  tutorialRef.current = showTutorial;
   const toastRef = useRef({ text: '', until: 0 });
+  const radioCalloutRef = useRef({ text: '', until: 0, coolUntil: 0, lastTo: '' });
 
   const contender = contenders.find((c) => c.id === contenderId) ?? contenders[0]!;
+  const party = partyForContender(contenderId);
   const ride = rides.find((r) => r.id === rideId) ?? rides[0]!;
   const perkLabel = contender.perk.id.replace(/-/g, ' ');
   // Stable across HUD re-renders — a fresh array here remounts the whole WebGL run.
@@ -461,29 +600,37 @@ function GameScreen() {
   );
   const finish = useMemo(() => finishSign(stateName, pack?.farewellLine), [stateName, pack]);
   useEffect(() => {
-    if (!containerRef.current || !pack) return;
+    if (!containerRef.current || !pack || !world) return;
     const container = containerRef.current;
     let alive = true;
 
     void audio.unlock();
     audio.setVolumes(sfxVolume, musicVolume);
     audio.tune(audioStem);
-    audio.setRadio(radioOn);
+    // Read, not subscribed: toggling the radio must not tear the run down (a separate effect applies it).
+    audio.setRadio(useGameStore.getState().radioOn);
 
     const debug = new URLSearchParams(window.location.search).has('debug');
     const ch = getCharacter(contender.id, outfitOverrides);
     // C29: your personal-best ghost for this state, if one's been set — precomputed once up
     // front so the render loop only ever does an array lookup, no second live sim.
-    const ghost = loadGhost(stateId);
+    // A quick rally is a different course length, and a ghost is only ever
+    // replayed on the course it was recorded on, so quick runs race no ghost.
+    const runState = useGameStore.getState();
+    const challenge = runState.challenge;
+    const quick = challenge ? challenge.quick : runState.quickRun;
+    const cfg = runConfig(simConfig, quick);
+    const ghost = quick || challenge ? null : loadGhost(stateId);
     // C45: on this state's road, because a ghost is only ever stored and replayed
     // per state — the road it drove is the road you are about to drive.
     const ghostTrajectory = ghost
       ? computeGhostTrajectory(ghost, simConfig, roadProfile(pack?.hazards ?? []))
       : undefined;
-    const seed = (Math.random() * 0xffffffff) >>> 0;
+    const dbgSeed = Number(debugParam('debugSeed'));
+    const seed = challenge ? challenge.seed : Number.isFinite(dbgSeed) && dbgSeed > 0 ? dbgSeed >>> 0 : (Math.random() * 0xffffffff) >>> 0;
     // C30: decided once, here, from the real clock — sim and the renderer's World just apply
     // the result, neither ever reads Date itself.
-    const weather = computeWeather(Date.now(), pack?.zone ?? 'SW', seed);
+    const weather = debugWeather(computeWeather(Date.now(), pack?.zone ?? 'SW', seed), debugParam('debugWeather'));
     const renderer = new GameRenderer({
       look: ch.look,
       outfit: ch.outfit,
@@ -491,12 +638,19 @@ function GameScreen() {
       gate,
       finish,
       rideId: ride.id,
-      config: simConfig,
+      config: cfg,
       reduceMotion: reduceMotion || window.matchMedia('(prefers-reduced-motion: reduce)').matches,
       dataSaver,
       debug,
       ghostTrajectory,
       weather,
+      palette: pack?.palette,
+      zone: pack?.zone ?? 'SW',
+      scenery: pack?.scenery ?? [],
+      world,
+      hazards: pack?.hazards ?? [],
+      stateName,
+      venueTypes: pack?.landmarks.map((l) => l.venueType) ?? [],
     });
     container.insertBefore(renderer.canvas, container.firstChild);
     renderer.resize();
@@ -512,7 +666,7 @@ function GameScreen() {
 
     const inputLog: InputRecord[] = [];
     let lastLoggedBits = -1;
-    const state = initState(simConfig, seedRng(seed), {
+    const state = initState(cfg, seedRng(seed), {
       // C44: capacity, size, traits and handling in one place, shared with the
       // ghost replay so the two can't disagree about how this ride drives.
       ...rideSimTraits(ride),
@@ -521,7 +675,8 @@ function GameScreen() {
       contenderId,
       upgrades: runModifiers(upgrades),
       signatureRideBonusPermille: pack?.signatureRide === ride.id ? simConfig.bonuses.signatureRideBonusPermille : 1000,
-      rallySaturdayMultiplierPermille: weather.isRallySaturday ? simConfig.bonuses.rallySaturdayMultiplierPermille : 1000,
+      // A challenge is the same road for everyone, so no clock-dependent bonus.
+      rallySaturdayMultiplierPermille: weather.isRallySaturday && !challenge ? simConfig.bonuses.rallySaturdayMultiplierPermille : 1000,
     });
     // Debug-only (needs ?debug): jump to a distance in metres to inspect later Lagos segments.
     const dbgZ = Number(new URLSearchParams(window.location.search).get('debugZ'));
@@ -534,6 +689,7 @@ function GameScreen() {
     let acc = 0;
     let frameId = 0;
     let hudAcc = 0;
+    let lastCloseCall = -1e9;
 
     // C46: BEAT and PERK are the only two pads left. Everything else is a
     // gesture read off the glass by the InputController itself.
@@ -544,15 +700,30 @@ function GameScreen() {
     };
     beatEl?.addEventListener('pointerdown', onBeat);
     const perkEl = container.querySelector('[data-control=perk]');
-    const onPerk = (e: Event) => {
+    // PERK spends a charge, so it fires on release of a press that stayed put: a swipe that merely
+    // starts on the pad (the right thumb's natural spot) steers instead of spending it.
+    let perkDown: { id: number; x: number; y: number } | null = null;
+    const onPerkDown = (e: Event) => {
       e.preventDefault();
-      input.pulsePerk();
+      const p = e as PointerEvent;
+      perkDown = { id: p.pointerId, x: p.clientX, y: p.clientY };
     };
-    perkEl?.addEventListener('pointerdown', onPerk);
+    const onPerkUp = (e: Event) => {
+      const p = e as PointerEvent;
+      const d = perkDown;
+      perkDown = null;
+      if (d && d.id === p.pointerId && Math.hypot(p.clientX - d.x, p.clientY - d.y) < 14) input.pulsePerk();
+    };
+    const onPerkCancel = () => {
+      perkDown = null;
+    };
+    perkEl?.addEventListener('pointerdown', onPerkDown);
+    perkEl?.addEventListener('pointerup', onPerkUp);
+    perkEl?.addEventListener('pointercancel', onPerkCancel);
 
     const endRun = () => {
       // C29: only a clean finish becomes your "personal best" ghost to race next time.
-      if (state.phase === 'finished' && stateId) {
+      if (state.phase === 'finished' && stateId && !quick && !challenge) {
         saveGhostIfBest({
           stateId,
           seed,
@@ -571,21 +742,49 @@ function GameScreen() {
         integrity: state.integrity,
         capacity: state.capacity,
         phase: state.phase === 'breakdown' ? 'breakdown' : 'finished',
+        progress: state.finishZ > 0 ? Math.min(100, Math.floor((state.z / state.finishZ) * 100)) : 0,
+        reached: legAt(state.z, landmarks, gateLabel, cfg.course, world.start.label).from,
+        seed,
+        quick,
+        replay: {
+          log: bytesToBase64(encodeInputLog(inputLog)),
+          upgrades,
+          rallySaturday: weather.isRallySaturday && !challenge,
+        },
       });
       setScreen('summary');
+    };
+
+    const pushCallout = (time: number, line: string | null) => {
+      if (!line || !useGameStore.getState().radioOn) return;
+      const rc = radioCalloutRef.current;
+      if (time < rc.coolUntil) return;
+      rc.text = line;
+      rc.until = time + CALLOUT_MS;
+      rc.coolUntil = time + CALLOUT_COOLDOWN_MS;
+      audio.blip();
     };
 
     const loop = (time: number) => {
       if (!alive) return;
       const screenNow = useGameStore.getState().screen;
+      const calloutActive = time < radioCalloutRef.current.until;
       if (screenNow === 'paused') {
         audio.duck(true);
+        input.reset();
         last = time;
         frameId = requestAnimationFrame(loop);
         return;
       }
       if (screenNow !== 'game') return;
-      audio.duck(false);
+      if (tutorialRef.current) {
+        input.reset();
+        last = time;
+        renderer.render(prev, state, 0);
+        frameId = requestAnimationFrame(loop);
+        return;
+      }
+      audio.duck(calloutActive);
 
       const dt = Math.min(100, time - last);
       last = time;
@@ -599,9 +798,10 @@ function GameScreen() {
           inputLog.push({ tick: state.tick, input: bits });
           lastLoggedBits = bits;
         }
-        step(state, bits, simConfig);
+        step(state, bits, cfg);
 
         renderer.notifyEvents(state.events);
+        const legNow = legAt(state.z, landmarks, gateLabel, cfg.course, world.start.label);
         for (const ev of state.events) {
           audio.playEvent(ev);
           if (haptics && navigator.vibrate) {
@@ -616,6 +816,17 @@ function GameScreen() {
           if (ev.type === 'integritySuccess' && typeof ev.payload === 'string') {
             toastRef.current = { text: `CLEAR · ${integrityEvent(ev.payload).title}`, until: time + 1100 };
           }
+          if (ev.type === 'toll') toastRef.current = { text: 'TOLL · AGBERO', until: time + 1300 };
+          if (ev.type === 'tollDodged') toastRef.current = { text: 'DODGED THE TOLL', until: time + 1000 };
+          if (ev.type === 'stubborn') toastRef.current = { text: 'STUBBORN PASSENGER · HOLD', until: time + 1500 };
+          if (ev.type === 'weaveWarn') toastRef.current = { text: 'SWERVING AHEAD', until: time + 900 };
+          // Close calls come one after another in dense traffic: say it once in a while, not every pass.
+          if (ev.type === 'closeCall') {
+            if (time - lastCloseCall < 5000) continue;
+            lastCloseCall = time;
+            if (toastRef.current.until < time) toastRef.current = { text: 'CLOSE CALL', until: time + 900 };
+          }
+          pushCallout(time, calloutForEvent(ev, legNow.to, pack?.zone ?? 'SW', pack?.name));
         }
         acc -= msPerTick;
 
@@ -638,7 +849,12 @@ function GameScreen() {
           else if (z?.zoneKind === 'venue' || z?.zoneKind === 'grand') prompt = `FLICK DOWN & HOLD · DOUBLE-TAP ×${beatMult}`;
         }
         const toast = time < toastRef.current.until ? toastRef.current.text : '';
-        const leg = legAt(state.z, landmarks, gateLabel);
+        const leg = legAt(state.z, landmarks, gateLabel, cfg.course, world.start.label);
+        if (leg.to !== radioCalloutRef.current.lastTo) {
+          radioCalloutRef.current.lastTo = leg.to;
+          pushCallout(time, calloutForLandmark(leg.to, pack?.zone ?? 'SW', pack?.name));
+        }
+        const radioLine = time < radioCalloutRef.current.until ? radioCalloutRef.current.text : '';
         if (state.perkCooldownTicks > perkCdMax) perkCdMax = state.perkCooldownTicks;
         setHud({
           crowd: state.skillCrowd,
@@ -652,6 +868,7 @@ function GameScreen() {
           toast,
           from: leg.from,
           to: leg.to,
+          radioLine,
           braking: input.isBraking(time),
           beatOpen: Math.round((state.beatWindowTicks / simConfig.bonuses.onBeatWindowTicks) * 100),
           beatTaps: state.beatTaps,
@@ -672,12 +889,15 @@ function GameScreen() {
       cancelAnimationFrame(frameId);
       audio.stopRun();
       beatEl?.removeEventListener('pointerdown', onBeat);
-      perkEl?.removeEventListener('pointerdown', onPerk);
+      perkEl?.removeEventListener('pointerdown', onPerkDown);
+      perkEl?.removeEventListener('pointerup', onPerkUp);
+      perkEl?.removeEventListener('pointercancel', onPerkCancel);
       input.detach();
       renderer.dispose();
     };
   }, [
     pack,
+    world,
     landmarks,
     audioStem,
     gateLabel,
@@ -693,7 +913,6 @@ function GameScreen() {
     sfxVolume,
     musicVolume,
     setScreen,
-    radioOn,
     contenderId,
     upgrades,
   ]);
@@ -701,6 +920,50 @@ function GameScreen() {
   useEffect(() => {
     audio.setRadio(radioOn);
   }, [radioOn]);
+
+  // A phone call, a notification shade or a tab switch must not let the convoy run on
+  // unattended, and the hardware Back / iOS edge swipe pauses instead of leaving the game.
+  useEffect(() => {
+    const pauseIfRunning = () => {
+      // The tutorial already holds the convoy still; a pause card on top of it would hide the instructions.
+      if (useGameStore.getState().screen === 'game' && !tutorialRef.current) setScreen('paused');
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') pauseIfRunning();
+    };
+    const pushSentinel = () => {
+      try {
+        // One entry on top of the page's own: Back pops it instead of leaving. Reuse it if it is already current.
+        if (!(history.state as { crRun?: boolean } | null)?.crRun) history.pushState({ crRun: true }, '');
+      } catch {
+        /* history unavailable (sandboxed frame): fall back to no Back handling */
+      }
+    };
+    const onPop = () => {
+      pauseIfRunning();
+      pushSentinel();
+    };
+    runEffects++;
+    pushSentinel();
+    document.addEventListener('visibilitychange', onVisibility);
+    window.addEventListener('pagehide', pauseIfRunning);
+    window.addEventListener('popstate', onPop);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('pagehide', pauseIfRunning);
+      window.removeEventListener('popstate', onPop);
+      runEffects--;
+      // Deferred: React re-runs effects straight away in development, and a real exit has nobody re-registering.
+      setTimeout(() => {
+        if (runEffects !== 0) return;
+        try {
+          if ((history.state as { crRun?: boolean } | null)?.crRun) history.back();
+        } catch {
+          /* nothing to unwind */
+        }
+      }, 0);
+    };
+  }, [setScreen]);
 
   if (!pack) {
     // C48: this used to borrow the briefing screen, which lays its children out
@@ -717,49 +980,79 @@ function GameScreen() {
   }
 
   return (
-    <div className="cr-game" ref={containerRef}>
+    <div className="cr-game" ref={containerRef} style={{ '--cr-party': party?.color ?? 'var(--cr-danfo)' } as React.CSSProperties}>
       <div className="cr-hud">
-        <div className="cr-hud-top">
-          <div className="cr-stat">
-            <span>Crowd</span>
-            <strong>{hud.crowd}</strong>
-            <div className="cr-track">
-              <i style={{ width: `${hud.progress}%` }} />
+        <div className="cr-hud-chrome">
+          <header className="cr-hud-bar" aria-label="Run meters">
+            <div className="cr-hud-metric">
+              <span className="cr-hud-metric__label">Turnout</span>
+              <strong>{hud.crowd}</strong>
+              <div className="cr-hud-metric__foot">
+                <div className="cr-track">
+                  <i style={{ width: `${hud.progress}%` }} />
+                </div>
+              </div>
             </div>
-          </div>
-          <div className="cr-stat">
-            <span>Carry</span>
-            <strong>
-              {hud.carried}/{hud.capacity}
-            </strong>
-            <div className="cr-dents" aria-label="dents">
-              {[0, 1, 2].map((i) => (
-                <i key={i} className={`cr-dent${hud.dents > i ? ' is-filled' : ''}`} />
-              ))}
+            <div className="cr-hud-metric">
+              <span className="cr-hud-metric__label">Carry</span>
+              <strong>
+                {hud.carried}
+                <span className="cr-hud-metric__cap">/{hud.capacity}</span>
+              </strong>
+              <div className="cr-hud-metric__foot">
+                <div className="cr-dents" aria-label="dents">
+                  {[0, 1, 2].map((i) => (
+                    <i key={i} className={`cr-dent${hud.dents > i ? ' is-filled' : ''}`} />
+                  ))}
+                </div>
+              </div>
             </div>
-          </div>
-          <div className="cr-stat">
-            <span>Momentum</span>
-            <strong>×{(hud.momentum / 1000).toFixed(2)}</strong>
-          </div>
-          <div className="cr-stat cr-stat--integrity">
-            <span>Integrity</span>
-            <strong>{hud.integrity}</strong>
-            <div className="cr-track">
-              <i style={{ width: `${hud.integrity}%` }} />
+            <div className="cr-hud-metric">
+              <span className="cr-hud-metric__label">Momentum</span>
+              <strong>×{(hud.momentum / 1000).toFixed(2)}</strong>
+              <div className="cr-hud-metric__foot" aria-hidden="true" />
             </div>
+            <div className="cr-hud-metric cr-hud-metric--integrity">
+              <span className="cr-hud-metric__label">Integrity</span>
+              <strong>{hud.integrity}</strong>
+              <div className="cr-hud-metric__foot">
+                <div className="cr-track">
+                  <i style={{ width: `${hud.integrity}%` }} />
+                </div>
+              </div>
+            </div>
+            <button className="cr-hud-pause" type="button" onClick={() => setScreen('paused')} aria-label="Pause">
+              <span aria-hidden="true">⏸</span>
+            </button>
+          </header>
+          <div className="cr-leg">
+            <span className="cr-leg-route">
+              {hud.from} → {hud.to}
+            </span>
           </div>
-          <button className="cr-icon-btn" type="button" onClick={() => setScreen('paused')} aria-label="Pause">
-            II
-          </button>
-        </div>
-        <div className="cr-leg">
-          <span>
-            {hud.from} → {hud.to}
-          </span>
-          <button type="button" className="cr-radio-chip" onClick={() => setRadioOn(!radioOn)}>
-            {radioOn ? stationFor(audioStem).name : 'Radio off'}
-          </button>
+          {/* Always-visible radio strip — matches Danfo Run UX */}
+          <div
+            className={`cr-radio-strip${radioOn ? ' is-on' : ' is-off'}`}
+            role="status"
+            aria-live="polite"
+          >
+            <button
+              type="button"
+              className="cr-radio-strip__btn"
+              onClick={() => setRadioOn(!radioOn)}
+              aria-pressed={radioOn}
+              aria-label={radioOn ? 'Radio on — tap to mute' : 'Radio off — tap to enable'}
+            >
+              <i className="cr-radio-dot" aria-hidden="true" />
+              <span className="cr-radio-strip__name">
+                {radioOn ? stationForZone(pack?.zone ?? 'SW') : 'Radio off'}
+              </span>
+              <span className="cr-radio-strip__skip" aria-hidden="true">&gt;</span>
+            </button>
+            {radioOn && hud.radioLine ? (
+              <span className="cr-radio-strip__line">{hud.radioLine}</span>
+            ) : null}
+          </div>
         </div>
 
         <div className={`cr-toast${hud.toast ? ' is-on' : ''}`}>{hud.toast}</div>
@@ -773,7 +1066,7 @@ function GameScreen() {
             className={`cr-pad cr-pad--beat${hud.beatOpen > 0 ? ' is-live' : ''}`}
             type="button"
             data-control="beat"
-            aria-label={`Beat: double-tap for ${beatMult} times the crowd`}
+            aria-label={`Beat: double-tap for ${beatMult} times the turnout`}
           >
             <span>BEAT</span>
             <small>

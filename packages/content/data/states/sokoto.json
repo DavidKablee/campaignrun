@@ -3,18 +3,116 @@
   "name": "Sokoto",
   "zone": "NW",
   "biomeKit": "harmattan-dune",
-  "palette": { "sky": "#EBD3A0", "fog": "#F6EAD2", "ground": "#C79B63", "accent": "#9C6B3C" },
+  "palette": {
+    "sky": "#EBD3A0",
+    "fog": "#F6EAD2",
+    "ground": "#C79B63",
+    "accent": "#7A4A2B"
+  },
   "landmarks": [
-    { "name": "Sokoto Central Market", "venueType": "market", "verified": false },
-    { "name": "Kofar Rini Gate", "venueType": "landmark", "verified": false },
-    { "name": "Sokoto River Crossing", "venueType": "bridge", "verified": false },
-    { "name": "Takalmawa Leather Row", "venueType": "square", "verified": false },
-    { "name": "Sokoto Township Stadium", "venueType": "stadium", "verified": false }
+    {
+      "name": "Grain Market",
+      "venueType": "market",
+      "verified": false
+    },
+    {
+      "name": "Leather Row",
+      "venueType": "square",
+      "verified": false
+    },
+    {
+      "name": "River Bridge",
+      "venueType": "bridge",
+      "verified": false
+    },
+    {
+      "name": "City Gate",
+      "venueType": "landmark",
+      "verified": false
+    },
+    {
+      "name": "Township Stadium",
+      "venueType": "stadium",
+      "verified": false
+    }
   ],
-  "scenery": ["deleb palm line", "tannery yards"],
-  "hazards": ["dust-storm", "heat-shimmer", "go-slow"],
+  "scenery": [
+    "deleb palm line",
+    "leather racks"
+  ],
+  "hazards": [
+    "dust-storm",
+    "heat-shimmer",
+    "go-slow"
+  ],
   "signatureRide": "okada",
-  "welcomeLines": ["Barka da zuwa Sakkwato!"],
+  "welcomeLines": [
+    "Barka da zuwa Sakkwato!"
+  ],
   "farewellLine": "Na gode, Sokoto!",
-  "audioStem": "nw-kalangu"
+  "audioStem": "nw-kalangu",
+  "world": {
+    "library": "sahel-savanna",
+    "start": {
+      "district": "sokoto.kasuwa",
+      "label": "Your street"
+    },
+    "route": [
+      "sokoto.kasuwa",
+      "sokoto.leather-road",
+      "sokoto.river",
+      "sokoto.gate",
+      "sokoto.stadium-road",
+      "sokoto.plots",
+      "sokoto.quarter",
+      "sokoto.centre"
+    ],
+    "finish": {
+      "district": "sokoto.centre",
+      "label": "SOKOTO · GRAND RALLY"
+    },
+    "road": "sokoto-pale",
+    "dress": "hausa-sokoto",
+    "billboards": [
+      "WELCOME TO SOKOTO",
+      "LEATHER · BAGS",
+      "ONIONS · GARLIC",
+      "CAPS · CLOTH",
+      "PROVISIONS",
+      "WATER · TEA",
+      "RECHARGE CARDS",
+      "POS · AIRTIME",
+      "DATA 4G · BIG SAVER",
+      "PHARMACY"
+    ],
+    "skyline": "sokoto-plain",
+    "ambient": "none",
+    "pieces": [
+      {
+        "landmark": 0,
+        "piece": "sokoto.grain-market",
+        "side": -1
+      },
+      {
+        "landmark": 1,
+        "piece": "sokoto.leather-row",
+        "side": -1
+      },
+      {
+        "landmark": 2,
+        "piece": "sokoto.river-bridge",
+        "side": -1
+      },
+      {
+        "landmark": 3,
+        "piece": "sokoto.city-gate",
+        "side": -1
+      },
+      {
+        "landmark": 4,
+        "piece": "sokoto.stadium",
+        "side": -1
+      }
+    ]
+  }
 }

@@ -6,6 +6,8 @@ import {
   metaConfig,
   runModifiers,
   runPayout,
+  runConfig,
+  streakBonusPermille,
   upgradeReadout,
   upgradeValue,
   activeContenders,
@@ -51,13 +53,13 @@ describe('content packs', () => {
       expect(rides[i]!.capacity).toBeGreaterThan(rides[i - 1]!.capacity);
       expect(rides[i]!.followingGate).toBeGreaterThan(rides[i - 1]!.followingGate);
     }
-    expect(rides.find((r) => r.id === 'okada')!.followingGate).toBe(150);
+    expect(rides.find((r) => r.id === 'okada')!.followingGate).toBe(60);
     const okada = rides.find((r) => r.id === 'okada')!;
     const keke = rides.find((r) => r.id === 'keke')!;
-    expect(isRidePlayable(okada, 149)).toBe(false);
-    expect(isRidePlayable(okada, 150)).toBe(true);
-    expect(isRidePlayable(keke, 1_499)).toBe(false);
-    expect(isRidePlayable(keke, 1_500)).toBe(true);
+    expect(isRidePlayable(okada, 59)).toBe(false);
+    expect(isRidePlayable(okada, 60)).toBe(true);
+    expect(isRidePlayable(keke, 449)).toBe(false);
+    expect(isRidePlayable(keke, 450)).toBe(true);
     // C26: full roster is playable (gated by Following, not a playable:false lock).
     expect(rides.filter((r) => r.playable).map((r) => r.id)).toEqual(['trek', 'okada', 'keke', 'hilux', 'danfo', 'coaster', 'grand-convoy']);
   });
@@ -380,6 +382,28 @@ describe('C45: hazards differ per state', () => {
     }
   });
 
+  it('only drives vehicles the obstacle table knows how to size', () => {
+    const kinds = new Set(simConfig.obstacles.map((o) => o.kind));
+    for (const k of simConfig.traffic.kinds) {
+      expect(kinds.has(k.kind), k.kind).toBe(true);
+      // Something for it to do: no kind is listed with nowhere to go.
+      expect(k.oncoming || k.slow, k.kind).toBeTruthy();
+      if (k.oncoming) {
+        expect(k.oncoming[0]).toBeLessThanOrEqual(k.oncoming[1]);
+        expect(k.oncoming[1]).toBeLessThan(0);
+      }
+      if (k.slow) {
+        expect(k.slow[0]).toBeLessThanOrEqual(k.slow[1]);
+        // A same-direction vehicle must be slower than the slowest the player can go on the move.
+        expect(k.slow[1]).toBeLessThan(Math.floor(simConfig.baseSpeedUm / 1000));
+      }
+    }
+    // Reaction time at the worst closing speed: a head-on vehicle woken at the wake distance reaches the player no sooner than ~3 s.
+    const fastest = Math.min(...simConfig.traffic.kinds.map((k) => k.oncoming?.[0] ?? 0));
+    const closingMmPerTick = Math.floor(simConfig.maxSpeedUm / 1000) - fastest;
+    expect(simConfig.traffic.wakeMm / closingMmPerTick / simConfig.tickHz).toBeGreaterThan(3);
+  });
+
   it('only reweights obstacles the sim actually spawns', () => {
     const kinds = new Set(simConfig.obstacles.map((o) => o.kind));
     for (const h of hazardEffects) {
@@ -633,6 +657,31 @@ describe('C48: the Convoy Yard explains itself', () => {
       const levels = { ...noUpgrades, [upgrade.id]: maxUpgradeLevel };
       expect(runPayout(18, levels)).toBe(runPayout(18, noUpgrades));
     }
+  });
+
+  it('lifts the payout by the streak, stepped and capped, and never above the cap', () => {
+    const r = metaConfig.rewards;
+    expect(streakBonusPermille(0)).toBe(0);
+    expect(streakBonusPermille(2)).toBe(2 * r.streakBonusPermillePerStep);
+    expect(streakBonusPermille(500)).toBe(r.streakBonusMaxSteps * r.streakBonusPermillePerStep);
+    expect(streakBonusPermille(-3)).toBe(0);
+    const plain = runPayout(18, noUpgrades);
+    expect(runPayout(18, noUpgrades, { streak: 0 })).toBe(plain);
+    expect(runPayout(18, noUpgrades, { streak: 3 })).toBe(Math.floor((plain * (1000 + streakBonusPermille(3))) / 1000));
+    expect(runPayout(18, noUpgrades, { streak: 99 })).toBe(runPayout(18, noUpgrades, { streak: r.streakBonusMaxSteps }));
+  });
+
+  it('pays a short run only its share of the finishing money', () => {
+    const half = runPayout(0, noUpgrades, { baseSharePermille: 500 });
+    expect(half).toBe(Math.floor(metaConfig.rewards.baseRun / 2));
+  });
+
+  it('shortens the road for a quick rally without touching the rest of the config', () => {
+    const quick = runConfig(simConfig, true);
+    expect(quick.course.segmentCount).toBe(Math.min(simConfig.course.segmentCount, simConfig.course.quickSegmentCount));
+    expect(quick.course.segmentCount).toBeLessThan(simConfig.course.segmentCount);
+    expect({ ...quick, course: simConfig.course }).toEqual(simConfig);
+    expect(runConfig(simConfig, false)).toBe(simConfig);
   });
 
   it('names delivering supporters as the only source of Following', () => {

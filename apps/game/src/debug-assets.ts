@@ -3,6 +3,7 @@ import { simConfig } from '@cr/content';
 import { biomeAssetIds, buildInstancedProp, loadAsset, preloadBiome } from './render/assets';
 import { bakeCharacter, buildCharacter, poseCharacter } from './render/character';
 import { vcMat } from './render/materials';
+import { buildObstacle } from './render/props';
 import { World } from './render/world';
 
 /**
@@ -107,7 +108,35 @@ function themeCheck(theme: string) {
   tick();
 }
 
+/** Obstacle close-up (`?obstacle=barricade`): one obstacle on a road strip, seen from the player's side. */
+function obstacleCheck(kind: string) {
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color('#dce8f0');
+  const camera = new THREE.PerspectiveCamera(40, innerWidth / innerHeight, 0.1, 80);
+  camera.position.set(1.2, 1.6, 6.5);
+  camera.lookAt(0, 0.5, 0);
+  scene.add(new THREE.HemisphereLight('#fff6df', '#8d7a63', 1.3));
+  const sun = new THREE.DirectionalLight('#fff1cf', 2.0);
+  sun.position.set(-3, 6, 5);
+  scene.add(sun);
+  const road = new THREE.Mesh(new THREE.PlaneGeometry(12, 30), new THREE.MeshStandardMaterial({ color: '#4d4f52' }));
+  road.rotation.x = -Math.PI / 2;
+  scene.add(road);
+  scene.add(buildObstacle(kind, 1));
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(innerWidth, innerHeight);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  document.body.appendChild(renderer.domElement);
+  renderer.render(scene, camera);
+  log(`obstacle ${kind} rendered`);
+}
+
 async function main() {
+  const obstacle = new URLSearchParams(location.search).get('obstacle');
+  if (obstacle) {
+    obstacleCheck(obstacle);
+    return;
+  }
   const theme = new URLSearchParams(location.search).get('theme');
   if (theme) {
     themeCheck(theme);

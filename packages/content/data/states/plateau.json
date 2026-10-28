@@ -3,18 +3,116 @@
   "name": "Plateau",
   "zone": "NC",
   "biomeKit": "hills-plateau",
-  "palette": { "sky": "#A7D8EE", "fog": "#E3E9DC", "ground": "#9A5B38", "accent": "#5E8A46" },
+  "palette": {
+    "sky": "#9DBFD6",
+    "fog": "#DCE3E1",
+    "ground": "#9DB279",
+    "accent": "#707A84"
+  },
   "landmarks": [
-    { "name": "Jos Main Market", "venueType": "market", "verified": false },
-    { "name": "Shere Hills", "venueType": "landmark", "verified": false },
-    { "name": "Rayfield Lakeside", "venueType": "waterfront", "verified": false },
-    { "name": "Wildlife Park Gate", "venueType": "park", "verified": false },
-    { "name": "Jos Township Stadium", "venueType": "stadium", "verified": false }
+    {
+      "name": "Highland Produce Market",
+      "venueType": "market",
+      "verified": false
+    },
+    {
+      "name": "Jos Wildlife Park Gate",
+      "venueType": "park",
+      "verified": false
+    },
+    {
+      "name": "Tower Roundabout",
+      "venueType": "square",
+      "verified": false
+    },
+    {
+      "name": "Jos Township Stadium",
+      "venueType": "stadium",
+      "verified": false
+    },
+    {
+      "name": "Shere Hills",
+      "venueType": "landmark",
+      "verified": false
+    }
   ],
-  "scenery": ["tin-mine ponds", "rock domes"],
-  "hazards": ["rocky-ridge", "low-visibility", "go-slow"],
-  "signatureRide": "hilux",
-  "welcomeLines": ["Barka da zuwa Jos!"],
+  "scenery": [
+    "pale boulder fields",
+    "cool highland haze"
+  ],
+  "hazards": [
+    "rocky-ridge",
+    "low-visibility",
+    "go-slow"
+  ],
+  "signatureRide": "keke",
+  "welcomeLines": [
+    "Barka da zuwa Jos!"
+  ],
   "farewellLine": "Na gode, Plateau!",
-  "audioStem": "nc-drums"
+  "audioStem": "nc-drums",
+  "world": {
+    "library": "forest-hills",
+    "start": {
+      "district": "plateau.produce",
+      "label": "Your street"
+    },
+    "route": [
+      "plateau.produce",
+      "plateau.park-road",
+      "plateau.tower",
+      "plateau.stadium-road",
+      "plateau.rocks",
+      "plateau.tin-belt",
+      "plateau.potato-ridge",
+      "plateau.centre"
+    ],
+    "finish": {
+      "district": "plateau.centre",
+      "label": "PLATEAU · GRAND RALLY"
+    },
+    "road": "plateau-sand",
+    "dress": "jos-layers",
+    "billboards": [
+      "WELCOME TO PLATEAU",
+      "POTATOES · VEGETABLES",
+      "CHARCOAL · FIREWOOD",
+      "FRESH MILK · HONEY",
+      "JACKETS · SWEATERS",
+      "RECHARGE CARDS",
+      "POS · AIRTIME",
+      "DATA 4G · BIG SAVER",
+      "HARDWARE",
+      "PURE WATER"
+    ],
+    "skyline": "jos-domes",
+    "ambient": "none",
+    "pieces": [
+      {
+        "landmark": 0,
+        "piece": "plateau.produce-market",
+        "side": -1
+      },
+      {
+        "landmark": 1,
+        "piece": "plateau.wildlife-gate",
+        "side": -1
+      },
+      {
+        "landmark": 2,
+        "piece": "plateau.tower-roundabout",
+        "side": -1
+      },
+      {
+        "landmark": 3,
+        "piece": "plateau.stadium",
+        "side": -1
+      },
+      {
+        "landmark": 4,
+        "piece": "plateau.shere-hills",
+        "side": -1
+      }
+    ]
+  }
 }

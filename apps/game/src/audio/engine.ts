@@ -174,6 +174,13 @@ export class AudioEngine {
     this.applyVolumes();
   }
 
+  /** Soft radio blip when a DJ callout starts (no VO assets). */
+  blip() {
+    if (!this.ctx || this.muted || !this.radioOn) return;
+    this.tone(880, 0.08, 0.28, { type: 'triangle', lp: 2400 });
+    this.tone(1175, 0.1, 0.22, { type: 'triangle', at: 0.06, lp: 2600 });
+  }
+
   setIntensity(momentum: number, carried: number, capacity: number) {
     const fill = capacity > 0 ? carried / capacity : 0;
     const m = Math.max(0, (momentum - 1000) / 1000);
@@ -392,6 +399,30 @@ export class AudioEngine {
       case 'integrityFail':
         if (this.throttled('intFail', 200)) return;
         this.tone(220, 0.35, 0.7, { slideTo: 90, lp: 500 });
+        break;
+      case 'toll':
+        if (this.throttled('toll', 200)) return;
+        this.tone(196, 0.2, 0.6, { type: 'square', slideTo: 130, lp: 800 });
+        this.tone(262, 0.12, 0.4, { at: 0.12 });
+        break;
+      case 'tollDodged':
+        if (this.throttled('tollOk', 160)) return;
+        this.tone(587, 0.1, 0.3);
+        this.tone(784, 0.12, 0.3, { at: 0.06 });
+        break;
+      case 'weaveWarn':
+        // Two short horn blasts: the rider is telling you which way they are about to go.
+        if (this.throttled('weave', 500)) return;
+        this.tone(430, 0.09, 0.35, { type: 'square', lp: 1400 });
+        this.tone(430, 0.09, 0.35, { type: 'square', lp: 1400, at: 0.14 });
+        break;
+      case 'closeCall':
+        if (this.throttled('close', 400)) return;
+        this.tone(900, 0.16, 0.22, { type: 'triangle', slideTo: 220, lp: 1800 });
+        break;
+      case 'stubborn':
+        this.tone(330, 0.14, 0.3, { type: 'triangle' });
+        this.tone(311, 0.16, 0.3, { type: 'triangle', at: 0.12 });
         break;
       case 'integritySuccess':
         if (this.throttled('intOk', 160)) return;

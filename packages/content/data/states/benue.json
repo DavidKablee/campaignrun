@@ -3,17 +3,115 @@
   "name": "Benue",
   "zone": "NC",
   "biomeKit": "farmland-river",
-  "palette": { "sky": "#8FBDE4", "fog": "#DCE8F2", "ground": "#7E8E58", "accent": "#D4A017" },
+  "palette": {
+    "sky": "#8FBDE4",
+    "fog": "#DCE8F2",
+    "ground": "#8E9A58",
+    "accent": "#2F6F8F"
+  },
   "landmarks": [
-    { "name": "Wurukum Market", "venueType": "market", "verified": false },
-    { "name": "River Benue Bridge", "venueType": "bridge", "verified": false },
-    { "name": "Zaki Biam Yam Market", "venueType": "market", "verified": false },
-    { "name": "Wadata Waterside", "venueType": "waterfront", "verified": false },
-    { "name": "Makurdi Township Stadium", "venueType": "stadium", "verified": false }
+    {
+      "name": "Market",
+      "venueType": "market",
+      "verified": false
+    },
+    {
+      "name": "Old Bridge",
+      "venueType": "bridge",
+      "verified": false
+    },
+    {
+      "name": "Yam Market",
+      "venueType": "market",
+      "verified": false
+    },
+    {
+      "name": "Riverbank Landing",
+      "venueType": "waterfront",
+      "verified": false
+    },
+    {
+      "name": "Township Stadium",
+      "venueType": "stadium",
+      "verified": false
+    }
   ],
-  "scenery": ["yam barns", "river sandbanks"],
-  "hazards": ["cattle-crossing", "river-fog", "go-slow"],
-  "signatureRide": "hilux",
-  "welcomeLines": ["Welcome to Makurdi — Benue is open."],
-  "audioStem": "nc-drums"
+  "scenery": [
+    "yam stacks",
+    "river banks"
+  ],
+  "hazards": [
+    "cart-weave",
+    "river-fog",
+    "go-slow"
+  ],
+  "signatureRide": "keke",
+  "welcomeLines": [
+    "Welcome to Makurdi — Benue is open."
+  ],
+  "audioStem": "nc-drums",
+  "world": {
+    "library": "guinea-savanna",
+    "start": {
+      "district": "benue.market",
+      "label": "Your street"
+    },
+    "route": [
+      "benue.market",
+      "benue.bridge-road",
+      "benue.yam-market",
+      "benue.riverbank",
+      "benue.stadium-road",
+      "benue.farm-belt",
+      "benue.quarter-lane",
+      "benue.plaza-street"
+    ],
+    "finish": {
+      "district": "benue.plaza-street",
+      "label": "BENUE · GRAND RALLY"
+    },
+    "road": "benue-sand",
+    "dress": "tiv-city",
+    "billboards": [
+      "WELCOME TO BENUE",
+      "YAM · RICE",
+      "SOYA · BEANS",
+      "PURE WATER",
+      "PROVISIONS",
+      "RECHARGE CARDS",
+      "POS · AIRTIME",
+      "DATA 4G · BIG SAVER",
+      "BUKA · CHOP",
+      "FRESH ORANGES"
+    ],
+    "skyline": "benue-hills",
+    "ambient": "none",
+    "pieces": [
+      {
+        "landmark": 0,
+        "piece": "benue.market",
+        "side": -1
+      },
+      {
+        "landmark": 1,
+        "piece": "benue.old-bridge",
+        "side": -1
+      },
+      {
+        "landmark": 2,
+        "piece": "benue.yam-market",
+        "side": -1
+      },
+      {
+        "landmark": 3,
+        "piece": "benue.riverbank",
+        "side": -1
+      },
+      {
+        "landmark": 4,
+        "piece": "benue.stadium",
+        "side": -1
+      }
+    ]
+  }
 }

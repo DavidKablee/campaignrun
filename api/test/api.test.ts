@@ -7,6 +7,7 @@ import { resetRateLimits } from '../src/rateLimit';
 import type { Db } from '../src/db';
 import { limits, rides, simConfig } from '@cr/content';
 import { maxCrowdFor } from '@cr/sim';
+import { play } from './replayHarness';
 
 const LOCKOUT_AFTER = limits.auth.loginFailuresBeforeLockout;
 const SCORES_PER_MIN = limits.scores.perMinutePerUser;
@@ -31,7 +32,9 @@ run('api', () => {
     database = pool;
     await migrate(database);
     mail = memoryMailer();
-    app = createApp(database, mail);
+    // These tests post hand-written scores, which have no replay to attach; the
+    // replay check has its own file (replay.test.ts) with it switched on.
+    app = createApp(database, mail, { requireReplay: false });
   });
 
   afterAll(async () => {
@@ -805,6 +808,107 @@ run('api', () => {
       const { cookie } = await signup('full@example.com', 'fulluser');
       const res = await json('/api/auth/email/snooze', { method: 'POST', headers: { cookie } });
       expect(res.status).toBe(409);
+    });
+  });
+
+  describe('replay verification on POST /api/scores', () => {
+    let strict: ReturnType<typeof createApp>;
+
+    beforeAll(() => {
+      // The default: replays are required.
+      strict = createApp(database, memoryMailer());
+    });
+
+    const post = (body: unknown, cookie: string) =>
+      strict.request('/api/scores', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', cookie },
+        body: JSON.stringify(body),
+      });
+
+    async function player(username = 'runner') {
+      const res = await strict.request('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ email: `${username}@example.com`, password: 'a-long-enough-password', username }),
+      });
+      return (res.headers.get('set-cookie') ?? '').split(';')[0]!;
+    }
+
+    it('stores a run that really happened', async () => {
+      const cookie = await player();
+      const body = play(4321);
+      expect(body.crowd).toBeGreaterThan(0);
+      const res = await post(body, cookie);
+      expect(res.status).toBe(201);
+      expect(await res.json()).toMatchObject({ verified: true });
+    });
+
+    it('refuses a score with no replay', async () => {
+      const cookie = await player();
+      const { replay: _drop, ...bare } = play(4321);
+      const res = await post(bare, cookie);
+      expect(res.status).toBe(422);
+      expect(await res.json()).toEqual({ error: 'replay-required' });
+    });
+
+    it('refuses a score the replay does not produce, even one the plausibility bound would allow', async () => {
+      const cookie = await player();
+      const body = play(4321);
+      const res = await post({ ...body, crowd: body.crowd + 1 }, cookie);
+      expect(res.status).toBe(422);
+      expect(await res.json()).toMatchObject({ error: 'replay-mismatch', reason: 'mismatch' });
+      const { rows } = await database.query('select 1 from scores');
+      expect(rows).toHaveLength(0);
+    });
+
+    it('refuses a replay played on a different ride', async () => {
+      const cookie = await player();
+      const body = play(4321, 'danfo');
+      expect((await post({ ...body, rideId: 'keke' }, cookie)).status).toBe(422);
+    });
+
+    it('refuses a log that is not a log', async () => {
+      const cookie = await player();
+      const body = play(4321);
+      const res = await post({ ...body, replay: { ...body.replay, log: Buffer.from([0x80]).toString('base64') } }, cookie);
+      expect(res.status).toBe(422);
+      expect(await res.json()).toEqual({ error: 'bad-replay' });
+    });
+
+    it('refuses a Rally Saturday claim outside the window', async () => {
+      const cookie = await player();
+      const body = play(4321);
+      const res = await post({ ...body, replay: { ...body.replay, rallySaturday: true } }, cookie);
+      expect(res.status).toBe(422);
+      expect(await res.json()).toMatchObject({ reason: 'rally-clock' });
+    });
+
+    it('takes one receipt once', async () => {
+      const cookie = await player();
+      const body = play(999);
+      expect((await post(body, cookie)).status).toBe(201);
+      expect((await post(body, cookie)).status).toBe(409);
+      const { rows } = await database.query('select 1 from scores');
+      expect(rows).toHaveLength(1);
+    });
+
+    it('keeps the Contender private without consent, and holds a shared one to the replay', async () => {
+      const cookie = await player();
+      const body = play(2024, 'danfo', 'captain-kobo');
+      // No consent: the server finds the Contender by trying them all and stores nothing.
+      const quiet = await post({ ...body, contenderId: 'captain-kobo' }, cookie);
+      expect(await quiet.json()).toMatchObject({ storedContender: false, verified: true });
+
+      await strict.request('/api/auth/consent', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', cookie },
+        body: JSON.stringify({ shareContender: true, legalVersion: 'test' }),
+      });
+      // Consented: a claimed Contender is checked, so naming someone else fails.
+      const other = play(2025, 'danfo', 'captain-kobo');
+      expect((await post({ ...other, contenderId: 'mama-ankara' }, cookie)).status).toBe(422);
+      expect((await post({ ...other, contenderId: 'captain-kobo' }, cookie)).status).toBe(201);
     });
   });
 });

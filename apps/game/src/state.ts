@@ -1,12 +1,22 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { isRidePlayable, metaConfig, rides, type UpgradeId } from '@cr/content';
+import { safeStorage } from './safeStorage';
+import { isRidePlayable, metaConfig, rides, simConfig, streakBonusPermille, type UpgradeId } from '@cr/content';
 import { useContenderStore } from './contenderStore';
+import type { Challenge } from './challenge';
+import { prefersDataSaver } from './deviceTier';
 import { challengeMet, todaysChallenge } from './daily';
 import { submitLocalBoard, type LocalBoardEntry } from './localBoard';
 import { emptyUpgrades, missionDelta, type MissionProgress, runPayout, type StartId, type UpgradeLevels, upgradeCost, watDay, watWeek } from './meta';
 import { canTravel, emptyTravel, noteTravel, type TravelProgress } from './travel';
 import { validateUsername } from './username';
+
+/** base64 input log + the setup around it; the server replays it to confirm a score. */
+export interface RunReplay {
+  log: string;
+  upgrades: UpgradeLevels;
+  rallySaturday: boolean;
+}
 
 export type Screen =
   | 'splash'
@@ -64,6 +74,23 @@ interface GameState {
   lastRunIntegrity: number;
   lastRunCapacity: number;
   lastRunPhase: 'finished' | 'breakdown';
+  /** Percent of the road covered, so a run that broke down still has a number. */
+  lastRunProgress: number;
+  /** The last landmark passed before the run ended. */
+  lastRunReached: string;
+  /** The seed the run was played on, so the result can be turned into a challenge link. */
+  lastRunSeed: number;
+  /** The run was a quick rally: shorter, and kept out of boards, ghosts, streaks and missions. */
+  lastRunQuick: boolean;
+  /** Next run is a quick rally. Set by whatever starts it; read once when the run begins. */
+  quickRun: boolean;
+  setQuickRun: (v: boolean) => void;
+  /** A challenge that arrived in the address bar and has not been taken yet. */
+  incomingChallenge: Challenge | null;
+  setIncomingChallenge: (c: Challenge | null) => void;
+  /** The challenge being played: it decides the seed, state, ride and course length. */
+  challenge: Challenge | null;
+  setChallenge: (c: Challenge | null) => void;
   setRunResult: (r: {
     skillCrowd: number;
     displayCrowd: number;
@@ -72,7 +99,14 @@ interface GameState {
     integrity: number;
     capacity: number;
     phase: 'finished' | 'breakdown';
+    progress?: number;
+    reached?: string;
+    seed?: number;
+    quick?: boolean;
+    /** What the server needs to play this run again: the input log and the convoy it was played with. */
+    replay?: RunReplay;
   }) => void;
+  lastRunReplay: RunReplay | null;
   startingStory: StartId | null;
   chooseStartingStory: (id: StartId) => void;
   upgrades: UpgradeLevels;
@@ -87,7 +121,11 @@ interface GameState {
   donationDay: string | null;
   claimDonation: () => boolean;
   lastMetaReward: number;
-  recordMetaRun: (r: { delivered: number; crowd: number; finished: boolean }) => void;
+  recordMetaRun: (r: { delivered: number; crowd: number; finished: boolean; broke?: boolean; quick?: boolean }) => void;
+  /** Permille the rally streak lifted the last payout by. */
+  lastStreakBonus: number;
+  /** What the last run did to the streak when it did not grow it. */
+  lastStreakNote: '' | 'frozen' | 'lost';
   /** Claimed daily-challenge id (WAT day + kind). */
   dailyChallengeClaimed: string | null;
   lastDailyReward: number;
@@ -145,7 +183,7 @@ export const useGameStore = create<GameState>()(
       sfxVolume: 0.8,
       musicVolume: 0.35,
       haptics: true,
-      dataSaver: false,
+      dataSaver: prefersDataSaver(),
       reduceMotion: false,
       setVolumes: (sfx, music) => set({ sfxVolume: sfx, musicVolume: music }),
       setFlags: (f) => set(f),
@@ -160,8 +198,24 @@ export const useGameStore = create<GameState>()(
       lastRunIntegrity: 100,
       lastRunCapacity: 8,
       lastRunPhase: 'finished',
+      lastRunProgress: 100,
+      lastRunReached: '',
+      lastRunSeed: 0,
+      lastRunReplay: null,
+      lastRunQuick: false,
+      quickRun: false,
+      setQuickRun: (v) => set({ quickRun: v }),
+      incomingChallenge: null,
+      setIncomingChallenge: (c) => set({ incomingChallenge: c }),
+      challenge: null,
+      setChallenge: (c) => set({ challenge: c }),
       setRunResult: (r) =>
         set({
+          lastRunSeed: r.seed ?? 0,
+          lastRunReplay: r.replay ?? null,
+          lastRunQuick: r.quick ?? false,
+          lastRunProgress: r.progress ?? (r.phase === 'finished' ? 100 : 0),
+          lastRunReached: r.reached ?? '',
           lastRunSkillCrowd: r.skillCrowd,
           lastRunDisplayCrowd: r.displayCrowd,
           lastRunDelivered: r.delivered,
@@ -216,6 +270,8 @@ export const useGameStore = create<GameState>()(
         return claimed;
       },
       lastMetaReward: 0,
+      lastStreakBonus: 0,
+      lastStreakNote: '',
       recordMetaRun: (r) => set((st) => {
         const day = watDay();
         const week = watWeek();
@@ -239,16 +295,45 @@ export const useGameStore = create<GameState>()(
         // C48: the payout formula lives in content beside the number the Yard
         // prints for the Fundraising Desk. The `* 50` that used to sit here was
         // a third copy of that upgrade's step.
-        const reward = runPayout(r.delivered, st.upgrades) + missionReward;
+        const reward =
+          runPayout(r.delivered, st.upgrades, {
+            streak: st.streak,
+            // A quick rally pays the finishing money for the share of the road it covered.
+            baseSharePermille: r.quick
+              ? Math.floor((simConfig.course.quickSegmentCount * 1000) / simConfig.course.segmentCount)
+              : 1000,
+          }) + missionReward;
+        // Finished rallies in a row. A breakdown ends the run of them, unless
+        // this week's freeze is still unspent, which absorbs exactly one.
+        let streak = st.streak;
+        let freezeWeek = st.freezeWeek;
+        let streakNote: GameState['lastStreakNote'] = '';
+        if (r.finished) streak += 1;
+        else if (r.broke && streak > 0) {
+          if (freezeWeek !== week) {
+            freezeWeek = week;
+            streakNote = 'frozen';
+          } else {
+            streak = 0;
+            streakNote = 'lost';
+          }
+        }
         const travel = r.finished ? noteTravel(st.travel, st.activeStateId) : st.travel;
-        if (r.finished) useContenderStore.getState().lockAfterFinish();
+        // A trial run (no Contender picked yet) must not lock anyone: the lock
+        // would spend the one free switch on their first real pick.
+        if (r.finished && useContenderStore.getState().activeContenderId !== null) {
+          useContenderStore.getState().lockAfterFinish();
+        }
         return {
           coins: st.coins + reward,
           dailyKey: day,
           weeklyKey: week,
           missionProgress: delta.progress,
           completedMissions: delta.completed,
-          streak: r.finished ? st.streak + 1 : st.streak,
+          streak,
+          freezeWeek,
+          lastStreakBonus: streakBonusPermille(st.streak),
+          lastStreakNote: streakNote,
           lastMetaReward: reward,
           dailyChallengeClaimed: freshDay ? null : st.dailyChallengeClaimed,
           travel,
@@ -383,7 +468,7 @@ export const useGameStore = create<GameState>()(
         localBoard: state.localBoard,
         travel: state.travel,
       }),
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => safeStorage),
     },
   ),
 );

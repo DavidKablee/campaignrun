@@ -92,9 +92,6 @@ export function SettingsScreen() {
         <Row label="About" hint="Disclosure, privacy and terms." onClick={() => setScreen('about')} />
       </Sheet>
 
-      <button className="cr-btn" type="button" onClick={leave}>
-        Back
-      </button>
     </div>
   );
 }

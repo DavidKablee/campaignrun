@@ -1,9 +1,10 @@
 import * as THREE from 'three';
 import { mulberry } from './geo';
+import { regionalFacadeTexture, regionalRoadTexture, regionalShopTexture } from './regionalTextures';
 
 /** All textures are painted procedurally on canvases: zero download weight. */
 
-function canvas(w: number, h: number) {
+export function canvas(w: number, h: number) {
   const c = document.createElement('canvas');
   c.width = w;
   c.height = h;
@@ -11,7 +12,7 @@ function canvas(w: number, h: number) {
   return { c, ctx };
 }
 
-function toTex(c: HTMLCanvasElement, repeat = true): THREE.CanvasTexture {
+export function toTex(c: HTMLCanvasElement, repeat = true): THREE.CanvasTexture {
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
   t.anisotropy = 4;
@@ -22,7 +23,7 @@ function toTex(c: HTMLCanvasElement, repeat = true): THREE.CanvasTexture {
   return t;
 }
 
-function speckle(ctx: CanvasRenderingContext2D, w: number, h: number, n: number, alpha: number, seed: number) {
+export function speckle(ctx: CanvasRenderingContext2D, w: number, h: number, n: number, alpha: number, seed: number) {
   const r = mulberry(seed);
   for (let i = 0; i < n; i++) {
     const v = r.next() > 0.5 ? 255 : 0;
@@ -32,7 +33,7 @@ function speckle(ctx: CanvasRenderingContext2D, w: number, h: number, n: number,
 }
 
 const cache = new Map<string, THREE.Texture>();
-function memo(key: string, make: () => THREE.Texture): THREE.Texture {
+export function memo(key: string, make: () => THREE.Texture): THREE.Texture {
   let t = cache.get(key);
   if (!t) {
     t = make();
@@ -45,7 +46,8 @@ function memo(key: string, make: () => THREE.Texture): THREE.Texture {
  * Road strip: 18 m wide (x) by 8 m long (v). Three lanes of 2.8 m, painted
  * kerbs, and block-paved sidewalks either side.
  */
-export function roadTexture() {
+export function roadTexture(style = 'lagos') {
+  if (style !== 'lagos') return regionalRoadTexture(style);
   return memo('road', () => {
     const W = 1024;
     const H = 512;
@@ -130,7 +132,8 @@ export function roadTexture() {
 const WALLS = ['#e6d6b0', '#c9794f', '#7ea5b6', '#d6a23f', '#8fae88', '#e2b3aa'];
 
 /** One window bay x one floor: 3.5 m x 3 m. Burglar-proof bars, stained paint. */
-export function facadeTexture(variant: number) {
+export function facadeTexture(variant: number, set = 'lagos') {
+  if (set !== 'lagos') return regionalFacadeTexture(variant, set);
   const v = variant % WALLS.length;
   return memo(`facade${v}`, () => {
     const { c, ctx } = canvas(256, 256);
@@ -199,7 +202,8 @@ const SHOPS = [
 export const SHOP_VARIANTS = SHOPS.length;
 
 /** Ground-floor shopfront: sign band over roll-up shutter or open stall. 3.5 m x 3.4 m. */
-export function shopTexture(variant: number) {
+export function shopTexture(variant: number, set = 'lagos') {
+  if (set !== 'lagos') return regionalShopTexture(variant, set);
   const v = variant % SHOPS.length;
   return memo(`shop${v}`, () => {
     const s = SHOPS[v]!;

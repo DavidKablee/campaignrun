@@ -3,18 +3,116 @@
   "name": "Borno",
   "zone": "NE",
   "biomeKit": "sahel-savanna",
-  "palette": { "sky": "#EAC78E", "fog": "#F5E6C8", "ground": "#B8894F", "accent": "#8B5A2B" },
+  "palette": {
+    "sky": "#DCD3BD",
+    "fog": "#ECE3CD",
+    "ground": "#C9B38C",
+    "accent": "#8B5A2B"
+  },
   "landmarks": [
-    { "name": "Monday Market", "venueType": "market", "verified": false },
-    { "name": "Borno State Museum", "venueType": "landmark", "verified": false },
-    { "name": "El-Kanemi Stadium", "venueType": "stadium", "verified": false },
-    { "name": "Sanda Kyarimi Park", "venueType": "park", "verified": false },
-    { "name": "Ramat Polytechnic", "venueType": "landmark", "verified": false }
+    {
+      "name": "Cap & Cloth Market",
+      "venueType": "market",
+      "verified": false
+    },
+    {
+      "name": "Flyover Road",
+      "venueType": "bridge",
+      "verified": false
+    },
+    {
+      "name": "City Gate",
+      "venueType": "landmark",
+      "verified": false
+    },
+    {
+      "name": "Main Stadium",
+      "venueType": "stadium",
+      "verified": false
+    },
+    {
+      "name": "Ngadda Riverbank",
+      "venueType": "waterfront",
+      "verified": false
+    }
   ],
-  "scenery": ["Kanem-Bornu motifs", "savanna acacia line"],
-  "hazards": ["dust-storm", "low-visibility", "go-slow"],
-  "signatureRide": "okada",
-  "welcomeLines": ["Barka da zuwa Borno!"],
+  "scenery": [
+    "flat sahel plain",
+    "clay-and-sand streets"
+  ],
+  "hazards": [
+    "dust-storm",
+    "low-visibility",
+    "go-slow"
+  ],
+  "signatureRide": "keke",
+  "welcomeLines": [
+    "Barka da zuwa Borno!"
+  ],
   "farewellLine": "Na gode, Borno!",
-  "audioStem": "ne-algaita"
+  "audioStem": "ne-algaita",
+  "world": {
+    "library": "sahel-savanna",
+    "start": {
+      "district": "borno.yerwa",
+      "label": "Your street"
+    },
+    "route": [
+      "borno.yerwa",
+      "borno.flyover",
+      "borno.gate",
+      "borno.stadium",
+      "borno.riverbank",
+      "borno.neem-avenue",
+      "borno.firgi",
+      "borno.centre"
+    ],
+    "finish": {
+      "district": "borno.centre",
+      "label": "BORNO · GRAND RALLY"
+    },
+    "road": "sahel-sand",
+    "dress": "kanuri-north",
+    "billboards": [
+      "WELCOME TO BORNO",
+      "CAPS · CLOTH",
+      "COLD WATER",
+      "TEA · BREAD",
+      "RECHARGE CARDS",
+      "POS · AIRTIME",
+      "DATA 4G · BIG SAVER",
+      "TAILORING",
+      "FRESH FISH",
+      "PROVISIONS"
+    ],
+    "skyline": "chad-plain",
+    "ambient": "none",
+    "pieces": [
+      {
+        "landmark": 0,
+        "piece": "borno.cap-market",
+        "side": -1
+      },
+      {
+        "landmark": 1,
+        "piece": "borno.flyover",
+        "side": -1
+      },
+      {
+        "landmark": 2,
+        "piece": "borno.city-gate",
+        "side": -1
+      },
+      {
+        "landmark": 3,
+        "piece": "borno.stadium",
+        "side": -1
+      },
+      {
+        "landmark": 4,
+        "piece": "borno.riverbank",
+        "side": -1
+      }
+    ]
+  }
 }

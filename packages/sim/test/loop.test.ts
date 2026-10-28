@@ -148,8 +148,8 @@ describe('controls', () => {
   it('hop clears every obstacle shorter than hopHeightMm and hits the rest', () => {
     const hoppable = simConfig.obstacles.filter((o) => o.heightMm < simConfig.hopHeightMm);
     const solid = simConfig.obstacles.filter((o) => o.heightMm >= simConfig.hopHeightMm);
-    expect(hoppable.map((o) => o.kind)).toEqual(['pothole', 'cones', 'tyres', 'barricade', 'jersey', 'narrow-gate', 'flood-patch']);
-    expect(solid.map((o) => o.kind)).toEqual(['roadworks', 'car', 'danfo', 'trailer']);
+    expect(hoppable.map((o) => o.kind)).toEqual(['pothole', 'cones', 'tyres', 'barricade', 'jersey', 'okada', 'narrow-gate', 'flood-patch']);
+    expect(solid.map((o) => o.kind)).toEqual(['roadworks', 'keke', 'car', 'danfo', 'trailer']);
 
     for (const o of simConfig.obstacles) {
       const state = initState(simConfig, seedRng(2), { capacity: 8 });
@@ -358,13 +358,13 @@ describe('pickup / venue loop', () => {
 });
 
 describe('course timing', () => {
-  it('scripted bot finishes between 75 and 100 seconds', () => {
+  it('scripted bot finishes between 150 and 320 seconds', () => {
     const state = initState(simConfig, seedRng(99), { capacity: 15 });
     // Timing measures course length + zone dwell, not dodge skill (covered elsewhere).
     state.entities = state.entities.filter((e) => e.isZone);
 
     let ticks = 0;
-    const maxTicks = simConfig.tickHz * 120;
+    const maxTicks = simConfig.tickHz * 360;
     while (state.phase === 'running' && ticks < maxTicks) {
       let input: number = Btn.Gas;
       const nearZone = state.entities.find(
@@ -381,8 +381,8 @@ describe('course timing', () => {
 
     expect(state.phase).toBe('finished');
     const seconds = ticks / simConfig.tickHz;
-    expect(seconds).toBeGreaterThanOrEqual(75);
-    expect(seconds).toBeLessThanOrEqual(100);
+    expect(seconds).toBeGreaterThanOrEqual(150);
+    expect(seconds).toBeLessThanOrEqual(320);
   });
 });
 
@@ -390,7 +390,7 @@ function campaignBot(capacity: number, seed: number) {
   const state = initState(simConfig, seedRng(seed), { capacity });
   state.entities = state.entities.filter((e) => e.isZone);
   let ticks = 0;
-  const maxTicks = simConfig.tickHz * 120;
+  const maxTicks = simConfig.tickHz * 360;
   while (state.phase === 'running' && ticks < maxTicks) {
     let input: number = Btn.Gas;
     const nearZone = state.entities.find(

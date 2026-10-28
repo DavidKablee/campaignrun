@@ -47,3 +47,25 @@ export function computeWeather(nowMs: number, zone: Zone, runSeed: number): Weat
   const isRallySaturday = weekday === 6 && hour >= 18 && hour < 21;
   return { dayPhase, isNight, isNepaOut, isHarmattan, isRainySeason, isRallySaturday };
 }
+
+export type DebugWeather = 'day' | 'night' | 'harmattan' | 'rainy';
+
+/**
+ * Review aid (behind `?debug` only): force one of the four moods regardless of the
+ * real clock, so a state can be looked at in the same light every time.
+ */
+export function debugWeather(base: WeatherContext, mood: string | null): WeatherContext {
+  const day = { ...base, dayPhase: 0.5, isNight: false, isNepaOut: false, isHarmattan: false, isRainySeason: false };
+  switch (mood) {
+    case 'day':
+      return day;
+    case 'night':
+      return { ...day, dayPhase: 0, isNight: true };
+    case 'harmattan':
+      return { ...day, isHarmattan: true };
+    case 'rainy':
+      return { ...day, isRainySeason: true };
+    default:
+      return base;
+  }
+}

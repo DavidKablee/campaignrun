@@ -3,7 +3,7 @@ import { getCookie, setCookie, deleteCookie } from 'hono/cookie';
 import { cors } from 'hono/cors';
 import { z } from 'zod';
 import { rides, simConfig } from '@cr/content';
-import { isPlausibleRun } from '@cr/sim';
+import { isPlausibleRun, verifyReplay } from '@cr/sim';
 import {
   SESSION_COOKIE,
   SESSION_DAYS,
@@ -28,6 +28,7 @@ import { LIMITS } from './limits.ts';
 import { log, requestLogger } from './log.ts';
 import { createMailer, resetLink, verifyLink, type Mailer } from './mailer.ts';
 import { hit, rateLimit } from './rateLimit.ts';
+import { decodeReplayLog, rallySaturdayPlausible } from './replayGate.ts';
 import { liveStandings, regionBoard, MIN_PLAYERS_PER_REGION } from './standings.ts';
 import {
   attachEmailSchema,
@@ -125,7 +126,22 @@ interface UserRow {
 }
 
 /** Built around an injected `Db` so the routes are testable without a live server. */
-export function createApp(database: Db, mailer: Mailer = createMailer()) {
+export interface AppOptions {
+  /**
+   * Refuse a score that arrives without a replay. On by default: a board that
+   * accepts unreplayed scores is forgeable by anyone who can call the API. The
+   * escape hatch (`CR_REQUIRE_REPLAY=false`) is for a local demo only.
+   */
+  requireReplay?: boolean;
+  /** Injected so a test can pin Rally Saturday; real time otherwise. */
+  now?: () => number;
+}
+
+export function createApp(database: Db, mailer: Mailer = createMailer(), options: AppOptions = {}) {
+  const log_replay = (userId: string, stateId: string, reason: string) =>
+    log('warn', 'score.replay-rejected', { userId, stateId, reason });
+  const requireReplay = options.requireReplay ?? process.env.CR_REQUIRE_REPLAY !== 'false';
+  const now = options.now ?? Date.now;
   assertCookieConfig();
   const app = new Hono<Env>();
 
@@ -140,7 +156,17 @@ export function createApp(database: Db, mailer: Mailer = createMailer()) {
     .map((s) => s.trim())
     .filter(Boolean);
   // Credentials are cookies, so the allowed origins must be an explicit list.
-  app.use('/api/*', cors({ origin: origins, credentials: true }));
+  // Development only: a phone loading the dev server over the LAN is a private-network origin that
+  // cannot be listed in advance. Production keeps the explicit list and nothing else.
+  const lanOrigin = /^http:\/\/(192\.168\.\d{1,3}\.\d{1,3}|10\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}):\d{2,5}$/;
+  const allowLan = process.env.NODE_ENV !== 'production';
+  app.use(
+    '/api/*',
+    cors({
+      origin: (origin) => (origins.includes(origin) || (allowLan && lanOrigin.test(origin)) ? origin : null),
+      credentials: true,
+    }),
+  );
 
   app.get('/api/health', (c) => c.json({ ok: true }));
 
@@ -529,12 +555,51 @@ export function createApp(database: Db, mailer: Mailer = createMailer()) {
     // if the client sends one anyway (guardrail 10).
     const contenderId = user.contenderConsentAt ? (s.contenderId ?? null) : null;
 
+    // The plausibility bound above is a ceiling; this is the proof. Play the
+    // claimed inputs on the claimed seed and the score has to come out exactly.
+    // When the player has shared their Contender the replay is pinned to it, so
+    // a claimed Contender is also a verified one; otherwise every Contender is
+    // tried and none is recorded.
+    if (!s.replay && requireReplay) {
+      return c.json({ error: 'replay-required' }, 422);
+    }
+    if (s.replay) {
+      const inputs = decodeReplayLog(s.replay.log);
+      if (!inputs) return c.json({ error: 'bad-replay' }, 422);
+      if (s.replay.rallySaturday && !rallySaturdayPlausible(now())) {
+        log_replay(user.id, s.stateId, 'rally-clock');
+        return c.json({ error: 'replay-mismatch', reason: 'rally-clock' }, 422);
+      }
+      const verdict = verifyReplay(
+        simConfig,
+        {
+          seed: s.replay.seed,
+          log: inputs,
+          stateId: s.stateId,
+          rideId: s.rideId,
+          upgrades: s.replay.upgrades,
+          rallySaturday: s.replay.rallySaturday,
+          contenderId,
+        },
+        { crowd: s.crowd, delivered: s.delivered, dents: s.dents, integrity: s.integrity },
+      );
+      if (!verdict.ok) {
+        log_replay(user.id, s.stateId, verdict.reason);
+        return c.json({ error: 'replay-mismatch', reason: verdict.reason }, 422);
+      }
+    }
+
+    // One row per played run: a replay is a receipt, and the same one posted
+    // twice would count twice toward a Contender's standing.
     const { rows } = await database.query<{ id: string; created_at: Date }>(
-      `insert into scores (user_id, state_id, crowd, delivered, dents, integrity, capacity, ride_id, contender_id)
-       values ($1, $2, $3, $4, $5, $6, $7, $8, $9) returning id, created_at`,
-      [user.id, s.stateId, s.crowd, s.delivered, s.dents, s.integrity, s.capacity, s.rideId, contenderId],
+      `insert into scores (user_id, state_id, crowd, delivered, dents, integrity, capacity, ride_id, contender_id, replay_seed)
+       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+       on conflict (user_id, replay_seed) where replay_seed is not null do nothing
+       returning id, created_at`,
+      [user.id, s.stateId, s.crowd, s.delivered, s.dents, s.integrity, s.capacity, s.rideId, contenderId, s.replay?.seed ?? null],
     );
-    return c.json({ id: rows[0]!.id, storedContender: contenderId != null }, 201);
+    if (rows.length === 0) return c.json({ error: 'duplicate' }, 409);
+    return c.json({ id: rows[0]!.id, storedContender: contenderId != null, verified: s.replay != null }, 201);
   });
 
   app.get('/api/scores/mine', requireUser, async (c) => {

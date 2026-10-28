@@ -1,12 +1,26 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
+import { fileURLToPath } from 'node:url';
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
+  // The dev server reads VITE_* values from the repo-root .env (the API address a phone on the
+  // LAN needs). A production build keeps the app folder, so a local address is never baked in.
+  envDir: command === 'serve' ? '../..' : undefined,
   plugins: [
     react(),
+    {
+      // The content package sits outside this app's root, so a dev server never saw files
+      // added to its data folders: the `import.meta.glob` lists of state packs and world
+      // libraries went stale and a new state silently drew the Lagos world. Watching the
+      // folder makes the globs refresh when a file is added.
+      name: 'cr-watch-content-data',
+      configureServer(server) {
+        server.watcher.add(fileURLToPath(new URL('../../packages/content/data', import.meta.url)));
+      },
+    },
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
       includeAssets: ['favicon.svg', 'flags.json', 'pwa-192.png', 'pwa-512.png'],
       manifest: {
         name: 'Campaign Run',
@@ -41,7 +55,7 @@ export default defineConfig({
             handler: 'CacheFirst',
             options: {
               cacheName: 'cr-state-packs',
-              expiration: { maxEntries: 8, maxAgeSeconds: 60 * 60 * 24 * 30 },
+              expiration: { maxEntries: 80, maxAgeSeconds: 60 * 60 * 24 * 30 },
             },
           },
           {
@@ -75,4 +89,4 @@ export default defineConfig({
       },
     },
   },
-});
+}));

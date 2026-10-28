@@ -305,7 +305,7 @@ export function AccountScreen() {
               className="cr-mini-btn cr-mini-btn--danger"
               type="button"
               onClick={() => {
-                if (window.confirm('Delete all local Campaign Run data on this device?')) deleteAllLocalData();
+                if (window.confirm('Delete all local Campaigner data on this device?')) deleteAllLocalData();
               }}
             >
               Delete
@@ -325,7 +325,7 @@ export function AccountScreen() {
                 className="cr-mini-btn cr-mini-btn--danger"
                 type="button"
                 onClick={() => {
-                  if (!window.confirm('Delete your Campaign Run account and all scores on the server?')) return;
+                  if (!window.confirm('Delete your Campaigner account and all scores on the server?')) return;
                   void deleteOnlineAccount().then((ok) =>
                     setNote(ok ? 'Account deleted.' : 'Could not reach the server. Nothing was deleted.'),
                   );

@@ -1,0 +1,3107 @@
+{
+  "districts": {
+    "rivers.aba-road": {
+      "label": "ABA ROAD",
+      "ground": null,
+      "water": null,
+      "facade": "plaster",
+      "shops": "delta",
+      "kerb": "none",
+      "median": true,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "shophouse",
+              4
+            ],
+            [
+              "flatroof-shopfront",
+              2
+            ]
+          ],
+          "floors": [
+            2,
+            3
+          ],
+          "setback": 11
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "oilpalm",
+              3
+            ],
+            [
+              "mango",
+              2
+            ]
+          ],
+          "n": 2,
+          "x": [
+            7,
+            12
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "bole",
+              3
+            ],
+            [
+              "basins",
+              1
+            ]
+          ],
+          "n": 3
+        }
+      ]
+    },
+    "rivers.diobu": {
+      "label": "DIOBU",
+      "ground": null,
+      "water": null,
+      "facade": "plaster",
+      "shops": "delta",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "market-shed",
+              4
+            ],
+            [
+              "shophouse",
+              3
+            ],
+            [
+              "flatroof-shopfront",
+              2
+            ]
+          ],
+          "floors": [
+            2,
+            3
+          ],
+          "palette": [
+            "#c98f3a",
+            "#2a6f73",
+            "#f4f1ea",
+            "#a8553b",
+            "#2d3c73"
+          ]
+        },
+        {
+          "op": "bazaar",
+          "density": 1.4,
+          "palette": [
+            "#c98f3a",
+            "#2a6f73",
+            "#f4f1ea",
+            "#a8553b",
+            "#2d3c73"
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "bole",
+              2
+            ],
+            [
+              "basins",
+              2
+            ],
+            [
+              "crates",
+              1
+            ]
+          ],
+          "n": 3
+        }
+      ]
+    },
+    "rivers.creek-road": {
+      "label": "CREEK ROAD",
+      "ground": null,
+      "water": null,
+      "facade": "plank",
+      "shops": "delta",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "waterEdge",
+          "x": [
+            21,
+            150
+          ],
+          "boats": 3,
+          "side": -1
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "stilt-house",
+              1
+            ]
+          ],
+          "floors": [
+            1,
+            1
+          ],
+          "setback": 11,
+          "spacing": 1,
+          "side": -1
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "flatroof-shopfront",
+              3
+            ],
+            [
+              "shophouse",
+              2
+            ]
+          ],
+          "floors": [
+            1,
+            2
+          ],
+          "setback": 10.5,
+          "side": 1
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "nipa",
+              2
+            ],
+            [
+              "mangrove",
+              1
+            ]
+          ],
+          "n": 2,
+          "x": [
+            24,
+            40
+          ],
+          "side": -1
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "sacks",
+              2
+            ],
+            [
+              "basins",
+              2
+            ],
+            [
+              "bole",
+              1
+            ]
+          ],
+          "n": 3,
+          "side": 1
+        }
+      ]
+    },
+    "rivers.pleasure-park": {
+      "label": "PLEASURE PARK",
+      "ground": null,
+      "water": null,
+      "facade": "plaster",
+      "shops": "delta",
+      "kerb": "none",
+      "median": true,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "shophouse",
+              3
+            ],
+            [
+              "flatroof-shopfront",
+              2
+            ]
+          ],
+          "floors": [
+            1,
+            2
+          ],
+          "setback": 14
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "mango",
+              3
+            ],
+            [
+              "oilpalm",
+              2
+            ]
+          ],
+          "n": 3,
+          "x": [
+            7,
+            14
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "bole",
+              2
+            ]
+          ],
+          "n": 2
+        }
+      ]
+    },
+    "rivers.garrison": {
+      "label": "GARRISON",
+      "ground": null,
+      "water": null,
+      "facade": "plaster",
+      "shops": "delta",
+      "kerb": "none",
+      "median": true,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "shophouse",
+              6
+            ],
+            [
+              "flatroof-shopfront",
+              1
+            ]
+          ],
+          "floors": [
+            3,
+            5
+          ],
+          "setback": 12
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "oilpalm",
+              3
+            ],
+            [
+              "mango",
+              1
+            ]
+          ],
+          "n": 2,
+          "x": [
+            8.6,
+            11
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "bole",
+              2
+            ],
+            [
+              "crates",
+              1
+            ]
+          ],
+          "n": 2
+        }
+      ]
+    },
+    "rivers.estuary": {
+      "label": "BONNY ESTUARY",
+      "ground": null,
+      "water": null,
+      "facade": "plank",
+      "shops": "delta",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "waterEdge",
+          "x": [
+            24,
+            150
+          ],
+          "boats": 3,
+          "side": -1
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "mangrove",
+              3
+            ],
+            [
+              "nipa",
+              3
+            ]
+          ],
+          "n": 4,
+          "x": [
+            11,
+            22
+          ],
+          "side": -1
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "nipa",
+              3
+            ],
+            [
+              "mangrove",
+              2
+            ],
+            [
+              "oilpalm",
+              1
+            ]
+          ],
+          "n": 4,
+          "x": [
+            9,
+            30
+          ],
+          "side": 1
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "stilt-house",
+              1
+            ]
+          ],
+          "floors": [
+            1,
+            1
+          ],
+          "setback": 13,
+          "spacing": 4,
+          "side": 1
+        }
+      ]
+    },
+    "rivers.old-gra": {
+      "label": "OLD G.R.A.",
+      "ground": "#5e7a4c",
+      "water": null,
+      "facade": "plaster",
+      "shops": "delta",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "colonial-bungalow",
+              5
+            ]
+          ],
+          "floors": [
+            1,
+            1
+          ],
+          "setback": 13,
+          "spacing": 2
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "mango",
+              3
+            ],
+            [
+              "oilpalm",
+              1
+            ],
+            [
+              "banana",
+              1
+            ]
+          ],
+          "n": 3,
+          "x": [
+            8,
+            14
+          ]
+        }
+      ]
+    },
+    "rivers.trans-amadi": {
+      "label": "TRANS-AMADI",
+      "ground": null,
+      "water": null,
+      "facade": "plaster",
+      "shops": "delta",
+      "kerb": "none",
+      "median": true,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "shophouse",
+              5
+            ],
+            [
+              "tank-farm",
+              3
+            ]
+          ],
+          "floors": [
+            6,
+            9
+          ],
+          "setback": 13,
+          "spacing": 1
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "oilpalm",
+              2
+            ],
+            [
+              "mango",
+              1
+            ]
+          ],
+          "n": 2,
+          "x": [
+            8.6,
+            11
+          ]
+        }
+      ]
+    },
+    "rivers.creek-village": {
+      "label": "OKRIKA CREEK",
+      "ground": null,
+      "water": null,
+      "facade": "plank",
+      "shops": "delta",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "waterEdge",
+          "x": [
+            22,
+            150
+          ],
+          "boats": 3,
+          "side": -1
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "stilt-house",
+              1
+            ]
+          ],
+          "floors": [
+            1,
+            1
+          ],
+          "setback": 11,
+          "spacing": 1,
+          "side": -1
+        },
+        {
+          "op": "crops",
+          "kind": "cassava",
+          "x": [
+            13,
+            32
+          ],
+          "side": 1
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "stilt-house",
+              1
+            ]
+          ],
+          "floors": [
+            1,
+            1
+          ],
+          "setback": 11,
+          "spacing": 6,
+          "side": 1
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "nipa",
+              2
+            ],
+            [
+              "banana",
+              2
+            ],
+            [
+              "oilpalm",
+              1
+            ]
+          ],
+          "n": 3,
+          "x": [
+            8,
+            12
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "basins",
+              3
+            ]
+          ],
+          "n": 2
+        }
+      ]
+    },
+    "delta.bridge-approach": {
+      "label": "ASABA BRIDGE ROAD",
+      "ground": "#55744A",
+      "water": null,
+      "facade": "plaster",
+      "shops": "warri",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "flatroof-shopfront",
+              3
+            ],
+            [
+              "plank-lockups",
+              3
+            ],
+            [
+              "zinc-bungalow",
+              2
+            ]
+          ],
+          "floors": [
+            1,
+            2
+          ],
+          "setback": 11,
+          "palette": [
+            "#8a7358",
+            "#4f6d85",
+            "#a9c0a8",
+            "#b8892e",
+            "#c9b58a"
+          ]
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "oilpalm",
+              2
+            ],
+            [
+              "mango",
+              2
+            ]
+          ],
+          "n": 2,
+          "x": [
+            8,
+            13
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "basins",
+              3
+            ],
+            [
+              "sachets",
+              2
+            ],
+            [
+              "keke",
+              1
+            ]
+          ],
+          "n": 3
+        }
+      ]
+    },
+    "delta.niger-bluff": {
+      "label": "ASABA · NIGER BLUFF",
+      "ground": "#6f7a4a",
+      "water": null,
+      "facade": "plaster",
+      "shops": "warri",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "colonial-bungalow",
+              2
+            ],
+            [
+              "zinc-bungalow",
+              2
+            ],
+            [
+              "flatroof-shopfront",
+              2
+            ]
+          ],
+          "floors": [
+            1,
+            2
+          ],
+          "setback": 12.5,
+          "spacing": 2,
+          "palette": [
+            "#9c5a3b",
+            "#9aa3a6",
+            "#8e5233"
+          ],
+          "side": 1
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "mango",
+              3
+            ],
+            [
+              "oilpalm",
+              2
+            ],
+            [
+              "banana",
+              1
+            ]
+          ],
+          "n": 2,
+          "x": [
+            8,
+            14
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "basins",
+              2
+            ],
+            [
+              "sachets",
+              1
+            ]
+          ],
+          "n": 2,
+          "side": 1
+        }
+      ]
+    },
+    "delta.timber-quarter": {
+      "label": "SAPELE TIMBER QUARTER",
+      "ground": "#7a6a46",
+      "water": null,
+      "facade": "plank",
+      "shops": "warri",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "waterEdge",
+          "x": [
+            22,
+            150
+          ],
+          "boats": 2,
+          "color": "#6f9a8a",
+          "side": -1
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "sawmill-shed",
+              4
+            ],
+            [
+              "zinc-bungalow",
+              2
+            ],
+            [
+              "flatroof-shopfront",
+              1
+            ]
+          ],
+          "floors": [
+            1,
+            2
+          ],
+          "setback": 11,
+          "spacing": 1,
+          "palette": [
+            "#a8553b",
+            "#9aa3a6",
+            "#8d979a"
+          ],
+          "side": 1
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "forest-giant",
+              2
+            ],
+            [
+              "raffia",
+              1
+            ],
+            [
+              "oilpalm",
+              1
+            ]
+          ],
+          "n": 2,
+          "x": [
+            9,
+            20
+          ],
+          "side": 1
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "logs",
+              3
+            ],
+            [
+              "planks",
+              3
+            ],
+            [
+              "sachets",
+              1
+            ]
+          ],
+          "n": 3,
+          "side": 1
+        }
+      ]
+    },
+    "delta.effurun": {
+      "label": "EFFURUN · UVWIE",
+      "ground": null,
+      "water": null,
+      "facade": "plaza",
+      "shops": "warri",
+      "kerb": "none",
+      "median": true,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "plaza-block",
+              4
+            ],
+            [
+              "shophouse",
+              3
+            ],
+            [
+              "tiled-villa",
+              1
+            ]
+          ],
+          "floors": [
+            3,
+            5
+          ],
+          "setback": 13,
+          "spacing": 1,
+          "palette": [
+            "#9c5a3b",
+            "#6e7a6a",
+            "#a8553b"
+          ]
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "oilpalm",
+              3
+            ],
+            [
+              "mango",
+              1
+            ]
+          ],
+          "n": 2,
+          "x": [
+            8.6,
+            11
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "keke",
+              2
+            ],
+            [
+              "sachets",
+              1
+            ]
+          ],
+          "n": 2
+        }
+      ]
+    },
+    "delta.warri-streets": {
+      "label": "WARRI STREETS",
+      "ground": null,
+      "water": null,
+      "facade": "plaster",
+      "shops": "warri",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "shophouse",
+              4
+            ],
+            [
+              "market-shed",
+              3
+            ],
+            [
+              "flatroof-shopfront",
+              2
+            ],
+            [
+              "market-block",
+              1
+            ]
+          ],
+          "floors": [
+            2,
+            3
+          ],
+          "setback": 10.5,
+          "palette": [
+            "#8a7358",
+            "#7a2f3e",
+            "#b8892e",
+            "#4d6f86",
+            "#e6dbc0"
+          ]
+        },
+        {
+          "op": "bazaar",
+          "density": 1.0,
+          "palette": [
+            "#8a7358",
+            "#7a2f3e",
+            "#b8892e",
+            "#4d6f86",
+            "#e6dbc0"
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "keke",
+              2
+            ],
+            [
+              "basins",
+              2
+            ],
+            [
+              "crates",
+              1
+            ],
+            [
+              "sachets",
+              1
+            ]
+          ],
+          "n": 3
+        }
+      ]
+    },
+    "delta.creek-market": {
+      "label": "WARRI NORTH CREEKS",
+      "ground": "#4d6a4a",
+      "water": null,
+      "facade": "plank",
+      "shops": "warri",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "waterEdge",
+          "x": [
+            21,
+            150
+          ],
+          "boats": 4,
+          "color": "#5f5a44",
+          "side": -1
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "stilt-house",
+              2
+            ],
+            [
+              "plank-lockups",
+              2
+            ]
+          ],
+          "floors": [
+            1,
+            1
+          ],
+          "setback": 11,
+          "spacing": 1,
+          "palette": [
+            "#8a7358",
+            "#4f6d85",
+            "#a9c0a8",
+            "#b8892e"
+          ],
+          "side": -1
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "flatroof-shopfront",
+              3
+            ],
+            [
+              "zinc-bungalow",
+              2
+            ]
+          ],
+          "floors": [
+            1,
+            2
+          ],
+          "setback": 10.5,
+          "side": 1
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "raffia",
+              3
+            ],
+            [
+              "nipa",
+              2
+            ],
+            [
+              "oilpalm",
+              1
+            ]
+          ],
+          "n": 3,
+          "x": [
+            24,
+            44
+          ],
+          "side": -1
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "basins",
+              2
+            ],
+            [
+              "sachets",
+              1
+            ],
+            [
+              "sacks",
+              1
+            ]
+          ],
+          "n": 3,
+          "side": 1
+        }
+      ]
+    },
+    "delta.warri-river": {
+      "label": "UDU · ALADJA",
+      "ground": null,
+      "water": null,
+      "facade": "plaster",
+      "shops": "warri",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "waterEdge",
+          "x": [
+            26,
+            150
+          ],
+          "boats": 2,
+          "color": "#6b7f72",
+          "side": 1
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "works-shed",
+              2
+            ],
+            [
+              "tank-farm",
+              2
+            ],
+            [
+              "factory-shed",
+              1
+            ],
+            [
+              "zinc-bungalow",
+              2
+            ]
+          ],
+          "floors": [
+            1,
+            2
+          ],
+          "setback": 12,
+          "spacing": 1.5,
+          "palette": [
+            "#9aa3a6",
+            "#8d979a",
+            "#a8553b"
+          ],
+          "side": -1
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "oilpalm",
+              2
+            ],
+            [
+              "nipa",
+              1
+            ]
+          ],
+          "n": 2,
+          "x": [
+            9,
+            14
+          ],
+          "side": -1
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "jerrycans",
+              2
+            ],
+            [
+              "crates",
+              1
+            ]
+          ],
+          "n": 2,
+          "side": -1
+        }
+      ]
+    },
+    "delta.palm-belt": {
+      "label": "UGHELLI · ISOKO PALM BELT",
+      "ground": "#5f7a45",
+      "water": null,
+      "facade": "plaster",
+      "shops": "warri",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "crops",
+          "kind": "cassava",
+          "x": [
+            13,
+            30
+          ],
+          "side": -1
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "zinc-bungalow",
+              4
+            ],
+            [
+              "flatroof-shopfront",
+              2
+            ],
+            [
+              "thatch-hut",
+              1
+            ]
+          ],
+          "floors": [
+            1,
+            2
+          ],
+          "setback": 11.5,
+          "spacing": 3,
+          "palette": [
+            "#a8553b",
+            "#9aa3a6",
+            "#8e5233"
+          ],
+          "side": 1
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "oilpalm",
+              4
+            ],
+            [
+              "banana",
+              1
+            ],
+            [
+              "raffia",
+              1
+            ]
+          ],
+          "n": 4,
+          "x": [
+            8,
+            22
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "jerrycans",
+              3
+            ],
+            [
+              "basins",
+              1
+            ],
+            [
+              "sacks",
+              1
+            ]
+          ],
+          "n": 3,
+          "side": 1
+        }
+      ]
+    },
+    "delta.okpanam-road": {
+      "label": "ASABA · OKPANAM ROAD",
+      "ground": "#5e7a4c",
+      "water": null,
+      "facade": "plaza",
+      "shops": "warri",
+      "kerb": "none",
+      "median": true,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "plaza-block",
+              4
+            ],
+            [
+              "tiled-villa",
+              2
+            ],
+            [
+              "shophouse",
+              2
+            ]
+          ],
+          "floors": [
+            3,
+            6
+          ],
+          "setback": 13.5,
+          "spacing": 1,
+          "palette": [
+            "#9c5a3b",
+            "#6e7a6a",
+            "#8e5233"
+          ]
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "oilpalm",
+              3
+            ],
+            [
+              "mango",
+              1
+            ]
+          ],
+          "n": 2,
+          "x": [
+            8.6,
+            11
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "keke",
+              1
+            ],
+            [
+              "sachets",
+              1
+            ]
+          ],
+          "n": 2
+        }
+      ]
+    },
+    "akwa-ibom.itam": {
+      "label": "ITAM MARKET QUARTER",
+      "ground": null,
+      "water": null,
+      "facade": "ibom-render",
+      "shops": "ibom",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "shophouse",
+              3
+            ],
+            [
+              "flatroof-shopfront",
+              3
+            ],
+            [
+              "market-shed",
+              1
+            ]
+          ],
+          "floors": [
+            1,
+            2
+          ],
+          "setback": 10.5,
+          "spacing": 0.8,
+          "palette": [
+            "#ece6d6",
+            "#d6d0bd",
+            "#b89c5a",
+            "#8fb0a0"
+          ]
+        },
+        {
+          "op": "bazaar",
+          "density": 1.0,
+          "palette": [
+            "#c98f3a",
+            "#f4f1ea",
+            "#2a6f73",
+            "#a8553b",
+            "#6a7fa0"
+          ]
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "oilpalm",
+              2
+            ],
+            [
+              "mango",
+              1
+            ]
+          ],
+          "n": 2,
+          "x": [
+            8,
+            13
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "basins",
+              2
+            ],
+            [
+              "crates",
+              1
+            ],
+            [
+              "keke",
+              2
+            ],
+            [
+              "sachets",
+              1
+            ]
+          ],
+          "n": 3
+        }
+      ]
+    },
+    "akwa-ibom.plaza": {
+      "label": "PLAZA ROUNDABOUT",
+      "ground": null,
+      "water": null,
+      "facade": "ibom-render",
+      "shops": "ibom",
+      "kerb": "none",
+      "median": true,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "plaza-block",
+              3
+            ],
+            [
+              "tiled-villa",
+              2
+            ],
+            [
+              "shophouse",
+              1
+            ]
+          ],
+          "floors": [
+            2,
+            4
+          ],
+          "setback": 13,
+          "spacing": 2,
+          "palette": [
+            "#ece6d6",
+            "#d6d0bd",
+            "#b89c5a",
+            "#8fb0a0"
+          ]
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "oilpalm",
+              2
+            ],
+            [
+              "mango",
+              2
+            ]
+          ],
+          "n": 3,
+          "x": [
+            8,
+            13
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "keke",
+              2
+            ],
+            [
+              "sachets",
+              1
+            ]
+          ],
+          "n": 2
+        }
+      ]
+    },
+    "akwa-ibom.beach-road": {
+      "label": "BEACH ROAD",
+      "ground": "#cfc6a4",
+      "water": null,
+      "facade": "ibom-render",
+      "shops": "ibom",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "zinc-bungalow",
+              2
+            ],
+            [
+              "thatch-hut",
+              1
+            ]
+          ],
+          "floors": [
+            1,
+            1
+          ],
+          "setback": 13,
+          "spacing": 5,
+          "palette": [
+            "#ece6d6",
+            "#d6d0bd",
+            "#b89c5a",
+            "#8fb0a0"
+          ],
+          "side": 1
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "mangrove",
+              2
+            ],
+            [
+              "raffia",
+              2
+            ],
+            [
+              "oilpalm",
+              2
+            ]
+          ],
+          "n": 4,
+          "x": [
+            8,
+            30
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "basins",
+              1
+            ],
+            [
+              "sacks",
+              1
+            ]
+          ],
+          "n": 2
+        }
+      ]
+    },
+    "akwa-ibom.craft-road": {
+      "label": "CRAFT ROAD",
+      "ground": null,
+      "water": null,
+      "facade": "ibom-render",
+      "shops": "ibom",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "flatroof-shopfront",
+              2
+            ],
+            [
+              "zinc-bungalow",
+              2
+            ],
+            [
+              "shophouse",
+              1
+            ]
+          ],
+          "floors": [
+            1,
+            2
+          ],
+          "setback": 11,
+          "spacing": 1.5,
+          "palette": [
+            "#ece6d6",
+            "#d6d0bd",
+            "#b89c5a",
+            "#8fb0a0"
+          ]
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "raffia",
+              3
+            ],
+            [
+              "oilpalm",
+              2
+            ]
+          ],
+          "n": 3,
+          "x": [
+            8,
+            14
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "matscreen",
+              1
+            ],
+            [
+              "crates",
+              1
+            ],
+            [
+              "keke",
+              1
+            ]
+          ],
+          "n": 3
+        }
+      ]
+    },
+    "akwa-ibom.stadium-road": {
+      "label": "STADIUM ROAD",
+      "ground": null,
+      "water": null,
+      "facade": "ibom-render",
+      "shops": "ibom",
+      "kerb": "none",
+      "median": true,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "plaza-block",
+              2
+            ],
+            [
+              "shophouse",
+              2
+            ],
+            [
+              "tiled-villa",
+              1
+            ]
+          ],
+          "floors": [
+            2,
+            3
+          ],
+          "setback": 12.5,
+          "spacing": 2,
+          "palette": [
+            "#ece6d6",
+            "#d6d0bd",
+            "#b89c5a",
+            "#8fb0a0"
+          ]
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "oilpalm",
+              2
+            ],
+            [
+              "mango",
+              2
+            ]
+          ],
+          "n": 3,
+          "x": [
+            8,
+            13
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "keke",
+              2
+            ],
+            [
+              "sachets",
+              1
+            ]
+          ],
+          "n": 2
+        }
+      ]
+    },
+    "akwa-ibom.palm-belt": {
+      "label": "OIL-PALM BELT",
+      "ground": "#5f7a45",
+      "water": null,
+      "facade": "ibom-render",
+      "shops": "ibom",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "crops",
+          "kind": "cassava",
+          "x": [
+            13,
+            34
+          ],
+          "side": -1
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "zinc-bungalow",
+              2
+            ],
+            [
+              "flatroof-shopfront",
+              1
+            ]
+          ],
+          "floors": [
+            1,
+            1
+          ],
+          "setback": 12,
+          "spacing": 4,
+          "palette": [
+            "#ece6d6",
+            "#d6d0bd",
+            "#b89c5a",
+            "#8fb0a0"
+          ],
+          "side": 1
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "oilpalm",
+              3
+            ],
+            [
+              "banana",
+              1
+            ],
+            [
+              "raffia",
+              2
+            ]
+          ],
+          "n": 5,
+          "x": [
+            8,
+            32
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "jerrycans",
+              1
+            ],
+            [
+              "basins",
+              1
+            ]
+          ],
+          "n": 2
+        }
+      ]
+    },
+    "akwa-ibom.creek": {
+      "label": "CREEK ROAD",
+      "ground": "#4d6a4a",
+      "water": null,
+      "facade": "ibom-render",
+      "shops": "ibom",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "waterEdge",
+          "x": [
+            34,
+            150
+          ],
+          "boats": 1,
+          "color": "#7e9490",
+          "side": 1
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "zinc-bungalow",
+              2
+            ],
+            [
+              "thatch-hut",
+              1
+            ]
+          ],
+          "floors": [
+            1,
+            1
+          ],
+          "setback": 13,
+          "spacing": 5,
+          "palette": [
+            "#ece6d6",
+            "#d6d0bd",
+            "#b89c5a",
+            "#8fb0a0"
+          ],
+          "side": -1
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "nipa",
+              3
+            ],
+            [
+              "mangrove",
+              2
+            ],
+            [
+              "raffia",
+              2
+            ]
+          ],
+          "n": 5,
+          "x": [
+            8,
+            30
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "basins",
+              1
+            ],
+            [
+              "sacks",
+              1
+            ]
+          ],
+          "n": 2,
+          "side": -1
+        }
+      ]
+    },
+    "akwa-ibom.avenue": {
+      "label": "FLOWERED AVENUE",
+      "ground": null,
+      "water": null,
+      "facade": "ibom-render",
+      "shops": "ibom",
+      "kerb": "none",
+      "median": true,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "plaza-block",
+              4
+            ],
+            [
+              "tiled-villa",
+              2
+            ],
+            [
+              "shophouse",
+              2
+            ]
+          ],
+          "floors": [
+            3,
+            5
+          ],
+          "setback": 12.5,
+          "spacing": 1.2,
+          "palette": [
+            "#ece6d6",
+            "#d6d0bd",
+            "#b89c5a",
+            "#8fb0a0"
+          ]
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "oilpalm",
+              3
+            ],
+            [
+              "mango",
+              1
+            ]
+          ],
+          "n": 3,
+          "x": [
+            8.6,
+            11
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "keke",
+              2
+            ],
+            [
+              "sachets",
+              1
+            ]
+          ],
+          "n": 2
+        }
+      ]
+    },
+    "cross-river.market": {
+      "label": "CENTRAL MARKET QUARTER",
+      "ground": null,
+      "water": null,
+      "facade": "calabar-render",
+      "shops": "cross-river",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "shophouse",
+              3
+            ],
+            [
+              "flatroof-shopfront",
+              2
+            ],
+            [
+              "market-shed",
+              2
+            ]
+          ],
+          "floors": [
+            1,
+            2
+          ],
+          "setback": 10.5,
+          "spacing": 0.8,
+          "palette": [
+            "#ece4d0",
+            "#cdbfa8",
+            "#d8b494",
+            "#a8b8a0"
+          ]
+        },
+        {
+          "op": "bazaar",
+          "density": 1.0,
+          "palette": [
+            "#c98f3a",
+            "#f4f1ea",
+            "#7a2e4a",
+            "#3f6f84",
+            "#4f7a52"
+          ]
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "raffia",
+              2
+            ],
+            [
+              "oilpalm",
+              1
+            ],
+            [
+              "banana",
+              1
+            ]
+          ],
+          "n": 2,
+          "x": [
+            8,
+            13
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "produce",
+              2
+            ],
+            [
+              "basins",
+              1
+            ],
+            [
+              "keke",
+              2
+            ],
+            [
+              "kekerank",
+              1
+            ]
+          ],
+          "n": 3
+        }
+      ]
+    },
+    "cross-river.quay-road": {
+      "label": "QUAY ROAD",
+      "ground": "#667050",
+      "water": null,
+      "facade": "calabar-render",
+      "shops": "cross-river",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "waterEdge",
+          "x": [
+            34,
+            150
+          ],
+          "boats": 0,
+          "color": "#7c8a70",
+          "side": 1
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "colonial-bungalow",
+              2
+            ],
+            [
+              "port-shed",
+              1
+            ],
+            [
+              "zinc-bungalow",
+              1
+            ]
+          ],
+          "floors": [
+            1,
+            2
+          ],
+          "setback": 13,
+          "spacing": 4,
+          "palette": [
+            "#ece4d0",
+            "#cdbfa8",
+            "#d8b494",
+            "#a8b8a0"
+          ],
+          "side": -1
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "mangrove",
+              2
+            ],
+            [
+              "raffia",
+              2
+            ],
+            [
+              "nipa",
+              1
+            ]
+          ],
+          "n": 4,
+          "x": [
+            8,
+            30
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "basins",
+              1
+            ],
+            [
+              "crates",
+              1
+            ]
+          ],
+          "n": 2,
+          "side": -1
+        }
+      ]
+    },
+    "cross-river.carnival-road": {
+      "label": "CARNIVAL ROAD",
+      "ground": null,
+      "water": null,
+      "facade": "calabar-render",
+      "shops": "cross-river",
+      "kerb": "none",
+      "median": true,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "plaza-block",
+              2
+            ],
+            [
+              "colonial-bungalow",
+              2
+            ],
+            [
+              "shophouse",
+              1
+            ]
+          ],
+          "floors": [
+            2,
+            3
+          ],
+          "setback": 12.5,
+          "spacing": 2,
+          "palette": [
+            "#ece4d0",
+            "#cdbfa8",
+            "#d8b494",
+            "#a8b8a0"
+          ]
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "oilpalm",
+              3
+            ],
+            [
+              "raffia",
+              1
+            ]
+          ],
+          "n": 3,
+          "x": [
+            8,
+            13
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "keke",
+              2
+            ],
+            [
+              "minibus",
+              1
+            ],
+            [
+              "sachets",
+              1
+            ]
+          ],
+          "n": 3
+        }
+      ]
+    },
+    "cross-river.hall-road": {
+      "label": "HALL ROAD",
+      "ground": "#6f8a56",
+      "water": null,
+      "facade": "calabar-render",
+      "shops": "cross-river",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "plaza-block",
+              1
+            ],
+            [
+              "zinc-bungalow",
+              2
+            ],
+            [
+              "gra-cottage",
+              1
+            ]
+          ],
+          "floors": [
+            1,
+            2
+          ],
+          "setback": 13,
+          "spacing": 4,
+          "palette": [
+            "#ece4d0",
+            "#cdbfa8",
+            "#d8b494",
+            "#a8b8a0"
+          ],
+          "side": -1
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "oilpalm",
+              2
+            ],
+            [
+              "raffia",
+              2
+            ],
+            [
+              "rubber",
+              1
+            ]
+          ],
+          "n": 4,
+          "x": [
+            8,
+            30
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "keke",
+              1
+            ],
+            [
+              "sachets",
+              1
+            ]
+          ],
+          "n": 2,
+          "side": -1
+        }
+      ]
+    },
+    "cross-river.stadium-road": {
+      "label": "STADIUM ROAD",
+      "ground": null,
+      "water": null,
+      "facade": "calabar-render",
+      "shops": "cross-river",
+      "kerb": "none",
+      "median": true,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "plaza-block",
+              2
+            ],
+            [
+              "shophouse",
+              2
+            ],
+            [
+              "colonial-bungalow",
+              1
+            ]
+          ],
+          "floors": [
+            2,
+            3
+          ],
+          "setback": 12.5,
+          "spacing": 2,
+          "palette": [
+            "#ece4d0",
+            "#cdbfa8",
+            "#d8b494",
+            "#a8b8a0"
+          ]
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "oilpalm",
+              2
+            ],
+            [
+              "raffia",
+              1
+            ]
+          ],
+          "n": 3,
+          "x": [
+            8,
+            13
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "keke",
+              2
+            ],
+            [
+              "sachets",
+              1
+            ]
+          ],
+          "n": 2
+        }
+      ]
+    },
+    "cross-river.raffia-belt": {
+      "label": "RAFFIA BELT",
+      "ground": "#4a6a3c",
+      "water": null,
+      "facade": "calabar-render",
+      "shops": "cross-river",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "crops",
+          "kind": "cassava",
+          "x": [
+            13,
+            34
+          ],
+          "side": -1
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "zinc-bungalow",
+              2
+            ],
+            [
+              "flatroof-shopfront",
+              1
+            ]
+          ],
+          "floors": [
+            1,
+            1
+          ],
+          "setback": 12,
+          "spacing": 4,
+          "palette": [
+            "#ece4d0",
+            "#cdbfa8",
+            "#d8b494",
+            "#a8b8a0"
+          ],
+          "side": 1
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "raffia",
+              3
+            ],
+            [
+              "rubber",
+              2
+            ],
+            [
+              "banana",
+              2
+            ],
+            [
+              "oilpalm",
+              1
+            ]
+          ],
+          "n": 6,
+          "x": [
+            8,
+            32
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "produce",
+              1
+            ],
+            [
+              "jerrycans",
+              1
+            ]
+          ],
+          "n": 2
+        }
+      ]
+    },
+    "cross-river.tailors-lane": {
+      "label": "TAILORS LANE",
+      "ground": null,
+      "water": null,
+      "facade": "calabar-render",
+      "shops": "cross-river",
+      "kerb": "none",
+      "median": false,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "zinc-bungalow",
+              2
+            ],
+            [
+              "veranda-range",
+              2
+            ],
+            [
+              "flatroof-shopfront",
+              1
+            ]
+          ],
+          "floors": [
+            1,
+            2
+          ],
+          "setback": 12,
+          "spacing": 2.5,
+          "palette": [
+            "#ece4d0",
+            "#cdbfa8",
+            "#d8b494",
+            "#a8b8a0"
+          ]
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "oilpalm",
+              2
+            ],
+            [
+              "banana",
+              1
+            ],
+            [
+              "raffia",
+              1
+            ]
+          ],
+          "n": 4,
+          "x": [
+            8,
+            30
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "keke",
+              2
+            ],
+            [
+              "clothbolts",
+              1
+            ],
+            [
+              "basins",
+              1
+            ]
+          ],
+          "n": 3
+        }
+      ]
+    },
+    "cross-river.plaza-street": {
+      "label": "PLAZA STREET",
+      "ground": null,
+      "water": null,
+      "facade": "calabar-render",
+      "shops": "cross-river",
+      "kerb": "none",
+      "median": true,
+      "side": [
+        {
+          "op": "furniture"
+        },
+        {
+          "op": "people"
+        },
+        {
+          "op": "lots",
+          "styles": [
+            [
+              "plaza-block",
+              4
+            ],
+            [
+              "shophouse",
+              3
+            ],
+            [
+              "tiled-villa",
+              1
+            ]
+          ],
+          "floors": [
+            3,
+            5
+          ],
+          "setback": 12.5,
+          "spacing": 1.2,
+          "palette": [
+            "#ece4d0",
+            "#cdbfa8",
+            "#d8b494",
+            "#a8b8a0"
+          ]
+        },
+        {
+          "op": "flora",
+          "kinds": [
+            [
+              "oilpalm",
+              3
+            ],
+            [
+              "raffia",
+              1
+            ]
+          ],
+          "n": 3,
+          "x": [
+            8.6,
+            11
+          ]
+        },
+        {
+          "op": "kerbside",
+          "items": [
+            [
+              "keke",
+              2
+            ],
+            [
+              "sachets",
+              1
+            ]
+          ],
+          "n": 2
+        }
+      ]
+    }
+  },
+  "roads": {
+    "delta-wet": {
+      "texture": "delta-wet",
+      "shoulder": "#6b5238"
+    },
+    "asaba-red": {
+      "texture": "asaba-red",
+      "shoulder": "#a5683f"
+    },
+    "ibom-clean": {
+      "texture": "ibom-clean",
+      "shoulder": "#76805a"
+    },
+    "calabar-wet": {
+      "texture": "calabar-wet",
+      "shoulder": "#667050"
+    }
+  },
+  "dress": {
+    "delta-south": {
+      "men": {
+        "tops": [
+          "tee",
+          "tee",
+          "ankara-shirt",
+          "ankara-shirt",
+          "tee"
+        ],
+        "bottoms": [
+          "trousers",
+          "jeans",
+          "shorts",
+          "wrapper"
+        ],
+        "headwear": [
+          "none"
+        ],
+        "footwear": [
+          "sandals",
+          "slippers",
+          "sneakers",
+          "shoes"
+        ]
+      },
+      "women": {
+        "tops": [
+          "blouse",
+          "ankara-shirt",
+          "blouse"
+        ],
+        "bottoms": [
+          "wrapper",
+          "wrapper",
+          "wrapper"
+        ],
+        "headwear": [
+          "headtie",
+          "headtie",
+          "none"
+        ],
+        "footwear": [
+          "sandals",
+          "slippers"
+        ]
+      },
+      "femalePermille": 480,
+      "colors": [
+        "#2A6F73",
+        "#C98F3A",
+        "#2D3C73",
+        "#A8553B",
+        "#8A7358",
+        "#E8DCC0",
+        "#6B5A3A",
+        "#6E7F8A",
+        "#B9B6AB",
+        "#8A5A3C",
+        "#3B5A80",
+        "#D9CDB0"
+      ],
+      "count": 14
+    },
+    "delta-warri": {
+      "men": {
+        "tops": [
+          "ankara-shirt",
+          "ankara-shirt",
+          "tee",
+          "tee",
+          "ankara-shirt"
+        ],
+        "bottoms": [
+          "trousers",
+          "jeans",
+          "wrapper",
+          "trousers"
+        ],
+        "headwear": [
+          "none"
+        ],
+        "footwear": [
+          "sandals",
+          "slippers",
+          "sneakers",
+          "shoes"
+        ]
+      },
+      "women": {
+        "tops": [
+          "blouse",
+          "blouse",
+          "ankara-shirt"
+        ],
+        "bottoms": [
+          "wrapper",
+          "wrapper",
+          "wrapper"
+        ],
+        "headwear": [
+          "headtie",
+          "headtie",
+          "none"
+        ],
+        "footwear": [
+          "sandals",
+          "slippers"
+        ]
+      },
+      "femalePermille": 500,
+      "colors": [
+        "#7A2F3E",
+        "#3C4B7A",
+        "#B8892E",
+        "#B97A84",
+        "#2E5E5A",
+        "#E6DBC0",
+        "#8A7358",
+        "#A9C0A8",
+        "#6E7F8A",
+        "#D9CDB0",
+        "#8A5A3C",
+        "#4D6F86"
+      ],
+      "count": 14
+    },
+    "ibibio-city": {
+      "men": {
+        "tops": [
+          "tee",
+          "ankara-shirt",
+          "ankara-shirt",
+          "tee",
+          "kaftan"
+        ],
+        "bottoms": [
+          "trousers",
+          "jeans",
+          "shorts",
+          "wrapper"
+        ],
+        "headwear": [
+          "none"
+        ],
+        "footwear": [
+          "sandals",
+          "slippers",
+          "sneakers",
+          "shoes"
+        ]
+      },
+      "women": {
+        "tops": [
+          "blouse",
+          "ankara-shirt",
+          "blouse"
+        ],
+        "bottoms": [
+          "wrapper",
+          "wrapper",
+          "wrapper"
+        ],
+        "headwear": [
+          "headtie",
+          "headtie",
+          "none"
+        ],
+        "footwear": [
+          "sandals",
+          "slippers"
+        ]
+      },
+      "femalePermille": 480,
+      "colors": [
+        "#2F6E6A",
+        "#B89C5A",
+        "#E8DCC0",
+        "#6B5A3A",
+        "#8A7358",
+        "#6E7F8A",
+        "#B9B6AB",
+        "#2E5A48",
+        "#D9CDB0",
+        "#3B5A80",
+        "#8A5A3C",
+        "#C9B074"
+      ],
+      "count": 14
+    },
+    "calabar-city": {
+      "men": {
+        "tops": [
+          "ankara-shirt",
+          "tee",
+          "tee",
+          "ankara-shirt",
+          "kaftan"
+        ],
+        "bottoms": [
+          "trousers",
+          "jeans",
+          "trousers",
+          "shorts"
+        ],
+        "headwear": [
+          "none"
+        ],
+        "footwear": [
+          "sandals",
+          "slippers",
+          "shoes",
+          "sneakers"
+        ]
+      },
+      "women": {
+        "tops": [
+          "blouse",
+          "blouse",
+          "ankara-shirt"
+        ],
+        "bottoms": [
+          "wrapper",
+          "wrapper",
+          "wrapper",
+          "jeans"
+        ],
+        "headwear": [
+          "headtie",
+          "headtie",
+          "none"
+        ],
+        "footwear": [
+          "sandals",
+          "slippers"
+        ]
+      },
+      "femalePermille": 520,
+      "colors": [
+        "#7A2E4A",
+        "#E8DCC0",
+        "#2F5D3A",
+        "#8A5A3C",
+        "#C9A56A",
+        "#2F3A44",
+        "#A87656",
+        "#B2AC9C",
+        "#F0EBDD",
+        "#4F7A52",
+        "#3F6F84",
+        "#6B5A3A"
+      ],
+      "count": 14
+    }
+  }
+}

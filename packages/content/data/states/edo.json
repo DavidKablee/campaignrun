@@ -3,17 +3,115 @@
   "name": "Edo",
   "zone": "SS",
   "biomeKit": "rainforest",
-  "palette": { "sky": "#8CC5E2", "fog": "#DCEBDF", "ground": "#7A4B32", "accent": "#B8860B" },
+  "palette": {
+    "sky": "#8CC5E2",
+    "fog": "#DCEBDF",
+    "ground": "#8A4B32",
+    "accent": "#B8860B"
+  },
   "landmarks": [
-    { "name": "New Benin Market", "venueType": "market", "verified": false },
-    { "name": "Benin City Walls", "venueType": "landmark", "verified": false },
-    { "name": "Ring Road", "venueType": "square", "verified": false },
-    { "name": "Ogba Gardens", "venueType": "park", "verified": false },
-    { "name": "Ikpoba Hill Crossing", "venueType": "bridge", "verified": false }
+    {
+      "name": "Produce Market",
+      "venueType": "market",
+      "verified": false
+    },
+    {
+      "name": "Brass Casters' Row",
+      "venueType": "landmark",
+      "verified": false
+    },
+    {
+      "name": "Moat Gate",
+      "venueType": "bridge",
+      "verified": false
+    },
+    {
+      "name": "Ring Road Junction",
+      "venueType": "square",
+      "verified": false
+    },
+    {
+      "name": "Township Stadium",
+      "venueType": "stadium",
+      "verified": false
+    }
   ],
-  "scenery": ["bronze-casters' row", "red laterite banks"],
-  "hazards": ["okada-swarm", "rain-slick", "go-slow"],
+  "scenery": [
+    "brass row",
+    "red earth banks"
+  ],
+  "hazards": [
+    "keke-swerve",
+    "rain-slick",
+    "go-slow"
+  ],
   "signatureRide": "danfo",
-  "welcomeLines": ["Obokhian! Welcome to Benin City."],
-  "audioStem": "ss-brass"
+  "welcomeLines": [
+    "Welcome to Benin City."
+  ],
+  "audioStem": "ss-brass",
+  "world": {
+    "library": "forest-hills",
+    "start": {
+      "district": "edo.market",
+      "label": "Your street"
+    },
+    "route": [
+      "edo.market",
+      "edo.brass-row",
+      "edo.moat-lane",
+      "edo.ring-road",
+      "edo.stadium-road",
+      "edo.rubber-belt",
+      "edo.farm-lane",
+      "edo.plaza-street"
+    ],
+    "finish": {
+      "district": "edo.plaza-street",
+      "label": "EDO · GRAND RALLY"
+    },
+    "road": "edo-red",
+    "dress": "edo-city",
+    "billboards": [
+      "WELCOME TO EDO",
+      "GARRI · PLANTAIN",
+      "RUBBER · TIMBER",
+      "PURE WATER",
+      "PROVISIONS",
+      "RECHARGE CARDS",
+      "POS · AIRTIME",
+      "DATA 4G · BIG SAVER",
+      "TAILORING",
+      "PHARMACY"
+    ],
+    "skyline": "edo-rubber",
+    "ambient": "none",
+    "pieces": [
+      {
+        "landmark": 0,
+        "piece": "edo.produce-market",
+        "side": -1
+      },
+      {
+        "landmark": 1,
+        "piece": "edo.brass-row",
+        "side": -1
+      },
+      {
+        "landmark": 2,
+        "piece": "edo.moat-gate",
+        "side": -1
+      },
+      {
+        "landmark": 3,
+        "piece": "edo.ring-junction",
+        "side": -1
+      },
+      {
+        "landmark": 4,
+        "piece": "edo.stadium",
+        "side": -1
+      }
+    ]
+  }
 }

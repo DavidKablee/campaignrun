@@ -19,7 +19,7 @@ export function AboutScreen() {
 
       <Sheet eyebrow="Not a poll" title="What the board means">
         <p>
-          Every number in Campaign Run is a game score. The map colours a state for whichever Party its players have
+          Every number in Campaigner is a game score. The map colours a state for whichever Contender its players have
           been running for — that is a count of players in a game, not a measure of anyone's support, and a state only
           shows a live split once at least {campaignMap.standings.minPlayersPerRegion} players have run it. Below that
           the board shows practice numbers and says so on screen.

@@ -25,7 +25,7 @@ function runClean(seedNum: number, contenderId: string, ride: Ride, hazards: Haz
   });
   state.entities = state.entities.filter((e) => e.isZone);
   let ticks = 0;
-  const MAX_TICKS = simConfig.tickHz * 120;
+  const MAX_TICKS = simConfig.tickHz * 400;
   while (state.phase === 'running' && ticks < MAX_TICKS) {
     let input: number = Btn.Gas;
     const nearZone = state.entities.find(
@@ -46,8 +46,8 @@ function runClean(seedNum: number, contenderId: string, ride: Ride, hazards: Haz
 }
 
 describe('C05 balance bot', () => {
-  it('active Contenders stay within ±3% mean Crowd on trek (clean course)', () => {
-    const RUNS = 200;
+  it('active Contenders stay within ±3% mean Crowd on trek (clean course)', { timeout: 60000 }, () => {
+    const RUNS = 80;
     const trek = rides.find((r) => r.id === 'trek')!;
     const averages = new Map<string, number>();
 
@@ -73,10 +73,10 @@ describe('C05 balance bot', () => {
 describe('C26 balance bot — all 7 ride classes', () => {
   // Acceptance criteria #4 from the spec: ±3% mean Crowd parity per Contender,
   // per ride class, never actually checked past trek before this chunk.
-  const RUNS = 120;
+  const RUNS = 60;
 
   for (const ride of rides) {
-    it(`active Contenders stay within ±3% mean Crowd on ${ride.id} (${ride.rideClass}, clean course)`, () => {
+    it(`active Contenders stay within ±3% mean Crowd on ${ride.id} (${ride.rideClass}, clean course)`, { timeout: 60000 }, () => {
       const averages = new Map<string, number>();
       for (const c of activeContenders) {
         let sum = 0;

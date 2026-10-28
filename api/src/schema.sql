@@ -117,3 +117,10 @@ create table if not exists device_keys (
   last_used_at timestamptz not null default now()
 );
 create index if not exists device_keys_user_idx on device_keys (user_id);
+
+-- Replay verification ------------------------------------------------------
+-- The seed of the run a score was verified against. A verified run can be
+-- posted once: the same receipt twice would count twice in a region's
+-- standing. Null for scores posted before replays, or with the check off.
+alter table scores add column if not exists replay_seed bigint;
+create unique index if not exists scores_replay_once on scores (user_id, replay_seed) where replay_seed is not null;

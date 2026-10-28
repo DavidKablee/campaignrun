@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
-import { contenders, followingGain, rides, simConfig } from '@cr/content';
+import { contenders, followingGain, partyForContender, rides, simConfig, stateIndex } from '@cr/content';
 import { starForCrowd } from '@cr/sim';
 import { useAccountStore } from '../accountStore';
+import { challengeText, challengeUrl, judgeChallenge, type Challenge } from '../challenge';
 import { contenderShareAllowed } from '../consent';
 import { useContenderStore } from '../contenderStore';
 import { emailPromptDue, runsFromBest } from '../emailPrompt';
 import { useOnlineStore } from '../onlineStore';
+import { type Outcome, resultExclaim } from '../exclaim';
 import { renderShareCard, shareOrDownload } from '../shareCard';
 import { useStatePack } from '../statePack';
 import { useGameStore } from '../state';
@@ -26,7 +28,7 @@ const STAR_LABEL: Record<string, string> = {
  * board-name field and the three navigation buttons were squeezed off the
  * bottom with nowhere to scroll — and the field itself was `--cr-ink` text on a
  * dark slab, so whatever you typed into it was invisible. The result now leads
- * with one card (tier, Crowd, who ran), the four figures sit in white stat
+ * with one card (tier, Turnout, who ran), the four figures sit in white stat
  * cards, and posting and sharing each say what they do before you press them.
  */
 export function SummaryScreen() {
@@ -44,9 +46,23 @@ export function SummaryScreen() {
   const metaReward = useGameStore((s) => s.lastMetaReward);
   const following = useGameStore((s) => s.following);
   const streak = useGameStore((s) => s.streak);
-  const rideId = useGameStore((s) => s.activeRideId);
-  const stateId = useGameStore((s) => s.activeStateId);
-  const contenderId = useContenderStore((s) => s.activeContenderId) ?? contenders[0]!.id;
+  const streakBonus = useGameStore((s) => s.lastStreakBonus);
+  const streakNote = useGameStore((s) => s.lastStreakNote);
+  const challenge = useGameStore((s) => s.challenge);
+  const quick = useGameStore((s) => s.lastRunQuick);
+  const seed = useGameStore((s) => s.lastRunSeed);
+  const replay = useGameStore((s) => s.lastRunReplay);
+  // A challenge decides its own road; otherwise it is the one picked on the map.
+  const rideId = useGameStore((s) => challenge?.rideId ?? s.activeRideId);
+  const stateId = useGameStore((s) => challenge?.stateId ?? s.activeStateId);
+  // A quick rally or a fixed-seed challenge is a casual run: it pays and counts
+  // toward missions, but it never reaches a board or a personal best, because a
+  // short course or a known seed is not comparable (or is trivially repeatable).
+  const casual = quick || challenge !== null;
+  const chosenContenderId = useContenderStore((s) => s.activeContenderId);
+  const contenderId = chosenContenderId ?? contenders[0]!.id;
+  const progress = useGameStore((s) => s.lastRunProgress);
+  const reached = useGameStore((s) => s.lastRunReached);
   const consentLog = useAccountStore((s) => s.consentLog);
   const shareContender = contenderShareAllowed(consentLog);
   const username = useGameStore((s) => s.username);
@@ -67,18 +83,58 @@ export function SummaryScreen() {
   const [boardNote, setBoardNote] = useState('');
   const [nameDraft, setNameDraft] = useState(username);
   const [dailyBonus, setDailyBonus] = useState(0);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const ride = rides.find((r) => r.id === rideId) ?? rides[0]!;
   const contender = contenders.find((c) => c.id === contenderId) ?? contenders[0]!;
+  const party = partyForContender(contenderId);
   const finished = phase === 'finished';
-  const star = phase === 'breakdown' ? 'none' : starForCrowd(skill, ride.capacity, simConfig);
+  // Tiers are tuned to the full road, so a quick rally is judged per segment.
+  const fullScale = quick ? simConfig.course.segmentCount / Math.min(simConfig.course.segmentCount, simConfig.course.quickSegmentCount) : 1;
+  const star = phase === 'breakdown' ? 'none' : starForCrowd(Math.round(skill * fullScale), ride.capacity, simConfig);
   const stateName = pack?.name ?? 'Lagos';
+  const brokeDown = phase === 'breakdown';
+  const exclaim = resultExclaim(brokeDown ? 'breakdown' : (star as Outcome), skill);
+  // A breakdown has a result too: how far the convoy got is the number to beat.
+  const shareLabel = brokeDown
+    ? `Broke down · ${progress}% of the road`
+    : `${quick ? 'Quick rally · ' : ''}${STAR_LABEL[star] ?? 'Turnout'}`;
+  const verdict = challenge && finished ? judgeChallenge(challenge.crowd, skill) : null;
+  const [linkNote, setLinkNote] = useState('');
+  const challengeStateName = stateIndex.find((x) => x.id === stateId)?.name ?? stateName;
+  // Sent from a finished run only: a breakdown has no score worth chasing.
+  const onChallengeFriend = async () => {
+    const link: Challenge = { seed, stateId, rideId: ride.id, crowd: skill, quick, from: username };
+    const url = challengeUrl(window.location.href, link);
+    const text = challengeText(link, ride.name, challengeStateName);
+    try {
+      if (typeof navigator.share === 'function') {
+        await navigator.share({ text, url });
+        setLinkNote('Shared');
+      } else {
+        await navigator.clipboard.writeText(`${text} ${url}`);
+        setLinkNote('Link copied');
+      }
+    } catch {
+      setLinkNote('Could not share the link');
+    }
+  };
+  /** Back to the normal campaign: no fixed road, full length. */
+  const goCampaign = (to: 'game' | 'roster' | 'splash') => {
+    const g = useGameStore.getState();
+    g.setChallenge(null);
+    g.setQuickRun(false);
+    setScreen(to);
+  };
+  const supportersTotal = following + (awarded.current ? 0 : followingGain(delivered));
 
   useEffect(() => {
     if (awarded.current) return;
     awarded.current = true;
-    recordMetaRun({ delivered, crowd: skill, finished: phase === 'finished' });
+    // A quick rally is not a completed campaign run: it pays for what it
+    // delivered but does not lock a Contender, extend the streak or clear the daily.
+    recordMetaRun({ delivered, crowd: skill, finished: phase === 'finished' && !quick, broke: phase === 'breakdown' && !quick, quick });
     const bonus = claimDailyIfMet({
-      finished: phase === 'finished',
+      finished: phase === 'finished' && !quick,
       dents,
       delivered,
       crowd: skill,
@@ -89,6 +145,7 @@ export function SummaryScreen() {
     // C48: one Following per supporter delivered — the rate is content now, and
     // the Yard prints it, so the two cannot drift.
     addFollowing(followingGain(delivered));
+    if (casual) return;
     noteRun(stateId, skill);
     // Post to the server too, when there is an account to post under. The
     // Contender id only rides along with consent — and the server drops it
@@ -102,6 +159,9 @@ export function SummaryScreen() {
       capacity: ride.capacity,
       rideId: ride.id,
       contenderId: shareContender ? contenderId : null,
+      // Only a debug-jumped or replay-less run goes without; the server
+      // refuses those, which is the point.
+      replay: replay ? { seed, ...replay } : undefined,
     });
   }, [
     recordMetaRun,
@@ -118,19 +178,52 @@ export function SummaryScreen() {
     ride,
     contenderId,
     shareContender,
+    quick,
+    casual,
+    seed,
+    replay,
   ]);
+
+  useEffect(() => {
+    let revoke: string | null = null;
+    let cancelled = false;
+    void renderShareCard({
+      crowd: display,
+      starLabel: shareLabel,
+      rideName: ride.name,
+      contenderName: shareContender ? contender.name : 'Your Contender',
+      stateName,
+      partyColor: party?.color,
+      partyName: shareContender ? contender.name : undefined,
+    })
+      .then((blob) => {
+        if (cancelled) return;
+        const url = URL.createObjectURL(blob);
+        revoke = url;
+        setPreviewUrl(url);
+      })
+      .catch(() => {
+        if (!cancelled) setPreviewUrl(null);
+      });
+    return () => {
+      cancelled = true;
+      if (revoke) URL.revokeObjectURL(revoke);
+    };
+  }, [display, shareLabel, ride.name, shareContender, contender.name, stateName]);
 
   const onShare = async () => {
     setShareNote('…');
     try {
       const blob = await renderShareCard({
         crowd: display,
-        starLabel: STAR_LABEL[star] ?? 'Crowd',
+        starLabel: shareLabel,
         rideName: ride.name,
         contenderName: shareContender ? contender.name : 'Your Contender',
         stateName,
+        partyColor: party?.color,
+        partyName: shareContender ? contender.name : undefined,
       });
-      const how = await shareOrDownload(blob, `campaign-run-${skill}.png`);
+      const how = await shareOrDownload(blob, `campaigner-${skill}.png`);
       setShareNote(how === 'shared' ? 'Shared' : 'Saved image');
     } catch {
       setShareNote('Share failed');
@@ -153,17 +246,36 @@ export function SummaryScreen() {
     <div className="cr-screen cr-screen--menu cr-screen--result">
       <section className={`cr-result${finished ? '' : ' cr-result--down'}`}>
         <p className="cr-eyebrow">
-          {finished ? 'Rally called' : 'Breakdown'} · {stateName}
+          {finished ? (quick ? 'Quick rally' : 'Rally called') : 'Breakdown'} · {stateName}
         </p>
-        <h2>{STAR_LABEL[star]}</h2>
+        {verdict ? (
+          <p className={`cr-result-verdict${verdict.won ? ' is-win' : ''}`}>
+            {verdict.won
+              ? `You beat ${challenge!.from || 'your friend'} by ${verdict.margin}.`
+              : verdict.tied
+                ? `Dead level with ${challenge!.from || 'your friend'}.`
+                : `${verdict.margin} short of ${challenge!.from || 'your friend'}'s ${challenge!.crowd}.`}
+          </p>
+        ) : null}
+        {exclaim ? <p className={`cr-result-exclaim${brokeDown ? ' is-down' : ''}`}>{exclaim}</p> : null}
+        <h2>{brokeDown ? 'Convoy broke down' : STAR_LABEL[star]}</h2>
         <p className="cr-result-score">
           <b>{skill}</b>
-          <span>Crowd</span>
+          <span>Turnout</span>
         </p>
+        {brokeDown ? (
+          <p className="cr-result-reach">
+            Made it <b>{progress}%</b> of the road{reached ? ` · past ${reached}` : ''}. Beat that next time.
+          </p>
+        ) : null}
         <p className="cr-result-who">
           {contender.name} · {ride.name}
         </p>
-        {display > skill ? <p className="cr-fineprint">Celebration Crowd {display}</p> : null}
+        <p className="cr-result-explain">
+          <b>{delivered}</b> delivered at venues → Supporters · Turnout is the run score (multipliers can lift it above
+          delivered)
+        </p>
+        {display > skill ? <p className="cr-fineprint">Celebration Turnout {display}</p> : null}
       </section>
 
       <div className="cr-wallet">
@@ -172,12 +284,12 @@ export function SummaryScreen() {
           <strong>{delivered}</strong>
         </article>
         <article>
-          <span>Following</span>
-          <strong>{following + (awarded.current ? 0 : delivered)}</strong>
+          <span>Supporters</span>
+          <strong>{supportersTotal.toLocaleString('en-US')}</strong>
         </article>
         <article>
           <span>Funds earned</span>
-          <strong>₦{metaReward + dailyBonus}</strong>
+          <strong>₦{(metaReward + dailyBonus).toLocaleString('en-US')}</strong>
         </article>
         <article>
           <span>Dents</span>
@@ -185,10 +297,18 @@ export function SummaryScreen() {
         </article>
       </div>
 
+      {streakBonus > 0 || streakNote ? (
+        <p className="cr-fineprint cr-streak-line">
+          {streakBonus > 0 ? `Rally streak: +${streakBonus / 10}% Funds on this run. ` : ''}
+          {streakNote === 'frozen' ? 'The weekly streak freeze covered this breakdown — your streak is safe. ' : ''}
+          {streakNote === 'lost' ? 'The streak is back to 0. Finish a rally to start it again. ' : ''}
+        </p>
+      ) : null}
+
       {dailyBonus > 0 ? (
-        <p className="cr-daily-chip is-done">Daily cleared · ₦{dailyBonus}</p>
+        <p className="cr-daily-chip is-done">Daily cleared · ₦{dailyBonus.toLocaleString('en-US')}</p>
       ) : (
-        finished && <DailyChip />
+        finished && !quick && <DailyChip />
       )}
 
       {askForEmail ? (
@@ -208,6 +328,11 @@ export function SummaryScreen() {
         </Sheet>
       ) : null}
 
+      {casual ? (
+        <p className="cr-fineprint">
+          {quick ? 'Quick rallies' : 'Challenge runs'} are for fun: they pay out, but they do not go on a board.
+        </p>
+      ) : (
       <Sheet eyebrow="Local board" title={finished ? 'Post this run' : 'Nothing to post'}>
         {finished ? (
           <>
@@ -225,7 +350,7 @@ export function SummaryScreen() {
                   onChange={(e) => setNameDraft(e.target.value)}
                 />
               </label>
-              <button className="cr-btn cr-btn--ghost" type="button" onClick={onBoard}>
+              <button className="cr-btn cr-btn--post" type="button" onClick={onBoard}>
                 Post
               </button>
             </div>
@@ -235,31 +360,98 @@ export function SummaryScreen() {
           <p>A convoy that breaks down does not post a score. Finish a run to put it on the board.</p>
         )}
       </Sheet>
+      )}
+
+      {finished && skill > 0 ? (
+        <Sheet eyebrow="Challenge" title="Beat my run">
+          <p className="cr-fineprint">
+            Sends a link to this exact road and traffic with your {skill} to beat. No account needed.
+          </p>
+          <div className="cr-share-row">
+            <button className="cr-btn" type="button" onClick={() => void onChallengeFriend()}>
+              Challenge a friend
+            </button>
+            {linkNote ? <span className="cr-fineprint">{linkNote}</span> : null}
+          </div>
+        </Sheet>
+      ) : null}
 
       <Sheet eyebrow="Share" title="Make a card">
         <p className="cr-fineprint">
-          A picture of this run: tier, Crowd, ride and state.{' '}
+          A picture of this run: tier, Turnout, ride and state.{' '}
           {shareContender ? 'Your Contender is named on it, because you consented to share it.' : 'Your Contender is not named on it.'}
         </p>
+        {previewUrl ? (
+          <figure className="cr-share-preview">
+            <img src={previewUrl} alt="Share card preview" />
+          </figure>
+        ) : (
+          <div className="cr-share-preview cr-share-preview--empty" aria-hidden="true">
+            Preparing card…
+          </div>
+        )}
         <div className="cr-share-row">
-          <button className="cr-btn cr-btn--ghost" type="button" onClick={() => void onShare()}>
+          <button className="cr-btn" type="button" onClick={() => void onShare()} disabled={!previewUrl}>
             Share card
           </button>
           {shareNote ? <span className="cr-fineprint">{shareNote}</span> : null}
         </div>
       </Sheet>
 
-      <button className="cr-btn cr-result-again" type="button" onClick={() => setScreen('game')}>
-        Run again
-      </button>
-      <div className="cr-row">
-        <button className="cr-btn cr-btn--ghost" type="button" onClick={() => setScreen('map')}>
-          Board
+      {challenge ? (
+        <>
+          <button className="cr-btn cr-result-again" type="button" onClick={() => setScreen('game')}>
+            {verdict?.won ? 'Run it again' : 'Rematch'}
+          </button>
+          <button className="cr-btn cr-btn--ghost" type="button" onClick={() => goCampaign(chosenContenderId === null ? 'roster' : 'game')}>
+            {chosenContenderId === null ? 'Pick your Contender' : 'Back to my campaign'}
+          </button>
+        </>
+      ) : chosenContenderId === null ? (
+        <>
+          <button
+            className="cr-btn cr-result-again"
+            type="button"
+            onClick={() => goCampaign(brokeDown ? 'game' : 'roster')}
+          >
+            {brokeDown ? 'Try again' : 'Pick your Contender →'}
+          </button>
+          <button
+            className="cr-btn cr-btn--ghost"
+            type="button"
+            onClick={() => goCampaign(brokeDown ? 'roster' : 'game')}
+          >
+            {brokeDown ? 'Pick your Contender' : 'Run again'}
+          </button>
+        </>
+      ) : quick ? (
+        <>
+          <button className="cr-btn cr-result-again" type="button" onClick={() => goCampaign('game')}>
+            Full campaign run
+          </button>
+          <button className="cr-btn cr-btn--ghost" type="button" onClick={() => setScreen('game')}>
+            Another quick rally
+          </button>
+        </>
+      ) : (
+        <button className="cr-btn cr-result-again" type="button" onClick={() => goCampaign('game')}>
+          Campaign again
         </button>
-        <button className="cr-btn cr-btn--ghost" type="button" onClick={() => setScreen('yard')}>
-          Yard
+      )}
+      <nav className="cr-result-nav" aria-label="After this run">
+        <button type="button" onClick={() => setScreen('map')}>
+          <span aria-hidden="true">⊙</span>
+          <small>Board</small>
         </button>
-      </div>
+        <button type="button" onClick={() => setScreen('yard')}>
+          <span aria-hidden="true">⊞</span>
+          <small>Yard</small>
+        </button>
+        <button type="button" onClick={() => goCampaign('splash')}>
+          <span aria-hidden="true">⌂</span>
+          <small>Home</small>
+        </button>
+      </nav>
       <p className="cr-fineprint cr-result-foot">Streak {streak} · Game scores, not a poll</p>
     </div>
   );

@@ -3,7 +3,8 @@
  * those need a backend (C12). Stores the input log for your best-Crowd finished run of each
  * state so the next run of that state can replay it alongside you.
  */
-const KEY = 'cr-ghosts-v1';
+/** v2: the road now has moving traffic, so a v1 input log would replay on a different course. */
+const KEY = 'cr-ghosts-v2';
 
 export interface GhostRecord {
   stateId: string;
