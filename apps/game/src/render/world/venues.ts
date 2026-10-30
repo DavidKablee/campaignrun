@@ -33,6 +33,8 @@ function toneFor(world: ResolvedWorld): Tone {
       return { wall: '#ece4d0', accent: '#7a2e4a', cloth: ['#3f6f84', '#ece4d0', '#7a2e4a', '#4f7a52', '#bdb8aa'] };
     case 'jigawa-sand':
       return { wall: '#ecdfc4', accent: '#8c5a2b', cloth: ['#2f3a66', '#f4f1ea', '#c9b080', '#8c5a2b', '#bdb8aa'] };
+    case 'fct-asphalt':
+      return { wall: '#e6e4dc', accent: '#4a5560', cloth: ['#2f4560', '#f4f1ea', '#c9ced1', '#8a7a5a', '#bdb8aa'] };
     case 'adamawa-dust':
       return { wall: '#eadcc0', accent: '#5e8a46', cloth: ['#2f4560', '#f4f1ea', '#b9a06c', '#8a5a2b', '#bdb8aa'] };
     case 'osun-green':

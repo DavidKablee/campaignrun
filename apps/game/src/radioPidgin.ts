@@ -15,7 +15,7 @@ export const PCM = {
     'Supporters don land — go the next stop!',
     'You drop am clean — road dey sweet!',
     'Oya, unload don happen — keep moving!',
-    'Crowd don enter — next batch, make we go!',
+    'Supporters don enter — next batch, make we go!',
     'Gbam! Passengers don comot well well!',
   ],
   fullHouse: [
@@ -26,10 +26,10 @@ export const PCM = {
     'Dem pack am like market day — oya go!',
   ],
   onBeat: [
-    'On beat o! Turnout dey climb!',
+    'On beat o! Crowd dey climb!',
     'That timing sweet — keep am up!',
     'You dey on point — the crowd dey feel am!',
-    'Beat dey your side — Turnout dey stack!',
+    'Beat dey your side — Crowd dey stack!',
   ],
   finish: [
     'Grand rally don reach! Thank you from the studio!',

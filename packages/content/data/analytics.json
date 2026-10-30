@@ -13,7 +13,12 @@
     "challenge_start",
     "challenge_finish",
     "feedback_open",
-    "feedback_sent"
+    "feedback_sent",
+    "mobilise_open",
+    "place_join",
+    "place_action",
+    "place_say",
+    "place_invite"
   ],
   "maxPerSession": 150,
   "flushAt": 10

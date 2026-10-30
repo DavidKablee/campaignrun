@@ -1,5 +1,72 @@
 # Changelog
 
+## 2026-10-30 — Wording and layout pass (C87)
+
+From a review that the run and the menus read as two apps. Colours and the run's own chrome were left exactly as they are (the HUD and pause card were tried in white and put back).
+
+- Momentum was checked rather than assumed dead: on a clear road the bot sits at x1.25 or more for 98% of a Trek run (90% on the Okada) and drops to x1.00 only after a hit. The sim is untouched.
+- The first-run coach card now explains Integrity (English and Pidgin): shady figures cut it, dodging them wins it back.
+- Briefing: Start the run is full width on top, Quick rally and Board under it. They used to share one row and wrap into round blobs over the text.
+- Settings (splash, roster) and Board (roster, Briefing) carry a word beside the glyph.
+- `docs/DESIGN.md` now describes what ships instead of the retired street-poster spec.
+
+## 2026-10-30 — The Board says it is a game (C86)
+
+From a review: the Board is the one screen that looks like a result, and it showed a black box when WebGL was missing.
+
+- A plain line under the Board header: "A game board. Standings are practice until real players fill a region." (it switches wording once any region is live). The full disclosure still lives on About only (GUARDRAILS 1).
+- The focus panel carries a **Practice** or **Live** tag, so a generated number is never mistaken for a collected one.
+- "is ahead by N" is now "is in front here": no margin number, so the lead cannot read as a poll result (GUARDRAILS 2). The per-Contender Crowd list stays.
+- No WebGL (blocked, or the GPU context is lost): the Board draws the same regions flat in SVG (`ui/FlatBoard.tsx`) instead of a black rectangle. Regions can be tapped, and the chips below still work.
+- Tests: `vocabulary.test.ts` (no margin wording, game line present) and an e2e that blocks WebGL.
+- Contender names untouched. They still owe a fresh GUARDRAILS 3 pass before any public link.
+
+## 2026-10-30 — One word per idea (C85)
+
+From a review: the score had two names, "Supporters" meant two things, and the tiers read as poll language.
+
+- The run score is **Crowd** everywhere: glass, result, share card, challenge text (English and Pidgin), radio. "Turnout" is gone from the game's text.
+- People on the bus are **Supporters** (the HUD says "Aboard"); the radio no longer calls a drop-off a "crowd".
+- The ride-unlock and Mobilise currency is **Following**: splash, Briefing, Roster, Yard, result, Mobilise lock and reward lines. The Yard no longer calls it Supporters.
+- Result tiers read **Small / Packed / Overflowing**; the Board says "ahead by", not "leads by". Ids (`foothold`, `majority`, `landslide`) and saved data are unchanged.
+- `apps/game/test/vocabulary.test.ts` stops the old words coming back; the rule is in AGENTS.md ("Words").
+
+## 2026-10-30 — One way back, and settings that do what they say (C84)
+
+- **Mobilise opens at 1,000 Supporters** (`followingGate` in `places.json`); below it the button says how far to go, and invite links are ignored.
+- **Convoy Yard** and the result screen's fineprint are centred.
+- **Esc** pauses a run and resumes it; on any menu it is Back, and it closes an open Mobilise sheet first. The tutorial card still blocks pausing.
+- **Navigation** now lives in `nav.ts`: `backTarget` says where Back goes from every screen, and the on-screen arrows, Esc and the browser/hardware Back all use it. Back now steps through menus instead of leaving the page.
+- **Haptics, Data saver, Reduce motion** live in `prefs.ts`. Reduce motion now reaches the stylesheet (it only moved the 3D scenes before) and Mobilise honours the OS preference; data saver drops blur layers; haptics go through one helper and Mobilise actions buzz.
+
+## 2026-10-30 — The first minute, fixed (C83)
+
+From a review of what a stranger meets in their first minute.
+
+- A player who took **Grassroots Start** in the Yard before driving is still a first-timer: their 35 Supporters were a gift, not a run (`hasPlayed` in `meta.ts`). Play now runs the coached trial instead of dropping them into the Briefing.
+- The first result puts **Pick your Contender** (and Run again) straight under the score; the wallet, card and board come after it. The challenge link is held until a Contender is picked.
+- The coach card now has a third move: at a pickup, **flick down and hold to load**. The early "ahead" prompt says the verb ("flick down & hold to load / unload"), not "be ready to brake".
+- The roster no longer says the Contender locks on the first run. It locks on the first **full campaign** run; quick rallies and the trial never lock it.
+- **Quit** from a trial goes back to the start, not to a Briefing for a campaign they never chose.
+
+## 2026-10-30 — Mobilise: shared campaign places (C82)
+
+- **Run my race** is now the splash button (a line under it confirms 18+). On the planning page a new **Mobilise** button opens a place where real players appear as avatars: a market, park, lakeside or stadium in the state you are in. Tap the ground to walk; use Canvass, Hand out flyers, Rally the crowd (needs someone close by) and Wave; say something from 12 preset phrases (English or Pidgin) or 8 emoji. There is no text box.
+- Actions pay coins and up to 5 Supporters a day (₦60 a day cap, held on the server across devices) and count toward the state's activity. Nothing touches the sim, replays or a Contender's power.
+- Needs the API: with it unreachable the button says "Opening soon". Presence is in the API's memory (one instance), over server-sent events.
+- Mute and a closed-list report on any player. Avatars are citizens seeded from the account, so a Contender is never shown.
+- Mobilise redesign: ambient Locals, first-visit coach card, a talk tray that keeps the scene in view, dock icons with daily progress bars, a larger tap target for people, and an invite link (`#mobilise=state.kind`, WhatsApp, copy, share).
+- Test files now run one at a time (`vitest.config.ts`): the API suites share one database. See `docs/chunks/C82.md`.
+
+## 2026-10-30 — FCT's world, the Final Week, the Weekly Tour (C81)
+
+- **FCT** has its own world: a concrete market hall, a landscaped roundabout, a lake promenade, a terraced park, a city stadium, on dark asphalt between pale mid-rise blocks. No government building, flag, place of worship or person-named place. Dossier is thin and unreviewed (`docs/research/states/fct.md`).
+- **Final Week:** the last seven days feature FCT, with a daily ₦150 bonus for a finished rally there. After the close the game is practice mode.
+- **Weekly Tour:** each Lagos-time week one open state is featured; the first finished rally there pays ₦200. Splash banners, a result-screen line, and a tag on the Board. `flags.json` can name the state by hand.
+- **Rally Saturday** already doubled Crowd from 6 to 9 pm Lagos time on Saturdays; it was just never announced. It is now.
+- **C14** checked end to end against the local API: verified runs from consenting accounts show as "Live" on the Board. **C16** was already closed (the earlier review was wrong about it).
+- Not done: a local reviewer for FCT; a real-phone look; 11 states still look like Lagos. See `docs/chunks/C81.md`.
+
 ## 2026-10-28 — Resend mailer and a local backend (C80)
 
 `api/src/mailer.ts` sends verification and reset mail through Resend when `RESEND_API_KEY` is set (10 s timeout, errors logged, key never logged); mail subjects now say Campaigner. `pnpm --filter @cr/api dev` loads `../.env`. Ran the API locally on Postgres and drove signup → verify → forgot → reset → login and the new events and feedback routes with curl; all worked with the console mailer. **Not done:** a real Resend delivery (needs your key in `.env`). `docs/LOCAL-BACKEND.md` has the steps.

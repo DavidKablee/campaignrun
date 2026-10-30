@@ -92,15 +92,15 @@ export function RosterScreen() {
       <div className="cr-chrome-top">
         <div className="cr-pill-row">
           <span className="cr-pill cr-pill--live">{stateName}</span>
-          <span className="cr-pill">{following.toLocaleString('en-US')} Supporters</span>
+          <span className="cr-pill">{following.toLocaleString('en-US')} Following</span>
           <span className="cr-pill">{daysLeftLabel(Date.now(), true)}</span>
         </div>
         <span className="cr-chrome-actions">
-          <button className="cr-mini-btn cr-mini-btn--icon" type="button" onClick={() => setScreen('map')} aria-label="Board">
-            ⊙
+          <button className="cr-mini-btn" type="button" onClick={() => setScreen('map')}>
+            Board
           </button>
-          <button className="cr-mini-btn cr-mini-btn--icon" type="button" onClick={openSettings} aria-label="Settings">
-            ⚙
+          <button className="cr-mini-btn" type="button" onClick={openSettings}>
+            Settings
           </button>
         </span>
       </div>
@@ -118,8 +118,8 @@ export function RosterScreen() {
 
       {!locked && (
         <div className="cr-lock-alert" role="alert">
-          <strong>First run = permanent lock.</strong>
-          {' '}Your Contender choice is fixed after your first completed run. Pick carefully — you get one switch after, then it&apos;s fixed for the campaign.
+          <strong>First full run = permanent lock.</strong>
+          {' '}Your Contender choice is fixed after your first completed campaign run. Quick rallies do not lock it. Pick carefully — you get one switch after, then it&apos;s fixed for the campaign.
         </div>
       )}
 

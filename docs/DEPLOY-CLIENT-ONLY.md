@@ -30,6 +30,7 @@ Edit `flags.json` on the host:
 - `notice` shows as one line on the splash screen (200 characters at most).
 - `calendar.closeAt` moves the countdown and the close. `calendar.unlocks` moves single states. A date outside Oct 2026–Dec 2027, a malformed date or an unknown state is ignored, so a typo cannot lock players out or open everything.
 - After the close, every state with a pack opens for practice and the pill reads "Closed".
+- `featured` (a state id) picks the Weekly Tour state by hand; it is ignored if the state is unknown or not yet open.
 - `killSwitch: true` shows "Back soon" instead of the game.
 - Players pick a change up on their next visit (network first, three-second timeout, then the last copy offline).
 

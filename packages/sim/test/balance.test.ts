@@ -106,6 +106,7 @@ describe('C45 balance bot — the hardest shipped roads', () => {
   const RUNS = 120;
   const ROADS: { name: string; hazards: Hazard[] }[] = [
     { name: 'Adamawa (switchback, rocky ridge)', hazards: ['switchback', 'rocky-ridge', 'go-slow'] },
+    { name: 'FCT (roundabout maze, crowd surge)', hazards: ['roundabout-maze', 'crowd-surge', 'go-slow'] },
     { name: 'Borno (dust storm, low visibility)', hazards: ['dust-storm', 'low-visibility', 'go-slow'] },
     { name: 'Bayelsa (flood sheet, creek crossing)', hazards: ['flood-sheet', 'creek-crossing', 'go-slow'] },
   ];

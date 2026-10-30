@@ -546,6 +546,14 @@ export const limitsSchema = z.object({
     minTotalRallies: z.number().int().positive(),
     topStates: z.number().int().positive(),
   }),
+  /** C82: Mobilise. Per-user ceilings so a script cannot flood a room or farm the daily cap. */
+  places: z.object({
+    joinPerMinutePerIp: z.number().int().positive(),
+    movePerMinutePerUser: z.number().int().positive(),
+    actPerMinutePerUser: z.number().int().positive(),
+    sayPerMinutePerUser: z.number().int().positive(),
+    reportPerDayPerUser: z.number().int().positive(),
+  }),
 });
 export type Limits = z.infer<typeof limitsSchema>;
 
@@ -562,6 +570,82 @@ export const analyticsSchema = z.object({
   flushAt: z.number().int().positive(),
 });
 export type Analytics = z.infer<typeof analyticsSchema>;
+
+/**
+ * The standing live events (C81). All three run from the clock and the player's own device, with no
+ * server: a Weekly Tour state that pays once a week and a Final Week that pays once a day. They
+ * change only the coins a finished run pays, never the sim. (Rally Saturday's double Crowd is the
+ * sim's own `rallySaturdayMultiplierPermille`, announced by `liveEvents.ts`.)
+ */
+export const liveEventsSchema = z.object({
+  /** Coins for the first finished rally of the week in the featured state. */
+  tourBonus: z.number().int().positive(),
+  /** Coins for the first finished rally of each day in the Final Week, in the finale state. */
+  finalWeekDailyBonus: z.number().int().positive(),
+  /** The state the Final Week features. */
+  finalWeekStateId: z.string().min(1),
+});
+export type LiveEventsConfig = z.infer<typeof liveEventsSchema>;
+
+/**
+ * C82: Mobilise, the shared campaign places. A place is one of four kinds in a state; players in it
+ * walk about, do a few campaign actions and talk in preset phrases only (no free text, so nothing a
+ * player types can be relayed). Actions pay coins and a small, daily-capped Supporters head start
+ * and add to the state's activity on the Board. None of it reaches the sim or a Contender's power.
+ */
+export const placeKindSchema = z.object({
+  id: z.string().regex(/^[a-z]{3,12}$/),
+  label: z.string().min(1),
+  blurb: z.string().min(10),
+});
+
+export const placeActionSchema = z.object({
+  id: z.string().regex(/^[a-z]{3,12}$/),
+  label: z.string().min(1),
+  /** One word for the action dock, where the full label would wrap. */
+  short: z.string().min(1).max(10),
+  pose: z.enum(['stand', 'wave', 'cheer']),
+  poseSeconds: z.number().positive().max(10),
+  cooldownSeconds: z.number().positive(),
+  coins: z.number().int().min(0),
+  supporters: z.number().int().min(0),
+  /** Points added to the state's activity on the Board. */
+  activity: z.number().int().min(0),
+  /** True when the action only counts with someone else within `companyRadiusMetres`. */
+  needsCompany: z.boolean(),
+});
+
+export const placePhraseSchema = z.object({
+  id: z.string().regex(/^[a-z]{3,12}$/),
+  tag: z.enum(['greet', 'chat', 'civic', 'rally']),
+  en: z.string().min(3).max(60),
+  pcm: z.string().min(3).max(60),
+});
+
+export const placesSchema = z.object({
+  kinds: z.array(placeKindSchema).min(1),
+  roomCapacity: z.number().int().min(2),
+  /** Supporters (Following) a player needs before Mobilise opens. */
+  followingGate: z.number().int().min(0),
+  presenceTtlSeconds: z.number().int().positive(),
+  walkSpeedMetresPerSecond: z.number().positive(),
+  bounds: z.object({ halfX: z.number().positive(), halfZ: z.number().positive() }),
+  companyRadiusMetres: z.number().positive(),
+  /** Ambient "Local" characters (never players) so a quiet room is not empty; fewer as it fills. */
+  locals: z.object({ max: z.number().int().min(0), min: z.number().int().min(0) }),
+  actions: z.array(placeActionSchema).min(1),
+  phrases: z.array(placePhraseSchema).min(1),
+  emoji: z.array(z.string().min(1).max(8)).min(1),
+  daily: z.object({
+    coins: z.number().int().positive(),
+    supporters: z.number().int().positive(),
+    actions: z.number().int().positive(),
+  }),
+  report: z.object({ reasons: z.array(z.string().regex(/^[a-z-]{3,24}$/)).min(1) }),
+});
+export type PlacesConfig = z.infer<typeof placesSchema>;
+export type PlaceAction = z.infer<typeof placeActionSchema>;
+export type PlacePhrase = z.infer<typeof placePhraseSchema>;
 
 export const legalSchema = z.object({
   version: z.string().min(1),

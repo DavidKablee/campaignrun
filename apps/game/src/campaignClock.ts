@@ -20,6 +20,8 @@ export interface RemoteConfig {
   calendar?: RemoteCalendar;
   /** One line shown on the splash screen, e.g. when a date moves. */
   notice?: string;
+  /** A state id to feature this week instead of the one the calendar picks. */
+  featured?: string;
 }
 
 /** Earliest and latest moment a remote date may name: the run of the game, with room either side. */
@@ -28,7 +30,10 @@ const MAX_MS = Date.UTC(2028, 0, 1);
 const NOTICE_MAX = 200;
 
 const bundledClose = Date.parse(calendar.closeAt);
+/** How long the Final Week runs before the close, so a moved close date moves it too. */
+const FINAL_WEEK_MS = bundledClose - Date.parse(calendar.finalWeekFrom);
 let closeMs = bundledClose;
+let featuredId = '';
 let unlockOverrides: Record<string, number> = {};
 let noticeText = '';
 
@@ -43,6 +48,7 @@ export function resetRemoteConfig(): void {
   closeMs = bundledClose;
   unlockOverrides = {};
   noticeText = '';
+  featuredId = '';
 }
 
 export function applyRemoteConfig(raw: unknown): void {
@@ -62,6 +68,8 @@ export function applyRemoteConfig(raw: unknown): void {
     }
   }
 
+  if (typeof cfg.featured === 'string' && known.has(cfg.featured)) featuredId = cfg.featured;
+
   if (typeof cfg.notice === 'string') noticeText = cfg.notice.replace(/\s+/g, ' ').trim().slice(0, NOTICE_MAX);
 }
 
@@ -73,6 +81,16 @@ export function daysLeft(now: number = Date.now()): number {
 /** True once the campaign has closed: every state with a pack is then open for practice. */
 export function isClosed(now: number = Date.now()): boolean {
   return now >= closeMs;
+}
+
+/** True from the start of the Final Week until the close. */
+export function isFinalWeek(now: number = Date.now()): boolean {
+  return now >= closeMs - FINAL_WEEK_MS && now < closeMs;
+}
+
+/** The state the remote config asked to feature, or '' when it did not. */
+export function remoteFeatured(): string {
+  return featuredId;
 }
 
 /** The unlock moment for a state: the remote override, else the bundled week. */

@@ -276,6 +276,8 @@ export function regionalRoadTexture(style: string) {
       return lateriteWashRoad('jigawa-sand', '#504e49', '210,180,134', '#c9b080', 277);
     case 'adamawa-dust':
       return lateriteWashRoad('adamawa-dust', '#4d4b46', '176,146,104', '#b09468', 269);
+    case 'fct-asphalt':
+      return lateriteWashRoad('fct-asphalt', '#3f4448', '124,124,120', '#8f9296', 293);
     case 'osun-green':
       return lateriteWashRoad('osun-green', '#45494b', '122,100,68', '#6a6f46', 263);
     case 'ogun-slab':
@@ -905,6 +907,14 @@ const ADAMAWA_SHOPS: TradeBoard[] = [
   { name: 'RECHARGE · POS', bg: '#e6dcc2', fg: '#3a3224', shutter: '#8a7a64' },
   { name: 'TAILORING', bg: '#5e8a46', fg: '#f4f1ea', shutter: '#d8c9a0' },
 ];
+const FCT_SHOPS: TradeBoard[] = [
+  { name: 'PRINT · COPY', bg: '#2f4560', fg: '#f4f1ea', shutter: '#d8d8d2' },
+  { name: 'FRESH PRODUCE', bg: '#6a7a3c', fg: '#f4f1ea', shutter: '#d8d2c2' },
+  { name: 'PHARMACY', bg: '#e6e2d6', fg: '#26363f', shutter: '#8a9094' },
+  { name: 'PURE WATER', bg: '#5a86a0', fg: '#f4f1ea', shutter: '#d8d2c2' },
+  { name: 'POS · AIRTIME', bg: '#e6dcc2', fg: '#2a2f36', shutter: '#8a8f94' },
+  { name: 'PROVISIONS', bg: '#d9d4c4', fg: '#2a2f36', shutter: '#4a5560' },
+];
 const OSUN_SHOPS: TradeBoard[] = [
   { name: 'ADIRE · ARO', bg: '#2b3a6b', fg: '#f4f1ea', shutter: '#d9d2bc' },
   { name: 'ASO · ANKARA', bg: '#5e7a3a', fg: '#f4f1ea', shutter: '#d8c9a0' },
@@ -958,6 +968,8 @@ export function regionalFacadeTexture(variant: number, set: string) {
       return plainFacade('calabar-render', 5100, ['#ece4d0', '#dcd8c0', '#cdbfa8', '#efe8d6', '#d4ccb4', '#e4dcc8'], variant, '#7a2e4a', '#a8967a');
     case 'jigawa-render':
       return plainFacade('jigawa-render', 5000, ['#ecdfc4', '#e4d2ae', '#d8c08c', '#efe4cb', '#dcc89c', '#e6d8b8'], variant, '#5a3a22', '#c0a468');
+    case 'fct-render':
+      return plainFacade('fct-render', 5200, ['#ece9e2', '#e0ddd5', '#d6d3cb', '#f0eee8', '#cfd4d6', '#dfe3e6'], variant, '#4a5560', '#b8bcc0');
     case 'adamawa-render':
       return plainFacade('adamawa-render', 4900, ['#eadcc0', '#e0cfae', '#d4bd94', '#eee2c8', '#d8c49e', '#e4d5b6'], variant, '#5a3a22', '#b9a06c');
     case 'osun-render':
@@ -1404,6 +1416,8 @@ export function regionalShopTexture(variant: number, set: string) {
       return tradeShop('cross-river', 5100, '#e6dcc6', CROSS_RIVER_SHOPS, variant, [150, 200]);
     case 'jigawa':
       return tradeShop('jigawa', 5050, '#e6d8b8', JIGAWA_SHOPS, variant, [24, 60]);
+    case 'fct':
+      return tradeShop('fct', 5250, '#e6e4dc', FCT_SHOPS, variant, [190, 230]);
     case 'adamawa':
       return tradeShop('adamawa', 4950, '#e4d8bc', ADAMAWA_SHOPS, variant, [30, 70]);
     case 'osun':

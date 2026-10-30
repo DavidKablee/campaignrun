@@ -80,7 +80,7 @@ export async function renderShareCard(input: ShareCardInput): Promise<Blob> {
 
   ctx.fillStyle = 'rgba(247,241,227,0.78)';
   ctx.font = '600 42px "DM Sans", sans-serif';
-  ctx.fillText(`Turnout · ${input.contenderName}`, 64, 1062, w - 128);
+  ctx.fillText(`Crowd · ${input.contenderName}`, 64, 1062, w - 128);
 
   // The ask.
   ctx.fillStyle = cream;

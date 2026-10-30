@@ -1,0 +1,184 @@
+{
+  "kinds": [
+    {
+      "id": "market",
+      "label": "Market",
+      "blurb": "Stalls, traders and the loudest bargaining in town."
+    },
+    {
+      "id": "park",
+      "label": "Park",
+      "blurb": "Shade trees, benches and a place to talk it over."
+    },
+    {
+      "id": "lake",
+      "label": "Lakeside",
+      "blurb": "Water, fishing boats and a slow evening crowd."
+    },
+    {
+      "id": "stadium",
+      "label": "Stadium",
+      "blurb": "Stands, flags and room for a proper rally."
+    }
+  ],
+  "roomCapacity": 12,
+  "followingGate": 1000,
+  "presenceTtlSeconds": 40,
+  "walkSpeedMetresPerSecond": 2.4,
+  "bounds": {
+    "halfX": 15,
+    "halfZ": 11
+  },
+  "companyRadiusMetres": 7,
+  "actions": [
+    {
+      "id": "canvass",
+      "label": "Canvass",
+      "pose": "wave",
+      "poseSeconds": 2.2,
+      "cooldownSeconds": 20,
+      "coins": 3,
+      "supporters": 1,
+      "activity": 2,
+      "needsCompany": false,
+      "short": "Canvass"
+    },
+    {
+      "id": "flyers",
+      "label": "Hand out flyers",
+      "pose": "stand",
+      "poseSeconds": 1.6,
+      "cooldownSeconds": 15,
+      "coins": 2,
+      "supporters": 0,
+      "activity": 1,
+      "needsCompany": false,
+      "short": "Flyers"
+    },
+    {
+      "id": "rally",
+      "label": "Rally the crowd",
+      "pose": "cheer",
+      "poseSeconds": 3,
+      "cooldownSeconds": 60,
+      "coins": 6,
+      "supporters": 2,
+      "activity": 4,
+      "needsCompany": true,
+      "short": "Rally"
+    },
+    {
+      "id": "wave",
+      "label": "Wave",
+      "pose": "wave",
+      "poseSeconds": 1.8,
+      "cooldownSeconds": 5,
+      "coins": 0,
+      "supporters": 0,
+      "activity": 0,
+      "needsCompany": false,
+      "short": "Wave"
+    }
+  ],
+  "phrases": [
+    {
+      "id": "greet",
+      "tag": "greet",
+      "en": "Good morning, neighbour!",
+      "pcm": "Good morning o, neighbour!"
+    },
+    {
+      "id": "nice",
+      "tag": "greet",
+      "en": "Nice to meet you.",
+      "pcm": "I dey happy to see you."
+    },
+    {
+      "id": "market",
+      "tag": "chat",
+      "en": "How is market today?",
+      "pcm": "How market dey today?"
+    },
+    {
+      "id": "where",
+      "tag": "chat",
+      "en": "Which way to the stadium?",
+      "pcm": "Which side the stadium dey?"
+    },
+    {
+      "id": "register",
+      "tag": "civic",
+      "en": "Have you registered to vote?",
+      "pcm": "You don register to vote?"
+    },
+    {
+      "id": "road",
+      "tag": "civic",
+      "en": "Our road needs fixing.",
+      "pcm": "Our road need fixing o."
+    },
+    {
+      "id": "light",
+      "tag": "civic",
+      "en": "We need steady light.",
+      "pcm": "We need light wey go stay."
+    },
+    {
+      "id": "voice",
+      "tag": "civic",
+      "en": "Every voice counts.",
+      "pcm": "Every voice dey count."
+    },
+    {
+      "id": "gather",
+      "tag": "rally",
+      "en": "Come to the rally!",
+      "pcm": "Make we gather for rally!"
+    },
+    {
+      "id": "turnout",
+      "tag": "rally",
+      "en": "Great crowd today!",
+      "pcm": "People plenty today!"
+    },
+    {
+      "id": "peace",
+      "tag": "rally",
+      "en": "Let's keep it peaceful.",
+      "pcm": "Make we do am in peace."
+    },
+    {
+      "id": "thanks",
+      "tag": "chat",
+      "en": "Thank you, see you at the rally!",
+      "pcm": "Thank you, see you for rally!"
+    }
+  ],
+  "emoji": [
+    "👋",
+    "👏",
+    "🔥",
+    "🙏",
+    "🎉",
+    "😂",
+    "💚",
+    "🇳🇬"
+  ],
+  "daily": {
+    "coins": 60,
+    "supporters": 5,
+    "actions": 40
+  },
+  "report": {
+    "reasons": [
+      "spam",
+      "harassment",
+      "offensive-name",
+      "other"
+    ]
+  },
+  "locals": {
+    "max": 5,
+    "min": 2
+  }
+}

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { activeContenders, analytics, feedbackTopics, limits, maxUpgradeLevel, rides, stateIndex } from '@cr/content';
+import { activeContenders, analytics, feedbackTopics, limits, maxUpgradeLevel, outfits, places, rides, stateIndex } from '@cr/content';
 
 const stateIds = stateIndex.map((s) => s.id);
 const rideIds = rides.map((r) => r.id);
@@ -141,4 +141,35 @@ export const feedbackSchema = z.object({
     .refine((v) => !PERSONAL.test(v), 'no links, emails or phone numbers')
     .default(''),
   fromHere: z.boolean().default(false),
+});
+
+// -- Mobilise (C82) ---------------------------------------------------------
+
+const placeKinds = places.kinds.map((k) => k.id);
+
+/** The shirt colour is the only thing a player picks about their avatar, and only from the game's own palette. */
+export const placeJoinSchema = z.object({
+  stateId: z.enum(stateIds as [string, ...string[]]),
+  kind: z.enum(placeKinds as [string, ...string[]]),
+  color: z.enum(outfits.options.colors as unknown as [string, ...string[]]).optional(),
+});
+
+export const placeMoveSchema = z.object({
+  x: z.number().min(-100).max(100),
+  z: z.number().min(-100).max(100),
+});
+
+export const placeActSchema = z.object({ action: z.enum(places.actions.map((a) => a.id) as [string, ...string[]]) });
+
+/** A preset phrase id or one emoji from the list, never both and never anything else. */
+export const placeSaySchema = z
+  .object({
+    phrase: z.enum(places.phrases.map((p) => p.id) as [string, ...string[]]).optional(),
+    emoji: z.enum(places.emoji as [string, ...string[]]).optional(),
+  })
+  .refine((v) => (v.phrase === undefined) !== (v.emoji === undefined), { message: 'one of phrase or emoji' });
+
+export const placeReportSchema = z.object({
+  memberId: z.string().min(4).max(24),
+  reason: z.enum(places.report.reasons as [string, ...string[]]),
 });

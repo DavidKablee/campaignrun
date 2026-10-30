@@ -11,7 +11,7 @@ export function AboutScreen() {
   const setScreen = useGameStore((s) => s.setScreen);
   return (
     <div className="cr-screen cr-screen--menu">
-      <MenuHead title="About" sub="What this game is, and what it is not" onBack={() => setScreen('splash')} />
+      <MenuHead title="About" sub="What this game is, and what it is not" />
 
       <Sheet tone="accent" eyebrow="Disclosure">
         <p>{copy.disclosure}</p>

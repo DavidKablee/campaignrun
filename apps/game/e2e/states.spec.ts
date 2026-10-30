@@ -10,7 +10,7 @@ import { test, expect } from '@playwright/test';
  * `debugState` plays a state without unlocking or travelling to it,
  * `debugWeather` and `debugSeed` make every shot the same light and the same road.
  */
-const STATES = ['kano', 'rivers', 'anambra', 'kaduna', 'delta', 'kwara', 'oyo', 'borno', 'enugu', 'plateau', 'katsina', 'ogun', 'bauchi', 'sokoto', 'akwa-ibom', 'imo', 'edo', 'ondo', 'abia', 'benue', 'osun', 'adamawa', 'jigawa', 'cross-river'];
+const STATES = ['kano', 'rivers', 'anambra', 'kaduna', 'delta', 'kwara', 'oyo', 'borno', 'enugu', 'plateau', 'katsina', 'ogun', 'bauchi', 'sokoto', 'akwa-ibom', 'imo', 'edo', 'ondo', 'abia', 'benue', 'osun', 'adamawa', 'jigawa', 'cross-river', 'fct'];
 const GATE = 20;
 const SEG = 340;
 /** A spot 18 m before the chunk a landmark's set piece stands in, so the piece is the first thing ahead. */

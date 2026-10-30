@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { legal, limits } from '@cr/content';
 import { useGameStore } from '../state';
+import { goBack } from '../nav';
 import { useOnlineStore } from '../onlineStore';
 
 /**
@@ -22,6 +23,12 @@ type Mode = 'signup' | 'login' | 'forgot' | 'name';
 
 export function AuthScreen() {
   const setScreen = useGameStore((s) => s.setScreen);
+  // Mobilise sends a signed-out player here; once in, they go on to the place, not the Board.
+  const goNext = () => {
+    const back = useGameStore.getState().authReturn;
+    useGameStore.getState().setAuthReturn(null);
+    setScreen(back ?? 'map');
+  };
   const { signup, login, busy, error, notice, clearError, clearNotice } = useOnlineStore();
   const forgotPassword = useOnlineStore((s) => s.forgotPassword);
   const resetPassword = useOnlineStore((s) => s.resetPassword);
@@ -57,7 +64,7 @@ export function AuthScreen() {
       return;
     }
     if (screen === 'reset') {
-      if (await resetPassword(pendingReset!, password)) setScreen('map');
+      if (await resetPassword(pendingReset!, password)) goNext();
       return;
     }
     const ok =
@@ -66,7 +73,7 @@ export function AuthScreen() {
         : screen === 'signup'
           ? await signup(email, password, username)
           : await login(email, password);
-    if (ok) setScreen('map');
+    if (ok) goNext();
   }
 
   const switchTo = (m: Mode) => {
@@ -78,7 +85,11 @@ export function AuthScreen() {
   return (
     <div className="cr-screen cr-screen--auth">
       <header className="cr-board-ticker">
-        <button type="button" className="cr-link" onClick={() => setScreen('splash')}>
+        <button
+          type="button"
+          className="cr-link"
+          onClick={goBack}
+        >
           ← Back
         </button>
         <span className="cr-board-ticker-msg">Your board, on every device</span>

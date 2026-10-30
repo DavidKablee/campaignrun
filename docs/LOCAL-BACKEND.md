@@ -26,3 +26,11 @@ curl localhost:8787/api/health
 DATABASE_URL="postgres://<you>@localhost/campaignrun_test?host=/tmp" pnpm -s test
 pnpm --filter @cr/api report   # funnel counts and newest state corrections
 ```
+
+## Trying Mobilise with several players
+Mobilise needs the API. Each browser profile is one player, and cookies are per host, so `http://localhost:5173` and `http://127.0.0.1:5173` are two players (both are in the default allowed origins). Add `CR_REQUIRE_VERIFIED=false` to see state activity from name-only accounts.
+1. Start the API and the game as above.
+2. In each window: play once (or finish a quick rally), open the planning page, tap **Mobilise**, choose a name.
+3. Walk by tapping the ground; use the action buttons and **Say**. Players in the same place and state share a room (12 at most, then a second room opens).
+4. Stop the API: the Mobilise button turns to "Opening soon".
+For the Playwright check run the API with `CR_ALLOWED_ORIGINS=http://127.0.0.1:4173` added, then `pnpm --filter @cr/game run build` and `pnpm test:e2e`; `places.spec.ts` skips itself when the API is not up.

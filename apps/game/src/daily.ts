@@ -13,7 +13,7 @@ export interface DailyChallenge {
 
 const ROTATION: Array<{ kind: DailyKind; label: string; target: number; reward: number }> = [
   { kind: 'clean', label: 'Finish with 0 dents', target: 0, reward: 120 },
-  { kind: 'landslide', label: 'Hit Landslide in Lagos', target: 1, reward: 140 },
+  { kind: 'landslide', label: 'Hit Overflowing in Lagos', target: 1, reward: 140 },
   { kind: 'deliver', label: 'Deliver 20 supporters', target: 20, reward: 110 },
   { kind: 'integrity', label: 'End Integrity at 80+', target: 80, reward: 130 },
   { kind: 'crowd', label: 'Score 30 Crowd', target: 30, reward: 125 },

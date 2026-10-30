@@ -84,7 +84,7 @@ export function AccountScreen() {
 
   return (
     <div className="cr-screen cr-screen--menu">
-      <MenuHead title="Account" sub="Who you are, and what leaves this phone" onBack={() => setScreen('splash')} />
+      <MenuHead title="Account" sub="Who you are, and what leaves this phone" />
 
       <Sheet>
         <div className="cr-identity">

@@ -17,7 +17,6 @@ function pct(v: number): string {
  */
 export function SettingsScreen() {
   const setScreen = useGameStore((s) => s.setScreen);
-  const back = useGameStore((s) => s.settingsBack);
   const sfx = useGameStore((s) => s.sfxVolume);
   const music = useGameStore((s) => s.musicVolume);
   const setVolumes = useGameStore((s) => s.setVolumes);
@@ -27,7 +26,6 @@ export function SettingsScreen() {
   const setFlags = useGameStore((s) => s.setFlags);
   const lang = useLang();
   const [countsOff, setCountsOff] = useState(analyticsOff);
-  const leave = () => setScreen(back === 'settings' ? 'splash' : back);
 
   useEffect(() => {
     audio.setVolumes(sfx, music);
@@ -35,7 +33,7 @@ export function SettingsScreen() {
 
   return (
     <div className="cr-screen cr-screen--menu">
-      <MenuHead title="Settings" onBack={leave} />
+      <MenuHead title="Settings" />
 
       <Sheet eyebrow="Sound">
         <div className="cr-slider">

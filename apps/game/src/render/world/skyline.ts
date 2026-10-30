@@ -287,6 +287,30 @@ export const SKYLINES: Record<string, SkylineBuilder> = {
     }
   },
   /**
+   * The capital's horizon: a far granite ridge in blue-grey, a long band of mid-rise blocks in
+   * pale concrete with a few taller slabs and glass-blue towers, a line of leafy trees, and
+   * mast lights. Generic: no dome, minaret, spire, hall, villa or flag, and nothing on the ridge.
+   */
+  'fct-capital'(b) {
+    const r = mulberry(9941);
+    for (const [x, w, h, c] of [[-130, 80, 12, '#8e98a2'], [-20, 70, 18, '#848e98'], [95, 90, 14, '#939ca5']] as const) b.cap(1, Math.PI / 2, c, { x, y: -1, z: -22, sx: w, sy: h, sz: 14 }, 10);
+    for (let i = 0; i < 26; i++) {
+      const tall = i % 7 === 3;
+      const h = tall ? r.range(11, 17) : r.range(3.5, 8);
+      b.box(r.range(5, 8.5), h, r.range(4.5, 7), r.pick(tall ? ['#aab6be', '#9aa9b4', '#cfd4d6'] : ['#ece9e2', '#d6d3cb', '#cfd4d6', '#e0ddd5']), { x: -118 + i * 9.2 + r.range(-2, 2), y: h / 2 - 0.4, z: r.range(-9, -2) });
+    }
+    for (let i = 0; i < 14; i++) {
+      const x = -150 + i * 23 + r.range(-5, 5);
+      const h = r.range(3.5, 5.5);
+      b.cyl(0.14, 0.2, h, '#6a5a44', { x, y: h / 2, z: r.range(-5, -2) }, 5);
+      b.sphere(r.range(1.4, 2.1), r.pick(['#5f7a3c', '#6f8a46', '#527034']), { x, y: h + 0.5, z: r.range(-5, -2), sy: 0.75 }, 5);
+    }
+    for (const x of [-85, -15, 55, 120]) {
+      b.cyl(0.16, 0.22, 12, '#8a8f90', { x, y: 6, z: -2 }, 5);
+      b.box(2.4, 0.3, 0.6, '#d8d8d2', { x, y: 12, z: -2 });
+    }
+  },
+  /**
    * Osun's horizon: a low rolling line of forest-savanna canopy in two greens, a long band of pale
    * and zinc roofs, a few tall oil palms, the frame of a ring-road flyover, mast lights and a
    * faint rail gantry. No tower, dome, spire, grove, shrine, palace or flag.

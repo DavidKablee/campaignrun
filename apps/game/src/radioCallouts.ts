@@ -36,7 +36,7 @@ const DROPOFF_LINES = [
   'Supporters delivered — on to the next stop!',
   'Drop-off confirmed — route is clean!',
   'Oya, unload don happen — keep momentum!',
-  'Crowd drop complete — next wave, mount up!',
+  'Supporters dropped off — next wave, mount up!',
   'Supporters offloaded — keep it moving, driver!',
 ];
 
@@ -49,7 +49,7 @@ const FULL_HOUSE_LINES = [
 ];
 
 const ON_BEAT_LINES = [
-  'On the beat — Turnout stacking up nicely!',
+  'On the beat — Crowd stacking up nicely!',
   'Rhythm right — crowd numbers climbing!',
   'That timing sweet — keep the groove!',
   'On beat, on point — this convoy is blessed!',

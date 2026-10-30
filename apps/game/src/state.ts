@@ -1,13 +1,14 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { safeStorage } from './safeStorage';
-import { isRidePlayable, metaConfig, rides, simConfig, streakBonusPermille, type UpgradeId } from '@cr/content';
+import { isRidePlayable, metaConfig, places, rides, simConfig, streakBonusPermille, type UpgradeId } from '@cr/content';
 import { useContenderStore } from './contenderStore';
 import type { Challenge } from './challenge';
 import { prefersDataSaver } from './deviceTier';
 import { challengeMet, todaysChallenge } from './daily';
 import { submitLocalBoard, type LocalBoardEntry } from './localBoard';
 import { emptyUpgrades, missionDelta, type MissionProgress, runPayout, type StartId, type UpgradeLevels, upgradeCost, watDay, watWeek } from './meta';
+import { tourBonusFor } from './liveEvents';
 import { canTravel, emptyTravel, noteTravel, type TravelProgress } from './travel';
 import { validateUsername } from './username';
 
@@ -31,9 +32,10 @@ export type Screen =
   | 'map'
   | 'auth'
   | 'paused'
-  | 'yard';
+  | 'yard'
+  | 'places';
 
-const STORE_VERSION = 11;
+const STORE_VERSION = 12;
 
 interface GameState {
   screen: Screen;
@@ -86,6 +88,15 @@ interface GameState {
   quickRun: boolean;
   setQuickRun: (v: boolean) => void;
   /** A challenge that arrived in the address bar and has not been taken yet. */
+  /** Where to go once the player has signed in (not persisted): Mobilise needs an account. */
+  authReturn: Screen | null;
+  /** Where Back goes from Mobilise: it opens from the splash, the planning page and the result screen (not persisted). */
+  placesBack: Screen;
+  openPlaces: (from: Screen) => void;
+  /** A place a friend invited the player to (not persisted); Mobilise opens here instead of the active state. */
+  placesTarget: { stateId: string; kind: string } | null;
+  setPlacesTarget: (t: { stateId: string; kind: string } | null) => void;
+  setAuthReturn: (s: Screen | null) => void;
   incomingChallenge: Challenge | null;
   setIncomingChallenge: (c: Challenge | null) => void;
   /** The challenge being played: it decides the seed, state, ride and course length. */
@@ -121,7 +132,12 @@ interface GameState {
   donationDay: string | null;
   claimDonation: () => boolean;
   lastMetaReward: number;
-  recordMetaRun: (r: { delivered: number; crowd: number; finished: boolean; broke?: boolean; quick?: boolean }) => void;
+  /** The tour bonus period last paid (week, or day in the Final Week), so it pays once. */
+  tourClaimedKey: string | null;
+  /** What the live events added to the last payout, for the result screen. Not persisted. */
+  lastEventCoins: number;
+  lastEventNote: string;
+  recordMetaRun: (r: { delivered: number; crowd: number; finished: boolean; broke?: boolean; quick?: boolean; stateId?: string }) => void;
   /** Permille the rally streak lifted the last payout by. */
   lastStreakBonus: number;
   /** What the last run did to the streak when it did not grow it. */
@@ -205,6 +221,12 @@ export const useGameStore = create<GameState>()(
       lastRunQuick: false,
       quickRun: false,
       setQuickRun: (v) => set({ quickRun: v }),
+      authReturn: null,
+      placesBack: 'briefing',
+      openPlaces: (from) => set((s) => (s.following < places.followingGate ? {} : { placesBack: from, screen: 'places' })),
+      placesTarget: null,
+      setPlacesTarget: (t) => set({ placesTarget: t }),
+      setAuthReturn: (s) => set({ authReturn: s }),
       incomingChallenge: null,
       setIncomingChallenge: (c) => set({ incomingChallenge: c }),
       challenge: null,
@@ -270,6 +292,9 @@ export const useGameStore = create<GameState>()(
         return claimed;
       },
       lastMetaReward: 0,
+      tourClaimedKey: null,
+      lastEventCoins: 0,
+      lastEventNote: '',
       lastStreakBonus: 0,
       lastStreakNote: '',
       recordMetaRun: (r) => set((st) => {
@@ -295,14 +320,18 @@ export const useGameStore = create<GameState>()(
         // C48: the payout formula lives in content beside the number the Yard
         // prints for the Fundraising Desk. The `* 50` that used to sit here was
         // a third copy of that upgrade's step.
-        const reward =
-          runPayout(r.delivered, st.upgrades, {
-            streak: st.streak,
-            // A quick rally pays the finishing money for the share of the road it covered.
-            baseSharePermille: r.quick
-              ? Math.floor((simConfig.course.quickSegmentCount * 1000) / simConfig.course.segmentCount)
-              : 1000,
-          }) + missionReward;
+        const basePayout = runPayout(r.delivered, st.upgrades, {
+          streak: st.streak,
+          // A quick rally pays the finishing money for the share of the road it covered.
+          baseSharePermille: r.quick
+            ? Math.floor((simConfig.course.quickSegmentCount * 1000) / simConfig.course.segmentCount)
+            : 1000,
+        });
+        // C81: the tour pays extra coins for a finished rally; it never touches the run itself.
+        const tour = tourBonusFor({ finished: r.finished, stateId: r.stateId ?? st.activeStateId }, st.tourClaimedKey);
+        const eventCoins = tour?.coins ?? 0;
+        const eventNote = tour ? `${tour.kind === 'final' ? 'Final week' : 'Weekly Tour'} · ${tour.stateName} +₦${tour.coins}` : '';
+        const reward = basePayout + missionReward + eventCoins;
         // Finished rallies in a row. A breakdown ends the run of them, unless
         // this week's freeze is still unspent, which absorbs exactly one.
         let streak = st.streak;
@@ -335,6 +364,9 @@ export const useGameStore = create<GameState>()(
           lastStreakBonus: streakBonusPermille(st.streak),
           lastStreakNote: streakNote,
           lastMetaReward: reward,
+          tourClaimedKey: tour ? tour.periodKey : st.tourClaimedKey,
+          lastEventCoins: eventCoins,
+          lastEventNote: eventNote,
           dailyChallengeClaimed: freshDay ? null : st.dailyChallengeClaimed,
           travel,
         };
@@ -439,6 +471,9 @@ export const useGameStore = create<GameState>()(
           delete out.contenderGraceUsed;
           delete out.outfits;
         }
+        if (version < 12) {
+          out = { ...out, tourClaimedKey: null };
+        }
         return out as unknown as GameState;
       },
       partialize: (state) => ({
@@ -464,6 +499,7 @@ export const useGameStore = create<GameState>()(
         freezeWeek: state.freezeWeek,
         donationDay: state.donationDay,
         dailyChallengeClaimed: state.dailyChallengeClaimed,
+        tourClaimedKey: state.tourClaimedKey,
         username: state.username,
         localBoard: state.localBoard,
         travel: state.travel,

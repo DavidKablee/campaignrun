@@ -13,7 +13,7 @@ export interface Challenge {
   seed: number;
   stateId: string;
   rideId: string;
-  /** The Turnout to beat. */
+  /** The Crowd to beat. */
   crowd: number;
   /** The short course (a quick rally), so the receiver drives the same road. */
   quick: boolean;

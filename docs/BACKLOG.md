@@ -14,7 +14,9 @@ Work only the current chunk (`docs/STATUS.md`). Do not start later chunks early.
 | C10 | done | Weekly packs (26 Oct), travel caps (client), live counters |
 | C11 | done | Guest→save, Contender consent log, export/delete (client) |
 | **C12** | **next** | Ghosts / server verification |
-| C13–C19 | reviewed | See `docs/research/c13-c19-review.md`: build C19 and C18 in lite form, finish C14 and C16, defer C15 and C17, skip C13 and the prize flow |
+| C82 | built | Mobilise places (`docs/chunks/C82.md`). Redesign built (Locals, coach card, talk tray, invite link). Follow-ups: shared pub/sub if the API scales past one instance; state-specific scenery per place; a place-activity strip on the Board; moderation review of reports; Open Graph preview page for invite links |
+| C83 | built | First-minute fixes (`docs/chunks/C83.md`). Open: where a finished-trial player who never picked should land; run the first-minute playtest |
+| C13–C19 | reviewed | See `docs/research/c13-c19-review.md`. C19-lite, C18-lite and the C14 check are built (C81) and C16 was already closed. Deferred: C15, C17. Skipped: C13, the prize flow |
 
 ## Outside the current chunk
 
@@ -22,8 +24,10 @@ Work only the current chunk (`docs/STATUS.md`). Do not start later chunks early.
 - Real-money / ads / server scores.
 - glTF meshopt swaps, recorded audio stems, Playwright visual baselines, Cloudflare/waitlist.
 
-## Needs a person (C78)
+## Needs a person (C78, C81)
 
+- A reviewer from the capital checks `docs/research/states/fct.md` and the FCT world.
+- Look at the Weekly Tour and Final Week bonuses on a real phone and tune the amounts once there is play data.
 - Run `docs/PLAYTEST-FIRST-MINUTE.md` with 8–10 Nigerian players on mid-range phones, then fix the earliest confusion first.
 - A native Pidgin speaker marks `docs/research/pidgin-review.md`.
 - A lawyer reviews the privacy text (events, corrections) before anything that collects data goes public.
@@ -31,7 +35,7 @@ Work only the current chunk (`docs/STATUS.md`). Do not start later chunks early.
 
 ## Every state its own world (remaining 25 states)
 
-Kano (C51), Rivers (C52), Anambra (C53), Kaduna (C54), Delta (C55), Kwara (C56), Oyo (C57), Borno (C58), Enugu (C59), Plateau (C60), Katsina (C61), Ogun (C62), Bauchi (C64), Sokoto (C65), Akwa Ibom (C66), Imo (C67), Edo (C69), Ondo (C70), Abia (C71), Benue (C72), Osun (C73), Adamawa (C74), Jigawa (C75) and Cross River (C76) are built; every one still needs a local reviewer. Dossiers exist for all four in `docs/research/states/`; each is a draft to be checked against the template before building (the Kaduna one suggests accent `#B9663A`). Do one state at a time, with screenshots for review before the next. Both sim questions are closed in C77 (Rivers keke; ride bonus removed). Batch 5 is built (C69–C72); Batch 6 is built (C73–C76); twelve real states are left without worlds (Batch 7 candidates: Niger, Gombe, Ebonyi, Kebbi, Ekiti, Kogi, Taraba, Bayelsa, Nasarawa, Yobe, Zamfara, FCT). Do not write `scenery` strings for a new state without checking the `case` list in `world.ts`.
+Kano (C51), Rivers (C52), Anambra (C53), Kaduna (C54), Delta (C55), Kwara (C56), Oyo (C57), Borno (C58), Enugu (C59), Plateau (C60), Katsina (C61), Ogun (C62), Bauchi (C64), Sokoto (C65), Akwa Ibom (C66), Imo (C67), Edo (C69), Ondo (C70), Abia (C71), Benue (C72), Osun (C73), Adamawa (C74), Jigawa (C75), Cross River (C76) and FCT (C81) are built; every one still needs a local reviewer. Dossiers exist for all four in `docs/research/states/`; each is a draft to be checked against the template before building (the Kaduna one suggests accent `#B9663A`). Do one state at a time, with screenshots for review before the next. Both sim questions are closed in C77 (Rivers keke; ride bonus removed). Batch 5 is built (C69–C72); Batch 6 is built (C73–C76); eleven states are left without worlds (Batch 7 candidates: Niger, Gombe, Ebonyi, Kebbi, Ekiti, Kogi, Taraba, Bayelsa, Nasarawa, Yobe, Zamfara). Do not write `scenery` strings for a new state without checking the `case` list in `world.ts`.
 
 Recipe per state:
 1. Write `docs/research/states/<id>.md` from `_TEMPLATE.md` (sources, built form, road, vegetation, dress, avoid list, landmark shortlist with rule flags, route table, welcome/farewell in a language the state speaks). Cross-check; mark single-source claims.

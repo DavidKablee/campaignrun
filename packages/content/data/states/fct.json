@@ -3,17 +3,107 @@
   "name": "FCT",
   "zone": "FCT",
   "biomeKit": "capital-city",
-  "palette": { "sky": "#9CC9E8", "fog": "#DDE4EA", "ground": "#6E7480", "accent": "#E6B422" },
+  "palette": {
+    "sky": "#9CC9E8",
+    "fog": "#DDE4EA",
+    "ground": "#6E7480",
+    "accent": "#E6B422"
+  },
   "landmarks": [
-    { "name": "Wuse Market", "venueType": "market", "verified": false },
-    { "name": "Central Boulevard", "venueType": "square", "verified": false },
-    { "name": "Jabi Lake Waterfront", "venueType": "waterfront", "verified": false },
-    { "name": "Millennium Park", "venueType": "park", "verified": false },
-    { "name": "Abuja National Stadium", "venueType": "stadium", "verified": false }
+    {
+      "name": "Wuse Market",
+      "venueType": "market",
+      "verified": false
+    },
+    {
+      "name": "Boulevard Roundabout",
+      "venueType": "square",
+      "verified": false
+    },
+    {
+      "name": "Jabi Lake Waterfront",
+      "venueType": "waterfront",
+      "verified": false
+    },
+    {
+      "name": "Millennium Park",
+      "venueType": "park",
+      "verified": false
+    },
+    {
+      "name": "City Stadium",
+      "venueType": "stadium",
+      "verified": false
+    }
   ],
-  "scenery": ["granite inselbergs on the skyline", "boulevard flagpoles"],
+  "scenery": ["granite inselbergs on the skyline", "wide boulevards and roundabouts"],
   "hazards": ["roundabout-maze", "crowd-surge", "go-slow"],
   "signatureRide": "grand-convoy",
   "welcomeLines": ["Welcome to the Capital. Final week."],
-  "audioStem": "fct-mix"
+  "audioStem": "fct-mix",
+  "farewellLine": "Thank you, Abuja. See you at the finish.",
+  "world": {
+    "library": "guinea-savanna",
+    "start": {
+      "district": "fct.market-zone",
+      "label": "Your street"
+    },
+    "route": [
+      "fct.market-zone",
+      "fct.boulevard",
+      "fct.lake-road",
+      "fct.park-avenue",
+      "fct.stadium-road",
+      "fct.estate-road",
+      "fct.satellite-lane",
+      "fct.city-centre"
+    ],
+    "finish": {
+      "district": "fct.city-centre",
+      "label": "THE CAPITAL \u00b7 GRAND RALLY"
+    },
+    "road": "fct-asphalt",
+    "dress": "abuja-city",
+    "billboards": [
+      "WELCOME TO THE CAPITAL",
+      "FINAL WEEK",
+      "PURE WATER",
+      "PROVISIONS",
+      "RECHARGE CARDS",
+      "POS \u00b7 AIRTIME",
+      "DATA 4G \u00b7 BIG SAVER",
+      "TAILORING",
+      "PRINT \u00b7 COPY",
+      "FRESH PRODUCE"
+    ],
+    "skyline": "fct-capital",
+    "ambient": "none",
+    "pieces": [
+      {
+        "landmark": 0,
+        "piece": "fct.market",
+        "side": -1
+      },
+      {
+        "landmark": 1,
+        "piece": "fct.roundabout-plaza",
+        "side": -1
+      },
+      {
+        "landmark": 2,
+        "piece": "fct.lakefront",
+        "side": -1
+      },
+      {
+        "landmark": 3,
+        "piece": "fct.park",
+        "side": -1
+      },
+      {
+        "landmark": 4,
+        "piece": "fct.stadium",
+        "side": -1
+      }
+    ]
+  }
 }

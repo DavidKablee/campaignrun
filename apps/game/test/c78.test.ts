@@ -112,7 +112,7 @@ describe('Pidgin', () => {
   });
 
   it('writes the challenge message in the sender\'s language', () => {
-    expect(challengeText(sample, 'Keke', 'Kano', 'en')).toMatch(/^Beat my 214 Turnout on Campaigner/);
+    expect(challengeText(sample, 'Keke', 'Kano', 'en')).toMatch(/^Beat my 214 Crowd on Campaigner/);
     const pcm = challengeText(sample, 'Keke', 'Kano', 'pcm');
     expect(pcm).toContain('214');
     expect(pcm).toContain('Kano');

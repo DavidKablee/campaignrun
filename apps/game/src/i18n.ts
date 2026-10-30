@@ -72,18 +72,20 @@ const en = {
 
   'prompt.pickup': 'FLICK DOWN & HOLD · LOAD',
   'prompt.venue': 'FLICK DOWN & HOLD · DOUBLE-TAP ×{beat}',
-  'prompt.pickupAhead': 'PICKUP AHEAD · BE READY TO BRAKE',
-  'prompt.venueAhead': 'VENUE AHEAD · BE READY TO BRAKE',
+  'prompt.pickupAhead': 'PICKUP AHEAD · FLICK DOWN & HOLD TO LOAD',
+  'prompt.venueAhead': 'VENUE AHEAD · FLICK DOWN & HOLD TO UNLOAD',
 
   'hint.gestures': '<b>Flick</b> ◀ ▶ lane · <b>up</b> hop · <b>down</b> brake · <b>double-tap</b> beat · <b>hold</b> horn',
 
-  'tutorial.title': 'Two moves to start',
+  'tutorial.title': 'Three moves to start',
   'tutorial.lane': 'Flick left or right to change lane',
   'tutorial.hop': 'Flick up to hop a pothole',
-  'tutorial.rest': 'The convoy drives itself. When you reach a pickup, the screen tells you what to do.',
+  'tutorial.load': 'At a pickup, flick down and hold to load supporters',
+  'tutorial.integrity': 'Integrity is your clean name. Shady figures on the road cut it; dodging them wins it back.',
+  'tutorial.rest': 'The convoy drives itself. Load at pickups, unload at venues, and the screen tells you when.',
   'tutorial.go': 'Got it — drive',
 
-  'challenge.text': 'Beat my {crowd} Turnout on Campaigner — same road ({state} · {ride}).',
+  'challenge.text': 'Beat my {crowd} Crowd on Campaigner — same road ({state} · {ride}).',
   'challenge.whatsapp': 'Send on WhatsApp',
   'challenge.other': 'Share…',
   'challenge.copy': 'Copy link',
@@ -110,18 +112,20 @@ const pcm: Record<StrKey, string> = {
 
   'prompt.pickup': 'FLICK DOWN, HOLD · LOAD AM',
   'prompt.venue': 'FLICK DOWN, HOLD · DOUBLE-TAP ×{beat}',
-  'prompt.pickupAhead': 'PICKUP DEY AHEAD · GET READY TO BRAKE',
-  'prompt.venueAhead': 'VENUE DEY AHEAD · GET READY TO BRAKE',
+  'prompt.pickupAhead': 'PICKUP DEY AHEAD · FLICK DOWN, HOLD TO LOAD AM',
+  'prompt.venueAhead': 'VENUE DEY AHEAD · FLICK DOWN, HOLD TO UNLOAD',
 
   'hint.gestures': '<b>Flick</b> ◀ ▶ change lane · <b>up</b> jump · <b>down</b> brake · <b>double-tap</b> beat · <b>hold</b> horn',
 
-  'tutorial.title': 'Two things to start',
+  'tutorial.title': 'Three things to start',
   'tutorial.lane': 'Flick left or right to change lane',
   'tutorial.hop': 'Flick up to jump the pothole',
-  'tutorial.rest': 'The convoy dey drive itself. When you reach pickup, the screen go tell you wetin to do.',
+  'tutorial.load': 'For pickup, flick down and hold to load people',
+  'tutorial.integrity': 'Integrity na your clean name. Shady people for road go cut am; if you dodge dem, e go return.',
+  'tutorial.rest': 'The convoy dey drive itself. Load for pickup, unload for venue, and the screen go tell you when.',
   'tutorial.go': 'I don understand — drive',
 
-  'challenge.text': 'Abeg beat my {crowd} Turnout for Campaigner. Na the same road ({state} · {ride}).',
+  'challenge.text': 'Abeg beat my {crowd} Crowd for Campaigner. Na the same road ({state} · {ride}).',
   'challenge.whatsapp': 'Send am for WhatsApp',
   'challenge.other': 'Share am…',
   'challenge.copy': 'Copy the link',

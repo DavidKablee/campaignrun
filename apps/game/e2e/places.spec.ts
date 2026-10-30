@@ -1,0 +1,127 @@
+import { test, expect, type Browser, type Page } from '@playwright/test';
+
+/**
+ * Mobilise (C82). The offline path needs nothing running; the two-player path needs the API on
+ * 127.0.0.1:8787 with a database (see docs/LOCAL-BACKEND.md) and skips itself when it is not there.
+ */
+const API = 'http://127.0.0.1:8787';
+
+async function seeded(browser: Browser): Promise<Page> {
+  const context = await browser.newContext({
+    viewport: { width: 390, height: 844 },
+    hasTouch: true,
+    isMobile: true,
+    baseURL: 'http://127.0.0.1:4173',
+  });
+  await context.addInitScript(() => {
+    localStorage.setItem('cr-storage', JSON.stringify({ state: { following: 1500, seenTutorial: true }, version: 12 }));
+  });
+  return context.newPage();
+}
+
+async function openMobilise(page: Page) {
+  await page.goto('/?debug');
+  await page.getByRole('button', { name: /Continue campaign/i }).click();
+  await page.getByRole('button', { name: /^Mobilise/ }).click();
+}
+
+test('a first-time player sees Mobilise on the splash, beside Run my race', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByRole('button', { name: /Run my race/i })).toBeVisible();
+  await expect(page.getByRole('button', { name: /^Mobilise/ })).toBeVisible();
+});
+
+test('Mobilise is locked below 1,000 Following and says how far to go', async ({ browser }) => {
+  const context = await browser.newContext({ baseURL: 'http://127.0.0.1:4173' });
+  await context.addInitScript(() => {
+    localStorage.setItem('cr-storage', JSON.stringify({ state: { following: 40, seenTutorial: true }, version: 12 }));
+  });
+  const page = await context.newPage();
+  await page.goto('/');
+  const button = page.getByRole('button', { name: /^Mobilise/ });
+  await expect(button).toBeDisabled();
+  await expect(button).toContainText('Unlocks at 1,000 Following · 960 to go');
+  await context.close();
+});
+
+test('Mobilise says "Opening soon" and stays shut when the server is unreachable', async ({ browser }) => {
+  const page = await seeded(browser);
+  await page.route('**/api/places/online**', (r) => r.abort());
+  await page.goto('/');
+  await page.getByRole('button', { name: /Continue campaign/i }).click();
+  const button = page.getByRole('button', { name: /^Mobilise/ });
+  await expect(button).toContainText('Opening soon');
+  await expect(button).toBeDisabled();
+  await page.context().close();
+});
+
+test('two players meet in a place, act and talk in presets', async ({ browser, request }) => {
+  const health = await request.get(`${API}/api/health`).catch(() => null);
+  test.skip(!health?.ok(), 'API not running on 127.0.0.1:8787');
+
+  const a = await seeded(browser);
+  const b = await seeded(browser);
+  const suffix = Math.random().toString(36).slice(2, 7);
+  for (const [page, name] of [[a, `alpha_${suffix}`], [b, `bravo_${suffix}`]] as const) {
+    const res = await page.context().request.post(`${API}/api/auth/guest`, { data: { username: name } });
+    expect(res.status()).toBe(201);
+  }
+  await openMobilise(a);
+  await openMobilise(b);
+  // The two projects run side by side against one API, so the room may hold more than these two.
+  await expect(a.locator('.cr-places-title')).toContainText(/(?:[2-9]|1\d) players/, { timeout: 15_000 });
+  await expect(b.locator('.cr-places-title')).toContainText(/(?:[2-9]|1\d) players/, { timeout: 15_000 });
+
+  // Locals fill the place and say so; the first-visit card explains the controls once.
+  await expect(a.locator('.cr-places-title')).toContainText(/\d+ locals/);
+  await expect(a.locator('.cr-places-coach')).toContainText('Tap the ground to walk');
+  await a.getByRole('button', { name: 'Got it' }).click();
+  await expect(a.locator('.cr-places-coach')).toHaveCount(0);
+  await expect(a.locator('.cr-place-tag.is-local').first()).toBeVisible();
+
+  // The invite sheet offers WhatsApp, copy and the deep link; nothing about the Contender.
+  await a.getByRole('button', { name: 'Invite a friend here' }).click();
+  await expect(a.getByRole('button', { name: 'Share on WhatsApp' })).toBeVisible();
+  await expect(a.getByRole('region', { name: 'Invite a friend' })).not.toContainText(/contender:/i);
+  await a.screenshot({ path: `test-results/shots/places-invite-${test.info().project.name}.png` });
+  await a.getByRole('button', { name: 'Close' }).click();
+
+  // A canvass pays coins and the toast says so.
+  await a.getByRole('button', { name: /^Canvass/ }).click();
+  await expect(a.locator('.cr-places-toast')).toContainText('₦3');
+
+  // B says a preset phrase from the talk tray, which keeps the scene in view; A sees the bubble.
+  await b.getByRole('button', { name: /^Say/ }).click();
+  await expect(b.locator('.cr-places-stage')).toBeVisible();
+  await b.screenshot({ path: `test-results/shots/places-talk-${test.info().project.name}.png` });
+  await b.getByRole('button', { name: 'Good morning, neighbour!' }).click();
+  await expect(a.locator('.cr-place-bubble').first()).toContainText('Good morning, neighbour!', { timeout: 10_000 });
+
+  await a.screenshot({ path: `test-results/shots/places-${test.info().project.name}.png` });
+
+  // There is no way to type: no text field in the place at all.
+  await expect(a.locator('.cr-screen--places input[type="text"], .cr-screen--places textarea')).toHaveCount(0);
+
+  // The scene stays inside the draw budget.
+  const stats = await a.evaluate(() => (window as unknown as { __place?: { stats: () => { draws: number } } }).__place?.stats());
+  test.info().annotations.push({ type: 'draws', description: JSON.stringify(stats) });
+  expect(stats?.draws ?? 0).toBeLessThan(200);
+
+  await a.context().close();
+  await b.context().close();
+});
+
+test('an invite link opens the same place for a friend', async ({ browser }) => {
+  const page = await seeded(browser);
+  await page.goto('/#mobilise=kano.stadium');
+  await expect(page.locator('.cr-places-title strong')).toContainText('Kano Stadium');
+  await expect(page).toHaveURL(/^[^#]*$/);
+  await page.context().close();
+});
+
+test('a link that names no real place is ignored', async ({ browser }) => {
+  const page = await seeded(browser);
+  await page.goto('/#mobilise=nowhere.moon');
+  await expect(page.locator('.cr-screen--places')).toHaveCount(0);
+  await page.context().close();
+});

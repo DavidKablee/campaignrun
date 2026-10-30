@@ -2,7 +2,7 @@
   "timezone": "Africa/Lagos",
   "closeAt": "2027-01-15T22:59:00Z",
   "finaleAt": "2027-01-04T05:00:00Z",
-  "finalWeekFrom": "2027-01-11T05:00:00Z",
+  "finalWeekFrom": "2027-01-08T23:00:00Z",
   "electionDate": "2027-01-16T00:00:00Z",
   "unlocks": [
     { "at": "2026-10-19T05:00:00Z", "states": ["lagos"], "note": "R0 launch" },

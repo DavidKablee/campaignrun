@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { contenders, followingGain, partyForContender, rides, simConfig, stateIndex } from '@cr/content';
+import { contenders, followingGain, partyForContender, places, rides, simConfig, stateIndex } from '@cr/content';
 import { starForCrowd } from '@cr/sim';
 import { useAccountStore } from '../accountStore';
 import { track } from '../analytics';
@@ -19,9 +19,9 @@ import { Sheet } from './MenuChrome';
 
 const STAR_LABEL: Record<string, string> = {
   none: 'No tier yet',
-  foothold: 'Foothold',
-  majority: 'Majority',
-  landslide: 'Landslide',
+  foothold: 'Small',
+  majority: 'Packed',
+  landslide: 'Overflowing',
 };
 
 /**
@@ -31,7 +31,7 @@ const STAR_LABEL: Record<string, string> = {
  * board-name field and the three navigation buttons were squeezed off the
  * bottom with nowhere to scroll — and the field itself was `--cr-ink` text on a
  * dark slab, so whatever you typed into it was invisible. The result now leads
- * with one card (tier, Turnout, who ran), the four figures sit in white stat
+ * with one card (tier, Crowd, who ran), the four figures sit in white stat
  * cards, and posting and sharing each say what they do before you press them.
  */
 export function SummaryScreen() {
@@ -47,6 +47,7 @@ export function SummaryScreen() {
   const recordMetaRun = useGameStore((s) => s.recordMetaRun);
   const claimDailyIfMet = useGameStore((s) => s.claimDailyIfMet);
   const metaReward = useGameStore((s) => s.lastMetaReward);
+  const eventNote = useGameStore((s) => s.lastEventNote);
   const following = useGameStore((s) => s.following);
   const streak = useGameStore((s) => s.streak);
   const streakBonus = useGameStore((s) => s.lastStreakBonus);
@@ -100,7 +101,7 @@ export function SummaryScreen() {
   // A breakdown has a result too: how far the convoy got is the number to beat.
   const shareLabel = brokeDown
     ? `Broke down · ${progress}% of the road`
-    : `${quick ? 'Quick rally · ' : ''}${STAR_LABEL[star] ?? 'Turnout'}`;
+    : `${quick ? 'Quick rally · ' : ''}${STAR_LABEL[star] ?? 'Crowd'}`;
   const verdict = challenge && finished ? judgeChallenge(challenge.crowd, skill) : null;
   const [linkNote, setLinkNote] = useState('');
   const challengeStateName = stateIndex.find((x) => x.id === stateId)?.name ?? stateName;
@@ -141,7 +142,7 @@ export function SummaryScreen() {
     awarded.current = true;
     // A quick rally is not a completed campaign run: it pays for what it
     // delivered but does not lock a Contender, extend the streak or clear the daily.
-    recordMetaRun({ delivered, crowd: skill, finished: phase === 'finished' && !quick, broke: phase === 'breakdown' && !quick, quick });
+    recordMetaRun({ delivered, crowd: skill, finished: phase === 'finished' && !quick, broke: phase === 'breakdown' && !quick, quick, stateId });
     const bonus = claimDailyIfMet({
       finished: phase === 'finished' && !quick,
       dents,
@@ -252,6 +253,54 @@ export function SummaryScreen() {
     setBoardNote(res.ok ? 'On the local board' : res.reason === 'crowd' || res.reason === 'delivered' ? 'Score rejected' : 'Could not post');
   };
 
+  // A first-timer has just driven a trial: the one thing to do next sits right under the score,
+  // before the wallet, the card and the board, which all make more sense once they have a Contender.
+  const trial = chosenContenderId === null && challenge === null;
+  const next = (
+    <>
+      {challenge ? (
+        <>
+          <button className="cr-btn cr-result-again" type="button" onClick={() => setScreen('game')}>
+            {verdict?.won ? 'Run it again' : 'Rematch'}
+          </button>
+          <button className="cr-btn cr-btn--ghost" type="button" onClick={() => goCampaign(chosenContenderId === null ? 'roster' : 'game')}>
+            {chosenContenderId === null ? 'Pick your Contender' : 'Back to my campaign'}
+          </button>
+        </>
+      ) : chosenContenderId === null ? (
+        <>
+          <button
+            className="cr-btn cr-result-again"
+            type="button"
+            onClick={() => goCampaign(brokeDown ? 'game' : 'roster')}
+          >
+            {brokeDown ? 'Try again' : 'Pick your Contender →'}
+          </button>
+          <button
+            className="cr-btn cr-btn--ghost"
+            type="button"
+            onClick={() => goCampaign(brokeDown ? 'roster' : 'game')}
+          >
+            {brokeDown ? 'Pick your Contender' : 'Run again'}
+          </button>
+        </>
+      ) : quick ? (
+        <>
+          <button className="cr-btn cr-result-again" type="button" onClick={() => goCampaign('game')}>
+            Full campaign run
+          </button>
+          <button className="cr-btn cr-btn--ghost" type="button" onClick={() => setScreen('game')}>
+            Another quick rally
+          </button>
+        </>
+      ) : (
+        <button className="cr-btn cr-result-again" type="button" onClick={() => goCampaign('game')}>
+          Campaign again
+        </button>
+      )}
+    </>
+  );
+
   return (
     <div className="cr-screen cr-screen--menu cr-screen--result">
       <section className={`cr-result${finished ? '' : ' cr-result--down'}`}>
@@ -271,7 +320,7 @@ export function SummaryScreen() {
         <h2>{brokeDown ? 'Convoy broke down' : STAR_LABEL[star]}</h2>
         <p className="cr-result-score">
           <b>{skill}</b>
-          <span>Turnout</span>
+          <span>Crowd</span>
         </p>
         {brokeDown ? (
           <p className="cr-result-reach">
@@ -282,13 +331,16 @@ export function SummaryScreen() {
           {contender.name} · {ride.name}
         </p>
         <p className="cr-result-explain">
-          <b>{delivered}</b> delivered at venues → Supporters · Turnout is the run score (multipliers can lift it above
+          <b>{delivered}</b> delivered at venues → Following · Crowd is the run score (multipliers can lift it above
           delivered)
         </p>
-        {display > skill ? <p className="cr-fineprint">Celebration Turnout {display}</p> : null}
+        {display > skill ? <p className="cr-fineprint">Celebration Crowd {display}</p> : null}
       </section>
 
-      {finished && skill > 0 ? (
+      {trial && next}
+
+      {/* Held for the trial: a first-timer cannot yet explain a quick-rally score to a friend. */}
+      {finished && skill > 0 && !trial ? (
         <Sheet tone="accent" eyebrow="Challenge" title={t('challenge.title')}>
           <p className="cr-fineprint">{t('challenge.sub', { crowd: skill })}</p>
           <div className="cr-share-row">
@@ -314,7 +366,7 @@ export function SummaryScreen() {
           <strong>{delivered}</strong>
         </article>
         <article>
-          <span>Supporters</span>
+          <span>Following</span>
           <strong>{supportersTotal.toLocaleString('en-US')}</strong>
         </article>
         <article>
@@ -326,6 +378,8 @@ export function SummaryScreen() {
           <strong>{dents}/3</strong>
         </article>
       </div>
+
+      {eventNote ? <p className="cr-fineprint cr-streak-line">{eventNote}</p> : null}
 
       {streakBonus > 0 || streakNote ? (
         <p className="cr-fineprint cr-streak-line">
@@ -394,7 +448,7 @@ export function SummaryScreen() {
 
       <Sheet eyebrow="Share" title="Make a card">
         <p className="cr-fineprint">
-          A picture of this run: tier, Turnout, ride and state.{' '}
+          A picture of this run: tier, Crowd, ride and state.{' '}
           {shareContender ? 'Your Contender is named on it, because you consented to share it.' : 'Your Contender is not named on it.'}
         </p>
         {previewUrl ? (
@@ -416,47 +470,16 @@ export function SummaryScreen() {
 
       <StateCorrection stateId={stateId} stateName={challengeStateName} />
 
-      {challenge ? (
-        <>
-          <button className="cr-btn cr-result-again" type="button" onClick={() => setScreen('game')}>
-            {verdict?.won ? 'Run it again' : 'Rematch'}
-          </button>
-          <button className="cr-btn cr-btn--ghost" type="button" onClick={() => goCampaign(chosenContenderId === null ? 'roster' : 'game')}>
-            {chosenContenderId === null ? 'Pick your Contender' : 'Back to my campaign'}
-          </button>
-        </>
-      ) : chosenContenderId === null ? (
-        <>
-          <button
-            className="cr-btn cr-result-again"
-            type="button"
-            onClick={() => goCampaign(brokeDown ? 'game' : 'roster')}
-          >
-            {brokeDown ? 'Try again' : 'Pick your Contender →'}
-          </button>
-          <button
-            className="cr-btn cr-btn--ghost"
-            type="button"
-            onClick={() => goCampaign(brokeDown ? 'roster' : 'game')}
-          >
-            {brokeDown ? 'Pick your Contender' : 'Run again'}
-          </button>
-        </>
-      ) : quick ? (
-        <>
-          <button className="cr-btn cr-result-again" type="button" onClick={() => goCampaign('game')}>
-            Full campaign run
-          </button>
-          <button className="cr-btn cr-btn--ghost" type="button" onClick={() => setScreen('game')}>
-            Another quick rally
-          </button>
-        </>
-      ) : (
-        <button className="cr-btn cr-result-again" type="button" onClick={() => goCampaign('game')}>
-          Campaign again
-        </button>
-      )}
+      {!trial && next}
       <nav className="cr-result-nav" aria-label="After this run">
+        <button
+          type="button"
+          disabled={following < places.followingGate}
+          onClick={() => useGameStore.getState().openPlaces('summary')}
+        >
+          <span aria-hidden="true">⚑</span>
+          <small>Mobilise</small>
+        </button>
         <button type="button" onClick={() => setScreen('map')}>
           <span aria-hidden="true">⊙</span>
           <small>Board</small>

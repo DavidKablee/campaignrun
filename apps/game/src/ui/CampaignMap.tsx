@@ -13,10 +13,14 @@ import { CampaignBoard, type BoardTile } from '../render/mapBoard';
 import { apiGet } from '../api/client';
 import { BusiestRoads } from './BusiestRoads';
 import { StateCorrection } from './StateCorrection';
+import { FlatBoard } from './FlatBoard';
 import { liveRegionCount, mergeStandings, type LiveRegion } from '../liveBoard';
 import { useOnlineStore } from '../onlineStore';
 import { useContenderStore } from '../contenderStore';
 import { useGameStore } from '../state';
+import { goBack } from '../nav';
+import { motionReduced } from '../prefs';
+import { currentTour } from '../liveEvents';
 import { campaignRows, formatUnlock, stationFor } from '../trail';
 import { syncTravelDay } from '../travel';
 
@@ -120,23 +124,37 @@ export function CampaignMap() {
   const hostRef = useRef<HTMLDivElement>(null);
   const boardRef = useRef<CampaignBoard | null>(null);
   const [ready, setReady] = useState(false);
+  // No WebGL (blocked, or the GPU context was lost): draw the same regions flat instead of a black box.
+  const [flat, setFlat] = useState(false);
 
   useEffect(() => {
     const host = hostRef.current;
-    if (!host) return;
-    const board = new CampaignBoard(host, {
-      reduceMotion,
-      dataSaver,
-      onSelect: (id) => setFocusId(id),
-    });
+    if (!host || flat) return;
+    let board: CampaignBoard;
+    try {
+      board = new CampaignBoard(host, {
+        reduceMotion: motionReduced(reduceMotion),
+        dataSaver,
+        onSelect: (id) => setFocusId(id),
+      });
+    } catch {
+      setFlat(true);
+      return;
+    }
+    const onLost = (e: Event) => {
+      e.preventDefault();
+      setFlat(true);
+    };
+    board.canvas.addEventListener('webglcontextlost', onLost);
     boardRef.current = board;
     setReady(true);
     return () => {
+      board.canvas.removeEventListener('webglcontextlost', onLost);
       board.dispose();
       boardRef.current = null;
       setReady(false);
     };
-  }, [reduceMotion, dataSaver]);
+  }, [reduceMotion, dataSaver, flat]);
 
   useEffect(() => {
     if (!ready) return;
@@ -155,7 +173,7 @@ export function CampaignMap() {
   return (
     <div className="cr-screen cr-screen--map">
       <header className="cr-board-ticker">
-        <button type="button" className="cr-link" onClick={() => setScreen(picked ? 'roster' : 'splash')}>
+        <button type="button" className="cr-link" onClick={goBack}>
           ← Back
         </button>
         <span className="cr-pill cr-pill--live">{liveCount > 0 ? `Live · ${liveCount}` : 'Practice board'}</span>
@@ -170,6 +188,11 @@ export function CampaignMap() {
           {radioOn ? stationFor(open[0]?.audioStem ?? 'sw-fuji').name : 'Radio off'}
         </button>
       </header>
+      <p className="cr-board-note">
+        {liveCount > 0
+          ? 'A game board. Regions with enough real players are live; the rest are practice.'
+          : 'A game board. Standings are practice until real players fill a region.'}
+      </p>
 
       <div className="cr-board-score">
         <article>
@@ -233,7 +256,9 @@ export function CampaignMap() {
       <BusiestRoads />
 
       <div className="cr-board-main">
-        <div className="cr-board-stage" ref={hostRef} aria-hidden="true" />
+        <div className="cr-board-stage" ref={hostRef} aria-hidden="true">
+          {flat ? <FlatBoard tiles={tiles} focusId={focusId} onSelect={setFocusId} /> : null}
+        </div>
 
         <section className="cr-board-picker" aria-label="Regions">
           {rows.map((r) => {
@@ -259,15 +284,27 @@ export function CampaignMap() {
         </section>
 
         <aside className="cr-board-focus">
-          <p className="cr-kicker">{focus.open ? 'Campaigning' : focus.awaitingPack ? 'Pack soon' : 'Locked'}</p>
+          <p className="cr-kicker">
+            {focus.open ? 'Campaigning' : focus.awaitingPack ? 'Pack soon' : 'Locked'}
+            {focus.open && focusStanding ? (
+              <span className={`cr-pill cr-pill--tag${focusStanding.source === 'live' ? ' is-live' : ''}`}>
+                {focusStanding.source === 'live' ? 'Live' : 'Practice'}
+              </span>
+            ) : null}
+          </p>
           <h2>{focus.name}</h2>
+          {focus.open && currentTour()?.stateId === focus.id ? (
+            <p className="cr-notice cr-notice--tour">
+              <b>{currentTour()!.kind === 'final' ? 'Final week' : 'Weekly Tour'}</b> · ₦{currentTour()!.coins} for a finished rally
+            </p>
+          ) : null}
 
           {focus.open ? (
             <p className="cr-hold" style={{ ['--fill' as string]: focusLeader?.color ?? CONTESTED_FILL }}>
               <i />
               {focusLeader ? (
                 <span>
-                  <b>{candidateName(focusLeader)}</b> leads by {focusStanding?.margin}
+                  <b>{candidateName(focusLeader)}</b> is in front here
                 </span>
               ) : (
                 <span>Too close to call</span>

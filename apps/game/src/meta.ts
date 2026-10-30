@@ -12,6 +12,16 @@ export type UpgradeLevels = Record<UpgradeId, number>;
 export { runModifiers, runPayout, followingGain } from '@cr/content';
 export type MissionProgress = Record<string, number>;
 
+/**
+ * Has this player actually driven? Supporters from a Starting Story are a gift, not a run, so a
+ * player who took Grassroots Start in the Yard before playing is still a first-timer and still
+ * gets the coached trial.
+ */
+export function hasPlayed(s: { following: number; startingStory: StartId | null; hasBest: boolean }): boolean {
+  const gift = metaConfig.starts.find((x) => x.id === s.startingStory)?.following ?? 0;
+  return s.hasBest || s.following - gift > 0;
+}
+
 export const emptyUpgrades = (): UpgradeLevels => ({ magnet: 0, shield: 0, horn: 0, loading: 0, value: 0 });
 
 export function watDay(now = Date.now()): string {

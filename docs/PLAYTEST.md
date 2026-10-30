@@ -10,7 +10,7 @@ pnpm dev      # open LAN URL on phone
 
 ## Checklist
 
-1. Splash shows disclosure + **I'm 18+ · Play** (one tap).
+1. Splash shows disclosure + **Run my race** (one tap).
 2. Roster: six Contenders with distinct colours/props; pick one.
 3. One-thumb: swipe lanes, flick hop, hold Gas/Brake.
 4. Brake in glowing Pickup Zone ~1 s → supporters load; capacity clamps.

@@ -29,6 +29,7 @@ import { log, requestLogger } from './log.ts';
 import { createMailer, resetLink, verifyLink, type Mailer } from './mailer.ts';
 import { hit, rateLimit } from './rateLimit.ts';
 import { decodeReplayLog, rallySaturdayPlausible } from './replayGate.ts';
+import { registerPlaces } from './places.ts';
 import { liveStandings, regionBoard, MIN_PLAYERS_PER_REGION } from './standings.ts';
 import {
   attachEmailSchema,
@@ -153,7 +154,7 @@ export function createApp(database: Db, mailer: Mailer = createMailer(), options
   // localhost are different origins, and only one of them being listed looks
   // exactly like "the server is down" from the client.
   const origins = (process.env.CR_ALLOWED_ORIGINS ??
-    'http://localhost:5173,http://127.0.0.1:5173,http://localhost:5180,http://127.0.0.1:5180')
+    'http://localhost:5173,http://127.0.0.1:5173,http://localhost:5180,http://127.0.0.1:5180,http://localhost:4173,http://127.0.0.1:4173')
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean);
@@ -336,6 +337,9 @@ export function createApp(database: Db, mailer: Mailer = createMailer(), options
     await next();
     return undefined;
   };
+
+  const placeHub = registerPlaces(app, { database, requireUser, now });
+  void placeHub;
 
   app.get('/api/auth/me', requireUser, async (c) => {
     return c.json({ user: userPayload(await loadUser(c.get('user').id)) });

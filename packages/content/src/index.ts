@@ -13,6 +13,8 @@ import travelJson from '../data/travel.json';
 import legalJson from '../data/legal.json';
 import limitsJson from '../data/limits.json';
 import analyticsJson from '../data/analytics.json';
+import liveEventsJson from '../data/live-events.json';
+import placesJson from '../data/places.json';
 import feedbackJson from '../data/feedback.json';
 import controlsJson from '../data/controls.json';
 import {
@@ -31,6 +33,8 @@ import {
   legalSchema,
   limitsSchema,
   analyticsSchema,
+  liveEventsSchema,
+  placesSchema,
   feedbackTopicsSchema,
   controlsSchema,
   type SimConfig,
@@ -46,6 +50,7 @@ export * from './ride-feel';
 export * from './road';
 export * from './state-roads';
 export * from './yard';
+export * from './places';
 import { rideRoadFit } from './road';
 import type { Hazard } from './schemas';
 
@@ -76,6 +81,9 @@ export const travelCaps = travelCapsSchema.parse(travelJson);
 export const legal = legalSchema.parse(legalJson);
 export const limits = limitsSchema.parse(limitsJson);
 export const analytics = analyticsSchema.parse(analyticsJson);
+export const liveEvents = liveEventsSchema.parse(liveEventsJson);
+/** C82: the Mobilise places, their actions, preset phrases and daily caps. */
+export const places = placesSchema.parse(placesJson);
 export const feedbackTopics = feedbackTopicsSchema.parse(feedbackJson).topics;
 /** C46: gesture thresholds for the on-glass controls. */
 export const controlTuning = controlsSchema.parse(controlsJson);

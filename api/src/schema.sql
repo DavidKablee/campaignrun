@@ -152,3 +152,34 @@ create table if not exists state_feedback (
   created_at timestamptz not null default now()
 );
 create index if not exists state_feedback_state_idx on state_feedback (state_id, created_at desc);
+
+-- C82 ----------------------------------------------------------------------
+-- Mobilise: what a player has earned from campaign places today (Lagos day), so the daily caps hold
+-- across tabs and devices, and the state activity the Board shows. Presence itself (who is standing
+-- where) is in process memory and never stored; chat is preset ids and is not stored at all.
+
+create table if not exists place_daily (
+  user_id    uuid    not null references users (id) on delete cascade,
+  day        date    not null,
+  coins      integer not null default 0 check (coins >= 0),
+  supporters integer not null default 0 check (supporters >= 0),
+  actions    integer not null default 0 check (actions >= 0),
+  primary key (user_id, day)
+);
+
+create table if not exists place_activity (
+  state_id text    not null,
+  day      date    not null,
+  points   bigint  not null default 0 check (points >= 0),
+  primary key (state_id, day)
+);
+
+-- A report is a reason from a closed list about a board name in a room. No free text, no chat log.
+create table if not exists place_reports (
+  id          bigserial   primary key,
+  reporter_id uuid        references users (id) on delete set null,
+  reported_id uuid        references users (id) on delete set null,
+  place_key   text        not null,
+  reason      text        not null,
+  created_at  timestamptz not null default now()
+);

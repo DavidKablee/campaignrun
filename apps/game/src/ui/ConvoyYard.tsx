@@ -205,7 +205,6 @@ function UpgradeRow({
  * the pips were levels of anything.
  */
 export function ConvoyYard() {
-  const setScreen = useGameStore((s) => s.setScreen);
   const coins = useGameStore((s) => s.coins);
   const following = useGameStore((s) => s.following);
   const story = useGameStore((s) => s.startingStory);
@@ -230,7 +229,7 @@ export function ConvoyYard() {
 
   return (
     <div className="cr-screen cr-screen--menu cr-screen--yard">
-      <MenuHead title="Convoy Yard" sub="Spend what the road paid you" onBack={() => setScreen('splash')} />
+      <MenuHead title="Convoy Yard" sub="Spend what the road paid you" />
 
       {/* C48: each tile says where its number comes from — they were three bare
           counters, and two of them are the currencies the whole screen runs on.
@@ -246,7 +245,7 @@ export function ConvoyYard() {
           </small>
         </article>
         <article>
-          <span>Supporters</span>
+          <span>Following</span>
           <strong>{n(following)}</strong>
           <small>{rewards.followingPerDelivered} per supporter delivered</small>
         </article>
@@ -262,10 +261,10 @@ export function ConvoyYard() {
       {gate ? (
         <div className="cr-next-ride">
           <p>
-            Next ride · <b>{gate.name}</b> at {n(gate.gate)} Supporters
+            Next ride · <b>{gate.name}</b> at {n(gate.gate)} Following
             <span>{n(gate.short)} to go</span>
           </p>
-          <div className="cr-bar cr-bar--gate" aria-label={`${n(following)} of ${n(gate.gate)} Supporters`}>
+          <div className="cr-bar cr-bar--gate" aria-label={`${n(following)} of ${n(gate.gate)} Following`}>
             <i style={{ width: `${Math.min(100, Math.round((following / gate.gate) * 100))}%` }} />
           </div>
         </div>
@@ -279,13 +278,13 @@ export function ConvoyYard() {
                 <strong>{start.name}</strong>
                 <small>{start.description}</small>
                 <span className="cr-choice-stats">
-                  ₦{n(start.coins)} · {n(start.following)} Supporters
+                  ₦{n(start.coins)} · {n(start.following)} Following
                 </span>
               </button>
             ))}
           </div>
           <p className="cr-fineprint">
-            One-time, and it cannot be changed afterwards. Funds buy upgrades; Supporters unlocks rides. Both end
+            One-time, and it cannot be changed afterwards. Funds buy upgrades; Following unlocks rides. Both end
             up in the same place — this is only which one you start with.
           </p>
         </Sheet>
@@ -358,16 +357,16 @@ export function ConvoyYard() {
 
       {tab === 'rides' && (
         <TabPanel id="rides">
-          <Sheet eyebrow="Rides" title="Unlocked by Supporters">
+          <Sheet eyebrow="Rides" title="Unlocked by Following">
             <p className="cr-lede">
-              Rides cost no money. They open at a Supporters total, and Supporters comes only from supporters you
+              Rides cost no money. They open at a Following total, and Following comes only from supporters you
               deliver to a venue — {rewards.followingPerDelivered} each.
               {gate
                 ? ` Next up: the ${gate.name} at ${n(gate.gate)}, which is ${n(gate.short)} away — about ${n(gate.supporters)} more supporters.`
                 : ' You have opened every ride that is in the game.'}
             </p>
             {gate ? (
-              <div className="cr-bar cr-bar--gate" aria-label={`${n(following)} of ${n(gate.gate)} Supporters`}>
+              <div className="cr-bar cr-bar--gate" aria-label={`${n(following)} of ${n(gate.gate)} Following`}>
                 <i style={{ width: `${Math.min(100, Math.round((following / gate.gate) * 100))}%` }} />
               </div>
             ) : null}
@@ -388,7 +387,7 @@ export function ConvoyYard() {
         <TabPanel id="how">
           {/* C48: the page the Yard never had. Every figure below is read off
               `metaConfig`, so it cannot describe a game the code is not playing. */}
-          <Sheet eyebrow="Two currencies" title="Funds and Supporters">
+          <Sheet eyebrow="Two currencies" title="Funds and Following">
             <dl className="cr-explain">
               <div>
                 <dt>Funds (₦)</dt>
@@ -399,17 +398,17 @@ export function ConvoyYard() {
                 </dd>
               </div>
               <div>
-                <dt>Supporters</dt>
+                <dt>Following</dt>
                 <dd>
                   {rewards.followingPerDelivered} for every supporter delivered, and that is the only way it
-                  moves — it is not bought, and it is not lost. Supporters unlocks rides.
+                  moves — it is not bought, and it is not lost. Following unlocks rides.
                 </dd>
               </div>
               <div>
                 <dt>Crowd</dt>
                 <dd>
                   Your score for one rally. It decides the board and the state tier, and is spent on nothing —
-                  Funds and Supporters are what the Yard reads.
+                  Funds and Following are what the Yard reads.
                 </dd>
               </div>
             </dl>
@@ -424,7 +423,7 @@ export function ConvoyYard() {
               <li>
                 <span>Each supporter delivered</span>
                 <b>
-                  ₦{rewards.perDelivered} + {rewards.followingPerDelivered} Supporters
+                  ₦{rewards.perDelivered} + {rewards.followingPerDelivered} Following
                 </b>
               </li>
               <li>
@@ -452,7 +451,7 @@ export function ConvoyYard() {
               {rewards.streakBonusPermillePerStep / 10}%, up to +
               {(rewards.streakBonusPermillePerStep * rewards.streakBonusMaxSteps) / 10}% at a streak of{' '}
               {rewards.streakBonusMaxSteps}. A breakdown ends it — except once a week, when the streak freeze
-              covers you. It lifts Funds only; it never touches Turnout, a board or a tier. A quick rally
+              covers you. It lifts Funds only; it never touches Crowd, a board or a tier. A quick rally
               neither builds it nor breaks it.
             </p>
           </Sheet>

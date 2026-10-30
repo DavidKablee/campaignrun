@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { goBack } from '../nav';
 
 /**
  * Shared chrome for the four menu screens (About, Settings, Account, Convoy
@@ -13,12 +14,12 @@ import type { ReactNode } from 'react';
 export function MenuHead({
   title,
   sub,
-  onBack,
+  onBack = goBack,
   trailing,
 }: {
   title: string;
   sub?: string;
-  onBack: () => void;
+  onBack?: () => void;
   trailing?: ReactNode;
 }) {
   return (

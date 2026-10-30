@@ -31,6 +31,11 @@ export const LIMITS = {
   eventsMaxPerRequest: limits.events.maxPerRequest,
   feedbackPerDayPerIp: num(process.env.CR_FEEDBACK_PER_DAY, limits.feedback.perDayPerIp),
   feedbackNoteMaxChars: limits.feedback.noteMaxChars,
+  placeJoinPerMinutePerIp: num(process.env.CR_PLACE_JOIN_PER_MIN, limits.places.joinPerMinutePerIp),
+  placeMovePerMinutePerUser: num(process.env.CR_PLACE_MOVE_PER_MIN, limits.places.movePerMinutePerUser),
+  placeActPerMinutePerUser: num(process.env.CR_PLACE_ACT_PER_MIN, limits.places.actPerMinutePerUser),
+  placeSayPerMinutePerUser: num(process.env.CR_PLACE_SAY_PER_MIN, limits.places.sayPerMinutePerUser),
+  placeReportPerDayPerUser: num(process.env.CR_PLACE_REPORT_PER_DAY, limits.places.reportPerDayPerUser),
 } as const;
 
 /**

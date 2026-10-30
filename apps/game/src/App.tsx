@@ -18,17 +18,21 @@ import {
   partyForContender,
   runConfig,
   stateIndex,
+  places,
 } from '@cr/content';
 import { initState, step, seedRng, encodeInputLog, type SimState, type InputRecord } from '@cr/sim';
 import { loadGhost, saveGhostIfBest, bytesToBase64 } from './ghostStore';
 import { computeGhostTrajectory } from './ghostReplay';
 import { computeWeather, debugWeather } from './weather';
 import { decodeChallenge } from './challenge';
+import { parseInvite } from './places/placesModel';
 import { GameRenderer } from './render/GameRenderer';
 import { InputController } from './input/controls';
 import { audio } from './audio/engine';
 import { getCharacter } from './characters';
 import { useContenderStore } from './contenderStore';
+import { holdBackGuard, goBack, onEscape } from './nav';
+import { haptic, motionReduced, usePrefsOnRoot } from './prefs';
 import { CampaignMap } from './ui/CampaignMap';
 import { AuthScreen } from './ui/AuthScreen';
 import { AboutScreen } from './ui/AboutScreen';
@@ -39,21 +43,23 @@ import { DailyChip } from './ui/DailyChip';
 import { useOnlineStore } from './onlineStore';
 import { campaignRows, finishSign, gateSign, legAt, stationFor } from './trail';
 import { Showcase } from './render/showcase';
-import { runModifiers } from './meta';
+import { hasPlayed, runModifiers } from './meta';
 import { syncTravelDay } from './travel';
 import { daysLeftLabel, isClosed, remoteNotice } from './campaignClock';
+import { liveBanners } from './liveEvents';
 import { track, trackRunStart } from './analytics';
 import { approachingZone, bumpCoachRuns, coachWanted } from './coach';
 import { t } from './i18n';
 import { useStatePack, useStateWorld } from './statePack';
 import { authLinkFromUrl, strippedUrl } from './authLink';
+import { PlacesScreen } from './places/PlacesScreen';
+import { usePlacesStore } from './places/placesStore';
 import { RosterScreen } from './ui/RosterScreen';
 import { StudioScreen } from './ui/StudioScreen';
 import { SummaryScreen } from './ui/SummaryScreen';
 import { CALLOUT_COOLDOWN_MS, CALLOUT_MS, calloutForEvent, calloutForLandmark, stationForZone } from './radioCallouts';
 
 /** Live run screens that hold a Back sentinel (more than one only while React re-runs the effect). */
-let runEffects = 0;
 
 export function App() {
   const screen = useGameStore((s) => s.screen);
@@ -65,6 +71,17 @@ export function App() {
   // until the player says they are 18+, and take it out of the address bar.
   useEffect(() => {
     const take = () => {
+      const invite = parseInvite(window.location.hash);
+      if (invite) {
+        const g = useGameStore.getState();
+        if (g.following >= places.followingGate) {
+          g.setPlacesTarget(invite);
+          track('mobilise_open', invite.stateId);
+          if (g.screen === 'splash') g.openPlaces('splash');
+        }
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        return;
+      }
       const c = decodeChallenge(window.location.hash);
       if (!c) return;
       useGameStore.getState().setIncomingChallenge(c);
@@ -100,6 +117,15 @@ export function App() {
     void loadStatePack(activeStateId);
     if (activeStateId !== 'lagos') void loadStatePack('lagos');
   }, [activeStateId]);
+  usePrefsOnRoot();
+  // Esc is Back on every menu; the browser / hardware Back steps through them too. The run holds its own
+  // guard (GameScreen) so a hand-over between a menu and a run never drops the history entry.
+  useEffect(() => {
+    window.addEventListener('keydown', onEscape);
+    return () => window.removeEventListener('keydown', onEscape);
+  }, []);
+  const deep = screen !== 'splash' && !inRun;
+  useEffect(() => (deep ? holdBackGuard(goBack) : undefined), [deep]);
   return (
     <div className="cr-shell">
       {screen === 'splash' && <Splash />}
@@ -115,6 +141,7 @@ export function App() {
       {screen === 'map' && <CampaignMap />}
       {screen === 'auth' && <AuthScreen />}
       {screen === 'yard' && <ConvoyYard />}
+      {screen === 'places' && <PlacesScreen />}
     </div>
   );
 }
@@ -126,6 +153,7 @@ function Splash() {
   const setScreen = useGameStore((s) => s.setScreen);
   const following = useGameStore((s) => s.following);
   const coins = useGameStore((s) => s.coins);
+  const tourClaimedKey = useGameStore((s) => s.tourClaimedKey);
   const best = useGameStore((s) => s.bestByState['lagos']);
   const contenderId = useContenderStore((s) => s.activeContenderId) ?? contenders[0]!.id;
   const overrides = useContenderStore((s) => s.outfits[contenderId]);
@@ -134,7 +162,8 @@ function Splash() {
   const station = stationFor(lagosLaunch.audioStem);
   const heroRef = useRef<HTMLDivElement>(null);
   const [live, setLive] = useState(false);
-  const returning = following > 0 || !!best;
+  const startingStory = useGameStore((s) => s.startingStory);
+  const returning = hasPlayed({ following, startingStory, hasBest: !!best });
   const allStates = useMemo(() => campaignRows(), []);
   const openStates = useMemo(() => allStates.filter((r) => r.open), [allStates]);
   const pendingStates = allStates.length - openStates.length;
@@ -148,7 +177,7 @@ function Splash() {
         heroRef.current,
         ch.look,
         ch.outfit,
-        reduceMotion || window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+        motionReduced(reduceMotion),
         dataSaver,
       );
       setLive(true);
@@ -199,25 +228,24 @@ function Splash() {
         {returning && <span className="cr-pill">{naira(coins)}</span>}
         {returning && (
           <span className="cr-pill cr-pill--supporters" title="Unlocks rides">
-            {fmt(following)} Supporters
+            {fmt(following)} Following
           </span>
         )}
         <button
           className="cr-icon-btn cr-splash-gear"
           type="button"
-          aria-label="Settings"
           onClick={() => useGameStore.getState().openSettings()}
         >
-          ⚙
+          <span aria-hidden="true">⚙</span> Settings
         </button>
       </div>
       <div className="cr-splash-copy">
-        <p className="cr-kicker">{returning ? `Welcome back · ${fmt(following)} Supporters` : 'Day 1 · You start in Lagos'}</p>
+        <p className="cr-kicker">{returning ? `Welcome back · ${fmt(following)} Following` : 'Day 1 · You start in Lagos'}</p>
         <h1 className="cr-brand">Campaigner</h1>
         {incoming ? (
           <div className="cr-challenge-banner" role="status">
             <p>
-              <b>{incoming.from || 'A friend'}</b> got <b>{incoming.crowd}</b> Turnout on {incomingState?.name ?? 'this road'}
+              <b>{incoming.from || 'A friend'}</b> got <b>{incoming.crowd}</b> Crowd on {incomingState?.name ?? 'this road'}
               {incomingRide ? ` · ${incomingRide.name}` : ''}
               {incoming.quick ? ' (quick rally)' : ''}. Same road, same traffic. Beat it.
             </p>
@@ -243,12 +271,36 @@ function Splash() {
         ) : null}
         {isClosed() ? (
           <p className="cr-notice" role="status">
-            The campaign has closed. Every road is open for practice; scores are game scores.
+            The campaign has closed. Every road is open for practice.
           </p>
         ) : null}
+        {liveBanners(Date.now(), tourClaimedKey).map((b) => (
+          <p key={b.id} className={`cr-notice cr-notice--${b.id}`} role="status">
+            <b>{b.title}</b> · {b.line}
+          </p>
+        ))}
         <p className="cr-tag">Drive your convoy through Nigeria. Load your people, dodge the go-slow, fill the rally.</p>
         <button className="cr-btn cr-btn--hero" type="button" onClick={start}>
           {returning ? 'Continue campaign' : copy.playButton}
+        </button>
+        {returning ? null : <p className="cr-fineprint cr-age">Tapping this confirms you are 18 or over.</p>}
+        <button
+          type="button"
+          className="cr-btn cr-btn--ghost cr-mobilise cr-mobilise--splash"
+          disabled={following < places.followingGate}
+          onClick={() => {
+            track('mobilise_open', useGameStore.getState().activeStateId);
+            useGameStore.getState().openPlaces('splash');
+          }}
+        >
+          <span>
+            <span aria-hidden="true">⚑</span> Mobilise
+          </span>
+          <small>
+            {following < places.followingGate
+              ? `Unlocks at ${places.followingGate.toLocaleString('en-US')} Following · ${(places.followingGate - following).toLocaleString('en-US')} to go`
+              : 'Meet other players and campaign on the ground'}
+          </small>
         </button>
         <nav className="cr-splash-nav">
           <button type="button" onClick={() => setScreen('map')}>
@@ -295,7 +347,7 @@ function Splash() {
           </div>
           <div>
             <strong>{best ? best.crowd : '0'}</strong>
-            <span>{best ? 'Best turnout' : 'Your best: go set it'}</span>
+            <span>{best ? 'Best Crowd' : 'Your best: go set it'}</span>
           </div>
         </div>
       </aside>
@@ -330,6 +382,12 @@ function Briefing() {
   const station = stationFor(stem);
   const gate = travelGate(stateId);
   const dayTravel = syncTravelDay(travel);
+  const placesUp = usePlacesStore((st) => st.availability);
+  const placesOnline = usePlacesStore((st) => st.online);
+  const placesLocked = following < places.followingGate;
+  useEffect(() => {
+    void usePlacesStore.getState().probe(stateId);
+  }, [stateId]);
   // C45: the same hazard list the sim is about to be handed, in words.
   const hazards = pack?.hazards ?? [];
   const roadToday = roadLines(hazards);
@@ -351,9 +409,30 @@ function Briefing() {
         </div>
         <h2>{welcome}</h2>
         <p className="cr-tag">
-          {contender.name} · {chosen.name} · {fmt(following)} Supporters
+          {contender.name} · {chosen.name} · {fmt(following)} Following
           {nextRide ? ` · ${fmt(nextRide.followingGate - following)} to ${nextRide.name}` : ''}
         </p>
+
+        <button
+          type="button"
+          className="cr-btn cr-btn--ghost cr-mobilise"
+          disabled={placesLocked || placesUp === 'down'}
+          onClick={() => {
+            track('mobilise_open', stateId);
+            useGameStore.getState().openPlaces('briefing');
+          }}
+        >
+          Mobilise
+          <small>
+            {placesLocked
+              ? `Unlocks at ${places.followingGate.toLocaleString('en-US')} Following · ${(places.followingGate - following).toLocaleString('en-US')} to go`
+              : placesUp === 'down'
+              ? 'Opening soon'
+              : placesOnline
+                ? `${placesOnline} out in ${pack?.name ?? 'Lagos'} now`
+                : `Meet players in ${pack?.name ?? 'Lagos'}`}
+          </small>
+        </button>
 
         <p className="cr-kicker">Today&apos;s Road</p>
         <ol className="cr-route cr-route--trail">
@@ -454,10 +533,10 @@ function Briefing() {
               setScreen('game');
             }}
           >
-            Quick rally · ~90 s
+            Quick rally <small>~90 s</small>
           </button>
           <button className="cr-btn cr-btn--ghost cr-btn--icon-label" type="button" onClick={() => setScreen('map')}>
-            <span aria-hidden="true">⊙</span> Board
+            Board
           </button>
           <button
             className="cr-btn"
@@ -498,11 +577,17 @@ function Paused() {
           >
             Resume
           </button>
-          <button className="cr-btn cr-btn--ghost" type="button" onClick={() => setScreen('briefing')}>
+          <button
+            className="cr-btn cr-btn--ghost"
+            type="button"
+            // A first-timer who bails out of the trial goes back to the start, not into a
+            // Briefing for a campaign they never chose; Play there runs the trial again.
+            onClick={() => setScreen(useContenderStore.getState().activeContenderId === null ? 'splash' : 'briefing')}
+          >
             Quit
           </button>
         </div>
-        {crowd > 0 && <p className="cr-fineprint">Last Turnout {crowd}</p>}
+        {crowd > 0 && <p className="cr-fineprint">Last Crowd {crowd}</p>}
       </div>
     </div>
   );
@@ -653,7 +738,7 @@ function GameScreen() {
       finish,
       rideId: ride.id,
       config: cfg,
-      reduceMotion: reduceMotion || window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+      reduceMotion: motionReduced(reduceMotion),
       dataSaver,
       debug,
       ghostTrajectory,
@@ -828,10 +913,8 @@ function GameScreen() {
         const legNow = legAt(state.z, landmarks, gateLabel, cfg.course, world.start.label);
         for (const ev of state.events) {
           audio.playEvent(ev);
-          if (haptics && navigator.vibrate) {
-            if (ev.type === 'dent' || ev.type === 'hit') navigator.vibrate(30);
-            if (ev.type === 'pickup' || ev.type === 'dropoff') navigator.vibrate(10);
-          }
+          if (ev.type === 'dent' || ev.type === 'hit') haptic(30);
+          if (ev.type === 'pickup' || ev.type === 'dropoff') haptic(10);
           if (ev.type === 'fullHouse') toastRef.current = { text: t('toast.fullHouse'), until: time + 900 };
           if (ev.type === 'onBeat') toastRef.current = { text: t('toast.onBeat'), until: time + 900 };
           if (ev.type === 'integrityFail' && typeof ev.payload === 'string') {
@@ -960,37 +1043,24 @@ function GameScreen() {
     const onVisibility = () => {
       if (document.visibilityState === 'hidden') pauseIfRunning();
     };
-    const pushSentinel = () => {
-      try {
-        // One entry on top of the page's own: Back pops it instead of leaving. Reuse it if it is already current.
-        if (!(history.state as { crRun?: boolean } | null)?.crRun) history.pushState({ crRun: true }, '');
-      } catch {
-        /* history unavailable (sandboxed frame): fall back to no Back handling */
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape' || e.defaultPrevented || e.repeat) return;
+      const st = useGameStore.getState().screen;
+      if (st === 'game') pauseIfRunning();
+      else if (st === 'paused') {
+        void audio.unlock();
+        setScreen('game');
       }
     };
-    const onPop = () => {
-      pauseIfRunning();
-      pushSentinel();
-    };
-    runEffects++;
-    pushSentinel();
+    const release = holdBackGuard(pauseIfRunning);
     document.addEventListener('visibilitychange', onVisibility);
     window.addEventListener('pagehide', pauseIfRunning);
-    window.addEventListener('popstate', onPop);
+    window.addEventListener('keydown', onKey);
     return () => {
       document.removeEventListener('visibilitychange', onVisibility);
       window.removeEventListener('pagehide', pauseIfRunning);
-      window.removeEventListener('popstate', onPop);
-      runEffects--;
-      // Deferred: React re-runs effects straight away in development, and a real exit has nobody re-registering.
-      setTimeout(() => {
-        if (runEffects !== 0) return;
-        try {
-          if ((history.state as { crRun?: boolean } | null)?.crRun) history.back();
-        } catch {
-          /* nothing to unwind */
-        }
-      }, 0);
+      window.removeEventListener('keydown', onKey);
+      release();
     };
   }, [setScreen]);
 
@@ -1014,7 +1084,7 @@ function GameScreen() {
         <div className="cr-hud-chrome">
           <header className="cr-hud-bar" aria-label="Run meters">
             <div className="cr-hud-metric">
-              <span className="cr-hud-metric__label">Turnout</span>
+              <span className="cr-hud-metric__label">Crowd</span>
               <strong>{hud.crowd}</strong>
               <div className="cr-hud-metric__foot">
                 <div className="cr-track">
@@ -1023,7 +1093,7 @@ function GameScreen() {
               </div>
             </div>
             <div className="cr-hud-metric">
-              <span className="cr-hud-metric__label">Carry</span>
+              <span className="cr-hud-metric__label">Aboard</span>
               <strong>
                 {hud.carried}
                 <span className="cr-hud-metric__cap">/{hud.capacity}</span>
@@ -1095,7 +1165,7 @@ function GameScreen() {
             className={`cr-pad cr-pad--beat${hud.beatOpen > 0 ? ' is-live' : ''}`}
             type="button"
             data-control="beat"
-            aria-label={`Beat: double-tap for ${beatMult} times the turnout`}
+            aria-label={`Beat: double-tap for ${beatMult} times the Crowd`}
           >
             <span>BEAT</span>
             <small>
@@ -1150,6 +1220,13 @@ function GameScreen() {
               </span>
               <p>{t('tutorial.hop')}</p>
             </div>
+            <div className="cr-coach-move">
+              <span className="cr-coach-demo cr-coach-demo--load" aria-hidden="true">
+                <i />
+              </span>
+              <p>{t('tutorial.load')}</p>
+            </div>
+            <p className="cr-coach-note">{t('tutorial.integrity')}</p>
             <p className="cr-fineprint">{t('tutorial.rest')}</p>
           </div>
           <button

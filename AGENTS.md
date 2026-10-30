@@ -20,3 +20,7 @@
 1. `pnpm verify` green.
 2. Update `docs/STATUS.md` (done / next / blockers / gotchas).
 3. One line in `docs/CHANGELOG.md`. Commit: `feat(cxx): …` (Conventional Commits).
+
+## Words (C85)
+
+One player-facing word per idea. **Crowd** is the score of a run (never "Turnout"). **Supporters** are the people on the bus (the HUD shows them as "Aboard"). **Following** is the ride-unlock and Mobilise currency (code name `following`). Result tiers read **Small / Packed / Overflowing** (ids stay `foothold` / `majority` / `landslide`). `apps/game/test/vocabulary.test.ts` guards the first and last.

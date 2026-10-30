@@ -4101,6 +4101,10 @@ body,
 .cr-coach-demo--hop i {
   animation-name: cr-coach-hop;
 }
+/* Load: the dot drops, then holds low, like a flick down and hold. */
+.cr-coach-demo--load i {
+  animation-name: cr-coach-load;
+}
 @keyframes cr-coach-lane {
   0%, 15% { transform: translateX(-26px); }
   45%, 60% { transform: translateX(26px); }
@@ -4109,6 +4113,11 @@ body,
 @keyframes cr-coach-hop {
   0%, 20%, 100% { transform: translateY(14px); }
   50% { transform: translateY(-14px); }
+}
+@keyframes cr-coach-load {
+  0%, 15% { transform: translateY(-14px); }
+  35%, 75% { transform: translateY(14px); }
+  100% { transform: translateY(-14px); }
 }
 @media (prefers-reduced-motion: reduce) {
   .cr-coach-demo i {
@@ -4195,4 +4204,758 @@ body,
 }
 .cr-correction .cr-error {
   color: #a3261a;
+}
+.cr-notice b {
+  color: #f5c518;
+}
+
+/* ===========================================================================
+   Mobilise places (C82)
+   ========================================================================= */
+.cr-screen--places {
+  padding: calc(0.75rem + var(--cr-safe-top)) calc(0.75rem + var(--cr-safe-right)) calc(0.75rem + var(--cr-safe-bottom))
+    calc(0.75rem + var(--cr-safe-left));
+  gap: 0.5rem;
+  min-height: 0;
+}
+.cr-places-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.cr-places-title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.15;
+  min-width: 0;
+}
+.cr-places-title strong {
+  font-family: var(--cr-font-display);
+  color: var(--cr-danfo);
+  font-size: 1.05rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 52vw;
+}
+.cr-places-title small {
+  opacity: 0.7;
+  font-size: 0.75rem;
+}
+.cr-chip {
+  appearance: none;
+  border: 0;
+  min-height: 44px;
+  padding: 0 0.95rem;
+  border-radius: 999px;
+  font: 700 0.85rem var(--cr-font-body);
+  background: rgba(247, 241, 227, 0.14);
+  color: var(--cr-paper);
+  cursor: pointer;
+}
+.cr-chip.is-on,
+.cr-chip[aria-pressed='true'] {
+  background: var(--cr-danfo);
+  color: var(--cr-ink);
+}
+.cr-places-kinds {
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.cr-places-stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  border-radius: var(--cr-radius-card);
+  overflow: hidden;
+  background: #0b1220;
+}
+.cr-places-host {
+  position: absolute;
+  inset: 0;
+  touch-action: manipulation;
+}
+.cr-place-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.cr-place-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.cr-place-tag,
+.cr-place-bubble {
+  position: absolute;
+  left: 0;
+  top: 0;
+  white-space: nowrap;
+  will-change: transform;
+}
+.cr-place-tag {
+  font: 700 0.7rem var(--cr-font-body);
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: rgba(11, 18, 32, 0.72);
+  color: var(--cr-paper);
+}
+.cr-place-tag.is-self {
+  background: var(--cr-danfo);
+  color: var(--cr-ink);
+}
+.cr-place-bubble {
+  max-width: 220px;
+  white-space: normal;
+  text-align: center;
+  font: 600 0.82rem var(--cr-font-body);
+  padding: 0.3rem 0.6rem;
+  border-radius: 12px;
+  background: #fff;
+  color: var(--cr-surface-ink);
+  box-shadow: var(--cr-lift);
+}
+.cr-place-bubble.is-emoji {
+  font-size: 1.6rem;
+  background: transparent;
+  box-shadow: none;
+}
+.cr-places-gate {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 0.6rem;
+  padding: 1.5rem;
+  text-align: center;
+  background: rgba(11, 18, 32, 0.78);
+}
+.cr-places-gate h2 {
+  margin: 0;
+  font-family: var(--cr-font-display);
+  color: var(--cr-danfo);
+}
+.cr-places-gate p {
+  margin: 0;
+  max-width: 28ch;
+}
+.cr-places-gate .cr-btn {
+  width: auto;
+  padding-inline: 1.6rem;
+}
+.cr-places-toast {
+  position: absolute;
+  left: 50%;
+  top: 0.7rem;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  background: var(--cr-green);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  box-shadow: var(--cr-lift-lg);
+  white-space: nowrap;
+  max-width: 92%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cr-places-dock {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.cr-places-today {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin: 0;
+  font-size: 0.74rem;
+  opacity: 0.9;
+}
+.cr-places-today > span {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.cr-bar {
+  display: block;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(247, 241, 227, 0.16);
+  overflow: hidden;
+}
+.cr-bar b {
+  display: block;
+  height: 100%;
+  background: var(--cr-danfo);
+}
+.cr-places-actions {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.4rem;
+}
+.cr-place-action {
+  appearance: none;
+  border: 0;
+  min-height: 56px;
+  padding: 0.3rem 0.2rem;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  font: 700 0.74rem/1.1 var(--cr-font-body);
+  text-align: center;
+  background: var(--cr-green);
+  color: #fff;
+  box-shadow: var(--cr-ring), var(--cr-lift);
+  cursor: pointer;
+}
+.cr-place-action small {
+  font-weight: 600;
+  opacity: 0.85;
+}
+.cr-place-action:disabled {
+  background: rgba(247, 241, 227, 0.14);
+  color: rgba(247, 241, 227, 0.6);
+  box-shadow: none;
+  cursor: default;
+}
+.cr-place-action--say {
+  background: var(--cr-danfo);
+  color: var(--cr-ink);
+}
+/* In-flow trays (talk, person, invite) take the dock's place, so the scene stays in view above them. */
+.cr-places-tray {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  max-height: 46%;
+  overflow-y: auto;
+  padding: 0.7rem 0.9rem 0.9rem;
+  border-radius: 24px 24px 0 0;
+  background: var(--cr-surface);
+  color: var(--cr-surface-ink);
+  box-shadow: var(--cr-lift-lg);
+}
+.cr-places-tray button {
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  font: 700 0.9rem var(--cr-font-body);
+  color: var(--cr-surface-ink);
+}
+.cr-places-tray-head,
+.cr-places-who {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.cr-places-tray-head b {
+  flex: 1;
+  min-width: 0;
+}
+.cr-places-who > div {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.cr-places-who small,
+.cr-places-card small {
+  color: var(--cr-surface-dim);
+  font-size: 0.78rem;
+}
+.cr-places-x {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(22, 32, 43, 0.08);
+}
+.cr-places-initial {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--cr-green);
+  color: #fff;
+  font-weight: 700;
+}
+.cr-places-lang {
+  display: flex;
+  padding: 3px;
+  border-radius: 999px;
+  background: rgba(22, 32, 43, 0.1);
+}
+.cr-places-lang button {
+  min-height: 36px;
+  padding: 0 0.8rem;
+  border-radius: 999px;
+  background: transparent;
+  font-size: 0.8rem;
+}
+.cr-places-lang button[aria-pressed='true'] {
+  background: var(--cr-surface-ink);
+  color: var(--cr-paper);
+}
+.cr-places-emoji {
+  display: flex;
+  justify-content: space-between;
+}
+.cr-places-emoji button {
+  width: 40px;
+  height: 44px;
+  border-radius: 12px;
+  font-size: 1.35rem;
+  background: rgba(22, 32, 43, 0.08);
+}
+.cr-places-topics {
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.cr-places-topics--wrap {
+  flex-wrap: wrap;
+  overflow: visible;
+}
+.cr-places-topics button {
+  flex: none;
+  min-height: 44px;
+  padding: 0 1rem;
+  border-radius: 999px;
+  background: rgba(22, 32, 43, 0.08);
+  font-size: 0.85rem;
+}
+.cr-places-topics button[aria-pressed='true'] {
+  background: var(--cr-surface-ink);
+  color: var(--cr-paper);
+}
+.cr-places-lines,
+.cr-places-pair {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.cr-places-pair {
+  flex-direction: row;
+}
+.cr-places-pair button {
+  flex: 1;
+}
+.cr-places-lines button,
+.cr-places-pair button,
+.cr-places-wa {
+  min-height: 48px;
+  padding: 0 1rem;
+  border-radius: 14px;
+  background: rgba(22, 32, 43, 0.08);
+  text-align: left;
+}
+.cr-places-pair button {
+  text-align: center;
+  min-height: 52px;
+}
+.cr-places-lines button:first-child,
+.cr-places-pair .is-go,
+.cr-places-wa {
+  background: var(--cr-green);
+  color: #fff;
+}
+.cr-places-wa {
+  min-height: 56px;
+  text-align: center;
+  border-radius: 18px;
+  font-size: 1rem;
+}
+.cr-places-tray button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.cr-places-note {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--cr-surface-dim);
+}
+.cr-places-card {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.7rem;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+.cr-places-card > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.cr-places-card-art {
+  flex: none;
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #1b2a4a 55%, #d8c79a 55%);
+}
+.cr-places-round {
+  appearance: none;
+  border: 0;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(247, 241, 227, 0.12);
+  color: var(--cr-paper);
+  cursor: pointer;
+}
+.cr-places-round--gold {
+  background: var(--cr-danfo);
+  color: var(--cr-ink);
+}
+.cr-places-round:disabled {
+  opacity: 0.4;
+}
+.cr-places-coach {
+  position: absolute;
+  left: 0.75rem;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.8rem 0.9rem;
+  border-radius: 18px;
+  background: var(--cr-surface);
+  color: var(--cr-surface-ink);
+  box-shadow: var(--cr-lift-lg);
+}
+.cr-places-coach p {
+  margin: 0;
+  font-size: 0.88rem;
+}
+.cr-places-coach button {
+  appearance: none;
+  border: 0;
+  align-self: flex-end;
+  min-height: 44px;
+  padding: 0 1.2rem;
+  border-radius: 999px;
+  background: var(--cr-green);
+  color: #fff;
+  font: 700 0.9rem var(--cr-font-body);
+  cursor: pointer;
+}
+.cr-place-tag.is-local {
+  background: transparent;
+  color: var(--cr-paper);
+  border: 1px dashed rgba(247, 241, 227, 0.65);
+  font-weight: 600;
+  opacity: 0.85;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cr-place-action {
+    transition: none;
+  }
+}
+.cr-mobilise {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  margin-top: 0.4rem;
+}
+.cr-mobilise small {
+  font: 600 0.74rem var(--cr-font-body);
+  opacity: 0.8;
+}
+.cr-mobilise:disabled {
+  opacity: 0.55;
+}
+.cr-age {
+  text-align: center;
+  margin: -0.2rem 0 0;
+}
+.cr-mobilise--splash {
+  flex-direction: column;
+  min-height: 56px;
+}
+
+/* -- Convoy Yard: everything on the centre line --------------------------- */
+.cr-screen--yard {
+  align-items: center;
+  text-align: center;
+}
+.cr-screen--yard > * {
+  width: 100%;
+}
+.cr-screen--yard .cr-menu-head {
+  position: relative;
+  justify-content: center;
+  min-height: 48px;
+}
+.cr-screen--yard .cr-menu-back {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.cr-screen--yard .cr-menu-back:active {
+  transform: translateY(calc(-50% + 1px));
+}
+.cr-screen--yard .cr-menu-headings {
+  padding: 0 52px;
+  text-align: center;
+}
+.cr-screen--yard .cr-tabs--menu {
+  justify-content: center;
+}
+.cr-screen--yard .cr-wallet article {
+  text-align: center;
+}
+.cr-screen--yard .cr-next-ride p {
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  text-align: center;
+}
+.cr-screen--yard .cr-next-ride p span {
+  margin-left: 0;
+}
+.cr-screen--yard .cr-sheet {
+  align-items: center;
+  text-align: center;
+}
+.cr-screen--yard .cr-sheet > * {
+  width: 100%;
+}
+.cr-screen--yard .cr-sheet-head {
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  text-align: center;
+}
+.cr-screen--yard .cr-sheet-aside {
+  display: flex;
+  justify-content: center;
+}
+.cr-screen--yard .cr-sheet-title,
+.cr-screen--yard .cr-sheet p,
+.cr-screen--yard .cr-lede,
+.cr-screen--yard .cr-fineprint,
+.cr-screen--yard .cr-eyebrow {
+  text-align: center;
+}
+.cr-screen--yard .cr-lede--inset {
+  padding: 0 1.1rem 0.8rem;
+}
+.cr-screen--yard .cr-daily-chip {
+  justify-content: center;
+  flex-wrap: wrap;
+  text-align: center;
+}
+.cr-screen--yard .cr-choice {
+  align-items: center;
+  text-align: center;
+}
+.cr-screen--yard .cr-goal header {
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+}
+.cr-screen--yard .cr-row-item,
+.cr-screen--yard .cr-upgrade {
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.6rem;
+}
+.cr-screen--yard .cr-row-text {
+  align-items: center;
+  text-align: center;
+}
+.cr-screen--yard .cr-upgrade-read,
+.cr-screen--yard .cr-upgrade-level {
+  justify-content: center;
+}
+.cr-screen--yard .cr-upgrade-buy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+.cr-screen--yard .cr-ride-card header {
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+}
+.cr-screen--yard .cr-ride-card,
+.cr-screen--yard .cr-ride-up,
+.cr-screen--yard .cr-ride-down,
+.cr-screen--yard .cr-ride-even,
+.cr-screen--yard .cr-ride-gate {
+  text-align: center;
+}
+.cr-screen--yard .cr-feel-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+}
+.cr-screen--yard .cr-feel-bar {
+  width: 100%;
+}
+.cr-screen--yard .cr-explain div,
+.cr-screen--yard .cr-explain dt,
+.cr-screen--yard .cr-explain dd {
+  text-align: center;
+}
+.cr-screen--yard .cr-payline li {
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  text-align: center;
+}
+.cr-screen--yard .cr-feel-delta,
+.cr-screen--yard .cr-payline b {
+  text-align: center;
+}
+
+/* Result screen: `.cr-fineprint { margin: 0 }` beat the column's auto margins, so the
+   quick-rally note and the streak line hung off the left edge of the page. */
+.cr-screen--result > .cr-fineprint,
+.cr-screen--result > .cr-link-btn,
+.cr-screen--result > .cr-correction {
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+
+/* Reduce motion (Settings) now reaches the stylesheet too: it used to move only the 3D scenes, while the
+   buttons, toasts and spinners followed the OS media query alone. `prefs.ts` sets the attribute. */
+:root[data-reduce-motion='true'] *,
+:root[data-reduce-motion='true'] *::before,
+:root[data-reduce-motion='true'] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+:root[data-reduce-motion='true'] .cr-loading-spin {
+  animation: none !important;
+  border-top-color: rgba(247, 241, 227, 0.2);
+  border-right-color: var(--cr-danfo);
+}
+/* Data saver: no blur layers, no animated glow. The 3D scenes already drop detail on their own. */
+:root[data-data-saver='true'] * {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+:root[data-data-saver='true'] .cr-btn--hero {
+  animation: none;
+}
+
+/* Board (C86): a plain "game board" line under the ticker, a Practice / Live tag on the focus panel, and the
+   flat SVG map that stands in when WebGL is not available. */
+.cr-screen--map > .cr-board-note {
+  /* `margin: 0` here beat the column's auto margins and pinned the line to the screen edge. */
+  margin: 0 auto;
+  width: 100%;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  opacity: 0.8;
+}
+.cr-pill--tag {
+  margin-left: 0.5rem;
+  padding: 0.12rem 0.5rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+.cr-pill--tag.is-live {
+  background: var(--cr-danfo);
+  color: var(--cr-ink);
+  box-shadow: none;
+}
+.cr-board-flat {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.cr-board-flat g {
+  cursor: pointer;
+}
+.cr-board-flat-label {
+  font: bold 0.42px system-ui, sans-serif;
+  fill: #fff;
+  stroke: rgba(12, 16, 20, 0.85);
+  stroke-width: 0.09px;
+  paint-order: stroke;
+  pointer-events: none;
+}
+
+/* C87: layout and wording only, no colours. Integrity line on the coach card, the Briefing actions laid out
+   so they cannot wrap into round blobs, and a word beside the Settings glyph. */
+.cr-coach-note {
+  margin: 0 0 0.75rem !important;
+  padding: 0.6rem 0.75rem;
+  border-radius: 14px;
+  background: rgba(11, 18, 32, 0.07);
+  font-weight: 600;
+  line-height: 1.3;
+}
+/* The three Briefing actions used to share one row and wrap into round blobs over the text. The run is
+   the primary action and goes first, full width; the two alternatives sit under it side by side. */
+.cr-brief .cr-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+.cr-brief .cr-row .cr-btn {
+  min-height: 48px;
+  padding: 0.7rem 0.9rem;
+  font-size: 0.95rem;
+  line-height: 1.15;
+  text-align: center;
+}
+.cr-brief .cr-row .cr-btn:last-child {
+  grid-column: 1 / -1;
+  order: -1;
+  font-size: 1.05rem;
+}
+/* Settings gets its word; the button keeps its own dark look. */
+.cr-splash-gear {
+  width: auto;
+  height: auto;
+  min-height: 44px;
+  padding: 0.35rem 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--cr-font-body);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.cr-brief .cr-row .cr-btn small {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  opacity: 0.7;
 }
