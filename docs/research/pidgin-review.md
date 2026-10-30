@@ -33,7 +33,7 @@ Where it appears: the radio strip, run toasts, run prompts, the first-run card a
 | `tutorial.hop` | Flick up to hop a pothole | Flick up to jump the pothole |
 | `tutorial.rest` | The convoy drives itself. When you reach a pickup, the screen tells you what to do. | The convoy dey drive itself. When you reach pickup, the screen go tell you wetin to do. |
 | `tutorial.go` | Got it — drive | I don understand — drive |
-| `challenge.text` | Beat my {crowd} Turnout on Campaigner — same road ({state} · {ride}). Game scores, not a poll. | Abeg beat my {crowd} Turnout for Campaigner. Na the same road ({state} · {ride}). E be game score, no be poll. |
+| `challenge.text` | Beat my {crowd} Crowd on Campaigner — same road ({state} · {ride}). | Abeg beat my {crowd} Crowd for Campaigner. Na the same road ({state} · {ride}). |
 | `challenge.whatsapp` | Send on WhatsApp | Send am for WhatsApp |
 | `challenge.other` | Share… | Share am… |
 | `challenge.copy` | Copy link | Copy the link |
@@ -68,10 +68,10 @@ Where it appears: the radio strip, run toasts, run prompts, the first-run card a
 - Dem pack am like market day — oya go!
 
 **onBeat**
-- On beat o! Turnout dey climb!
+- On beat o! Crowd dey climb!
 - That timing sweet — keep am up!
 - You dey on point — the crowd dey feel am!
-- Beat dey your side — Turnout dey stack!
+- Beat dey your side — Crowd dey stack!
 
 **finish**
 - Grand rally don reach! Thank you from the studio!

@@ -15,7 +15,11 @@ Work only the current chunk (`docs/STATUS.md`). Do not start later chunks early.
 | C11 | done | Guest→save, Contender consent log, export/delete (client) |
 | **C12** | **next** | Ghosts / server verification |
 | C82 | built | Mobilise places (`docs/chunks/C82.md`). Redesign built (Locals, coach card, talk tray, invite link). Follow-ups: shared pub/sub if the API scales past one instance; state-specific scenery per place; a place-activity strip on the Board; moderation review of reports; Open Graph preview page for invite links |
-| C83 | built | First-minute fixes (`docs/chunks/C83.md`). Open: where a finished-trial player who never picked should land; run the first-minute playtest |
+| C83 | built | First-minute fixes (`docs/chunks/C83.md`). A finished-trial player who never picked still returns to the Briefing (left as is on purpose, see the note); revisit after the first-minute playtest, which is not run |
+| C84 | built | Mobilise lock at 1,000 Following, one way back (`nav.ts`), settings that work (`docs/chunks/C84.md`) |
+| C85 | built | One word per idea, guarded by `vocabulary.test.ts` (`docs/chunks/C85.md`) |
+| C86 | built | Board says it is a game, Practice/Live tag, flat map without WebGL (`docs/chunks/C86.md`) |
+| C87 | built | Integrity explained, Briefing layout, words beside icons, no colour changes (`docs/chunks/C87.md`) |
 | C13–C19 | reviewed | See `docs/research/c13-c19-review.md`. C19-lite, C18-lite and the C14 check are built (C81) and C16 was already closed. Deferred: C15, C17. Skipped: C13, the prize flow |
 
 ## Outside the current chunk
