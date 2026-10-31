@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-31 — Talk: topic packs, polls and a Board strip (C92)
+
+The Say tray went from 12 phrases to about 150 across 12 topics (Greet, Chat, Market, Food, Football, Music, Transport, Our area, Our state, Campaign talk, Banter, Weekend), in English and Pidgin, with a Recent row of what you said last. Anyone can start a room poll from a fixed list ("Jollof: party or home?"); the room votes once each and sees live counts. The Board now shows the three most active states in Mobilise today. A tray with a long list no longer squashes the topic chips above it. Details in `docs/chunks/C92.md`.
+
 ## 2026-10-31 — The Campaign Phone, daily jobs and a streak (C91)
 
 Mobilise has a phone: one tap opens a home screen of apps (Jobs, Friends, Rooms, Messages, Board, Convoy, Settings). Each day there are three Campaign Jobs, the same for everyone, counted on the server; finishing one pays a little, finishing all three pays a bonus, all inside the existing daily limits. Days in a row build a streak, and streak milestones earn titles (Market Regular, Park Veteran, Stadium Faithful, Town Crier) that you can wear under your name. Details in `docs/chunks/C91.md`.

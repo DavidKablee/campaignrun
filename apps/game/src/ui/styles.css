@@ -5318,3 +5318,106 @@ body,
   text-align: left;
   padding: 0 0.8rem;
 }
+
+/* C92: a room poll over the scene, and a second line under a poll in the Say list. */
+.cr-places-poll {
+  position: absolute;
+  left: 0.6rem;
+  right: 0.6rem;
+  top: 3.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.6rem 0.7rem;
+  border-radius: 18px;
+  background: var(--cr-surface);
+  color: var(--cr-surface-ink);
+  box-shadow: var(--cr-lift-lg);
+}
+.cr-places-poll-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.cr-places-poll-head b {
+  flex: 1;
+  min-width: 0;
+}
+.cr-places-poll ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.cr-places-poll li button {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0 0.8rem;
+  border: 0;
+  border-radius: 12px;
+  background: rgba(22, 32, 43, 0.08);
+  color: var(--cr-surface-ink);
+  font: 700 0.9rem var(--cr-font-body);
+  cursor: pointer;
+}
+.cr-places-poll li button:disabled {
+  cursor: default;
+}
+.cr-places-poll li button.is-mine {
+  box-shadow: inset 0 0 0 2px var(--cr-green);
+}
+.cr-places-poll-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: rgba(22, 32, 43, 0.12);
+}
+.cr-places-poll-label,
+.cr-places-poll-n {
+  position: relative;
+}
+.cr-places-poll small {
+  font-size: 0.78rem;
+  color: var(--cr-surface-dim);
+}
+.cr-places-lines button small {
+  display: block;
+  font-weight: 600;
+  font-size: 0.78rem;
+  opacity: 0.8;
+}
+
+/* C92: the Board's Mobilise activity strip. */
+.cr-activity ol {
+  list-style: none;
+  margin: 0.2rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.cr-activity li {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(247, 241, 227, 0.1);
+  font-size: 0.8rem;
+}
+.cr-activity li.is-focus {
+  box-shadow: inset 0 0 0 2px var(--cr-danfo);
+}
+
+/* C92: with a long list in a tray, the rows above it (topic chips, reactions) were squashed to nothing
+   and the list sat over them. Rows keep their height; the tray scrolls. */
+.cr-places-tray > * {
+  flex-shrink: 0;
+}

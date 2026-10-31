@@ -257,4 +257,74 @@ describe('place hub (C82)', () => {
     hub.setTitle(user(1).id, null, 3);
     expect(hub.snapshot(a.room.id, 3).find((m) => m.name === 'player1')!.title).toBeNull();
   });
+
+  describe('polls (C92)', () => {
+    const q = places.polls.items[0]!;
+    const secs = places.polls.seconds * 1000;
+    const setup = () => {
+      const hub = new PlaceHub();
+      const a = hub.join(user(1), 'kano', 'market', null, 0);
+      const b = hub.join(user(2), 'kano', 'market', null, 0);
+      const seenB: HubEvent[] = [];
+      hub.attach(b.member, (e) => seenB.push(e), 0);
+      return { hub, a, b, seenB };
+    };
+
+    it('lets a player start a poll from the list and tells the whole room', () => {
+      const { hub, a, seenB } = setup();
+      const res = hub.startPoll(a.member, q.id, 0);
+      expect(res.ok).toBe(true);
+      const told = seenB.find((e) => e.type === 'poll');
+      expect(told && told.type === 'poll' && told.poll).toMatchObject({ pollId: q.id, by: a.member.id, endsIn: secs });
+      expect(Object.keys((told as { poll: { counts: object } }).poll.counts).sort()).toEqual(q.options.map((o) => o.id).sort());
+    });
+
+    it('allows one open poll per room and a cooldown per player', () => {
+      const { hub, a, b } = setup();
+      hub.startPoll(a.member, q.id, 0);
+      expect(hub.startPoll(b.member, q.id, 1000)).toMatchObject({ ok: false, reason: 'busy' });
+      // Once it has closed the starter still waits their turn.
+      expect(hub.startPoll(a.member, q.id, secs + 5000)).toMatchObject({ ok: false, reason: 'cooldown' });
+      expect(hub.startPoll(a.member, 'nonsense', secs + 5000)).toMatchObject({ ok: false, reason: 'unknown' });
+      // But someone else may start the next one.
+      expect(hub.startPoll(b.member, q.id, secs + 5000)).toMatchObject({ ok: true });
+    });
+
+    it('counts one vote each for a real option, and shows counts without who voted', () => {
+      const { hub, a, b, seenB } = setup();
+      hub.startPoll(a.member, q.id, 0);
+      const first = q.options[0]!.id;
+      expect(hub.vote(a.member, first, 1000)).toMatchObject({ ok: true });
+      expect(hub.vote(a.member, q.options[1]!.id, 2000)).toMatchObject({ ok: false, reason: 'voted' });
+      expect(hub.vote(b.member, 'nonsense', 2000)).toMatchObject({ ok: false, reason: 'unknown' });
+      const res = hub.vote(b.member, first, 3000);
+      expect(res.ok && res.poll.counts[first]).toBe(2);
+      const text = JSON.stringify(seenB.filter((e) => e.type === 'vote'));
+      expect(text).not.toContain(a.member.id + '":');
+      expect(text).not.toContain(user(1).id);
+    });
+
+    it('closes by itself, tells the room the final counts, and refuses late votes', () => {
+      const { hub, a, b, seenB } = setup();
+      hub.startPoll(a.member, q.id, 0);
+      hub.vote(a.member, q.options[0]!.id, 1000);
+      hub.touch(a.member, secs);
+      hub.touch(b.member, secs);
+      hub.sweep(secs + 1);
+      const ended = seenB.find((e) => e.type === 'pollend');
+      expect(ended && ended.type === 'pollend' && ended.poll.counts[q.options[0]!.id]).toBe(1);
+      expect(hub.vote(b.member, q.options[0]!.id, secs + 2)).toMatchObject({ ok: false, reason: 'closed' });
+      expect(hub.pollFor(a.room.id, a.member.id, secs + 2)).toBeNull();
+    });
+
+    it('gives someone who joins mid-poll the poll and what they already voted', () => {
+      const { hub, a, b } = setup();
+      hub.startPoll(a.member, q.id, 0);
+      hub.vote(b.member, q.options[1]!.id, 1000);
+      const again = hub.pollFor(a.room.id, b.member.id, 5000)!;
+      expect(again.voted).toBe(q.options[1]!.id);
+      expect(again.poll.endsIn).toBe(secs - 5000);
+      expect(hub.pollFor(a.room.id, a.member.id, 5000)!.voted).toBeNull();
+    });
+  });
 });

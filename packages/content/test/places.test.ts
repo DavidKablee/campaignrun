@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { analytics, clampToBounds, jobsForDay, localsFor, distance, places, placesDay, stepToward } from '../src';
+import { analytics, clampToBounds, contenders, jobsForDay, parties, localsFor, distance, places, placesDay, stepToward } from '../src';
 
 describe('Mobilise places (C82)', () => {
   it('has unique ids for kinds, actions and phrases', () => {
@@ -131,6 +131,52 @@ describe('Mobilise places (C82)', () => {
 
     it('titles are plain labels from a closed list with no names, parties or slogans', () => {
       for (const t of places.titles) expect(t.label).not.toMatch(/\d|https?:|@|party|vote|president|governor/i);
+    });
+  });
+
+  describe('topic packs and polls (C92)', () => {
+    it('has well over a hundred phrases, every one in a known topic, every topic well stocked', () => {
+      expect(places.phrases.length).toBeGreaterThanOrEqual(140);
+      const topics = places.topics.map((t) => t.id);
+      expect(new Set(topics).size).toBe(topics.length);
+      for (const p of places.phrases) expect(topics).toContain(p.tag);
+      for (const t of topics) expect(places.phrases.filter((p) => p.tag === t).length).toBeGreaterThanOrEqual(8);
+    });
+
+    it('never says the same thing twice in English within a topic', () => {
+      for (const t of places.topics) {
+        const lines = places.phrases.filter((p) => p.tag === t.id).map((p) => p.en.toLowerCase());
+        expect(new Set(lines).size).toBe(lines.length);
+      }
+    });
+
+    it('names no Contender, party or person, and carries no link or number, in any phrase or poll', () => {
+      const names = [...contenders.map((c) => c.name), ...parties.map((p) => p.name)].map((n) => n.toLowerCase());
+      const texts = [
+        ...places.phrases.flatMap((p) => [p.en, p.pcm]),
+        ...places.polls.items.flatMap((q) => [q.en, q.pcm, ...q.options.flatMap((o) => [o.en, o.pcm])]),
+      ];
+      for (const text of texts) {
+        expect(text).not.toMatch(/\d|https?:|@|www\./i);
+        for (const n of names) expect(text.toLowerCase()).not.toContain(n);
+      }
+    });
+
+    it('has polls with two or three options, unique ids, in a known topic, none shared with a phrase id', () => {
+      const ids = places.polls.items.map((q) => q.id);
+      expect(new Set(ids).size).toBe(ids.length);
+      const phraseIds = new Set(places.phrases.map((p) => p.id));
+      for (const q of places.polls.items) {
+        expect(places.topics.some((t) => t.id === q.topic)).toBe(true);
+        expect(phraseIds.has(q.id)).toBe(false);
+        expect(new Set(q.options.map((o) => o.id)).size).toBe(q.options.length);
+      }
+      expect(places.polls.items.length).toBeGreaterThanOrEqual(6);
+    });
+
+    it('closes a poll in well under a minute and does not let one player flood the room', () => {
+      expect(places.polls.seconds).toBeLessThanOrEqual(60);
+      expect(places.polls.cooldownSeconds).toBeGreaterThanOrEqual(places.polls.seconds);
     });
   });
 });

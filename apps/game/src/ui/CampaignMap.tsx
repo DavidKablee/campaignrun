@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { ActivityStrip } from './ActivityStrip';
 import {
   boardTotals,
   campaignMap,
@@ -374,6 +375,8 @@ export function CampaignMap() {
               {focus.awaitingPack ? 'Calendar open; pack not shipped yet.' : 'Opens Monday 06:00 WAT'}
             </p>
           )}
+
+          <ActivityStrip focusId={focus.id} />
 
           <div className="cr-local-board">
             <p className="cr-kicker">Local board{username ? ` · ${username}` : ''}</p>

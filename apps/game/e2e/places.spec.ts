@@ -164,6 +164,46 @@ test('players can switch to the national square, and become friends by tapping e
   await b.context().close();
 });
 
+test('a player starts a poll from the Say tray and the room votes on it (C92)', async ({ browser, request }) => {
+  const health = await request.get(`${API}/api/health`).catch(() => null);
+  test.skip(!health?.ok(), 'API not running on 127.0.0.1:8787');
+
+  const a = await seeded(browser);
+  const b = await seeded(browser);
+  const suffix = Math.random().toString(36).slice(2, 7);
+  for (const [page, name] of [[a, `pa_${suffix}`], [b, `pb_${suffix}`]] as const) {
+    const res = await page.context().request.post(`${API}/api/auth/guest`, { data: { username: name } });
+    expect(res.status()).toBe(201);
+  }
+  // A place of their own for this check, so a poll in a shared room does not collide with another run.
+  const spot = test.info().project.name === 'mobile-portrait' ? 'sokoto.lake' : 'katsina.lake';
+  for (const page of [a, b]) {
+    await page.goto(`/?debug#mobilise=${spot}`);
+    await expect(page.locator('.cr-places-title')).toContainText('Lakeside');
+  }
+  await expect(a.locator('.cr-places-title')).toContainText(/[2-9] players/, { timeout: 15_000 });
+
+  // The tray is a set of topic packs, with the polls among them.
+  await a.getByRole('button', { name: /^Say/ }).click();
+  const topics = a.getByRole('region', { name: 'Say something' }).getByLabel('Topics').getByRole('button');
+  expect(await topics.count()).toBeGreaterThanOrEqual(12);
+  await a.getByRole('button', { name: 'Polls', exact: true }).click();
+  await a.getByRole('button', { name: /^Jollof: party or home\?/ }).click();
+
+  // Both see the poll card; B votes; A sees the count move.
+  await expect(a.getByRole('group', { name: 'Poll' })).toContainText('Jollof: party or home?');
+  await expect(b.getByRole('group', { name: 'Poll' })).toBeVisible({ timeout: 10_000 });
+  await b.getByRole('group', { name: 'Poll' }).getByRole('button', { name: /Party jollof/ }).click();
+  await expect(a.getByRole('group', { name: 'Poll' }).getByRole('button', { name: /Party jollof/ })).toContainText('1', { timeout: 10_000 });
+  await a.screenshot({ path: `test-results/shots/places-poll-${test.info().project.name}.png` });
+
+  // A second vote from the same player is not possible: the buttons are spent.
+  await expect(b.getByRole('group', { name: 'Poll' }).getByRole('button', { name: /Home jollof/ })).toBeDisabled();
+
+  await a.context().close();
+  await b.context().close();
+});
+
 test('an invite link opens the same place for a friend', async ({ browser }) => {
   const page = await seeded(browser);
   await page.goto('/#mobilise=kano.stadium');

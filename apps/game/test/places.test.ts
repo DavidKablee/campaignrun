@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { places } from '@cr/content';
 import { usePlacesStore } from '../src/places/placesStore';
-import { actionById, applyPlaceEvent, inviteHash, parseInvite, rewardLine, roomPlace, walkedTo, type Members, type PlaceMember } from '../src/places/placesModel';
+import { actionById, applyPlaceEvent, applyPollEvent, pollFromView, inviteHash, parseInvite, rewardLine, roomPlace, walkedTo, type Members, type PlaceMember } from '../src/places/placesModel';
 
 const member = (id: string, over: Partial<PlaceMember> = {}): PlaceMember => ({
   id,
@@ -122,6 +122,38 @@ describe('Mobilise client model (C82)', () => {
       usePlacesStore.setState({ members: { a: member('a', { name: 'noisy' }) }, mutedNames: [] });
       usePlacesStore.getState().mute('a');
       expect(usePlacesStore.getState().isMuted('a')).toBe(true);
+    });
+  });
+
+  describe('polls on screen (C92)', () => {
+    const view = { pollId: 'polfood', by: 'm1', endsIn: 45_000, counts: { party: 0, home: 0 } };
+
+    it('opens a poll from the room event with a local close time and no vote yet', () => {
+      const p = applyPollEvent(null, { type: 'poll', poll: view }, 1_000)!;
+      expect(p).toMatchObject({ pollId: 'polfood', closesAt: 46_000, closed: false, voted: null });
+    });
+
+    it('updates counts from votes, keeps your own choice, and ignores another poll', () => {
+      const open = { ...pollFromView(view, 0), voted: 'party' };
+      const next = applyPollEvent(open, { type: 'vote', poll: { ...view, counts: { party: 2, home: 1 } } }, 5_000)!;
+      expect(next.counts).toEqual({ party: 2, home: 1 });
+      expect(next.voted).toBe('party');
+      const other = applyPollEvent(open, { type: 'vote', poll: { ...view, pollId: 'polrice', counts: { chicken: 9 } } }, 5_000);
+      expect(other).toBe(open);
+    });
+
+    it('closes on the end event with the final counts, and a joiner sees an open poll with their vote', () => {
+      const open = pollFromView(view, 0);
+      const done = applyPollEvent(open, { type: 'pollend', poll: { ...view, endsIn: 0, counts: { party: 3, home: 1 } } }, 45_000)!;
+      expect(done).toMatchObject({ closed: true, counts: { party: 3, home: 1 }, closesAt: 45_000 });
+      expect(pollFromView({ ...view, endsIn: 20_000 }, 100, 'home')).toMatchObject({ voted: 'home', closed: false, closesAt: 20_100 });
+      expect(pollFromView({ ...view, endsIn: 0 }, 100).closed).toBe(true);
+    });
+
+    it('leaves the people in the room alone', () => {
+      const m: Members = { a: member('a') };
+      expect(applyPlaceEvent(m, { type: 'poll', poll: view })).toBe(m);
+      expect(applyPlaceEvent(m, { type: 'vote', poll: view })).toBe(m);
     });
   });
 });

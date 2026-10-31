@@ -187,6 +187,9 @@ export const placeSaySchema = z
   })
   .refine((v) => (v.phrase === undefined) !== (v.emoji === undefined), { message: 'one of phrase or emoji' });
 
+export const placePollSchema = z.object({ pollId: z.enum(places.polls.items.map((q) => q.id) as [string, ...string[]]) });
+export const placeVoteSchema = z.object({ option: z.string().regex(/^[a-z]{3,12}$/) });
+
 export const placeReportSchema = z.object({
   memberId: z.string().min(4).max(24),
   reason: z.enum(places.report.reasons as [string, ...string[]]),

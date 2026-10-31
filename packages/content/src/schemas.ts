@@ -647,10 +647,32 @@ export const placeTitleSchema = z.object({
 });
 
 export const placePhraseSchema = z.object({
-  id: z.string().regex(/^[a-z]{3,12}$/),
-  tag: z.enum(['greet', 'chat', 'civic', 'rally']),
+  id: z.string().regex(/^[a-z][a-z0-9]{2,15}$/),
+  /** The topic pack the phrase belongs to; must be one of `topics`. */
+  tag: z.string().regex(/^[a-z]{3,12}$/),
   en: z.string().min(3).max(60),
   pcm: z.string().min(3).max(60),
+});
+
+export const placeTopicSchema = z.object({
+  id: z.string().regex(/^[a-z]{3,12}$/),
+  label: z.string().min(2).max(16),
+});
+
+/**
+ * C92: a poll any player in a room can start from a fixed list. The room votes once each, sees counts
+ * (never who voted for what) and it closes by itself. Question and options are preset text, so nothing
+ * typed can reach another player.
+ */
+export const placePollSchema = z.object({
+  id: z.string().regex(/^[a-z]{3,16}$/),
+  topic: z.string().regex(/^[a-z]{3,12}$/),
+  en: z.string().min(3).max(60),
+  pcm: z.string().min(3).max(60),
+  options: z
+    .array(z.object({ id: z.string().regex(/^[a-z]{3,12}$/), en: z.string().min(2).max(24), pcm: z.string().min(2).max(24) }))
+    .min(2)
+    .max(3),
 });
 
 /** C90: the one national place, outside any state: `naija:square`. */
@@ -698,7 +720,15 @@ export const placesSchema = z.object({
   /** Ambient "Local" characters (never players) so a quiet room is not empty; fewer as it fills. */
   locals: z.object({ max: z.number().int().min(0), min: z.number().int().min(0) }),
   actions: z.array(placeActionSchema).min(1),
+  topics: z.array(placeTopicSchema).min(2),
   phrases: z.array(placePhraseSchema).min(1),
+  polls: z.object({
+    /** How long a poll stays open. */
+    seconds: z.number().int().min(10).max(300),
+    /** How long before the same player may start another. */
+    cooldownSeconds: z.number().int().min(0),
+    items: z.array(placePollSchema).min(1),
+  }),
   emoji: z.array(z.string().min(1).max(8)).min(1),
   daily: z.object({
     coins: z.number().int().positive(),
@@ -711,6 +741,7 @@ export type PlacesConfig = z.infer<typeof placesSchema>;
 export type PlaceAction = z.infer<typeof placeActionSchema>;
 export type PlaceJob = z.infer<typeof placeJobSchema>;
 export type PlacePhrase = z.infer<typeof placePhraseSchema>;
+export type PlacePoll = z.infer<typeof placePollSchema>;
 
 export const legalSchema = z.object({
   version: z.string().min(1),

@@ -3,7 +3,7 @@ import { places, type PlaceAction } from '@cr/content';
 import { ApiError, API_BASE, apiGet, apiPost } from '../api/client';
 import { track } from '../analytics';
 import { useGameStore } from '../state';
-import { applyPlaceEvent, rewardLine, type Members, type PlaceEvent, type PlaceMember } from './placesModel';
+import { applyPlaceEvent, applyPollEvent, pollFromView, rewardLine, type ActivePoll, type PollView, type Members, type PlaceEvent, type PlaceMember } from './placesModel';
 
 /**
  * Mobilise (C82): the client half of a campaign place. The server owns who is where and what an
@@ -32,6 +32,7 @@ interface JoinResponse {
   today: Today;
   identity: Identity;
   progress: JobsProgress | null;
+  poll: { poll: PollView; voted: string | null } | null;
 }
 
 /** A row of the room browser: where, how many, and how many of them are the player's friends. */
@@ -114,6 +115,11 @@ interface PlacesState {
   /** Board names this player muted. Kept on the device. */
   mutedNames: string[];
   isMuted: (memberId: string) => boolean;
+  poll: ActivePoll | null;
+  /** Start one of the preset polls for the room. */
+  startPoll: (pollId: string) => Promise<void>;
+  vote: (option: string) => Promise<void>;
+  dismissPoll: () => void;
   jobs: JobsSnapshot | null;
   loadJobs: () => Promise<void>;
   /** Wear an earned title on the name tag, or none. */
@@ -163,7 +169,7 @@ const MAX_RETRIES = 3;
 
 export const usePlacesStore = create<PlacesState>()((set, get) => {
   const emit = (e: PlaceEvent) => {
-    set((s) => ({ members: applyPlaceEvent(s.members, e) }));
+    set((s) => ({ members: applyPlaceEvent(s.members, e), poll: applyPollEvent(s.poll, e, Date.now()) }));
     for (const fn of listeners) fn(e);
   };
 
@@ -197,7 +203,7 @@ export const usePlacesStore = create<PlacesState>()((set, get) => {
     closeStream();
     const es = new EventSource(`${API_BASE}/api/places/rooms/${encodeURIComponent(roomId)}/stream`, { withCredentials: true });
     source = es;
-    for (const type of ['join', 'leave', 'move', 'act', 'say'] as const) {
+    for (const type of ['join', 'leave', 'move', 'act', 'say', 'poll', 'vote', 'pollend'] as const) {
       es.addEventListener(type, (ev) => {
         try {
           emit(JSON.parse((ev as MessageEvent<string>).data) as PlaceEvent);
@@ -240,6 +246,7 @@ export const usePlacesStore = create<PlacesState>()((set, get) => {
       const m = get().members[memberId];
       return !!m && get().mutedNames.includes(m.name);
     },
+    poll: null,
     jobs: null,
     rooms: [],
     roomsBusyAt: 10,
@@ -297,6 +304,7 @@ export const usePlacesStore = create<PlacesState>()((set, get) => {
           today: res.today,
           identity: res.identity,
           availability: 'up',
+          poll: res.poll ? pollFromView(res.poll.poll, Date.now(), res.poll.voted) : null,
           toast: res.requested && res.landed === 'assigned' ? 'That room was full, so you are in another one.' : null,
         });
         applyProgress(res.progress);
@@ -311,7 +319,7 @@ export const usePlacesStore = create<PlacesState>()((set, get) => {
     async leave() {
       closeStream();
       const wasIn = get().phase === 'in';
-      set({ phase: 'idle', roomId: null, you: null, members: {}, toast: null, ready: {} });
+      set({ phase: 'idle', roomId: null, you: null, members: {}, toast: null, ready: {}, poll: null });
       if (wasIn) await apiPost('/api/places/leave').catch(() => undefined);
     },
 
@@ -448,6 +456,43 @@ export const usePlacesStore = create<PlacesState>()((set, get) => {
       set({ toast: `${m.name} is blocked and muted.` });
       await get().loadFriends();
     },
+
+    async startPoll(pollId) {
+      const { roomId } = get();
+      if (!roomId) return;
+      try {
+        const res = await apiPost<{ poll: PollView; progress: JobsProgress | null }>(`/api/places/rooms/${encodeURIComponent(roomId)}/poll`, { pollId });
+        // The room's own 'poll' event also arrives; this makes the starter's card appear without waiting.
+        set({ poll: pollFromView(res.poll, Date.now()) });
+        applyProgress(res.progress);
+      } catch (err) {
+        const code = err instanceof ApiError ? err.code : '';
+        set({
+          toast:
+            code === 'busy'
+              ? 'A poll is already open in this room.'
+              : code === 'cooldown'
+                ? 'You started one a moment ago. Try again soon.'
+                : 'Could not start that poll.',
+        });
+      }
+    },
+
+    async vote(option) {
+      const { roomId, poll } = get();
+      if (!roomId || !poll || poll.voted || poll.closed) return;
+      set({ poll: { ...poll, voted: option } });
+      try {
+        const res = await apiPost<{ poll: PollView }>(`/api/places/rooms/${encodeURIComponent(roomId)}/vote`, { option });
+        const now = get().poll;
+        if (now && now.pollId === res.poll.pollId) set({ poll: { ...now, counts: res.poll.counts } });
+      } catch {
+        const now = get().poll;
+        if (now) set({ poll: { ...now, voted: null }, toast: 'Could not record that vote.' });
+      }
+    },
+
+    dismissPoll: () => set({ poll: null }),
 
     async loadJobs() {
       try {

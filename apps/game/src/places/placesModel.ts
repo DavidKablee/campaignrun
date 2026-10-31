@@ -6,7 +6,18 @@ export type PlaceEvent =
   | { type: 'leave'; id: string }
   | { type: 'move'; id: string; x: number; z: number; tx: number; tz: number }
   | { type: 'act'; id: string; action: string }
-  | { type: 'say'; id: string; phrase?: string; emoji?: string };
+  | { type: 'say'; id: string; phrase?: string; emoji?: string }
+  | { type: 'poll'; poll: PollView }
+  | { type: 'vote'; poll: PollView }
+  | { type: 'pollend'; poll: PollView };
+
+/** A room's open poll: counts per option and how long is left, never who voted for what. */
+export interface PollView {
+  pollId: string;
+  by: string;
+  endsIn: number;
+  counts: Record<string, number>;
+}
 
 export interface PlaceMember {
   id: string;
@@ -39,6 +50,35 @@ export function applyPlaceEvent(members: Members, e: PlaceEvent): Members {
     }
     default:
       return members;
+  }
+}
+
+/** The poll as the screen holds it: counts, a local close time, and what this player voted. */
+export interface ActivePoll {
+  pollId: string;
+  by: string;
+  counts: Record<string, number>;
+  /** Local time (ms) the poll closes, from the server's "time left" so clocks need not agree. */
+  closesAt: number;
+  closed: boolean;
+  voted: string | null;
+}
+
+export function pollFromView(v: PollView, nowMs: number, voted: string | null = null): ActivePoll {
+  return { pollId: v.pollId, by: v.by, counts: v.counts, closesAt: nowMs + v.endsIn, closed: v.endsIn <= 0, voted };
+}
+
+/** What a poll event does to the poll on screen. Events for another poll are ignored. */
+export function applyPollEvent(current: ActivePoll | null, e: PlaceEvent, nowMs: number): ActivePoll | null {
+  switch (e.type) {
+    case 'poll':
+      return pollFromView(e.poll, nowMs);
+    case 'vote':
+      return current && current.pollId === e.poll.pollId ? { ...current, counts: e.poll.counts } : current;
+    case 'pollend':
+      return current && current.pollId === e.poll.pollId ? { ...current, counts: e.poll.counts, closed: true, closesAt: nowMs } : current;
+    default:
+      return current;
   }
 }
 

@@ -534,4 +534,83 @@ run('places api (C82)', () => {
       expect((await snap(a)).jobs.every((j) => j.progress === 0)).toBe(true);
     });
   });
+
+  describe('polls and bigger phrase lists (C92)', () => {
+    const q = places.polls.items[0]!;
+    const pollPath = (roomId: string) => `/api/places/rooms/${encodeURIComponent(roomId)}/poll`;
+    const votePath = (roomId: string) => `/api/places/rooms/${encodeURIComponent(roomId)}/vote`;
+
+    it('accepts any phrase from the large list, and still nothing that is not on it', async () => {
+      const a = await guest('pl1');
+      const { body } = await join(a, 'park', 'jigawa');
+      const say = (b: unknown) => json(`/api/places/rooms/${encodeURIComponent(body.roomId)}/say`, a, b);
+      for (const p of [places.phrases[0]!, places.phrases.at(-1)!, places.phrases[70]!]) {
+        resetRateLimits();
+        expect((await say({ phrase: p.id })).status).toBe(200);
+      }
+      expect((await say({ phrase: 'grt99' })).status).toBe(400);
+    });
+
+    it('sends the topics, phrases and polls with the join so the tray is built from the server', async () => {
+      const a = await guest('pl2');
+      const res = await json('/api/places/join', a, { stateId: 'jigawa', kind: 'lake' });
+      const body = (await res.json()) as { topics: { id: string }[]; phrases: unknown[]; polls: { items: unknown[]; seconds: number } };
+      expect(body.topics.length).toBe(places.topics.length);
+      expect(body.phrases.length).toBe(places.phrases.length);
+      expect(body.polls.items.length).toBe(places.polls.items.length);
+    });
+
+    it('starts a poll for the room, takes one vote each, and refuses a second poll while it is open', async () => {
+      const a = await guest('pl3');
+      const b = await guest('pl4');
+      const { body } = await join(a, 'market', 'zamfara');
+      await join(b, 'market', 'zamfara');
+      const started = await json(pollPath(body.roomId), a, { pollId: q.id });
+      expect(started.status).toBe(201);
+      expect(((await started.json()) as { poll: { pollId: string } }).poll.pollId).toBe(q.id);
+
+      const again = await json(pollPath(body.roomId), b, { pollId: places.polls.items[1]!.id });
+      expect(again.status).toBe(409);
+      expect(((await again.json()) as { error: string }).error).toBe('busy');
+
+      const opt = q.options[0]!.id;
+      expect((await json(votePath(body.roomId), b, { option: opt })).status).toBe(200);
+      const twice = await json(votePath(body.roomId), b, { option: opt });
+      expect(twice.status).toBe(409);
+      expect((await json(votePath(body.roomId), a, { option: 'nonsense' })).status).toBe(409);
+      const last = await json(votePath(body.roomId), a, { option: opt });
+      expect(((await last.json()) as { poll: { counts: Record<string, number> } }).poll.counts[opt]).toBe(2);
+
+      // Someone who joins mid-poll gets it in the join reply.
+      const c = await guest('pl5');
+      const joined = (await (await json('/api/places/join', c, { stateId: 'zamfara', kind: 'market' })).json()) as {
+        poll: { poll: { pollId: string }; voted: string | null } | null;
+      };
+      expect(joined.poll?.poll.pollId).toBe(q.id);
+      expect(joined.poll?.voted).toBeNull();
+    });
+
+    it('refuses polls and votes from outside the room, from nobody, and for anything not on the list', async () => {
+      const a = await guest('pl6');
+      const b = await guest('pl7');
+      const { body } = await join(a, 'stadium', 'kebbi');
+      expect((await json(pollPath(body.roomId), b, { pollId: q.id })).status).toBe(404);
+      expect((await json(votePath(body.roomId), b, { option: 'jollof' })).status).toBe(404);
+      expect((await json(pollPath(body.roomId), '', { pollId: q.id })).status).toBe(401);
+      expect((await json(pollPath(body.roomId), a, { pollId: 'vote-for-me' })).status).toBe(400);
+      expect((await json(pollPath(body.roomId), a, { question: 'who is best?' })).status).toBe(400);
+      expect((await json(votePath(body.roomId), a, { option: 'x' })).status).toBe(400);
+      // Nothing open: a vote is refused, not invented.
+      expect((await json(votePath(body.roomId), a, { option: q.options[0]!.id })).status).toBe(409);
+    });
+
+    it('counts starting a poll as talking for the day\'s jobs without breaking the daily caps', async () => {
+      const a = await guest('pl8');
+      const { body } = await join(a, 'park', 'yobe');
+      const started = await json(pollPath(body.roomId), a, { pollId: q.id });
+      expect(started.status).toBe(201);
+      const { rows } = await database.query<{ coins: number }>('select coins from place_daily');
+      for (const r of rows) expect(r.coins).toBeLessThanOrEqual(places.daily.coins);
+    });
+  });
 });

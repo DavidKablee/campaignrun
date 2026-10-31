@@ -17,7 +17,21 @@ export type HubEvent =
   | { type: 'leave'; id: string }
   | { type: 'move'; id: string; x: number; z: number; tx: number; tz: number }
   | { type: 'act'; id: string; action: string }
-  | { type: 'say'; id: string; phrase?: string; emoji?: string };
+  | { type: 'say'; id: string; phrase?: string; emoji?: string }
+  | { type: 'poll'; poll: PollView }
+  | { type: 'vote'; poll: PollView }
+  | { type: 'pollend'; poll: PollView };
+
+/**
+ * A room's open poll as everyone sees it: the question, who started it, how long is left and how many
+ * chose each option. Counts only: nobody can see who voted for what.
+ */
+export interface PollView {
+  pollId: string;
+  by: string;
+  endsIn: number;
+  counts: Record<string, number>;
+}
 
 export type Sink = (event: HubEvent) => void;
 
@@ -63,11 +77,24 @@ interface Member {
   sinks: Set<Sink>;
 }
 
+interface Poll {
+  pollId: string;
+  by: string;
+  endsAt: number;
+  /** member id -> option id. Kept only while the poll is open. */
+  votes: Map<string, string>;
+}
+
 interface Room {
   id: string;
   key: string;
   members: Map<string, Member>;
+  poll: Poll | null;
 }
+
+export type PollResult =
+  | { ok: true; poll: PollView }
+  | { ok: false; reason: 'not-in-room' | 'busy' | 'cooldown' | 'closed' | 'voted' | 'unknown'; retryAfter?: number };
 
 /** One row of the room browser: counts and a place, never names. */
 export interface RoomInfo {
@@ -158,7 +185,7 @@ export class PlaceHub {
     if (!room) {
       const n = (this.counters.get(key) ?? 0) + 1;
       this.counters.set(key, n);
-      room = { id: `${key}#${n}`, key, members: new Map() };
+      room = { id: `${key}#${n}`, key, members: new Map(), poll: null };
       this.rooms.set(room.id, room);
     }
 
@@ -223,6 +250,67 @@ export class PlaceHub {
     m.look = look;
     const room = this.rooms.get(m.roomId);
     if (room) this.emit(room, { type: 'join', member: this.view(m, now) });
+  }
+
+  private pollView(room: Room, now: number): PollView | null {
+    const poll = room.poll;
+    if (!poll) return null;
+    const counts: Record<string, number> = {};
+    const def = places.polls.items.find((q) => q.id === poll.pollId);
+    for (const o of def?.options ?? []) counts[o.id] = 0;
+    for (const option of poll.votes.values()) counts[option] = (counts[option] ?? 0) + 1;
+    return { pollId: poll.pollId, by: poll.by, endsIn: Math.max(0, poll.endsAt - now), counts };
+  }
+
+  /** The room's open poll for someone joining, and what they voted (if anything). Closes an expired one. */
+  pollFor(roomId: string, memberId: string, now: number): { poll: PollView; voted: string | null } | null {
+    const room = this.rooms.get(roomId);
+    if (!room) return null;
+    this.closeIfDone(room, now);
+    const view = this.pollView(room, now);
+    return view && room.poll ? { poll: view, voted: room.poll.votes.get(memberId) ?? null } : null;
+  }
+
+  private closeIfDone(room: Room, now: number): void {
+    if (room.poll && now >= room.poll.endsAt) {
+      const final = this.pollView(room, room.poll.endsAt);
+      room.poll = null;
+      if (final) this.emit(room, { type: 'pollend', poll: { ...final, endsIn: 0 } });
+    }
+  }
+
+  /** Starts a poll from the fixed list. One open poll per room, and a cooldown per player. */
+  startPoll(member: Member, pollId: string, now: number): PollResult {
+    const room = this.rooms.get(member.roomId);
+    if (!room) return { ok: false, reason: 'not-in-room' };
+    if (!places.polls.items.some((q) => q.id === pollId)) return { ok: false, reason: 'unknown' };
+    this.closeIfDone(room, now);
+    if (room.poll) return { ok: false, reason: 'busy', retryAfter: Math.ceil((room.poll.endsAt - now) / 1000) };
+    const ready = member.cooldowns.get('poll') ?? 0;
+    if (now < ready) return { ok: false, reason: 'cooldown', retryAfter: Math.ceil((ready - now) / 1000) };
+    member.cooldowns.set('poll', now + places.polls.cooldownSeconds * 1000);
+    member.lastSeen = now;
+    room.poll = { pollId, by: member.id, endsAt: now + places.polls.seconds * 1000, votes: new Map() };
+    const view = this.pollView(room, now)!;
+    this.emit(room, { type: 'poll', poll: view });
+    return { ok: true, poll: view };
+  }
+
+  /** One vote each, for an option of the open poll. */
+  vote(member: Member, optionId: string, now: number): PollResult {
+    const room = this.rooms.get(member.roomId);
+    if (!room) return { ok: false, reason: 'not-in-room' };
+    this.closeIfDone(room, now);
+    const poll = room.poll;
+    if (!poll) return { ok: false, reason: 'closed' };
+    const def = places.polls.items.find((q) => q.id === poll.pollId);
+    if (!def?.options.some((o) => o.id === optionId)) return { ok: false, reason: 'unknown' };
+    if (poll.votes.has(member.id)) return { ok: false, reason: 'voted' };
+    poll.votes.set(member.id, optionId);
+    member.lastSeen = now;
+    const view = this.pollView(room, now)!;
+    this.emit(room, { type: 'vote', poll: view });
+    return { ok: true, poll: view };
   }
 
   /** Wear a title (its label) or none. The room is told only if it changed. */
@@ -324,6 +412,7 @@ export class PlaceHub {
 
   /** Drops players who went quiet. Called on a timer by the server and directly by tests. */
   sweep(now: number): number {
+    for (const room of this.rooms.values()) this.closeIfDone(room, now);
     const ttl = places.presenceTtlSeconds * 1000;
     let removed = 0;
     for (const m of [...this.byUser.values()]) {

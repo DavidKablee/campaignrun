@@ -14,9 +14,11 @@ import {
   placeIdentitySchema,
   placeJoinSchema,
   placeMoveSchema,
+  placePollSchema,
   placeReportSchema,
   placeSaySchema,
   placeTitleSchema,
+  placeVoteSchema,
 } from './validate.ts';
 
 /**
@@ -137,7 +139,9 @@ export function registerPlaces(
     kinds: places.kinds,
     square: places.square,
     actions: places.actions,
+    topics: places.topics,
     phrases: places.phrases,
+    polls: places.polls,
     emoji: places.emoji,
     daily: places.daily,
     bounds: places.bounds,
@@ -185,6 +189,7 @@ export function registerPlaces(
     return c.json({
       roomId: room.id,
       progress,
+      poll: hub.pollFor(room.id, member.id, t),
       // 'assigned' when a requested room was full or gone, so the player is told they landed elsewhere.
       landed,
       requested: parsed.data.roomId ?? null,
@@ -412,7 +417,7 @@ export function registerPlaces(
       const sink = (e: HubEvent) => send(e.type, e);
       hub.attach(member, sink, now());
       stream.onAbort(() => hub.detach(member, sink, now()));
-      send('hello', { you: member.id, members: hub.snapshot(member.roomId, now()) });
+      send('hello', { you: member.id, members: hub.snapshot(member.roomId, now()), poll: hub.pollFor(member.roomId, member.id, now()) });
       while (!stream.aborted) {
         await stream.sleep(HEARTBEAT_MS);
         hub.touch(member, now());
@@ -461,6 +466,31 @@ export function registerPlaces(
     if (!member) return c.json({ error: 'not-in-room' }, 404);
     hub.say(member, parsed.data, now());
     return c.json({ progress: await jobs.record(user.id, { type: 'say' }) });
+  });
+
+  // Start a poll from the fixed list. Starting one counts as saying something for the day's jobs.
+  app.post('/api/places/rooms/:roomId/poll', requireUser, async (c) => {
+    const user = c.get('user');
+    if (!hit(`place-poll:${user.id}`, 10, MINUTE).ok) return c.json({ error: 'rate-limited' }, 429);
+    const parsed = placePollSchema.safeParse(await c.req.json().catch(() => null));
+    if (!parsed.success) return c.json({ error: 'invalid' }, 400);
+    const member = memberOf(user, c.req.param('roomId'));
+    if (!member) return c.json({ error: 'not-in-room' }, 404);
+    const res = hub.startPoll(member, parsed.data.pollId, now());
+    if (!res.ok) return c.json({ error: res.reason, retryAfter: res.retryAfter }, 409);
+    return c.json({ poll: res.poll, progress: await jobs.record(user.id, { type: 'say' }) }, 201);
+  });
+
+  app.post('/api/places/rooms/:roomId/vote', requireUser, async (c) => {
+    const user = c.get('user');
+    if (!hit(`place-vote:${user.id}`, 30, MINUTE).ok) return c.json({ error: 'rate-limited' }, 429);
+    const parsed = placeVoteSchema.safeParse(await c.req.json().catch(() => null));
+    if (!parsed.success) return c.json({ error: 'invalid' }, 400);
+    const member = memberOf(user, c.req.param('roomId'));
+    if (!member) return c.json({ error: 'not-in-room' }, 404);
+    const res = hub.vote(member, parsed.data.option, now());
+    if (!res.ok) return c.json({ error: res.reason }, 409);
+    return c.json({ poll: res.poll });
   });
 
   app.post('/api/places/rooms/:roomId/report', requireUser, async (c) => {

@@ -11,6 +11,7 @@ import { actionById, inviteHash } from './placesModel';
 import { usePlacesStore } from './placesStore';
 import { Icon } from './PlacesIcon';
 import { PhoneSheet, type PhoneApp } from './PhoneSheet';
+import { PollCard } from './PollCard';
 
 /**
  * Mobilise (C82): a campaign place full of real players. Walk by tapping the ground, use the four
@@ -25,7 +26,25 @@ const REPORT_LABELS: Record<string, string> = {
   other: 'Something else',
 };
 
-const TOPIC_LABELS: Record<string, string> = { greet: 'Greet', chat: 'Chat', civic: 'Our area', rally: 'Rally' };
+const RECENT_KEY = 'cr-places-recent';
+const RECENT_MAX = 8;
+
+function loadRecent(): string[] {
+  try {
+    const v: unknown = JSON.parse(localStorage.getItem(RECENT_KEY) ?? '[]');
+    return Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string' && places.phrases.some((p) => p.id === x)).slice(0, RECENT_MAX) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveRecent(ids: string[]) {
+  try {
+    localStorage.setItem(RECENT_KEY, JSON.stringify(ids));
+  } catch {
+    /* private mode: recents last for this visit only */
+  }
+}
 
 const COACHED_KEY = 'cr-places-coached';
 
@@ -70,7 +89,7 @@ export function PlacesScreen() {
   const dataSaver = useGameStore((s) => s.dataSaver);
   const status = useOnlineStore((s) => s.status);
   const store = usePlacesStore();
-  const { phase, roomId, you, members, ready, today, toast, lang, mutedNames, identity, friends, jobs } = store;
+  const { phase, roomId, you, members, ready, today, toast, lang, mutedNames, identity, friends, jobs, poll } = store;
   const isMuted = (id: string) => !!members[id] && mutedNames.includes(members[id]!.name);
   // Where the player asked to go. Once joined, the store says where they actually are, because they
   // can switch rooms and states from inside.
@@ -115,6 +134,7 @@ export function PlacesScreen() {
     return () => window.removeEventListener('keydown', onKey, true);
   }, [sheet]);
   const [topic, setTopic] = useState<string>('greet');
+  const [recent, setRecent] = useState<string[]>(loadRecent);
   const [coached, setCoached] = useState(wasCoached);
   const [picked, setPicked] = useState<string | null>(null);
   const [reported, setReported] = useState(false);
@@ -223,6 +243,13 @@ export function PlacesScreen() {
     void usePlacesStore.getState().loadJobs();
   }, [phase, roomId]);
 
+  const pollNow = useNow(!!poll && !poll.closed);
+  // A finished poll keeps its result in view for a moment, then steps aside.
+  useEffect(() => {
+    if (!poll?.closed) return;
+    const id = setTimeout(() => usePlacesStore.getState().dismissPoll(), 12_000);
+    return () => clearTimeout(id);
+  }, [poll?.closed, poll?.pollId]);
   const cooling = Object.values(ready).some((t) => t > Date.now());
   const now = useNow(cooling);
   const others = Object.values(members).filter((m) => m.id !== you);
@@ -238,6 +265,11 @@ export function PlacesScreen() {
     const t = Date.now();
     if (t - lastSay.current < 900) return;
     lastSay.current = t;
+    if (what.phrase) {
+      const next = [what.phrase, ...recent.filter((id) => id !== what.phrase)].slice(0, RECENT_MAX);
+      setRecent(next);
+      saveRecent(next);
+    }
     if (you) rendererRef.current?.say(you, what);
     void usePlacesStore.getState().say(what);
     setSheet(null);
@@ -279,7 +311,8 @@ export function PlacesScreen() {
   }
 
   const canShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
-  const topics = Object.keys(phraseGroups);
+  const topics = [...(recent.length ? ['recent'] : []), ...places.topics.map((t) => t.id), 'polls'];
+  const topicLabel = (t: string) => (t === 'recent' ? 'Recent' : t === 'polls' ? 'Polls' : (places.topics.find((x) => x.id === t)?.label ?? t));
   const coinPct = Math.min(100, (today.coins / places.daily.coins) * 100);
   const supPct = Math.min(100, (today.supporters / places.daily.supporters) * 100);
 
@@ -427,6 +460,16 @@ export function PlacesScreen() {
             </button>
           </div>
         ) : null}
+        {poll && phase === 'in' && !(members[poll.by] && isMuted(poll.by)) ? (
+          <PollCard
+            poll={poll}
+            lang={lang}
+            now={pollNow}
+            starterName={members[poll.by]?.name ?? null}
+            onVote={(o) => void usePlacesStore.getState().vote(o)}
+            onClose={() => usePlacesStore.getState().dismissPoll()}
+          />
+        ) : null}
         {toast ? (
           <p className="cr-places-toast" role="status">
             {toast}
@@ -516,16 +559,33 @@ export function PlacesScreen() {
           <div className="cr-places-topics" aria-label="Topics">
             {topics.map((t) => (
               <button key={t} type="button" aria-pressed={t === topic} onClick={() => setTopic(t)}>
-                {TOPIC_LABELS[t] ?? t}
+                {topicLabel(t)}
               </button>
             ))}
           </div>
           <div className="cr-places-lines">
-            {(phraseGroups[topic] ?? []).map((p) => (
-              <button key={p.id} type="button" onClick={() => say({ phrase: p.id })}>
-                {lang === 'pcm' ? p.pcm : p.en}
-              </button>
-            ))}
+            {topic === 'polls'
+              ? places.polls.items.map((q) => (
+                  <button
+                    key={q.id}
+                    type="button"
+                    onClick={() => {
+                      void usePlacesStore.getState().startPoll(q.id);
+                      setSheet(null);
+                    }}
+                  >
+                    {lang === 'pcm' ? q.pcm : q.en}
+                    <small>{q.options.map((o) => (lang === 'pcm' ? o.pcm : o.en)).join(' · ')}</small>
+                  </button>
+                ))
+              : (topic === 'recent'
+                  ? recent.map((id) => places.phrases.find((p) => p.id === id)).filter((p): p is (typeof places.phrases)[number] => !!p)
+                  : (phraseGroups[topic] ?? [])
+                ).map((p) => (
+                  <button key={p.id} type="button" onClick={() => say({ phrase: p.id })}>
+                    {lang === 'pcm' ? p.pcm : p.en}
+                  </button>
+                ))}
           </div>
         </section>
       ) : null}

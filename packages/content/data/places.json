@@ -156,6 +156,828 @@
       "tag": "chat",
       "en": "Thank you, see you at the rally!",
       "pcm": "Thank you, see you for rally!"
+    },
+    {
+      "id": "grt01",
+      "tag": "greet",
+      "en": "Good afternoon, everyone!",
+      "pcm": "Good afternoon o, everybody!"
+    },
+    {
+      "id": "grt02",
+      "tag": "greet",
+      "en": "Good evening, neighbours.",
+      "pcm": "Good evening, my neighbours."
+    },
+    {
+      "id": "grt03",
+      "tag": "greet",
+      "en": "How are you today?",
+      "pcm": "How you dey today?"
+    },
+    {
+      "id": "grt04",
+      "tag": "greet",
+      "en": "How is the family?",
+      "pcm": "How be the family?"
+    },
+    {
+      "id": "grt05",
+      "tag": "greet",
+      "en": "Welcome, glad you came.",
+      "pcm": "Welcome o, I dey glad say you come."
+    },
+    {
+      "id": "grt06",
+      "tag": "greet",
+      "en": "First time here?",
+      "pcm": "Na your first time for here?"
+    },
+    {
+      "id": "grt07",
+      "tag": "greet",
+      "en": "Nice to see you again.",
+      "pcm": "E good to see you again."
+    },
+    {
+      "id": "grt08",
+      "tag": "greet",
+      "en": "Long time, my friend!",
+      "pcm": "Long time no see, my friend!"
+    },
+    {
+      "id": "grt09",
+      "tag": "greet",
+      "en": "Hello from my state!",
+      "pcm": "Hello from my own state!"
+    },
+    {
+      "id": "grt10",
+      "tag": "greet",
+      "en": "How was your week?",
+      "pcm": "How your week be?"
+    },
+    {
+      "id": "grt11",
+      "tag": "greet",
+      "en": "Be well, my friend.",
+      "pcm": "Stay well, my friend."
+    },
+    {
+      "id": "grt12",
+      "tag": "greet",
+      "en": "Good to be out today.",
+      "pcm": "E sweet to come out today."
+    },
+    {
+      "id": "cht01",
+      "tag": "chat",
+      "en": "What a lovely day.",
+      "pcm": "Today fine well well."
+    },
+    {
+      "id": "cht02",
+      "tag": "chat",
+      "en": "It is very hot today.",
+      "pcm": "Sun dey burn today."
+    },
+    {
+      "id": "cht03",
+      "tag": "chat",
+      "en": "Looks like rain.",
+      "pcm": "Rain wan fall."
+    },
+    {
+      "id": "cht04",
+      "tag": "chat",
+      "en": "Can you hear that music?",
+      "pcm": "You dey hear that music?"
+    },
+    {
+      "id": "cht05",
+      "tag": "chat",
+      "en": "Where are you from?",
+      "pcm": "Which place you dey from?"
+    },
+    {
+      "id": "cht06",
+      "tag": "chat",
+      "en": "What do you do?",
+      "pcm": "Wetin you dey do?"
+    },
+    {
+      "id": "cht07",
+      "tag": "chat",
+      "en": "I am just walking around.",
+      "pcm": "I dey waka around small."
+    },
+    {
+      "id": "cht08",
+      "tag": "chat",
+      "en": "Any news today?",
+      "pcm": "Any gist today?"
+    },
+    {
+      "id": "cht09",
+      "tag": "chat",
+      "en": "Take care of yourself.",
+      "pcm": "Take care of yourself o."
+    },
+    {
+      "id": "cht10",
+      "tag": "chat",
+      "en": "I need to sit down a bit.",
+      "pcm": "I wan sit down small."
+    },
+    {
+      "id": "cht11",
+      "tag": "chat",
+      "en": "That is a good idea.",
+      "pcm": "Na good idea be that."
+    },
+    {
+      "id": "cht12",
+      "tag": "chat",
+      "en": "I agree with you.",
+      "pcm": "I gree with you."
+    },
+    {
+      "id": "mkt01",
+      "tag": "market",
+      "en": "How much is this?",
+      "pcm": "How much be this one?"
+    },
+    {
+      "id": "mkt02",
+      "tag": "market",
+      "en": "Please, reduce the price.",
+      "pcm": "Abeg, reduce the price."
+    },
+    {
+      "id": "mkt03",
+      "tag": "market",
+      "en": "Fresh tomatoes today?",
+      "pcm": "Fresh tomato dey today?"
+    },
+    {
+      "id": "mkt04",
+      "tag": "market",
+      "en": "The market is full today.",
+      "pcm": "Market full well well today."
+    },
+    {
+      "id": "mkt05",
+      "tag": "market",
+      "en": "I will buy from you again.",
+      "pcm": "I go buy from you again."
+    },
+    {
+      "id": "mkt06",
+      "tag": "market",
+      "en": "Your goods are very fine.",
+      "pcm": "Your goods fine well well."
+    },
+    {
+      "id": "mkt07",
+      "tag": "market",
+      "en": "Do you have change?",
+      "pcm": "You get change?"
+    },
+    {
+      "id": "mkt08",
+      "tag": "market",
+      "en": "I am just looking, thank you.",
+      "pcm": "I dey look only, thank you."
+    },
+    {
+      "id": "mkt09",
+      "tag": "market",
+      "en": "Support local traders!",
+      "pcm": "Make we support our traders!"
+    },
+    {
+      "id": "mkt10",
+      "tag": "market",
+      "en": "Who sells the best pepper?",
+      "pcm": "Who dey sell the best pepper?"
+    },
+    {
+      "id": "mkt11",
+      "tag": "market",
+      "en": "Bargaining is an art.",
+      "pcm": "Bargaining na art."
+    },
+    {
+      "id": "mkt12",
+      "tag": "market",
+      "en": "Mind your bag in the crowd.",
+      "pcm": "Hold your bag well for crowd."
+    },
+    {
+      "id": "fod01",
+      "tag": "food",
+      "en": "I am so hungry.",
+      "pcm": "Hunger dey catch me."
+    },
+    {
+      "id": "fod02",
+      "tag": "food",
+      "en": "Jollof is the best.",
+      "pcm": "Jollof na the best."
+    },
+    {
+      "id": "fod03",
+      "tag": "food",
+      "en": "Who is cooking tonight?",
+      "pcm": "Who dey cook tonight?"
+    },
+    {
+      "id": "fod04",
+      "tag": "food",
+      "en": "Suya smells so good.",
+      "pcm": "Suya dey smell sweet."
+    },
+    {
+      "id": "fod05",
+      "tag": "food",
+      "en": "I love pounded yam.",
+      "pcm": "I like pounded yam."
+    },
+    {
+      "id": "fod06",
+      "tag": "food",
+      "en": "Plantain with everything!",
+      "pcm": "Plantain for everything!"
+    },
+    {
+      "id": "fod07",
+      "tag": "food",
+      "en": "Pepper soup for the cold.",
+      "pcm": "Pepper soup for cold."
+    },
+    {
+      "id": "fod08",
+      "tag": "food",
+      "en": "Drink plenty of water.",
+      "pcm": "Drink plenty water."
+    },
+    {
+      "id": "fod09",
+      "tag": "food",
+      "en": "Any good place to eat?",
+      "pcm": "Any better place to chop?"
+    },
+    {
+      "id": "fod10",
+      "tag": "food",
+      "en": "Moi moi is underrated.",
+      "pcm": "Moi moi no get respect o."
+    },
+    {
+      "id": "fod11",
+      "tag": "food",
+      "en": "A little rice, please.",
+      "pcm": "Rice small, abeg."
+    },
+    {
+      "id": "fod12",
+      "tag": "food",
+      "en": "Let us share something.",
+      "pcm": "Make we share something."
+    },
+    {
+      "id": "ftb01",
+      "tag": "football",
+      "en": "Did you see the match?",
+      "pcm": "You see the match?"
+    },
+    {
+      "id": "ftb02",
+      "tag": "football",
+      "en": "What a goal that was!",
+      "pcm": "See goal wey enter!"
+    },
+    {
+      "id": "ftb03",
+      "tag": "football",
+      "en": "Who are you supporting?",
+      "pcm": "Which team you dey support?"
+    },
+    {
+      "id": "ftb04",
+      "tag": "football",
+      "en": "Super Eagles forever!",
+      "pcm": "Super Eagles forever!"
+    },
+    {
+      "id": "ftb05",
+      "tag": "football",
+      "en": "The referee was unfair.",
+      "pcm": "The referee no do well."
+    },
+    {
+      "id": "ftb06",
+      "tag": "football",
+      "en": "Good game, well played.",
+      "pcm": "Good game, una try."
+    },
+    {
+      "id": "ftb07",
+      "tag": "football",
+      "en": "Let us watch it together.",
+      "pcm": "Make we watch am together."
+    },
+    {
+      "id": "ftb08",
+      "tag": "football",
+      "en": "Football brings us together.",
+      "pcm": "Football dey join us together."
+    },
+    {
+      "id": "ftb09",
+      "tag": "football",
+      "en": "I played when I was young.",
+      "pcm": "I dey play when I small."
+    },
+    {
+      "id": "ftb10",
+      "tag": "football",
+      "en": "The stadium was loud!",
+      "pcm": "The stadium noise well well!"
+    },
+    {
+      "id": "ftb11",
+      "tag": "football",
+      "en": "We need a strong team.",
+      "pcm": "We need strong team."
+    },
+    {
+      "id": "ftb12",
+      "tag": "football",
+      "en": "Next time, we win.",
+      "pcm": "Next time, we go win."
+    },
+    {
+      "id": "msc01",
+      "tag": "music",
+      "en": "What song is this?",
+      "pcm": "Which song be this?"
+    },
+    {
+      "id": "msc02",
+      "tag": "music",
+      "en": "Turn it up!",
+      "pcm": "Turn am up!"
+    },
+    {
+      "id": "msc03",
+      "tag": "music",
+      "en": "I love this beat.",
+      "pcm": "I like this beat."
+    },
+    {
+      "id": "msc04",
+      "tag": "music",
+      "en": "Who wants to dance?",
+      "pcm": "Who wan dance?"
+    },
+    {
+      "id": "msc05",
+      "tag": "music",
+      "en": "Highlife never gets old.",
+      "pcm": "Highlife no dey old."
+    },
+    {
+      "id": "msc06",
+      "tag": "music",
+      "en": "Afrobeats all day.",
+      "pcm": "Afrobeats all day."
+    },
+    {
+      "id": "msc07",
+      "tag": "music",
+      "en": "Sing with me!",
+      "pcm": "Sing with me!"
+    },
+    {
+      "id": "msc08",
+      "tag": "music",
+      "en": "That drummer is great.",
+      "pcm": "That drummer sabi."
+    },
+    {
+      "id": "msc09",
+      "tag": "music",
+      "en": "Play something local.",
+      "pcm": "Play something from our side."
+    },
+    {
+      "id": "msc10",
+      "tag": "music",
+      "en": "Music makes the day light.",
+      "pcm": "Music dey make day easy."
+    },
+    {
+      "id": "msc11",
+      "tag": "music",
+      "en": "I cannot stop dancing.",
+      "pcm": "I no fit stop dance."
+    },
+    {
+      "id": "msc12",
+      "tag": "music",
+      "en": "Encore, encore!",
+      "pcm": "Again, again!"
+    },
+    {
+      "id": "trn01",
+      "tag": "transport",
+      "en": "Traffic was terrible today.",
+      "pcm": "Traffic hard today."
+    },
+    {
+      "id": "trn02",
+      "tag": "transport",
+      "en": "Which bus goes to the park?",
+      "pcm": "Which bus dey go the park?"
+    },
+    {
+      "id": "trn03",
+      "tag": "transport",
+      "en": "I walked all the way.",
+      "pcm": "I waka reach here."
+    },
+    {
+      "id": "trn04",
+      "tag": "transport",
+      "en": "The danfo was packed.",
+      "pcm": "The danfo full pass."
+    },
+    {
+      "id": "trn05",
+      "tag": "transport",
+      "en": "Keke or bus today?",
+      "pcm": "Keke or bus today?"
+    },
+    {
+      "id": "trn06",
+      "tag": "transport",
+      "en": "Drive safe, everyone.",
+      "pcm": "Drive well, everybody."
+    },
+    {
+      "id": "trn07",
+      "tag": "transport",
+      "en": "Roads are better now.",
+      "pcm": "Road don better now."
+    },
+    {
+      "id": "trn08",
+      "tag": "transport",
+      "en": "The road is still bad.",
+      "pcm": "The road still bad."
+    },
+    {
+      "id": "trn09",
+      "tag": "transport",
+      "en": "Leave early to beat traffic.",
+      "pcm": "Comot early to beat traffic."
+    },
+    {
+      "id": "trn10",
+      "tag": "transport",
+      "en": "Thanks for the ride.",
+      "pcm": "Thank you for the ride."
+    },
+    {
+      "id": "trn11",
+      "tag": "transport",
+      "en": "Mind the potholes!",
+      "pcm": "Watch the pothole o!"
+    },
+    {
+      "id": "trn12",
+      "tag": "transport",
+      "en": "Safe journey home.",
+      "pcm": "Safe journey go house."
+    },
+    {
+      "id": "civ01",
+      "tag": "civic",
+      "en": "Clean water matters.",
+      "pcm": "Clean water important."
+    },
+    {
+      "id": "civ02",
+      "tag": "civic",
+      "en": "Let us keep the street clean.",
+      "pcm": "Make we keep street clean."
+    },
+    {
+      "id": "civ03",
+      "tag": "civic",
+      "en": "Young people should be heard.",
+      "pcm": "Make young people talk too."
+    },
+    {
+      "id": "civ04",
+      "tag": "civic",
+      "en": "A good clinic nearby helps.",
+      "pcm": "Better clinic near us go help."
+    },
+    {
+      "id": "civ05",
+      "tag": "civic",
+      "en": "Safe streets for everyone.",
+      "pcm": "Safe street for everybody."
+    },
+    {
+      "id": "civ06",
+      "tag": "civic",
+      "en": "Our market needs a roof.",
+      "pcm": "Our market need roof."
+    },
+    {
+      "id": "civ07",
+      "tag": "civic",
+      "en": "Power cuts hurt small business.",
+      "pcm": "Light wahala dey hurt small business."
+    },
+    {
+      "id": "civ08",
+      "tag": "civic",
+      "en": "Ask your neighbour what they need.",
+      "pcm": "Ask your neighbour wetin he need."
+    },
+    {
+      "id": "civ09",
+      "tag": "civic",
+      "en": "Talk to your local leaders.",
+      "pcm": "Talk to your local leaders."
+    },
+    {
+      "id": "civ10",
+      "tag": "civic",
+      "en": "Good schools help everyone.",
+      "pcm": "Good schools dey help everybody."
+    },
+    {
+      "id": "sta01",
+      "tag": "state",
+      "en": "Which state are you from?",
+      "pcm": "Which state you come from?"
+    },
+    {
+      "id": "sta02",
+      "tag": "state",
+      "en": "I am proud of my state.",
+      "pcm": "I proud of my state."
+    },
+    {
+      "id": "sta03",
+      "tag": "state",
+      "en": "Tell me about your state.",
+      "pcm": "Tell me about your state."
+    },
+    {
+      "id": "sta04",
+      "tag": "state",
+      "en": "What is your state known for?",
+      "pcm": "Wetin your state dey known for?"
+    },
+    {
+      "id": "sta05",
+      "tag": "state",
+      "en": "Visit my state one day!",
+      "pcm": "Come visit my state one day!"
+    },
+    {
+      "id": "sta06",
+      "tag": "state",
+      "en": "Every state has something good.",
+      "pcm": "Every state get something good."
+    },
+    {
+      "id": "sta07",
+      "tag": "state",
+      "en": "I miss home today.",
+      "pcm": "I dey miss home today."
+    },
+    {
+      "id": "sta08",
+      "tag": "state",
+      "en": "We are many, we are one.",
+      "pcm": "We plenty, but we be one."
+    },
+    {
+      "id": "sta09",
+      "tag": "state",
+      "en": "Nice to meet someone new.",
+      "pcm": "E good to meet new person."
+    },
+    {
+      "id": "sta10",
+      "tag": "state",
+      "en": "Where should I visit next?",
+      "pcm": "Where I go visit next?"
+    },
+    {
+      "id": "ral01",
+      "tag": "rally",
+      "en": "Let us show up together!",
+      "pcm": "Make we show up together!"
+    },
+    {
+      "id": "ral02",
+      "tag": "rally",
+      "en": "Bring a friend to the rally.",
+      "pcm": "Carry your friend come rally."
+    },
+    {
+      "id": "ral03",
+      "tag": "rally",
+      "en": "Every person counts.",
+      "pcm": "Every person count."
+    },
+    {
+      "id": "ral04",
+      "tag": "rally",
+      "en": "Listen first, then speak.",
+      "pcm": "Listen first, then talk."
+    },
+    {
+      "id": "ral05",
+      "tag": "rally",
+      "en": "Respect every opinion.",
+      "pcm": "Respect everybody opinion."
+    },
+    {
+      "id": "ral06",
+      "tag": "rally",
+      "en": "Check that you are registered.",
+      "pcm": "Check say you don register."
+    },
+    {
+      "id": "ral07",
+      "tag": "rally",
+      "en": "Ask questions, get facts.",
+      "pcm": "Ask question, find the facts."
+    },
+    {
+      "id": "ral08",
+      "tag": "rally",
+      "en": "Peace is the best campaign.",
+      "pcm": "Peace na the best campaign."
+    },
+    {
+      "id": "ral09",
+      "tag": "rally",
+      "en": "Thank you for coming out.",
+      "pcm": "Thank you say you come out."
+    },
+    {
+      "id": "ral10",
+      "tag": "rally",
+      "en": "Tell a neighbour about today.",
+      "pcm": "Tell your neighbour about today."
+    },
+    {
+      "id": "ral11",
+      "tag": "rally",
+      "en": "Small steps, big change.",
+      "pcm": "Small small steps, big change."
+    },
+    {
+      "id": "ban01",
+      "tag": "banter",
+      "en": "You walk like you own the place.",
+      "pcm": "You dey waka like say na your place."
+    },
+    {
+      "id": "ban02",
+      "tag": "banter",
+      "en": "I came for the vibes.",
+      "pcm": "I come for the vibe."
+    },
+    {
+      "id": "ban03",
+      "tag": "banter",
+      "en": "You are too funny.",
+      "pcm": "You dey make me laugh."
+    },
+    {
+      "id": "ban04",
+      "tag": "banter",
+      "en": "Do not tell my mother.",
+      "pcm": "No tell my mama o."
+    },
+    {
+      "id": "ban05",
+      "tag": "banter",
+      "en": "I was here first.",
+      "pcm": "I reach here first."
+    },
+    {
+      "id": "ban06",
+      "tag": "banter",
+      "en": "Race you to the stall!",
+      "pcm": "Make we race go the stall!"
+    },
+    {
+      "id": "ban07",
+      "tag": "banter",
+      "en": "That hat looks great.",
+      "pcm": "That cap fine well."
+    },
+    {
+      "id": "ban08",
+      "tag": "banter",
+      "en": "Big man in the building!",
+      "pcm": "Big man don enter!"
+    },
+    {
+      "id": "ban09",
+      "tag": "banter",
+      "en": "No wahala at all.",
+      "pcm": "No wahala at all."
+    },
+    {
+      "id": "ban10",
+      "tag": "banter",
+      "en": "I am only joking.",
+      "pcm": "I dey joke only."
+    },
+    {
+      "id": "ban11",
+      "tag": "banter",
+      "en": "Tell me something funny.",
+      "pcm": "Tell me something wey funny."
+    },
+    {
+      "id": "ban12",
+      "tag": "banter",
+      "en": "My legs are tired o.",
+      "pcm": "My leg don tire o."
+    },
+    {
+      "id": "wkd01",
+      "tag": "weekend",
+      "en": "Any plans this weekend?",
+      "pcm": "You get plan this weekend?"
+    },
+    {
+      "id": "wkd02",
+      "tag": "weekend",
+      "en": "I will rest this weekend.",
+      "pcm": "I go rest this weekend."
+    },
+    {
+      "id": "wkd03",
+      "tag": "weekend",
+      "en": "Visiting family this weekend.",
+      "pcm": "I dey go see family this weekend."
+    },
+    {
+      "id": "wkd04",
+      "tag": "weekend",
+      "en": "Weddings every weekend!",
+      "pcm": "Wedding every weekend!"
+    },
+    {
+      "id": "wkd05",
+      "tag": "weekend",
+      "en": "Let us meet here again.",
+      "pcm": "Make we meet here again."
+    },
+    {
+      "id": "wkd06",
+      "tag": "weekend",
+      "en": "Same time tomorrow?",
+      "pcm": "Same time tomorrow?"
+    },
+    {
+      "id": "wkd07",
+      "tag": "weekend",
+      "en": "I am off to the park.",
+      "pcm": "I dey go the park."
+    },
+    {
+      "id": "wkd08",
+      "tag": "weekend",
+      "en": "Do something kind today.",
+      "pcm": "Do something kind today."
+    },
+    {
+      "id": "wkd09",
+      "tag": "weekend",
+      "en": "Enjoy your day, my people.",
+      "pcm": "Enjoy your day, my people."
+    },
+    {
+      "id": "wkd10",
+      "tag": "weekend",
+      "en": "See you at the next rally.",
+      "pcm": "See you for next rally."
     }
   ],
   "emoji": [
@@ -352,5 +1174,253 @@
       "id": "towncrier",
       "label": "Town Crier"
     }
-  ]
+  ],
+  "topics": [
+    {
+      "id": "greet",
+      "label": "Greet"
+    },
+    {
+      "id": "chat",
+      "label": "Chat"
+    },
+    {
+      "id": "market",
+      "label": "Market"
+    },
+    {
+      "id": "food",
+      "label": "Food"
+    },
+    {
+      "id": "football",
+      "label": "Football"
+    },
+    {
+      "id": "music",
+      "label": "Music"
+    },
+    {
+      "id": "transport",
+      "label": "Transport"
+    },
+    {
+      "id": "civic",
+      "label": "Our area"
+    },
+    {
+      "id": "state",
+      "label": "Our state"
+    },
+    {
+      "id": "rally",
+      "label": "Campaign talk"
+    },
+    {
+      "id": "banter",
+      "label": "Banter"
+    },
+    {
+      "id": "weekend",
+      "label": "Weekend"
+    }
+  ],
+  "polls": {
+    "seconds": 45,
+    "cooldownSeconds": 90,
+    "items": [
+      {
+        "id": "polfood",
+        "topic": "food",
+        "en": "Jollof: party or home?",
+        "pcm": "Jollof: party or house?",
+        "options": [
+          {
+            "id": "party",
+            "en": "Party jollof",
+            "pcm": "Party jollof"
+          },
+          {
+            "id": "home",
+            "en": "Home jollof",
+            "pcm": "House jollof"
+          }
+        ]
+      },
+      {
+        "id": "polrice",
+        "topic": "food",
+        "en": "Best with rice?",
+        "pcm": "Wetin best with rice?",
+        "options": [
+          {
+            "id": "chicken",
+            "en": "Chicken",
+            "pcm": "Chicken"
+          },
+          {
+            "id": "fish",
+            "en": "Fish",
+            "pcm": "Fish"
+          },
+          {
+            "id": "plantain",
+            "en": "Plantain",
+            "pcm": "Plantain"
+          }
+        ]
+      },
+      {
+        "id": "polmatch",
+        "topic": "football",
+        "en": "Best way to watch a match?",
+        "pcm": "Which way best to watch match?",
+        "options": [
+          {
+            "id": "stadium",
+            "en": "At the stadium",
+            "pcm": "For stadium"
+          },
+          {
+            "id": "friends",
+            "en": "With friends",
+            "pcm": "With friends"
+          },
+          {
+            "id": "home",
+            "en": "At home",
+            "pcm": "For house"
+          }
+        ]
+      },
+      {
+        "id": "polmusic",
+        "topic": "music",
+        "en": "Pick a sound.",
+        "pcm": "Pick one sound.",
+        "options": [
+          {
+            "id": "highlife",
+            "en": "Highlife",
+            "pcm": "Highlife"
+          },
+          {
+            "id": "afrobeats",
+            "en": "Afrobeats",
+            "pcm": "Afrobeats"
+          },
+          {
+            "id": "juju",
+            "en": "Juju",
+            "pcm": "Juju"
+          }
+        ]
+      },
+      {
+        "id": "poltravel",
+        "topic": "transport",
+        "en": "Getting around?",
+        "pcm": "How you dey move?",
+        "options": [
+          {
+            "id": "walk",
+            "en": "Walk",
+            "pcm": "Waka"
+          },
+          {
+            "id": "bus",
+            "en": "Bus",
+            "pcm": "Bus"
+          },
+          {
+            "id": "keke",
+            "en": "Keke",
+            "pcm": "Keke"
+          }
+        ]
+      },
+      {
+        "id": "polweek",
+        "topic": "weekend",
+        "en": "Weekend plan?",
+        "pcm": "Weekend plan?",
+        "options": [
+          {
+            "id": "rest",
+            "en": "Rest",
+            "pcm": "Rest"
+          },
+          {
+            "id": "family",
+            "en": "Visit family",
+            "pcm": "Visit family"
+          },
+          {
+            "id": "out",
+            "en": "Go out",
+            "pcm": "Go out"
+          }
+        ]
+      },
+      {
+        "id": "polstreet",
+        "topic": "civic",
+        "en": "First for every street?",
+        "pcm": "Wetin first for every street?",
+        "options": [
+          {
+            "id": "light",
+            "en": "Steady light",
+            "pcm": "Steady light"
+          },
+          {
+            "id": "water",
+            "en": "Clean water",
+            "pcm": "Clean water"
+          },
+          {
+            "id": "road",
+            "en": "A good road",
+            "pcm": "Good road"
+          }
+        ]
+      },
+      {
+        "id": "polmorn",
+        "topic": "banter",
+        "en": "Morning or evening person?",
+        "pcm": "Morning person or evening person?",
+        "options": [
+          {
+            "id": "morning",
+            "en": "Morning",
+            "pcm": "Morning"
+          },
+          {
+            "id": "evening",
+            "en": "Evening",
+            "pcm": "Evening"
+          }
+        ]
+      },
+      {
+        "id": "polrain",
+        "topic": "chat",
+        "en": "Rain or sun?",
+        "pcm": "Rain or sun?",
+        "options": [
+          {
+            "id": "rain",
+            "en": "Rain",
+            "pcm": "Rain"
+          },
+          {
+            "id": "sun",
+            "en": "Sun",
+            "pcm": "Sun"
+          }
+        ]
+      }
+    ]
+  }
 }
