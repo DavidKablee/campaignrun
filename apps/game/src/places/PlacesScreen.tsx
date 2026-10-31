@@ -7,8 +7,10 @@ import { haptic, motionReduced } from '../prefs';
 import { useOnlineStore } from '../onlineStore';
 import { PlaceRenderer } from '../render/placeRenderer';
 import { track } from '../analytics';
-import { actionById, inviteHash, roomPlace } from './placesModel';
+import { actionById, inviteHash } from './placesModel';
 import { usePlacesStore } from './placesStore';
+import { Icon } from './PlacesIcon';
+import { PhoneSheet, type PhoneApp } from './PhoneSheet';
 
 /**
  * Mobilise (C82): a campaign place full of real players. Walk by tapping the ground, use the four
@@ -43,28 +45,6 @@ function markCoached() {
   }
 }
 
-/** Small line icons for the dock; they sit above the short label so the buttons read at a glance. */
-function Icon({ name }: { name: string }) {
-  const paths: Record<string, string> = {
-    canvass: 'M9 11a3 3 0 100-6 3 3 0 000 6zM3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M17 8h4M19 6v4',
-    flyers: 'M7 3h8l4 4v14H7zM15 3v4h4M10 12h6M10 16h6',
-    rally: 'M3 10v4l3 1 9 4V5L6 9zM19 9a4 4 0 010 6',
-    wave: 'M8 13V6a1.5 1.5 0 013 0v5M11 11V4.5a1.5 1.5 0 013 0V11M14 11V6a1.5 1.5 0 013 0v8a6 6 0 01-6 6h-1a6 6 0 01-5-3l-2-4a1.5 1.5 0 012.5-1.5L8 14',
-    say: 'M4 5h16v11H9l-5 4z',
-    share: 'M18 8a3 3 0 100-6 3 3 0 000 6zM6 15a3 3 0 100-6 3 3 0 000 6zM18 22a3 3 0 100-6 3 3 0 000 6zM8.6 10.6l6.8-3.2M8.6 13.4l6.8 3.2',
-    back: 'M15 5l-7 7 7 7',
-    close: 'M6 6l12 12M18 6L6 18',
-    rooms: 'M4 20V9l8-5 8 5v11zM9 20v-6h6v6',
-    friend: 'M9 11a3 3 0 100-6 3 3 0 000 6zM3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M19 8v6M16 11h6',
-    people: 'M9 11a3 3 0 100-6 3 3 0 000 6zM3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M17 8a2.5 2.5 0 010 5M21 20c0-2.4-1.6-4.4-4-5',
-  };
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d={paths[name] ?? ''} />
-    </svg>
-  );
-}
-
 function hash(text: string): number {
   let h = 2166136261;
   for (let i = 0; i < text.length; i++) h = Math.imul(h ^ text.charCodeAt(i), 16777619) >>> 0;
@@ -90,7 +70,7 @@ export function PlacesScreen() {
   const dataSaver = useGameStore((s) => s.dataSaver);
   const status = useOnlineStore((s) => s.status);
   const store = usePlacesStore();
-  const { phase, roomId, you, members, ready, today, toast, lang, mutedNames, identity, rooms, friends } = store;
+  const { phase, roomId, you, members, ready, today, toast, lang, mutedNames, identity, friends, jobs } = store;
   const isMuted = (id: string) => !!members[id] && mutedNames.includes(members[id]!.name);
   // Where the player asked to go. Once joined, the store says where they actually are, because they
   // can switch rooms and states from inside.
@@ -107,7 +87,8 @@ export function PlacesScreen() {
   const myContender = contenders.find((c) => c.id === pickedContender);
   // The one-time question: only once someone has actually chosen a Contender, and only if never answered.
   const askIdentity = phase === 'in' && !!myContender && identity !== null && !identity.asked;
-  const [sheet, setSheet] = useState<'say' | 'person' | 'invite' | 'people' | 'rooms' | 'friends' | null>(null);
+  const [sheet, setSheet] = useState<'say' | 'person' | 'invite' | 'people' | 'phone' | null>(null);
+  const [phoneApp, setPhoneApp] = useState<PhoneApp | null>(null);
   const trayRef = useRef<HTMLElement>(null);
   const trigger = useRef<HTMLElement | null>(null);
   // Focus follows the tray: into it when it opens, back to what opened it when it closes.
@@ -236,12 +217,10 @@ export function PlacesScreen() {
     return () => clearTimeout(id);
   }, [toast]);
 
-  // The best room to switch to: the fullest one with space that is not this one.
-  const busiest = rooms
-    .filter((r) => r.roomId !== roomId && r.count < r.capacity && r.count > 0)
-    .sort((a, b) => b.count - a.count)[0];
   useEffect(() => {
-    if (phase === 'in') void usePlacesStore.getState().loadFriends();
+    if (phase !== 'in') return;
+    void usePlacesStore.getState().loadFriends();
+    void usePlacesStore.getState().loadJobs();
   }, [phase, roomId]);
 
   const cooling = Object.values(ready).some((t) => t > Date.now());
@@ -319,14 +298,14 @@ export function PlacesScreen() {
             type="button"
             className="cr-places-round"
             onClick={() => {
-              void store.loadRooms();
-              setSheet(sheet === 'rooms' ? null : 'rooms');
+              setPhoneApp(null);
+              setSheet(sheet === 'phone' ? null : 'phone');
             }}
-            aria-label="Rooms"
+            aria-label="Campaign Phone"
             disabled={phase !== 'in'}
-            title={phase !== 'in' ? 'Join a place to see its rooms' : undefined}
+            title={phase !== 'in' ? 'Join a place to use the phone' : undefined}
           >
-            <Icon name="rooms" />
+            <Icon name="phone" />
           </button>
           <button
             type="button"
@@ -470,6 +449,17 @@ export function PlacesScreen() {
                 <b style={{ width: `${supPct}%` }} />
               </i>
             </span>
+            <button
+              type="button"
+              className="cr-places-jobs"
+              onClick={() => {
+                setPhoneApp('jobs');
+                setSheet('phone');
+              }}
+            >
+              Jobs {jobs ? `${jobs.jobs.filter((j) => j.done).length}/${jobs.jobs.length}` : '–'}
+              {jobs && jobs.streak.count > 0 ? ` · ${jobs.streak.count}-day streak` : ''}
+            </button>
           </div>
           <div className="cr-places-actions">
             {places.actions.map((a) => {
@@ -548,8 +538,8 @@ export function PlacesScreen() {
               type="button"
               className="cr-places-link"
               onClick={() => {
-                void store.loadFriends();
-                setSheet('friends');
+                setPhoneApp('friends');
+                setSheet('phone');
               }}
             >
               Friends{friends && friends.incoming.length ? ` (${friends.incoming.length})` : ''}
@@ -565,8 +555,8 @@ export function PlacesScreen() {
                 type="button"
                 className="cr-btn"
                 onClick={() => {
-                  void store.loadRooms();
-                  setSheet('rooms');
+                  setPhoneApp('rooms');
+                  setSheet('phone');
                 }}
               >
                 Find a busier room
@@ -597,144 +587,14 @@ export function PlacesScreen() {
         </section>
       ) : null}
 
-      {sheet === 'rooms' ? (
-        <section className="cr-places-tray" aria-label="Rooms" ref={trayRef}>
-          <div className="cr-places-tray-head">
-            <b>Rooms</b>
-            <button type="button" className="cr-places-x" onClick={() => setSheet(null)} aria-label="Close">
-              <Icon name="close" />
-            </button>
-          </div>
-          {busiest ? (
-            <button
-              type="button"
-              className="cr-btn"
-              onClick={() => {
-                void store.join(busiest.stateId, busiest.kind, busiest.roomId);
-                setSheet(null);
-              }}
-            >
-              Quick switch: {placeTitle(busiest.stateId, busiest.kind)} ({busiest.count} here)
-            </button>
-          ) : null}
-          <ul className="cr-places-people cr-places-rooms">
-            {rooms.map((r) => {
-              const here = r.roomId === roomId;
-              const full = r.count >= r.capacity;
-              return (
-                <li key={r.roomId}>
-                  <button
-                    type="button"
-                    disabled={here || full}
-                    onClick={() => {
-                      void store.join(r.stateId, r.kind, r.roomId);
-                      setSheet(null);
-                    }}
-                  >
-                    <span>{placeTitle(r.stateId, r.kind)}</span>
-                    <small>
-                      {here ? 'You are here' : full ? 'Full' : `${r.count}/${r.capacity}`}
-                      {r.friends ? ` · ${r.friends} ${r.friends === 1 ? 'friend' : 'friends'}` : ''}
-                    </small>
-                  </button>
-                </li>
-              );
-            })}
-            {rooms.some((r) => r.key === placeKey(places.square.stateId, places.square.id)) ? null : (
-              <li>
-                <button
-                  type="button"
-                  disabled={isSquare}
-                  onClick={() => {
-                    void store.join(places.square.stateId, places.square.id);
-                    setSheet(null);
-                  }}
-                >
-                  <span>{places.square.label}</span>
-                  <small>{isSquare ? 'You are here' : 'Every state meets here'}</small>
-                </button>
-              </li>
-            )}
-          </ul>
-          {rooms.length === 0 ? <p className="cr-places-note">No rooms are open yet. You are the first one out.</p> : null}
-          <p className="cr-places-note">A room holds {places.roomCapacity} players. Friends in a room show beside it.</p>
-        </section>
-      ) : null}
-
-      {sheet === 'friends' ? (
-        <section className="cr-places-tray" aria-label="Friends" ref={trayRef}>
-          <div className="cr-places-tray-head">
-            <b>Friends</b>
-            <button type="button" className="cr-places-x" onClick={() => setSheet(null)} aria-label="Close">
-              <Icon name="close" />
-            </button>
-          </div>
-          {friends && friends.incoming.length ? (
-            <ul className="cr-places-people">
-              {friends.incoming.map((f) => (
-                <li key={f.name} className="cr-places-friendrow">
-                  <span>
-                    {f.name}
-                    <small>Wants to be friends</small>
-                  </span>
-                  <button type="button" className="is-go" onClick={() => void store.acceptFriend(f.name)}>
-                    Accept
-                  </button>
-                  <button type="button" onClick={() => void store.removeFriend(f.name)}>
-                    Not now
-                  </button>
-                </li>
-              ))}
-            </ul>
-          ) : null}
-          {friends && friends.friends.length ? (
-            <ul className="cr-places-people">
-              {friends.friends.map((f) => {
-                const spot = f.roomId ? roomPlace(f.roomId) : null;
-                return (
-                  <li key={f.name} className="cr-places-friendrow">
-                    <span>
-                      {f.name}
-                      <small>{spot ? `In ${placeTitle(spot.stateId, spot.kind)}` : 'Not out right now'}</small>
-                    </span>
-                    {spot && f.roomId && f.roomId !== roomId ? (
-                      <button
-                        type="button"
-                        className="is-go"
-                        onClick={() => {
-                          void store.join(spot.stateId, spot.kind, f.roomId);
-                          setSheet(null);
-                        }}
-                      >
-                        Join
-                      </button>
-                    ) : null}
-                    <button type="button" onClick={() => void store.removeFriend(f.name)} aria-label={`Remove ${f.name}`}>
-                      Remove
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          ) : friends && friends.incoming.length ? null : (
-            <p className="cr-places-note">No friends yet. Tap a player in a room and choose Add friend.</p>
-          )}
-          {friends && friends.outgoing.length ? (
-            <ul className="cr-places-people">
-              {friends.outgoing.map((f) => (
-                <li key={f.name} className="cr-places-friendrow">
-                  <span>
-                    {f.name}
-                    <small>Waiting for them</small>
-                  </span>
-                  <button type="button" onClick={() => void store.removeFriend(f.name)}>
-                    Cancel
-                  </button>
-                </li>
-              ))}
-            </ul>
-          ) : null}
-        </section>
+      {sheet === 'phone' ? (
+        <PhoneSheet
+          app={phoneApp}
+          setApp={setPhoneApp}
+          onClose={() => setSheet(null)}
+          onSay={() => setSheet('say')}
+          trayRef={trayRef}
+        />
       ) : null}
 
       {sheet === 'person' && person ? (

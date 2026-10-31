@@ -4,6 +4,7 @@ import { places, placesDay, stateIndex } from '@cr/content';
 import type { Db } from './db.ts';
 import { REQUIRE_VERIFIED_FOR_BOARDS, LIMITS } from './limits.ts';
 import { PlaceHub, type HubEvent } from './placesHub.ts';
+import { createJobs, type GrantResult } from './placeJobs.ts';
 import { hit, rateLimit } from './rateLimit.ts';
 import type { SessionUser } from './auth.ts';
 import {
@@ -15,6 +16,7 @@ import {
   placeMoveSchema,
   placeReportSchema,
   placeSaySchema,
+  placeTitleSchema,
 } from './validate.ts';
 
 /**
@@ -59,6 +61,25 @@ export function registerPlaces(
     );
     return rows[0] ?? { coins: 0, supporters: 0, actions: 0 };
   }
+
+  /** Pays a bonus (a finished job, a streak milestone) under the same daily caps as any action. */
+  async function grant(userId: string, coins: number, supporters: number): Promise<GrantResult> {
+    const before = await todayTotals(userId);
+    const room = places.daily;
+    const c = Math.max(0, Math.min(coins, room.coins - before.coins));
+    const s = Math.max(0, Math.min(supporters, room.supporters - before.supporters));
+    if (c > 0 || s > 0) {
+      await database.query(
+        `insert into place_daily as d (user_id, day, coins, supporters, actions) values ($1, $2, $3, $4, 0)
+         on conflict (user_id, day) do update
+           set coins = least(d.coins + $3, $5), supporters = least(d.supporters + $4, $6)`,
+        [userId, placesDay(now()), c, s, room.coins, room.supporters],
+      );
+    }
+    return { coins: c, supporters: s, capped: c < coins || s < supporters };
+  }
+
+  const jobs = createJobs({ database, now, grant });
 
   /** Pays an action, never beyond the day's caps, and counts it for the state's activity on the Board. */
   async function pay(user: SessionUser, stateId: string, actionId: string, solo = false): Promise<Reward> {
@@ -159,8 +180,11 @@ export function registerPlaces(
       t,
       parsed.data.roomId ?? null,
     );
+    hub.setTitle(user.id, await jobs.wearing(user.id), t);
+    const progress = parsed.data.stateId === places.square.stateId ? await jobs.record(user.id, { type: 'square' }) : null;
     return c.json({
       roomId: room.id,
+      progress,
       // 'assigned' when a requested room was full or gone, so the player is told they landed elsewhere.
       landed,
       requested: parsed.data.roomId ?? null,
@@ -295,11 +319,11 @@ export function registerPlaces(
         `insert into place_friends (user_id, other_id, status) values ($1, $2, 'accepted') on conflict do nothing`,
         [user.id, target],
       );
-      return c.json({ status: 'accepted' }, 201);
+      return c.json({ status: 'accepted', progress: await jobs.record(user.id, { type: 'friend' }) }, 201);
     }
     if ((await count(user.id, 'pending')) >= places.friends.max) return c.json({ error: 'friends-full' }, 409);
     await database.query(`insert into place_friends (user_id, other_id, status) values ($1, $2, 'pending')`, [user.id, target]);
-    return c.json({ status: 'pending' }, 201);
+    return c.json({ status: 'pending', progress: await jobs.record(user.id, { type: 'friend' }) }, 201);
   });
 
   app.post('/api/places/friends/accept', requireUser, async (c) => {
@@ -321,7 +345,7 @@ export function registerPlaces(
       `insert into place_friends (user_id, other_id, status) values ($1, $2, 'accepted') on conflict do nothing`,
       [user.id, other.id],
     );
-    return c.json({ status: 'accepted' });
+    return c.json({ status: 'accepted', progress: await jobs.record(user.id, { type: 'friend' }) });
   });
 
   // Decline, cancel, unfriend and unblock are all "remove the link".
@@ -355,6 +379,25 @@ export function registerPlaces(
       other.id,
     ]);
     return c.body(null, 204);
+  });
+
+  // ---- C91: Campaign Jobs, the streak and titles -------------------------------
+
+  app.get('/api/places/jobs', requireUser, async (c) => {
+    c.header('cache-control', 'no-store');
+    return c.json(await jobs.snapshot(c.get('user').id));
+  });
+
+  // Wear an earned title on your name tag, or none. A title is chosen from a fixed list, never typed.
+  app.post('/api/places/title', requireUser, async (c) => {
+    const user = c.get('user');
+    if (!hit(`place-title:${user.id}`, 20, MINUTE).ok) return c.json({ error: 'rate-limited' }, 429);
+    const parsed = placeTitleSchema.safeParse(await c.req.json().catch(() => null));
+    if (!parsed.success) return c.json({ error: 'invalid' }, 400);
+    const res = await jobs.wear(user.id, parsed.data.titleId);
+    if (!res.ok) return c.json({ error: 'not-earned' }, 409);
+    hub.setTitle(user.id, res.label, now());
+    return c.json(await jobs.snapshot(user.id));
   });
 
   app.get('/api/places/rooms/:roomId/stream', requireUser, (c) => {
@@ -404,7 +447,9 @@ export function registerPlaces(
       return c.json({ error: result.reason }, 409);
     }
     const stateId = roomId.split(':')[0]!;
-    return c.json({ action: action.id, reward: await pay(user, stateId, action.id, result.solo) });
+    const reward = await pay(user, stateId, action.id, result.solo);
+    const progress = await jobs.record(user.id, { type: 'action', action: action.id, company: result.withOthers > 0 });
+    return c.json({ action: action.id, reward, progress });
   });
 
   app.post('/api/places/rooms/:roomId/say', requireUser, async (c) => {
@@ -415,7 +460,7 @@ export function registerPlaces(
     const member = memberOf(user, c.req.param('roomId'));
     if (!member) return c.json({ error: 'not-in-room' }, 404);
     hub.say(member, parsed.data, now());
-    return c.body(null, 204);
+    return c.json({ progress: await jobs.record(user.id, { type: 'say' }) });
   });
 
   app.post('/api/places/rooms/:roomId/report', requireUser, async (c) => {

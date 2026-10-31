@@ -35,6 +35,8 @@ export interface PublicMember {
   /** Seeds a plain citizen avatar. The Studio look is never sent (guardrail 10). */
   seed: number;
   look: Look | null;
+  /** A cosmetic title from a fixed list (C91), or null. */
+  title: string | null;
   x: number;
   z: number;
   tx: number;
@@ -47,6 +49,7 @@ interface Member {
   name: string;
   seed: number;
   look: Look | null;
+  title: string | null;
   roomId: string;
   x: number;
   z: number;
@@ -106,7 +109,7 @@ export class PlaceHub {
 
   private view(m: Member, now: number): PublicMember {
     const p = this.position(m, now);
-    return { id: m.id, name: m.name, seed: m.seed, look: m.look, x: p.x, z: p.z, tx: m.tx, tz: m.tz };
+    return { id: m.id, name: m.name, seed: m.seed, look: m.look, title: m.title, x: p.x, z: p.z, tx: m.tx, tz: m.tz };
   }
 
   private emit(room: Room, event: HubEvent): void {
@@ -175,6 +178,7 @@ export class PlaceHub {
       name: user.username,
       seed: hashSeed(user.id),
       look,
+      title: null,
       roomId: room.id,
       x: spawn.x,
       z: spawn.z,
@@ -217,6 +221,15 @@ export class PlaceHub {
     const m = this.byUser.get(userId);
     if (!m) return;
     m.look = look;
+    const room = this.rooms.get(m.roomId);
+    if (room) this.emit(room, { type: 'join', member: this.view(m, now) });
+  }
+
+  /** Wear a title (its label) or none. The room is told only if it changed. */
+  setTitle(userId: string, title: string | null, now: number): void {
+    const m = this.byUser.get(userId);
+    if (!m || m.title === title) return;
+    m.title = title;
     const room = this.rooms.get(m.roomId);
     if (room) this.emit(room, { type: 'join', member: this.view(m, now) });
   }

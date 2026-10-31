@@ -199,5 +199,158 @@
     "listMax": 30,
     "busyAt": 10,
     "rejoinSeconds": 120
-  }
+  },
+  "jobs": {
+    "perDay": 3,
+    "allDone": {
+      "coins": 5,
+      "supporters": 1
+    },
+    "pool": [
+      {
+        "id": "canvassthree",
+        "label": "Canvass 3 times",
+        "type": "action",
+        "target": 3,
+        "coins": 3,
+        "supporters": 0,
+        "social": false,
+        "action": "canvass"
+      },
+      {
+        "id": "canvassfive",
+        "label": "Canvass 5 times",
+        "type": "action",
+        "target": 5,
+        "coins": 4,
+        "supporters": 1,
+        "social": false,
+        "action": "canvass"
+      },
+      {
+        "id": "flyersfour",
+        "label": "Hand out 4 flyers",
+        "type": "action",
+        "target": 4,
+        "coins": 3,
+        "supporters": 0,
+        "social": false,
+        "action": "flyers"
+      },
+      {
+        "id": "flyerssix",
+        "label": "Hand out 6 flyers",
+        "type": "action",
+        "target": 6,
+        "coins": 4,
+        "supporters": 0,
+        "social": false,
+        "action": "flyers"
+      },
+      {
+        "id": "rallyone",
+        "label": "Rally the crowd once",
+        "type": "action",
+        "target": 1,
+        "coins": 3,
+        "supporters": 1,
+        "social": false,
+        "action": "rally"
+      },
+      {
+        "id": "rallycompany",
+        "label": "Rally with a player close by",
+        "type": "action",
+        "target": 1,
+        "coins": 5,
+        "supporters": 1,
+        "social": true,
+        "action": "rally",
+        "withCompany": true
+      },
+      {
+        "id": "wavethree",
+        "label": "Wave 3 times",
+        "type": "action",
+        "target": 3,
+        "coins": 2,
+        "supporters": 0,
+        "social": false,
+        "action": "wave"
+      },
+      {
+        "id": "sayfour",
+        "label": "Say 4 things",
+        "type": "say",
+        "target": 4,
+        "coins": 2,
+        "supporters": 0,
+        "social": false
+      },
+      {
+        "id": "square",
+        "label": "Visit Naija Square",
+        "type": "square",
+        "target": 1,
+        "coins": 3,
+        "supporters": 0,
+        "social": false
+      },
+      {
+        "id": "friend",
+        "label": "Add a friend",
+        "type": "friend",
+        "target": 1,
+        "coins": 4,
+        "supporters": 0,
+        "social": true
+      }
+    ]
+  },
+  "streak": {
+    "milestones": [
+      {
+        "days": 3,
+        "title": "marketregular",
+        "coins": 4,
+        "supporters": 1
+      },
+      {
+        "days": 7,
+        "title": "parkveteran",
+        "coins": 8,
+        "supporters": 1
+      },
+      {
+        "days": 14,
+        "title": "stadiumfaithful",
+        "coins": 10,
+        "supporters": 2
+      },
+      {
+        "days": 30,
+        "title": "towncrier",
+        "coins": 15,
+        "supporters": 2
+      }
+    ]
+  },
+  "titles": [
+    {
+      "id": "marketregular",
+      "label": "Market Regular"
+    },
+    {
+      "id": "parkveteran",
+      "label": "Park Veteran"
+    },
+    {
+      "id": "stadiumfaithful",
+      "label": "Stadium Faithful"
+    },
+    {
+      "id": "towncrier",
+      "label": "Town Crier"
+    }
+  ]
 }

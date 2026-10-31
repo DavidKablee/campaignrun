@@ -102,7 +102,7 @@ describe('place hub (C82)', () => {
     const hub = new PlaceHub();
     const { room } = hub.join(user(1), 'kano', 'market', null, 0);
     const [m] = hub.snapshot(room.id, 0);
-    expect(Object.keys(m!).sort()).toEqual(['id', 'look', 'name', 'seed', 'tx', 'tz', 'x', 'z']);
+    expect(Object.keys(m!).sort()).toEqual(['id', 'look', 'name', 'seed', 'title', 'tx', 'tz', 'x', 'z']);
     expect(m!.look).toBeNull();
   });
 
@@ -240,5 +240,21 @@ describe('place hub (C82)', () => {
       const res = hub.act(a.member, action('rally'), 1000);
       expect(res.ok && res.solo).toBe(false);
     });
+  });
+
+  it('shows a title only once one is worn, and tells the room when it changes (C91)', () => {
+    const hub = new PlaceHub();
+    const a = hub.join(user(1), 'kano', 'market', null, 0);
+    const b = hub.join(user(2), 'kano', 'market', null, 0);
+    const seen: HubEvent[] = [];
+    hub.attach(b.member, (e) => seen.push(e), 0);
+    expect(hub.snapshot(a.room.id, 0).every((m) => m.title === null)).toBe(true);
+    hub.setTitle(user(1).id, 'Market Regular', 1);
+    expect(hub.snapshot(a.room.id, 1).find((m) => m.name === 'player1')!.title).toBe('Market Regular');
+    expect(seen.filter((e) => e.type === 'join')).toHaveLength(1);
+    hub.setTitle(user(1).id, 'Market Regular', 2); // unchanged: nothing sent
+    expect(seen.filter((e) => e.type === 'join')).toHaveLength(1);
+    hub.setTitle(user(1).id, null, 3);
+    expect(hub.snapshot(a.room.id, 3).find((m) => m.name === 'player1')!.title).toBeNull();
   });
 });

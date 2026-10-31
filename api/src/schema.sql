@@ -204,3 +204,34 @@ create table if not exists place_friends (
   check (user_id <> other_id)
 );
 create index if not exists place_friends_other_idx on place_friends (other_id);
+
+-- C91 ----------------------------------------------------------------------
+-- Campaign Jobs and the streak. Progress is counted here from accepted actions, so a client cannot
+-- report its own. A job row per (player, Lagos day, job); the row '_all' marks the all-done bonus as
+-- paid. The streak is the run of consecutive Lagos days with at least one job done. Titles come from
+-- a fixed list in places.json; the one a player wears is stored on the user and shown on the name tag.
+alter table users add column if not exists mobilise_title text;
+
+create table if not exists place_jobs (
+  user_id  uuid    not null references users (id) on delete cascade,
+  day      date    not null,
+  job_id   text    not null,
+  progress integer not null default 0 check (progress >= 0),
+  done_at  timestamptz,
+  primary key (user_id, day, job_id)
+);
+
+create table if not exists place_streak (
+  user_id  uuid    primary key references users (id) on delete cascade,
+  last_day date    not null,
+  count    integer not null check (count >= 0),
+  best     integer not null check (best >= 0)
+);
+
+create table if not exists place_titles (
+  user_id   uuid        not null references users (id) on delete cascade,
+  title_id  text        not null,
+  earned_at timestamptz not null default now(),
+  primary key (user_id, title_id)
+);
+

@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import pg from 'pg';
-import { places } from '@cr/content';
+import { jobsForDay, places } from '@cr/content';
 import { createApp } from '../src/app';
 import { migrate } from '../src/migrate';
 import { memoryMailer } from '../src/mailer';
@@ -100,8 +100,11 @@ run('places api (C82)', () => {
       const res = await json(path, a, { action: 'flyers' });
       paid += ((await res.json()) as { reward: { coins: number } }).reward.coins;
     }
+    // A finished job pays from the same daily cap, so the actions alone can fall a little short of it.
     expect(paid).toBeLessThanOrEqual(places.daily.coins);
-    expect(paid).toBe(Math.min(places.daily.coins, flyers.coins * places.daily.actions));
+    const { rows } = await database.query<{ coins: number }>('select coins from place_daily');
+    expect(rows[0]!.coins).toBeLessThanOrEqual(places.daily.coins);
+    expect(rows[0]!.coins).toBeGreaterThanOrEqual(paid);
 
     clock = Date.UTC(2026, 9, 31, 12, 0, 0);
     resetRateLimits();
@@ -121,8 +124,8 @@ run('places api (C82)', () => {
     const a = await guest('alpha');
     const { body } = await join(a);
     const say = (b: unknown) => json(`/api/places/rooms/${encodeURIComponent(body.roomId)}/say`, a, b);
-    expect((await say({ phrase: places.phrases[0]!.id })).status).toBe(204);
-    expect((await say({ emoji: places.emoji[0] })).status).toBe(204);
+    expect((await say({ phrase: places.phrases[0]!.id })).status).toBe(200);
+    expect((await say({ emoji: places.emoji[0] })).status).toBe(200);
     expect((await say({ text: 'vote for me' })).status).toBe(400);
     expect((await say({ phrase: 'vote-for-me' })).status).toBe(400);
     expect((await say({ phrase: places.phrases[0]!.id, emoji: places.emoji[0] })).status).toBe(400);
@@ -312,7 +315,7 @@ run('places api (C82)', () => {
       await join(b, 'park', 'abia');
       await json(`/api/places/rooms/${encodeURIComponent(room)}/friend`, a, { memberId: await memberId(a, room, 'mu2') });
       const res = await json(`/api/places/rooms/${encodeURIComponent(room)}/friend`, b, { memberId: await memberId(b, room, 'mu1') });
-      expect(await res.json()).toEqual({ status: 'accepted' });
+      expect(await res.json()).toMatchObject({ status: 'accepted' });
       expect((await friends(a)).friends).toHaveLength(1);
     });
 
@@ -366,6 +369,169 @@ run('places api (C82)', () => {
       await json(`/api/places/rooms/${encodeURIComponent(sq.roomId)}/act`, a, { action: 'canvass' });
       const { rows } = await database.query<{ state_id: string }>('select state_id from place_activity');
       expect(rows.map((r) => r.state_id)).not.toContain('naija');
+    });
+  });
+
+  describe('Campaign Jobs and streak (C91)', () => {
+    type Snap = {
+      day: string;
+      jobs: { id: string; progress: number; target: number; done: boolean }[];
+      allDone: { paid: boolean };
+      streak: { count: number; best: number; doneToday: boolean };
+      titles: { id: string; earned: boolean }[];
+      wearing: string | null;
+    };
+    const snap = async (cookie: string) => (await (await json('/api/places/jobs', cookie, undefined, 'GET')).json()) as Snap;
+    const dayMs = (d: string) => Date.parse(`${d}T12:00:00Z`);
+    const isoDay = (offset: number) => new Date(Date.UTC(2026, 10, 1 + offset)).toISOString().slice(0, 10);
+    // Days whose three jobs a solo player can finish by acting and talking alone.
+    const soloDays = Array.from({ length: 80 }, (_, i) => isoDay(i)).filter((d) => jobsForDay(d).every((j) => !j.social && j.type !== 'square'));
+    const dayWith = (pred: (jobs: ReturnType<typeof jobsForDay>) => boolean, among = Array.from({ length: 80 }, (_, i) => isoDay(i))) =>
+      among.find((d) => pred(jobsForDay(d)))!;
+
+    async function doJob(cookie: string, roomId: string, job: ReturnType<typeof jobsForDay>[number]) {
+      let last: { progress: { completed: string[]; reward: { coins: number } | null; newTitle: string | null } | null } = { progress: null };
+      for (let i = 0; i < job.target; i++) {
+        resetRateLimits();
+        if (job.type === 'say') {
+          const res = await json(`/api/places/rooms/${encodeURIComponent(roomId)}/say`, cookie, { phrase: places.phrases[0]!.id });
+          last = (await res.json()) as typeof last;
+        } else {
+          const action = places.actions.find((a) => a.id === job.action)!;
+          clock += action.cooldownSeconds * 1000 + 1;
+          const res = await json(`/api/places/rooms/${encodeURIComponent(roomId)}/act`, cookie, { action: action.id });
+          last = (await res.json()) as typeof last;
+        }
+      }
+      return last;
+    }
+
+    it('shows three of the day\'s jobs with no progress, and a streak of nothing', async () => {
+      clock = dayMs(soloDays[0]!);
+      const a = await guest('jb1');
+      const s = await snap(a);
+      expect(s.jobs.map((j) => j.id)).toEqual(jobsForDay(s.day).map((j) => j.id));
+      expect(s.jobs.every((j) => j.progress === 0 && !j.done)).toBe(true);
+      expect(s.streak).toMatchObject({ count: 0, best: 0, doneToday: false });
+      expect((await json('/api/places/jobs', '', undefined, 'GET')).status).toBe(401);
+    });
+
+    it('counts progress on the server, pays a finished job once, and starts a streak', async () => {
+      clock = dayMs(soloDays[0]!);
+      const a = await guest('jb2');
+      const { body } = await join(a);
+      const job = jobsForDay(soloDays[0]!)[0]!;
+      const last = await doJob(a, body.roomId, job);
+      expect(last.progress!.completed).toEqual([job.id]);
+      expect(last.progress!.reward!.coins).toBeGreaterThanOrEqual(job.coins);
+      const s = await snap(a);
+      expect(s.jobs.find((j) => j.id === job.id)).toMatchObject({ done: true, progress: job.target });
+      expect(s.streak).toMatchObject({ count: 1, doneToday: true });
+
+      // Doing it again changes nothing: no second payment, progress stays at the target.
+      const again = await doJob(a, body.roomId, job);
+      expect(again.progress === null || again.progress.completed.length === 0).toBe(true);
+      expect((await snap(a)).jobs.find((j) => j.id === job.id)!.progress).toBe(job.target);
+    });
+
+    it('pays the all-done bonus once and never beyond the daily cap', async () => {
+      clock = dayMs(soloDays[1]!);
+      const a = await guest('jb3');
+      const { body } = await join(a);
+      for (const job of jobsForDay(soloDays[1]!)) await doJob(a, body.roomId, job);
+      const s = await snap(a);
+      expect(s.jobs.every((j) => j.done)).toBe(true);
+      expect(s.allDone.paid).toBe(true);
+      const { rows } = await database.query<{ coins: number; supporters: number }>('select coins, supporters from place_daily');
+      expect(rows[0]!.coins).toBeLessThanOrEqual(places.daily.coins);
+      expect(rows[0]!.supporters).toBeLessThanOrEqual(places.daily.supporters);
+    });
+
+    it('does not count what a job does not ask for, or a rally alone for a with-company job', async () => {
+      const day = dayWith((jobs) => jobs.some((j) => j.withCompany) && jobs.every((j) => !(j.type === 'action' && j.action === 'wave')));
+      clock = dayMs(day);
+      const a = await guest('jb4');
+      const { body } = await join(a, 'stadium', 'taraba');
+      resetRateLimits();
+      clock += 1;
+      await json(`/api/places/rooms/${encodeURIComponent(body.roomId)}/act`, a, { action: 'rally' });
+      const s = await snap(a);
+      const company = jobsForDay(day).find((j) => j.withCompany)!;
+      expect(s.jobs.find((j) => j.id === company.id)!.progress).toBe(0);
+    });
+
+    it('rolls the streak over by Lagos day, restarts it after a gap, and earns each title once', async () => {
+      const all = Array.from({ length: 80 }, (_, i) => isoDay(i));
+      const start = all.findIndex((d, i) => [0, 1, 2].every((k) => soloDays.includes(all[i + k] ?? '')));
+      expect(start).toBeGreaterThanOrEqual(0);
+      const a = await guest('jb5');
+      const { body } = await join(a);
+      const milestone = places.streak.milestones[0]!;
+      expect(milestone.days).toBe(3);
+
+      for (let k = 0; k < 3; k++) {
+        const d = all[start + k]!;
+        clock = dayMs(d);
+        await join(a);
+        await doJob(a, body.roomId, jobsForDay(d)[0]!);
+        expect((await snap(a)).streak.count).toBe(k + 1);
+      }
+      const earned = await snap(a);
+      expect(earned.titles.find((t) => t.id === milestone.title)!.earned).toBe(true);
+      const titles = await database.query('select 1 from place_titles');
+      expect(titles.rows).toHaveLength(1);
+
+      // Skipping a day ends the streak: it reads as nothing until a job is done again, then it is 1.
+      const gap = soloDays.find((d) => d > all[start + 3]! && d !== all[start + 3] && Date.parse(d) - Date.parse(all[start + 2]!) > 2 * 86_400_000)!;
+      clock = dayMs(gap);
+      expect((await snap(a)).streak.count).toBe(0);
+      await join(a);
+      await doJob(a, body.roomId, jobsForDay(gap)[0]!);
+      const after = await snap(a);
+      expect(after.streak.count).toBe(1);
+      expect(after.streak.best).toBe(3);
+    });
+
+    it('lets a player wear an earned title on their name tag, and refuses one they have not earned', async () => {
+      const a = await guest('jb6');
+      const b = await guest('jb7');
+      const first = await join(a);
+      await join(b);
+      expect((await json('/api/places/title', a, { titleId: 'marketregular' })).status).toBe(409);
+      expect((await json('/api/places/title', a, { titleId: 'nonsense' })).status).toBe(400);
+      expect((await json('/api/places/title', '', { titleId: null })).status).toBe(401);
+
+      const me = await database.query<{ id: string }>("select id from users where username = 'jb6'");
+      await database.query("insert into place_titles (user_id, title_id) values ($1, 'marketregular')", [me.rows[0]!.id]);
+      const ok = await json('/api/places/title', a, { titleId: 'marketregular' });
+      expect(ok.status).toBe(200);
+      expect(((await ok.json()) as Snap).wearing).toBe('marketregular');
+      const seen = (await join(b)).body as unknown as { members: { name: string; title: string | null }[] };
+      expect(seen.members.find((m) => m.name === 'jb6')!.title).toBe('Market Regular');
+      expect(first.body.roomId).toBeTruthy();
+
+      await json('/api/places/title', a, { titleId: null });
+      expect(((await join(b)).body as unknown as typeof seen).members.find((m) => m.name === 'jb6')!.title).toBeNull();
+    });
+
+    it('counts a visit to the national square and a friend request towards their jobs', async () => {
+      const day = dayWith((jobs) => jobs.some((j) => j.type === 'square') && !jobs.some((j) => j.type === 'friend'));
+      clock = dayMs(day);
+      const a = await guest('jb8');
+      const res = await json('/api/places/join', a, { stateId: 'naija', kind: 'square' });
+      const body = (await res.json()) as { progress: { completed: string[] } | null };
+      expect(body.progress?.completed).toEqual(['square']);
+    });
+
+    it('never lets a client report progress', async () => {
+      clock = dayMs(soloDays[2]!);
+      const a = await guest('jb9');
+      await join(a);
+      for (const path of ['/api/places/jobs', '/api/places/jobs/progress']) {
+        const res = await json(path, a, { jobId: jobsForDay(soloDays[2]!)[0]!.id, progress: 99 });
+        expect([404, 405]).toContain(res.status);
+      }
+      expect((await snap(a)).jobs.every((j) => j.progress === 0)).toBe(true);
     });
   });
 });

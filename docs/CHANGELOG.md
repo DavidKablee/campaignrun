@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-31 — The Campaign Phone, daily jobs and a streak (C91)
+
+Mobilise has a phone: one tap opens a home screen of apps (Jobs, Friends, Rooms, Messages, Board, Convoy, Settings). Each day there are three Campaign Jobs, the same for everyone, counted on the server; finishing one pays a little, finishing all three pays a bonus, all inside the existing daily limits. Days in a row build a streak, and streak milestones earn titles (Market Regular, Park Veteran, Stadium Faithful, Town Crier) that you can wear under your name. Details in `docs/chunks/C91.md`.
+
 ## 2026-10-31 — Meet anyone in Mobilise (C90)
 
 You can switch rooms from inside Mobilise (a Rooms list with player counts, a friend badge and Quick switch), go to Naija Square where players from every state meet, and make friends by tapping a player. Invites can name a room. Rooms now top up before a new one opens, a dropped player walks back to where they stood, mutes are kept on the device, and a lone player can Rally for half the reward. Details in `docs/chunks/C90.md`.

@@ -621,6 +621,31 @@ export const placeActionSchema = z.object({
   soloPercent: z.number().int().min(0).max(100).default(0),
 });
 
+/**
+ * C91: a Campaign Job, a small goal a player can finish in a visit. Progress is counted on the server
+ * from accepted actions, never reported by the client. `type` says what counts: an action (`action`
+ * names which; `withCompany` only counts it with a real player close by), a phrase or emoji said, a
+ * visit to the national square, or a friendship made. A job that needs another player is `social`, and
+ * a day never offers more than one, so a solo player can always finish all of them.
+ */
+export const placeJobSchema = z.object({
+  id: z.string().regex(/^[a-z]{3,16}$/),
+  label: z.string().min(3).max(40),
+  type: z.enum(['action', 'say', 'square', 'friend']),
+  action: z.string().regex(/^[a-z]{3,12}$/).optional(),
+  withCompany: z.boolean().optional(),
+  target: z.number().int().min(1).max(20),
+  coins: z.number().int().min(0),
+  supporters: z.number().int().min(0),
+  social: z.boolean(),
+});
+
+export const placeTitleSchema = z.object({
+  id: z.string().regex(/^[a-z]{3,16}$/),
+  /** Chosen from this fixed list only: nobody types a title. */
+  label: z.string().min(3).max(20),
+});
+
 export const placePhraseSchema = z.object({
   id: z.string().regex(/^[a-z]{3,12}$/),
   tag: z.enum(['greet', 'chat', 'civic', 'rally']),
@@ -642,6 +667,19 @@ export const placesSchema = z.object({
   kinds: z.array(placeKindSchema).min(1),
   square: placeSquareSchema,
   friends: z.object({ max: z.number().int().positive() }),
+  jobs: z.object({
+    perDay: z.number().int().min(1).max(6),
+    /** Paid once when every job of the day is done. */
+    allDone: z.object({ coins: z.number().int().min(0), supporters: z.number().int().min(0) }),
+    pool: z.array(placeJobSchema).min(4),
+  }),
+  streak: z.object({
+    /** Consecutive Lagos days with at least one job done. Each milestone earns a title and a bonus once. */
+    milestones: z
+      .array(z.object({ days: z.number().int().min(2), title: z.string(), coins: z.number().int().min(0), supporters: z.number().int().min(0) }))
+      .min(1),
+  }),
+  titles: z.array(placeTitleSchema).min(1),
   rooms: z.object({
     /** Most rooms the room browser lists. */
     listMax: z.number().int().positive(),
@@ -671,6 +709,7 @@ export const placesSchema = z.object({
 });
 export type PlacesConfig = z.infer<typeof placesSchema>;
 export type PlaceAction = z.infer<typeof placeActionSchema>;
+export type PlaceJob = z.infer<typeof placeJobSchema>;
 export type PlacePhrase = z.infer<typeof placePhraseSchema>;
 
 export const legalSchema = z.object({

@@ -159,6 +159,11 @@ export const placeJoinSchema = z
   })
   .refine((v) => isPlace(v.stateId, v.kind), { message: 'unknown place' });
 
+/** Wear one of the earned titles (an id from places.json), or none. */
+export const placeTitleSchema = z.object({
+  titleId: z.enum(places.titles.map((t) => t.id) as [string, ...string[]]).nullable(),
+});
+
 export const placeFriendSchema = z.object({ name: z.string().min(2).max(24) });
 export const placeFriendRequestSchema = z.object({ memberId: z.string().min(4).max(24) });
 

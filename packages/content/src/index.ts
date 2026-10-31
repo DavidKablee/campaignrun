@@ -52,7 +52,7 @@ export * from './state-roads';
 export * from './yard';
 export * from './places';
 import { rideRoadFit } from './road';
-import type { Hazard } from './schemas';
+import type { Hazard, PlaceJob } from './schemas';
 
 /** Parsed at import time: an invalid pack fails the build, not the player. */
 export const simConfig = simConfigSchema.parse(simJson);
@@ -84,6 +84,38 @@ export const analytics = analyticsSchema.parse(analyticsJson);
 export const liveEvents = liveEventsSchema.parse(liveEventsJson);
 /** C82: the Mobilise places, their actions, preset phrases and daily caps. */
 export const places = placesSchema.parse(placesJson);
+
+/** Today's Campaign Jobs: the same three for everyone on a Lagos day, chosen by the date alone. */
+export function jobsForDay(day: string): PlaceJob[] {
+  let h = 2166136261;
+  for (let i = 0; i < day.length; i++) h = Math.imul(h ^ day.charCodeAt(i), 16777619) >>> 0;
+  const next = () => {
+    h = Math.imul(h ^ (h >>> 15), 2246822507) >>> 0;
+    h = Math.imul(h ^ (h >>> 13), 3266489909) >>> 0;
+    return (h ^ (h >>> 16)) >>> 0;
+  };
+  const order = [...places.jobs.pool];
+  for (let i = order.length - 1; i > 0; i--) {
+    const j = next() % (i + 1);
+    [order[i], order[j]] = [order[j]!, order[i]!];
+  }
+  const out: PlaceJob[] = [];
+  let social = 0;
+  for (const job of order) {
+    if (job.social && social >= 1) continue;
+    // Two jobs for the same thing is a chore, not a choice.
+    if (out.some((o) => o.type === job.type && o.action === job.action)) continue;
+    out.push(job);
+    if (job.social) social += 1;
+    if (out.length === places.jobs.perDay) break;
+  }
+  return out;
+}
+
+/** The title with this id, or undefined. */
+export function placeTitleById(id: string | null | undefined) {
+  return id ? places.titles.find((t) => t.id === id) : undefined;
+}
 
 /** C90: a real place is a state's market, park, lake or stadium, or the national square. */
 export function isPlace(stateId: string, kind: string): boolean {

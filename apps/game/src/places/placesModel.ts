@@ -14,6 +14,8 @@ export interface PlaceMember {
   seed: number;
   /** Their Contender, only for a player who opted in; everyone else is a plain citizen (guardrail 13). */
   look: { contenderId: string } | null;
+  /** A cosmetic title from a fixed list, shown under the name. */
+  title: string | null;
   x: number;
   z: number;
   tx: number;

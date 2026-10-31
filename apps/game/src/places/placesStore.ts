@@ -31,6 +31,7 @@ interface JoinResponse {
   members: PlaceMember[];
   today: Today;
   identity: Identity;
+  progress: JobsProgress | null;
 }
 
 /** A row of the room browser: where, how many, and how many of them are the player's friends. */
@@ -49,6 +50,23 @@ export interface FriendsState {
   incoming: { name: string }[];
   outgoing: { name: string }[];
   max: number;
+}
+
+export interface JobsSnapshot {
+  day: string;
+  jobs: { id: string; label: string; progress: number; target: number; done: boolean; coins: number; supporters: number }[];
+  allDone: { coins: number; supporters: number; paid: boolean };
+  streak: { count: number; best: number; doneToday: boolean; next: { days: number; title: string } | null };
+  titles: { id: string; label: string; earned: boolean }[];
+  wearing: string | null;
+}
+
+/** What the server says a job-counting call changed. */
+export interface JobsProgress {
+  snapshot: JobsSnapshot;
+  completed: string[];
+  reward: { coins: number; supporters: number; capped: boolean } | null;
+  newTitle: string | null;
 }
 
 const MUTED_KEY = 'cr-places-muted';
@@ -96,6 +114,11 @@ interface PlacesState {
   /** Board names this player muted. Kept on the device. */
   mutedNames: string[];
   isMuted: (memberId: string) => boolean;
+  jobs: JobsSnapshot | null;
+  loadJobs: () => Promise<void>;
+  /** Wear an earned title on the name tag, or none. */
+  wearTitle: (titleId: string | null) => Promise<void>;
+  unmute: (name: string) => void;
   rooms: RoomRow[];
   roomsBusyAt: number;
   loadRooms: () => Promise<void>;
@@ -144,6 +167,32 @@ export const usePlacesStore = create<PlacesState>()((set, get) => {
     for (const fn of listeners) fn(e);
   };
 
+  /** Takes what the server counted: the fresh jobs, any reward (the server already capped it) and a toast. */
+  function applyProgress(p: JobsProgress | null | undefined, lead = ''): void {
+    if (!p) return;
+    const game = useGameStore.getState();
+    if (p.reward) {
+      if (p.reward.coins > 0) game.addCoins(p.reward.coins);
+      if (p.reward.supporters > 0) game.addFollowing(p.reward.supporters);
+    }
+    const bits: string[] = [];
+    for (const id of p.completed) {
+      const job = p.snapshot.jobs.find((j) => j.id === id);
+      if (job) bits.push(`Job done: ${job.label}`);
+    }
+    if (p.snapshot.allDone.paid && p.completed.length && p.snapshot.jobs.every((j) => j.done)) bits.push('All jobs done');
+    if (p.newTitle) bits.push(`New title: ${p.newTitle}`);
+    if (p.reward) bits.push(rewardLine(p.reward));
+    const line = bits.filter(Boolean).join(' · ');
+    // What a job paid counts toward today's totals, which the server grew after the action's own reply.
+    const today = get().today;
+    set({
+      jobs: p.snapshot,
+      ...(p.reward ? { today: { ...today, coins: today.coins + p.reward.coins, supporters: today.supporters + p.reward.supporters } } : {}),
+      ...(line || lead ? { toast: [lead, line].filter(Boolean).join(' · ') } : {}),
+    });
+  }
+
   function open(roomId: string) {
     closeStream();
     const es = new EventSource(`${API_BASE}/api/places/rooms/${encodeURIComponent(roomId)}/stream`, { withCredentials: true });
@@ -191,6 +240,7 @@ export const usePlacesStore = create<PlacesState>()((set, get) => {
       const m = get().members[memberId];
       return !!m && get().mutedNames.includes(m.name);
     },
+    jobs: null,
     rooms: [],
     roomsBusyAt: 10,
     friends: null,
@@ -249,6 +299,7 @@ export const usePlacesStore = create<PlacesState>()((set, get) => {
           availability: 'up',
           toast: res.requested && res.landed === 'assigned' ? 'That room was full, so you are in another one.' : null,
         });
+        applyProgress(res.progress);
         track('place_join', stateId);
         open(res.roomId);
       } catch (err) {
@@ -280,7 +331,7 @@ export const usePlacesStore = create<PlacesState>()((set, get) => {
       if ((ready[action.id] ?? 0) > Date.now()) return;
       set({ ready: { ...ready, [action.id]: Date.now() + action.cooldownSeconds * 1000 } });
       try {
-        const res = await apiPost<{ reward: { coins: number; supporters: number; capped: boolean; today: Today } }>(
+        const res = await apiPost<{ reward: { coins: number; supporters: number; capped: boolean; today: Today }; progress: JobsProgress | null }>(
           `/api/places/rooms/${encodeURIComponent(roomId)}/act`,
           { action: action.id },
         );
@@ -288,6 +339,7 @@ export const usePlacesStore = create<PlacesState>()((set, get) => {
         if (res.reward.coins > 0) game.addCoins(res.reward.coins);
         if (res.reward.supporters > 0) game.addFollowing(res.reward.supporters);
         set({ today: res.reward.today, toast: rewardLine(res.reward) || null });
+        applyProgress(res.progress, rewardLine(res.reward));
         track('place_action', stateId);
       } catch (err) {
         // Roll the ring back so the player is not locked out by a refused call.
@@ -303,7 +355,8 @@ export const usePlacesStore = create<PlacesState>()((set, get) => {
       const { roomId } = get();
       if (!roomId) return;
       try {
-        await apiPost(`/api/places/rooms/${encodeURIComponent(roomId)}/say`, what);
+        const res = await apiPost<{ progress: JobsProgress | null }>(`/api/places/rooms/${encodeURIComponent(roomId)}/say`, what);
+        applyProgress(res.progress);
         track('place_say', get().stateId);
       } catch {
         /* a dropped phrase is not worth a message */
@@ -351,8 +404,12 @@ export const usePlacesStore = create<PlacesState>()((set, get) => {
       const { roomId } = get();
       if (!roomId) return 'failed';
       try {
-        const res = await apiPost<{ status: 'pending' | 'accepted' }>(`/api/places/rooms/${encodeURIComponent(roomId)}/friend`, { memberId });
+        const res = await apiPost<{ status: 'pending' | 'accepted'; progress: JobsProgress | null }>(
+          `/api/places/rooms/${encodeURIComponent(roomId)}/friend`,
+          { memberId },
+        );
         set({ toast: res.status === 'accepted' ? 'You are friends now.' : 'Friend request sent.' });
+        applyProgress(res.progress, res.status === 'accepted' ? 'You are friends now.' : 'Friend request sent.');
         void get().loadFriends();
         return res.status;
       } catch (err) {
@@ -369,8 +426,9 @@ export const usePlacesStore = create<PlacesState>()((set, get) => {
 
     async acceptFriend(name) {
       try {
-        await apiPost('/api/places/friends/accept', { name });
+        const res = await apiPost<{ progress: JobsProgress | null }>('/api/places/friends/accept', { name });
         set({ toast: `You and ${name} are friends.` });
+        applyProgress(res.progress, `You and ${name} are friends.`);
       } catch (err) {
         set({ toast: err instanceof ApiError && err.code === 'friends-full' ? 'Your friends list is full.' : 'Could not accept that.' });
       }
@@ -389,6 +447,28 @@ export const usePlacesStore = create<PlacesState>()((set, get) => {
       await apiPost('/api/places/friends/block', { name: m.name }).catch(() => undefined);
       set({ toast: `${m.name} is blocked and muted.` });
       await get().loadFriends();
+    },
+
+    async loadJobs() {
+      try {
+        set({ jobs: await apiGet<JobsSnapshot>('/api/places/jobs') });
+      } catch {
+        /* the phone shows what it had */
+      }
+    },
+
+    async wearTitle(titleId) {
+      try {
+        set({ jobs: await apiPost<JobsSnapshot>('/api/places/title', { titleId }) });
+      } catch {
+        set({ toast: 'Could not change that. Try again.' });
+      }
+    },
+
+    unmute(name) {
+      const next = get().mutedNames.filter((n) => n !== name);
+      saveMuted(next);
+      set({ mutedNames: next });
     },
 
     setLang: (lang) => set({ lang }),

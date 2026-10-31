@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { analytics, clampToBounds, localsFor, distance, places, placesDay, stepToward } from '../src';
+import { analytics, clampToBounds, jobsForDay, localsFor, distance, places, placesDay, stepToward } from '../src';
 
 describe('Mobilise places (C82)', () => {
   it('has unique ids for kinds, actions and phrases', () => {
@@ -83,5 +83,54 @@ describe('Mobilise places (C82)', () => {
   it('sizes rooms and friends sensibly (C90)', () => {
     expect(places.rooms.busyAt).toBeLessThanOrEqual(places.roomCapacity);
     expect(places.friends.max).toBeGreaterThan(0);
+  });
+
+  describe('Campaign Jobs (C91)', () => {
+    const days = Array.from({ length: 90 }, (_, i) => new Date(Date.UTC(2026, 9, 1 + i)).toISOString().slice(0, 10));
+
+    it('only names actions and titles that exist, and ids are unique', () => {
+      const ids = places.jobs.pool.map((j) => j.id);
+      expect(new Set(ids).size).toBe(ids.length);
+      for (const j of places.jobs.pool) {
+        if (j.type === 'action') expect(places.actions.some((a) => a.id === j.action)).toBe(true);
+        else expect(j.action).toBeUndefined();
+      }
+      for (const m of places.streak.milestones) expect(places.titles.some((t) => t.id === m.title)).toBe(true);
+      const dayList = places.streak.milestones.map((m) => m.days);
+      expect([...dayList].sort((a, b) => a - b)).toEqual(dayList);
+    });
+
+    it('picks the same jobs for a day every time, and a full set every day', () => {
+      for (const d of days) {
+        expect(jobsForDay(d).map((j) => j.id)).toEqual(jobsForDay(d).map((j) => j.id));
+        expect(jobsForDay(d)).toHaveLength(places.jobs.perDay);
+      }
+    });
+
+    it('never asks for two social jobs, or the same thing twice, in one day', () => {
+      for (const d of days) {
+        const jobs = jobsForDay(d);
+        expect(jobs.filter((j) => j.social).length).toBeLessThanOrEqual(1);
+        const keys = jobs.map((j) => `${j.type}:${j.action ?? ''}`);
+        expect(new Set(keys).size).toBe(keys.length);
+      }
+    });
+
+    it('varies from day to day, so there is a reason to come back', () => {
+      const sets = new Set(days.map((d) => jobsForDay(d).map((j) => j.id).sort().join(',')));
+      expect(sets.size).toBeGreaterThan(10);
+    });
+
+    it('keeps a day of jobs well inside the daily caps', () => {
+      for (const d of days) {
+        const jobs = jobsForDay(d);
+        const coins = jobs.reduce((n, j) => n + j.coins, 0) + places.jobs.allDone.coins;
+        expect(coins).toBeLessThanOrEqual(places.daily.coins);
+      }
+    });
+
+    it('titles are plain labels from a closed list with no names, parties or slogans', () => {
+      for (const t of places.titles) expect(t.label).not.toMatch(/\d|https?:|@|party|vote|president|governor/i);
+    });
   });
 });

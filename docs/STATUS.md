@@ -1,6 +1,8 @@
 # Status
 
 **Current chunk:** C48 done. C35–C48: parties and the campaign map (C35), the map as a world map (C36), accounts/API/database (C37), the Lagos Life UI chrome (C38), the four menu screens (C39), the roster and result screens (C40), the account layer made safe to expose (C41), two ways to sign in (C42), the look editor (C43), the ride ladder (C44), the road under it (C45), the thumb that drives it (C46), the screens that hold it (C47) and the economy that pays for it (C48). Next: a mail provider, then deploy — or the real-device playtest owed by every track, which C46–C48 have now made overdue rather than merely outstanding.
+**C91 (2026-10-31):** The Campaign Phone (Jobs, Friends, Rooms, Messages, Board, Convoy, Settings), three daily Campaign Jobs, a streak with four titles worn on the name tag. Next: C92 bigger presets, polls and a Board strip; then C93 typed chat (dark).
+
 **C90 (2026-10-31):** Meet anyone: room browser and quick switch, a national square, friends by tapping, saved mutes, rooms top up before new ones open, a dropped player returns to their spot, a solo Rally pays half. Next: C91 Campaign Phone and daily jobs.
 
 **C89 (2026-10-31):** Contender avatars in Mobilise, opt-in and private by default (asked once, changeable in Account, server-decided). Next: C90 rooms you can switch, national square, friends.

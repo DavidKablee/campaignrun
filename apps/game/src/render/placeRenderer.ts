@@ -21,6 +21,7 @@ export interface AvatarState {
   name: string;
   seed: number;
   look: { contenderId: string } | null;
+  title?: string | null;
   x: number;
   z: number;
   tx: number;
@@ -57,6 +58,15 @@ export interface PlaceRendererOptions {
 }
 
 const FACE_UP = 1.5;
+
+/** A name tag: the name, and under it a title if the player wears one (C91). Text only, from a fixed list. */
+function setTagText(tag: HTMLElement, name: string, title: string | null) {
+  tag.textContent = name;
+  if (!title) return;
+  const small = document.createElement('small');
+  small.textContent = title;
+  tag.append(small);
+}
 const sashMats = new Map<string, THREE.MeshBasicMaterial>();
 
 export class PlaceRenderer {
@@ -165,6 +175,7 @@ export class PlaceRenderer {
     if (existing) {
       // Someone opted in or out while standing here: rebuild them so the room sees it at once.
       if (existing.state.look?.contenderId === m.look?.contenderId) {
+        if ((existing.state.title ?? null) !== (m.title ?? null)) setTagText(existing.tag, existing.self ? `${m.name} (you)` : m.name, m.title ?? null);
         existing.state = { ...m };
         return;
       }
@@ -183,7 +194,7 @@ export class PlaceRenderer {
     this.scene.add(shadow);
     const tag = document.createElement('div');
     tag.className = `cr-place-tag${self ? ' is-self' : ''}${local ? ' is-local' : ''}`;
-    tag.textContent = local ? 'Local' : self ? `${m.name} (you)` : m.name;
+    setTagText(tag, local ? 'Local' : self ? `${m.name} (you)` : m.name, local ? null : (m.title ?? null));
     this.overlay.append(tag);
     this.avatars.set(m.id, {
       state: { ...m },

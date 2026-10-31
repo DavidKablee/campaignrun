@@ -8,6 +8,7 @@ const member = (id: string, over: Partial<PlaceMember> = {}): PlaceMember => ({
   name: id,
   seed: 1,
   look: null,
+  title: null,
   x: 0,
   z: 0,
   tx: 0,

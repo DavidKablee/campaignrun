@@ -138,15 +138,25 @@ test('players can switch to the national square, and become friends by tapping e
   // B sees the request and accepts; both now list each other as friends, online, in this place.
   await b.getByRole('button', { name: /^People here/ }).click();
   await b.getByRole('button', { name: /^Friends/ }).click();
-  await expect(b.getByRole('region', { name: 'Friends' })).toContainText(`fa_${suffix}`);
+  await expect(b.getByRole('region', { name: 'Campaign Phone' })).toContainText(`fa_${suffix}`);
   await b.getByRole('button', { name: 'Accept' }).click();
-  await expect(b.getByRole('region', { name: 'Friends' })).toContainText('In Enugu Park');
+  await expect(b.getByRole('region', { name: 'Campaign Phone' })).toContainText('In Enugu Park');
 
   // A switches rooms: the browser lists this room with the friend badge, and the square is one tap away.
-  await a.getByRole('button', { name: 'Rooms' }).click();
-  await expect(a.getByRole('region', { name: 'Rooms' })).toContainText('Enugu Park');
-  await expect(a.getByRole('region', { name: 'Rooms' })).toContainText('1 friend');
-  await a.getByRole('button', { name: /Naija Square/ }).last().click();
+  await a.getByRole('button', { name: 'Campaign Phone' }).click();
+  const phone = a.getByRole('region', { name: 'Campaign Phone' });
+  // The home screen lists the apps; Jobs shows today's three jobs and what they pay.
+  for (const app of ['Jobs', 'Friends', 'Rooms', 'Messages', 'Board', 'Convoy', 'Settings']) {
+    await expect(phone.getByRole('button', { name: new RegExp(`^${app}`) })).toBeVisible();
+  }
+  await phone.getByRole('button', { name: /^Jobs/ }).click();
+  await expect(phone.locator('.cr-phone-list').first().locator('li')).toHaveCount(3);
+  await a.screenshot({ path: `test-results/shots/places-phone-jobs-${test.info().project.name}.png` });
+  await phone.getByRole('button', { name: 'Back to the phone home' }).click();
+  await phone.getByRole('button', { name: /^Rooms/ }).click();
+  await expect(phone).toContainText('Enugu Park');
+  await expect(phone).toContainText('1 friend');
+  await phone.getByRole('button', { name: /Naija Square/ }).click();
   await expect(a.locator('.cr-places-title strong')).toContainText('Naija Square');
   await a.screenshot({ path: `test-results/shots/places-square-${test.info().project.name}.png` });
 
