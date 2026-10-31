@@ -257,10 +257,10 @@ export class PlaceRenderer {
     if (a) a.poseOverride = { pose, until: this.clock + seconds };
   }
 
-  say(id: string, what: { phrase?: string; emoji?: string }) {
+  say(id: string, what: { phrase?: string; emoji?: string; text?: string }) {
     const a = this.avatars.get(id);
     if (!a) return;
-    const text = what.emoji ?? (what.phrase ? this.phrasePhrases.get(what.phrase)?.[this.lang] : undefined);
+    const text = what.text ?? what.emoji ?? (what.phrase ? this.phrasePhrases.get(what.phrase)?.[this.lang] : undefined);
     if (!text) return;
     a.bubble?.remove();
     const el = document.createElement('div');
@@ -268,7 +268,7 @@ export class PlaceRenderer {
     el.textContent = text;
     this.overlay.append(el);
     a.bubble = el;
-    a.bubbleUntil = this.clock + (what.emoji ? 2.4 : 4.2);
+    a.bubbleUntil = this.clock + (what.emoji ? 2.4 : what.text ? 6 : 4.2);
   }
 
   showMarker(x: number, z: number) {

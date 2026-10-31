@@ -4589,6 +4589,32 @@ body,
   font-size: 0.78rem;
   color: var(--cr-surface-dim);
 }
+.cr-places-typebox {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.4rem;
+  align-items: center;
+}
+.cr-places-typebox input {
+  min-height: 48px;
+  min-width: 0;
+  padding: 0 1rem;
+  border: 0;
+  border-radius: 14px;
+  background: rgba(22, 32, 43, 0.08);
+  color: inherit;
+  font: inherit;
+  /* 16px stops iOS zooming the page when the box is focused */
+  font-size: 1rem;
+}
+.cr-places-typebox .cr-btn {
+  min-height: 48px;
+}
+.cr-places-typebox small {
+  grid-column: 1 / -1;
+  font-size: 0.78rem;
+  color: var(--cr-surface-dim);
+}
 .cr-places-card {
   display: flex;
   gap: 0.75rem;

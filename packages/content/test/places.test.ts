@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { analytics, clampToBounds, contenders, jobsForDay, parties, localsFor, distance, places, placesDay, stepToward } from '../src';
+import { legal, analytics, clampToBounds, contenders, jobsForDay, parties, localsFor, distance, places, placesDay, stepToward } from '../src';
 
 describe('Mobilise places (C82)', () => {
   it('has unique ids for kinds, actions and phrases', () => {
@@ -178,5 +178,18 @@ describe('Mobilise places (C82)', () => {
       expect(places.polls.seconds).toBeLessThanOrEqual(60);
       expect(places.polls.cooldownSeconds).toBeGreaterThanOrEqual(places.polls.seconds);
     });
+  });
+
+  it('typed chat settings are sane and the privacy copy states the retention the server enforces (C93)', () => {
+    const { chat } = places;
+    expect(chat.minAccountHours).toBeGreaterThanOrEqual(24);
+    expect(chat.maxChars).toBeLessThanOrEqual(80);
+    expect(chat.retentionHours).toBe(24);
+    expect(legal.privacyBody).toMatch(/kept on our server for 24 hours/);
+    for (const key of ['empty', 'too-long', 'links', 'numbers', 'flood', 'repeat', 'blocked']) {
+      expect(chat.reasons[key]?.en, key).toBeTruthy();
+      expect(chat.reasons[key]?.pcm, key).toBeTruthy();
+    }
+    for (const key of ['off', 'age', 'job']) expect(chat.locks[key]?.en, key).toBeTruthy();
   });
 });

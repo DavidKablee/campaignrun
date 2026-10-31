@@ -1422,5 +1422,61 @@
         ]
       }
     ]
+  },
+  "chat": {
+    "minAccountHours": 24,
+    "minJobsDone": 1,
+    "maxChars": 80,
+    "gapSeconds": 4,
+    "reportsToHide": 3,
+    "hideHours": 24,
+    "retentionHours": 24,
+    "strikesToCoolDown": 5,
+    "strikeWindowMinutes": 10,
+    "coolDownMinutes": 30,
+    "reasons": {
+      "empty": {
+        "en": "Type something first.",
+        "pcm": "Type something first."
+      },
+      "too-long": {
+        "en": "Keep it short, 80 characters at most.",
+        "pcm": "Make am short, 80 letters na im be maximum."
+      },
+      "links": {
+        "en": "Links and handles are not allowed here.",
+        "pcm": "Link and handle no allowed for here."
+      },
+      "numbers": {
+        "en": "Phone and account numbers are not allowed here.",
+        "pcm": "Phone or account number no allowed for here."
+      },
+      "flood": {
+        "en": "That looks like a flood of the same thing.",
+        "pcm": "You dey repeat the same thing too much."
+      },
+      "repeat": {
+        "en": "You just said that.",
+        "pcm": "You don talk that one just now."
+      },
+      "blocked": {
+        "en": "That message cannot be sent.",
+        "pcm": "We no fit send that message."
+      }
+    },
+    "locks": {
+      "off": {
+        "en": "Typed chat is switched off for now. Use the quick phrases.",
+        "pcm": "Typed chat dey off for now. Use the quick phrases."
+      },
+      "age": {
+        "en": "Typed chat opens 24 hours after you join.",
+        "pcm": "Typed chat go open 24 hours after you join."
+      },
+      "job": {
+        "en": "Finish one Campaign Job to unlock typed chat.",
+        "pcm": "Finish one Campaign Job to open typed chat."
+      }
+    }
   }
 }

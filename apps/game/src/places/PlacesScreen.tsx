@@ -15,8 +15,9 @@ import { PollCard } from './PollCard';
 
 /**
  * Mobilise (C82): a campaign place full of real players. Walk by tapping the ground, use the four
- * actions, say something from the preset list. There is no text box: the only things that can be said
- * are phrases and emoji from `places.json`.
+ * actions, say something from the preset list. The only things that can be said are phrases and emoji
+ * from `places.json`, plus, once the owner switches it on (C93) and only for an account that is old
+ * enough and has finished a job, a short typed line that the server judges before anyone sees it.
  */
 
 const REPORT_LABELS: Record<string, string> = {
@@ -274,6 +275,31 @@ export function PlacesScreen() {
     void usePlacesStore.getState().say(what);
     setSheet(null);
   }
+
+  const chat = store.chat;
+  const chatCopy = store.chatCopy;
+  const [typed, setTyped] = useState('');
+  const [typeNote, setTypeNote] = useState<string | null>(null);
+  const [typing, setTyping] = useState(false);
+
+  async function sendTyped() {
+    const text = typed.trim();
+    if (!text || typing) return;
+    setTyping(true);
+    const refused = await usePlacesStore.getState().type(text);
+    setTyping(false);
+    if (refused) setTypeNote(refused);
+    else {
+      setTyped('');
+      setTypeNote(null);
+      setSheet(null);
+    }
+  }
+
+  // The box only exists while the server switch is on; when it is off the tray is exactly the presets.
+  useEffect(() => {
+    if (sheet === 'say') void usePlacesStore.getState().loadChat();
+  }, [sheet]);
 
   const back = goBack;
 
@@ -549,6 +575,37 @@ export function PlacesScreen() {
               <Icon name="close" />
             </button>
           </div>
+          {chat?.enabled ? (
+            chat.canType ? (
+              <form
+                className="cr-places-typebox"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  void sendTyped();
+                }}
+              >
+                <input
+                  type="text"
+                  value={typed}
+                  maxLength={chat.maxChars}
+                  placeholder={lang === 'pcm' ? 'Type wetin you wan talk' : 'Type your own words'}
+                  aria-label="Type a message"
+                  autoComplete="off"
+                  enterKeyHint="send"
+                  onChange={(e) => {
+                    setTyped(e.target.value);
+                    setTypeNote(null);
+                  }}
+                />
+                <button type="submit" className="cr-btn" disabled={typing || typed.trim().length === 0}>
+                  Send
+                </button>
+                <small aria-live="polite">{typeNote ?? `${typed.length}/${chat.maxChars}`}</small>
+              </form>
+            ) : chat.lock && chatCopy?.locks[chat.lock] ? (
+              <p className="cr-places-note">{chatCopy.locks[chat.lock]![lang]}</p>
+            ) : null
+          ) : null}
           <div className="cr-places-emoji" aria-label="Reactions">
             {places.emoji.map((e) => (
               <button key={e} type="button" onClick={() => say({ emoji: e })} aria-label={`Send ${e}`}>
@@ -740,7 +797,7 @@ export function PlacesScreen() {
                   </button>
                 ))}
               </div>
-              <p className="cr-places-note">Reporting also mutes them for you. There is no free text, so we never see what you chose to say.</p>
+              <p className="cr-places-note">Reporting also mutes them for you. A report is a reason from a list{chat?.enabled ? '; if enough people report someone, their typed text is hidden from others' : ', so we never see what you chose to say'}.</p>
             </>
           )}
         </section>

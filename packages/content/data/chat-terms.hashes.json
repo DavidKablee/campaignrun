@@ -1,0 +1,1 @@
+{ "note": "SHA-256 hashes of normalised blocked chat terms (abuse, slurs, scam phrases). Regenerate with: node tools/hash-blocklist.mjs private/chat-terms.plain.txt packages/content/data/chat-terms.hashes.json. The plain list lives in private/ and is never committed.", "hashes": [] }

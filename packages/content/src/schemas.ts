@@ -736,6 +736,25 @@ export const placesSchema = z.object({
     actions: z.number().int().positive(),
   }),
   report: z.object({ reasons: z.array(z.string().regex(/^[a-z-]{3,24}$/)).min(1) }),
+  /**
+   * C93: typed chat. Ships dark (`CR_CHAT_ENABLED`). Who may type, the message rules, the safety loop and
+   * how long a message is kept for reports. `reasons` are what a refused sender is told; `locks` why the
+   * box is not there. Every number here is a policy the owner and a lawyer may change, not code.
+   */
+  chat: z.object({
+    minAccountHours: z.number().int().min(0),
+    minJobsDone: z.number().int().min(0),
+    maxChars: z.number().int().min(10).max(200),
+    gapSeconds: z.number().int().min(1),
+    reportsToHide: z.number().int().min(2),
+    hideHours: z.number().int().min(1),
+    retentionHours: z.number().int().min(1).max(72),
+    strikesToCoolDown: z.number().int().min(2),
+    strikeWindowMinutes: z.number().int().min(1),
+    coolDownMinutes: z.number().int().min(1),
+    reasons: z.record(z.string(), z.object({ en: z.string().min(3).max(80), pcm: z.string().min(3).max(80) })),
+    locks: z.record(z.string(), z.object({ en: z.string().min(3).max(80), pcm: z.string().min(3).max(80) })),
+  }),
 });
 export type PlacesConfig = z.infer<typeof placesSchema>;
 export type PlaceAction = z.infer<typeof placeActionSchema>;

@@ -187,6 +187,9 @@ export const placeSaySchema = z
   })
   .refine((v) => (v.phrase === undefined) !== (v.emoji === undefined), { message: 'one of phrase or emoji' });
 
+/** Typed chat (C93). Only the length is bounded here; the content rules are in placeChat.ts. */
+export const placeChatSchema = z.object({ text: z.string().min(1).max(places.chat.maxChars * 4) });
+
 export const placePollSchema = z.object({ pollId: z.enum(places.polls.items.map((q) => q.id) as [string, ...string[]]) });
 export const placeVoteSchema = z.object({ option: z.string().regex(/^[a-z]{3,12}$/) });
 

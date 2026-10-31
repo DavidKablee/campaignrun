@@ -6,7 +6,8 @@ import { distance, placeKey, places, stepToward, clampToBounds, type PlaceAction
  * In process memory on purpose: presence is "right now" and a restart clearing it is correct. It is
  * per-instance, so a second API process would split a place into two rooms; the BACKLOG note says
  * what to do (a shared pub/sub) if the API ever scales out. Nothing here is persisted and chat is
- * never stored: a phrase is an id that is relayed to the room and forgotten.
+ * never stored: a phrase is an id that is relayed to the room and forgotten. Typed text (C93) is relayed the same way; the
+ * API keeps a copy for 24 hours so a report can be reviewed, in the database, never here.
  *
  * The hub is deliberately free of HTTP and the database so the rules (capacity, cooldowns, company,
  * ttl) can be tested directly.
@@ -17,7 +18,7 @@ export type HubEvent =
   | { type: 'leave'; id: string }
   | { type: 'move'; id: string; x: number; z: number; tx: number; tz: number }
   | { type: 'act'; id: string; action: string }
-  | { type: 'say'; id: string; phrase?: string; emoji?: string }
+  | { type: 'say'; id: string; phrase?: string; emoji?: string; text?: string }
   | { type: 'poll'; poll: PollView }
   | { type: 'vote'; poll: PollView }
   | { type: 'pollend'; poll: PollView };
@@ -408,6 +409,20 @@ export class PlaceHub {
     if (!room) return;
     member.lastSeen = now;
     this.emit(room, { type: 'say', id: member.id, ...what });
+  }
+
+  /**
+   * C93: typed text, already judged by the chat rules. It is relayed live and not kept here. A shadowed
+   * message (the sender is cooling down after reports) is delivered to the sender alone, so they are
+   * not told and nobody else sees it.
+   */
+  sayText(member: Member, text: string, now: number, shadow = false): void {
+    const room = this.rooms.get(member.roomId);
+    if (!room) return;
+    member.lastSeen = now;
+    const event: HubEvent = { type: 'say', id: member.id, text };
+    if (shadow) for (const sink of member.sinks) sink(event);
+    else this.emit(room, event);
   }
 
   /** Drops players who went quiet. Called on a timer by the server and directly by tests. */

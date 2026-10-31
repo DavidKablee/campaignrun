@@ -235,3 +235,20 @@ create table if not exists place_titles (
   primary key (user_id, title_id)
 );
 
+
+-- C93 ----------------------------------------------------------------------
+-- Typed chat (ships dark, CR_CHAT_ENABLED). A message is relayed live; this copy exists only so a
+-- report can be reviewed, and rows are deleted after places.chat.retentionHours. Nothing else reads it.
+alter table users add column if not exists chat_hidden_until timestamptz;
+
+create table if not exists place_chat (
+  id         bigserial   primary key,
+  user_id    uuid        references users (id) on delete cascade,
+  place_key  text        not null,
+  body       text        not null,
+  shadowed   boolean     not null default false,
+  created_at timestamptz not null default now()
+);
+create index if not exists place_chat_created_idx on place_chat (created_at);
+create index if not exists place_chat_user_idx on place_chat (user_id, created_at desc);
+create index if not exists place_reports_reported_idx on place_reports (reported_id, created_at desc);

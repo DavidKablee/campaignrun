@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import { test, expect, type Browser, type Page } from '@playwright/test';
 
 /**
@@ -216,5 +217,45 @@ test('a link that names no real place is ignored', async ({ browser }) => {
   const page = await seeded(browser);
   await page.goto('/#mobilise=nowhere.moon');
   await expect(page.locator('.cr-screen--places')).toHaveCount(0);
+  await page.context().close();
+});
+
+// C93: typed chat ships dark. This needs the API started with CR_CHAT_ENABLED=true and E2E_DATABASE_URL
+// pointing at its database (to age the account and finish a job); it skips itself otherwise.
+test('a player who is old enough types a line and a refused one is dropped with a reason (C93)', async ({ browser, request }) => {
+  const health = await request.get(`${API}/api/health`).catch(() => null);
+  test.skip(!health?.ok(), 'API not running on 127.0.0.1:8787');
+  const dbUrl = process.env.E2E_DATABASE_URL;
+  test.skip(!dbUrl, 'E2E_DATABASE_URL not set');
+
+  const page = await seeded(browser);
+  const name = `typist_${Math.random().toString(36).slice(2, 7)}`;
+  const res = await page.context().request.post(`${API}/api/auth/guest`, { data: { username: name } });
+  expect(res.status()).toBe(201);
+  const status = await page.context().request.get(`${API}/api/places/chat`);
+  test.skip(!(((await status.json()) as { enabled: boolean }).enabled), 'API has CR_CHAT_ENABLED off');
+
+  execFileSync('psql', [
+    dbUrl!,
+    '-c',
+    `update users set created_at = now() - interval '2 days' where username = '${name}';
+     insert into place_jobs (user_id, day, job_id, progress, done_at) select id, current_date, 'e2e', 1, now() from users where username = '${name}';`,
+  ]);
+
+  await page.goto('/?debug#mobilise=kaduna.park');
+  await expect(page.locator('.cr-places-title strong')).toContainText('Kaduna Park');
+  await page.locator('.cr-place-action--say').click();
+  const box = page.getByLabel('Type a message');
+  await expect(box).toBeVisible();
+
+  await box.fill('call 08031234567');
+  await page.getByRole('button', { name: 'Send', exact: true }).click();
+  await expect(page.getByRole('region', { name: 'Say something' })).toContainText(/Phone and account numbers/);
+  // Locals chatter in bubbles of their own, so look for this text only.
+  await expect(page.locator('.cr-place-bubble', { hasText: '08031234567' })).toHaveCount(0);
+
+  await box.fill('Good morning Kaduna');
+  await page.getByRole('button', { name: 'Send', exact: true }).click();
+  await expect(page.locator('.cr-place-bubble', { hasText: 'Good morning Kaduna' })).toHaveCount(1);
   await page.context().close();
 });

@@ -4,7 +4,7 @@ import process from 'node:process';
 import console from 'node:console';
 
 const plainFile = process.argv[2] || 'private/blocklist.plain.txt';
-const outFile = 'packages/content/data/blocklist.hashes.json';
+const outFile = process.argv[3] || 'packages/content/data/blocklist.hashes.json';
 
 try {
   const words = readFileSync(plainFile, 'utf8')

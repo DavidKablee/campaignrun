@@ -6,7 +6,7 @@ export type PlaceEvent =
   | { type: 'leave'; id: string }
   | { type: 'move'; id: string; x: number; z: number; tx: number; tz: number }
   | { type: 'act'; id: string; action: string }
-  | { type: 'say'; id: string; phrase?: string; emoji?: string }
+  | { type: 'say'; id: string; phrase?: string; emoji?: string; text?: string }
   | { type: 'poll'; poll: PollView }
   | { type: 'vote'; poll: PollView }
   | { type: 'pollend'; poll: PollView };

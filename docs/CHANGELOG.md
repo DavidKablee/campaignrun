@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-31 — Typed chat, built and switched off (C93)
+
+Mobilise can now carry a short typed line, but nothing changes for players until the owner turns `CR_CHAT_ENABLED` on. When it is on, an account at least 24 hours old that has finished one Campaign Job gets a box in the Say tray (the phone's Messages tile): 80 characters, one message every 4 seconds, no links, handles, emails or phone and account numbers, no floods or repeats, and a hashed word filter. A refused message tells the sender why and reaches no one. Five refusals in ten minutes, or reports from three different people, hide that player's text from everyone else (they still see their own) for a while. Messages are relayed live and kept 24 hours for report review, then deleted. `pnpm --filter @cr/api report chat` lists reported players with what they typed and can lift or apply a hide. The privacy text now says what is kept. Not for production until the lawyer review, native-speaker filter test and abuse-term list described in `docs/chunks/C93.md`.
+
 ## 2026-10-31 — Talk: topic packs, polls and a Board strip (C92)
 
 The Say tray went from 12 phrases to about 150 across 12 topics (Greet, Chat, Market, Food, Football, Music, Transport, Our area, Our state, Campaign talk, Banter, Weekend), in English and Pidgin, with a Recent row of what you said last. Anyone can start a room poll from a fixed list ("Jollof: party or home?"); the room votes once each and sees live counts. The Board now shows the three most active states in Mobilise today. A tray with a long list no longer squashes the topic chips above it. Details in `docs/chunks/C92.md`.

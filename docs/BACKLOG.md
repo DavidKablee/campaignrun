@@ -25,7 +25,9 @@ Work only the current chunk (`docs/STATUS.md`). Do not start later chunks early.
 | C90 | built | Rooms you can switch, national square, friends (`docs/chunks/C90.md`) |
 | C91 | built | Campaign Phone, daily jobs, streak and titles (`docs/chunks/C91.md`) |
 | C92 | built | Topic packs (~150 phrases), room polls, Board activity strip (`docs/chunks/C92.md`) |
-| C89–C93 | planned | Mobilise v2: Contender avatars (opt-in), rooms and friends, Campaign Phone + jobs + streak, preset packs, typed chat after 24 h (dark) |
+| C93 | built (dark) | Typed chat after 24 h, off until the launch gate is met (`docs/chunks/C93.md`) |
+| C93 gate | needs a person | Lawyer review (Cybercrimes Act, data protection); abuse and scam terms hashed into `chat-terms.hashes.json` from a private list (English and Pidgin); filter tested with native speakers; someone assigned to `report chat` daily; then set `CR_CHAT_ENABLED=true` |
+| Mobilise later | idea | Rally Hours, Crews with weekly goals, shareable rally card, co-op mini-rally, weekly event tied to the Weekly Tour; Radio and Camera phone tiles; splash "jobs done" reminder |
 | C13–C19 | reviewed | See `docs/research/c13-c19-review.md`. C19-lite, C18-lite and the C14 check are built (C81) and C16 was already closed. Deferred: C15, C17. Skipped: C13, the prize flow |
 
 ## Outside the current chunk

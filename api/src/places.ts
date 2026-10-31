@@ -5,10 +5,12 @@ import type { Db } from './db.ts';
 import { REQUIRE_VERIFIED_FOR_BOARDS, LIMITS } from './limits.ts';
 import { PlaceHub, type HubEvent } from './placesHub.ts';
 import { createJobs, type GrantResult } from './placeJobs.ts';
+import { createChat, type Chat } from './placeChat.ts';
 import { hit, rateLimit } from './rateLimit.ts';
 import type { SessionUser } from './auth.ts';
 import {
   placeActSchema,
+  placeChatSchema,
   placeFriendRequestSchema,
   placeFriendSchema,
   placeIdentitySchema,
@@ -49,12 +51,16 @@ export interface Reward {
 
 export function registerPlaces(
   app: Hono<Env>,
-  deps: { database: Db; requireUser: MiddlewareHandler<Env>; now: () => number; hub?: PlaceHub },
+  deps: { database: Db; requireUser: MiddlewareHandler<Env>; now: () => number; hub?: PlaceHub; chat?: Chat },
 ): PlaceHub {
   const { database, requireUser, now } = deps;
   const hub = deps.hub ?? new PlaceHub();
+  const chat = deps.chat ?? createChat({ database, now });
   const sweeper = setInterval(() => hub.sweep(now()), 5_000);
   sweeper.unref?.();
+  // Typed messages are kept only so a report can be reviewed; this is what deletes them (C93).
+  const purger = setInterval(() => void chat.purge().catch(() => undefined), 10 * MINUTE);
+  purger.unref?.();
 
   async function todayTotals(userId: string): Promise<DailyTotals> {
     const { rows } = await database.query<DailyTotals>(
@@ -142,6 +148,7 @@ export function registerPlaces(
     topics: places.topics,
     phrases: places.phrases,
     polls: places.polls,
+    chatCopy: { reasons: places.chat.reasons, locks: places.chat.locks },
     emoji: places.emoji,
     daily: places.daily,
     bounds: places.bounds,
@@ -197,6 +204,7 @@ export function registerPlaces(
       members: hub.snapshot(room.id, t),
       today: await todayTotals(user.id),
       identity,
+      chat: await chat.status(user.id),
       ...catalogue(),
     });
   });
@@ -468,6 +476,32 @@ export function registerPlaces(
     return c.json({ progress: await jobs.record(user.id, { type: 'say' }) });
   });
 
+  // C93: typed chat. Ships dark: with CR_CHAT_ENABLED off, every call here says so and the client
+  // falls back to the preset phrases. A refusal tells the sender why and is never shown to anyone else.
+  app.get('/api/places/chat', requireUser, async (c) => {
+    c.header('cache-control', 'no-store');
+    return c.json(await chat.status(c.get('user').id));
+  });
+
+  app.post('/api/places/rooms/:roomId/chat', requireUser, async (c) => {
+    const user = c.get('user');
+    if (!hit(`place-chat:${user.id}`, LIMITS.placeSayPerMinutePerUser, MINUTE).ok) return c.json({ error: 'rate-limited' }, 429);
+    const parsed = placeChatSchema.safeParse(await c.req.json().catch(() => null));
+    if (!parsed.success) return c.json({ error: 'invalid' }, 400);
+    const roomId = c.req.param('roomId');
+    const member = memberOf(user, roomId);
+    if (!member) return c.json({ error: 'not-in-room' }, 404);
+    const res = await chat.send(user.id, roomId.split('#')[0]!, parsed.data.text);
+    if (!res.ok) {
+      if (res.error === 'chat-locked') return c.json({ error: res.error, lock: res.lock }, 403);
+      if (res.error === 'rate-limited') return c.json({ error: res.error, retryAfter: res.retryAfter }, 429);
+      // `field` is how the client's ApiError carries the reason.
+      return c.json({ error: res.error, field: res.reason, reason: res.reason }, 422);
+    }
+    hub.sayText(member, res.text, now(), res.shadow);
+    return c.json({ progress: await jobs.record(user.id, { type: 'say' }) });
+  });
+
   // Start a poll from the fixed list. Starting one counts as saying something for the day's jobs.
   app.post('/api/places/rooms/:roomId/poll', requireUser, async (c) => {
     const user = c.get('user');
@@ -508,6 +542,8 @@ export function registerPlaces(
       'insert into place_reports (reporter_id, reported_id, place_key, reason) values ($1, $2, $3, $4)',
       [user.id, reported, roomId.split('#')[0], parsed.data.reason],
     );
+    // Enough different people reporting hides this player's typed text from others for a while.
+    await chat.afterReport(reported);
     return c.body(null, 201);
   });
 

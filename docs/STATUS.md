@@ -1,6 +1,8 @@
 # Status
 
 **Current chunk:** C48 done. C35–C48: parties and the campaign map (C35), the map as a world map (C36), accounts/API/database (C37), the Lagos Life UI chrome (C38), the four menu screens (C39), the roster and result screens (C40), the account layer made safe to expose (C41), two ways to sign in (C42), the look editor (C43), the ride ladder (C44), the road under it (C45), the thumb that drives it (C46), the screens that hold it (C47) and the economy that pays for it (C48). Next: a mail provider, then deploy — or the real-device playtest owed by every track, which C46–C48 have now made overdue rather than merely outstanding.
+**C93 (2026-10-31):** Typed chat is built and ships dark (`CR_CHAT_ENABLED`): 24-hour account age plus one finished job, 80 characters, 4-second gap, no links or numbers, hashed word filter, strikes and three-reporter hide, 24-hour retention, review tool `report chat`, privacy copy updated. Next: lawyer review, abuse-term list and native-speaker filter test before it is turned on anywhere. Mobilise v2 (C88–C93) is complete.
+
 **C92 (2026-10-31):** Talk: 12 topic packs and about 150 preset phrases in English and Pidgin, recents, room polls, and the Board's "Most active in Mobilise today" strip. Next: C93 typed chat (built, ships dark). Pidgin lines still need a native reviewer.
 
 **C91 (2026-10-31):** The Campaign Phone (Jobs, Friends, Rooms, Messages, Board, Convoy, Settings), three daily Campaign Jobs, a streak with four titles worn on the name tag. Next: C92 bigger presets, polls and a Board strip; then C93 typed chat (dark).

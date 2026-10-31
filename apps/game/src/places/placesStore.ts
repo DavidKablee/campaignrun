@@ -33,6 +33,22 @@ interface JoinResponse {
   identity: Identity;
   progress: JobsProgress | null;
   poll: { poll: PollView; voted: string | null } | null;
+  chat: ChatStatus;
+  chatCopy: ChatCopy;
+}
+
+/** C93: whether this player can type to the room, and why not. Ships dark: `enabled` is false until the owner turns it on. */
+export interface ChatStatus {
+  enabled: boolean;
+  canType: boolean;
+  lock: 'off' | 'age' | 'job' | null;
+  maxChars: number;
+  gapSeconds: number;
+}
+
+interface ChatCopy {
+  reasons: Record<string, { en: string; pcm: string }>;
+  locks: Record<string, { en: string; pcm: string }>;
 }
 
 /** A row of the room browser: where, how many, and how many of them are the player's friends. */
@@ -116,6 +132,11 @@ interface PlacesState {
   mutedNames: string[];
   isMuted: (memberId: string) => boolean;
   poll: ActivePoll | null;
+  chat: ChatStatus | null;
+  chatCopy: ChatCopy | null;
+  loadChat: () => Promise<void>;
+  /** Send typed text. Resolves to a reason to show the sender, or null when it went through. */
+  type: (text: string) => Promise<string | null>;
   /** Start one of the preset polls for the room. */
   startPoll: (pollId: string) => Promise<void>;
   vote: (option: string) => Promise<void>;
@@ -247,6 +268,8 @@ export const usePlacesStore = create<PlacesState>()((set, get) => {
       return !!m && get().mutedNames.includes(m.name);
     },
     poll: null,
+    chat: null,
+    chatCopy: null,
     jobs: null,
     rooms: [],
     roomsBusyAt: 10,
@@ -305,6 +328,8 @@ export const usePlacesStore = create<PlacesState>()((set, get) => {
           identity: res.identity,
           availability: 'up',
           poll: res.poll ? pollFromView(res.poll.poll, Date.now(), res.poll.voted) : null,
+          chat: res.chat,
+          chatCopy: res.chatCopy,
           toast: res.requested && res.landed === 'assigned' ? 'That room was full, so you are in another one.' : null,
         });
         applyProgress(res.progress);
@@ -368,6 +393,35 @@ export const usePlacesStore = create<PlacesState>()((set, get) => {
         track('place_say', get().stateId);
       } catch {
         /* a dropped phrase is not worth a message */
+      }
+    },
+
+    async loadChat() {
+      try {
+        set({ chat: await apiGet<ChatStatus>('/api/places/chat') });
+      } catch {
+        /* keep what the join said */
+      }
+    },
+
+    async type(text) {
+      const { roomId, chatCopy, lang } = get();
+      if (!roomId) return null;
+      const say = (group: 'reasons' | 'locks', key: string, fallback: string) => chatCopy?.[group][key]?.[lang] ?? fallback;
+      try {
+        const res = await apiPost<{ progress: JobsProgress | null }>(`/api/places/rooms/${encodeURIComponent(roomId)}/chat`, { text });
+        applyProgress(res.progress);
+        track('place_chat', get().stateId);
+        return null;
+      } catch (err) {
+        if (!(err instanceof ApiError)) return 'Could not reach the field. Try again.';
+        if (err.code === 'rate-limited') return `Slow down a little${err.retryAfter ? `, try again in ${err.retryAfter}s` : ''}.`;
+        if (err.code === 'chat-locked') {
+          await get().loadChat();
+          return say('locks', get().chat?.lock ?? 'off', 'Typed chat is not open for you yet.');
+        }
+        if (err.code === 'refused') return say('reasons', err.field ?? 'blocked', 'That message cannot be sent.');
+        return 'That message cannot be sent.';
       }
     },
 

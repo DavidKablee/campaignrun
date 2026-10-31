@@ -174,6 +174,7 @@ pull request.
 | `CR_COOKIE_SECURE` | on in production | |
 | `CR_TRUST_PROXY` | `false` | Read `x-forwarded-for`. Only turn this on behind a proxy that **overwrites** the header — anyone can send it, and trusting it makes every IP limit decorative. |
 | `CR_REQUIRE_VERIFIED` | `true` | Public boards and standings count confirmed addresses only. |
+| `CR_CHAT_ENABLED` | off | Typed chat in Mobilise (C93). Leave it off in production until the launch gate in `docs/chunks/C93.md` is met. Unset or anything but `true` means presets only. |
 | `CR_MIN_PLAYERS` | from `map.json` (200) | Privacy floor for publishing a region's party breakdown. |
 | `CR_ALLOW_NO_MAIL` | `false` | Boot in production without a mail provider. Verification and reset links then only reach the server log — staging only. |
 
