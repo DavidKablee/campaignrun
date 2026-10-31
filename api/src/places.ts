@@ -8,6 +8,8 @@ import { hit, rateLimit } from './rateLimit.ts';
 import type { SessionUser } from './auth.ts';
 import {
   placeActSchema,
+  placeFriendRequestSchema,
+  placeFriendSchema,
   placeIdentitySchema,
   placeJoinSchema,
   placeMoveSchema,
@@ -59,15 +61,18 @@ export function registerPlaces(
   }
 
   /** Pays an action, never beyond the day's caps, and counts it for the state's activity on the Board. */
-  async function pay(user: SessionUser, stateId: string, actionId: string): Promise<Reward> {
+  async function pay(user: SessionUser, stateId: string, actionId: string, solo = false): Promise<Reward> {
     const action = places.actions.find((a) => a.id === actionId)!;
+    // An action that needs company, done with only Locals near, pays a share of its reward.
+    const pct = solo ? action.soloPercent : 100;
+    const want = { coins: Math.floor((action.coins * pct) / 100), supporters: Math.floor((action.supporters * pct) / 100) };
     const before = await todayTotals(user.id);
     const room = places.daily;
     const canPay = before.actions < room.actions;
-    const coins = canPay ? Math.min(action.coins, room.coins - before.coins) : 0;
-    const supporters = canPay ? Math.min(action.supporters, room.supporters - before.supporters) : 0;
-    const capped = !canPay || coins < action.coins || supporters < action.supporters;
-    if (action.coins === 0 && action.supporters === 0) return { coins: 0, supporters: 0, capped: false, today: before };
+    const coins = canPay ? Math.min(want.coins, room.coins - before.coins) : 0;
+    const supporters = canPay ? Math.min(want.supporters, room.supporters - before.supporters) : 0;
+    const capped = !canPay || coins < want.coins || supporters < want.supporters;
+    if (want.coins === 0 && want.supporters === 0) return { coins: 0, supporters: 0, capped: false, today: before };
 
     const day = placesDay(now());
     const { rows } = await database.query<DailyTotals>(
@@ -81,7 +86,8 @@ export function registerPlaces(
 
     // Activity is what a state's Board shows. It follows the standings rule: only accounts that
     // confirmed an address count, unless this is a local demo with that check off.
-    const counts = canPay && action.activity > 0 && (!REQUIRE_VERIFIED_FOR_BOARDS || user.emailVerifiedAt !== null);
+    // The national square belongs to no state, and a solo rally adds no activity to one.
+    const counts = canPay && !solo && stateId !== places.square.stateId && action.activity > 0 && (!REQUIRE_VERIFIED_FOR_BOARDS || user.emailVerifiedAt !== null);
     if (counts) {
       await database.query(
         `insert into place_activity (state_id, day, points) values ($1, $2, $3)
@@ -108,6 +114,7 @@ export function registerPlaces(
 
   const catalogue = () => ({
     kinds: places.kinds,
+    square: places.square,
     actions: places.actions,
     phrases: places.phrases,
     emoji: places.emoji,
@@ -144,15 +151,19 @@ export function registerPlaces(
     const user = c.get('user');
     const t = now();
     const identity = await identityOf(user.id);
-    const { member, room } = hub.join(
+    const { member, room, landed } = hub.join(
       { id: user.id, username: user.username },
       parsed.data.stateId,
       parsed.data.kind,
       identity.contenderId ? { contenderId: identity.contenderId } : null,
       t,
+      parsed.data.roomId ?? null,
     );
     return c.json({
       roomId: room.id,
+      // 'assigned' when a requested room was full or gone, so the player is told they landed elsewhere.
+      landed,
+      requested: parsed.data.roomId ?? null,
       you: member.id,
       members: hub.snapshot(room.id, t),
       today: await todayTotals(user.id),
@@ -178,6 +189,172 @@ export function registerPlaces(
     ]);
     hub.setLook(user.id, parsed.data.contenderId ? { contenderId: parsed.data.contenderId } : null, now());
     return c.json({ asked: true, contenderId: parsed.data.contenderId });
+  });
+
+  // ---- C90: friends and the room browser ----------------------------------
+
+  async function friendIdsOf(userId: string): Promise<string[]> {
+    const { rows } = await database.query<{ other_id: string }>(
+      "select other_id from place_friends where user_id = $1 and status = 'accepted'",
+      [userId],
+    );
+    return rows.map((r) => r.other_id);
+  }
+
+  async function userByName(name: string): Promise<{ id: string; username: string } | null> {
+    const { rows } = await database.query<{ id: string; username: string }>(
+      'select id, username from users where lower(username) = lower($1)',
+      [name],
+    );
+    return rows[0] ?? null;
+  }
+
+  async function count(userId: string, status: string): Promise<number> {
+    const { rows } = await database.query<{ n: string }>(
+      'select count(*)::int as n from place_friends where user_id = $1 and status = $2',
+      [userId, status],
+    );
+    return Number(rows[0]?.n ?? 0);
+  }
+
+  // Rooms with people in them, friends' rooms first, then the player's own state, then the busiest.
+  app.get('/api/places/rooms', requireUser, async (c) => {
+    const user = c.get('user');
+    const state = c.req.query('state');
+    const friends = new Set(await friendIdsOf(user.id));
+    const rows = hub.listRooms().map((r) => ({
+      ...r,
+      friends: hub.userIdsIn(r.roomId).filter((id) => friends.has(id)).length,
+    }));
+    rows.sort(
+      (a, b) =>
+        b.friends - a.friends ||
+        Number(b.stateId === state) - Number(a.stateId === state) ||
+        b.count - a.count ||
+        a.roomId.localeCompare(b.roomId),
+    );
+    c.header('cache-control', 'no-store');
+    return c.json({ rooms: rows.slice(0, places.rooms.listMax), busyAt: places.rooms.busyAt });
+  });
+
+  app.get('/api/places/friends', requireUser, async (c) => {
+    const user = c.get('user');
+    const { rows } = await database.query<{ other_id: string; username: string; status: string; mine: boolean }>(
+      `select f.other_id, u.username, f.status, true as mine
+         from place_friends f join users u on u.id = f.other_id where f.user_id = $1 and f.status in ('accepted', 'pending')
+       union all
+       select f.user_id, u.username, f.status, false
+         from place_friends f join users u on u.id = f.user_id where f.other_id = $1 and f.status = 'pending'`,
+      [user.id],
+    );
+    const friends = rows
+      .filter((r) => r.status === 'accepted')
+      .map((r) => {
+        const at = hub.whereIs(r.other_id);
+        return { name: r.username, online: at !== null, roomId: at?.roomId ?? null };
+      })
+      .sort((a, b) => Number(b.online) - Number(a.online) || a.name.localeCompare(b.name));
+    const incoming = rows.filter((r) => r.status === 'pending' && !r.mine).map((r) => ({ name: r.username }));
+    const outgoing = rows.filter((r) => r.status === 'pending' && r.mine).map((r) => ({ name: r.username }));
+    c.header('cache-control', 'no-store');
+    return c.json({ friends, incoming, outgoing, max: places.friends.max });
+  });
+
+  // Ask someone in your room to be friends by tapping them. No names are typed.
+  app.post('/api/places/rooms/:roomId/friend', requireUser, async (c) => {
+    const user = c.get('user');
+    if (!hit(`place-friend:${user.id}`, 30, 60 * MINUTE).ok) return c.json({ error: 'rate-limited' }, 429);
+    const parsed = placeFriendRequestSchema.safeParse(await c.req.json().catch(() => null));
+    if (!parsed.success) return c.json({ error: 'invalid' }, 400);
+    const roomId = c.req.param('roomId');
+    if (!memberOf(user, roomId)) return c.json({ error: 'not-in-room' }, 404);
+    const target = hub.userIdOf(roomId, parsed.data.memberId);
+    if (!target) return c.json({ error: 'not-found' }, 404);
+    if (target === user.id) return c.json({ error: 'invalid' }, 400);
+
+    const { rows: mine } = await database.query<{ status: string }>(
+      'select status from place_friends where user_id = $1 and other_id = $2',
+      [user.id, target],
+    );
+    if (mine[0]?.status === 'blocked') return c.json({ error: 'blocked' }, 409);
+    if (mine[0]) return c.json({ status: mine[0].status });
+    const { rows: theirs } = await database.query<{ status: string }>(
+      'select status from place_friends where user_id = $1 and other_id = $2',
+      [target, user.id],
+    );
+    // Someone who blocked you looks exactly like a request that was never answered.
+    if (theirs[0]?.status === 'blocked') return c.json({ status: 'pending' }, 201);
+    if ((await count(user.id, 'accepted')) >= places.friends.max) return c.json({ error: 'friends-full' }, 409);
+
+    if (theirs[0]?.status === 'pending') {
+      await database.query(
+        `update place_friends set status = 'accepted' where user_id = $1 and other_id = $2;`,
+        [target, user.id],
+      );
+      await database.query(
+        `insert into place_friends (user_id, other_id, status) values ($1, $2, 'accepted') on conflict do nothing`,
+        [user.id, target],
+      );
+      return c.json({ status: 'accepted' }, 201);
+    }
+    if ((await count(user.id, 'pending')) >= places.friends.max) return c.json({ error: 'friends-full' }, 409);
+    await database.query(`insert into place_friends (user_id, other_id, status) values ($1, $2, 'pending')`, [user.id, target]);
+    return c.json({ status: 'pending' }, 201);
+  });
+
+  app.post('/api/places/friends/accept', requireUser, async (c) => {
+    const user = c.get('user');
+    const parsed = placeFriendSchema.safeParse(await c.req.json().catch(() => null));
+    if (!parsed.success) return c.json({ error: 'invalid' }, 400);
+    const other = await userByName(parsed.data.name);
+    if (!other) return c.json({ error: 'not-found' }, 404);
+    const { rows: pending } = await database.query(
+      `update place_friends set status = 'accepted' where user_id = $1 and other_id = $2 and status = 'pending' returning user_id`,
+      [other.id, user.id],
+    );
+    if (pending.length === 0) return c.json({ error: 'not-found' }, 404);
+    if ((await count(user.id, 'accepted')) >= places.friends.max) {
+      await database.query(`update place_friends set status = 'pending' where user_id = $1 and other_id = $2`, [other.id, user.id]);
+      return c.json({ error: 'friends-full' }, 409);
+    }
+    await database.query(
+      `insert into place_friends (user_id, other_id, status) values ($1, $2, 'accepted') on conflict do nothing`,
+      [user.id, other.id],
+    );
+    return c.json({ status: 'accepted' });
+  });
+
+  // Decline, cancel, unfriend and unblock are all "remove the link".
+  app.post('/api/places/friends/remove', requireUser, async (c) => {
+    const user = c.get('user');
+    const parsed = placeFriendSchema.safeParse(await c.req.json().catch(() => null));
+    if (!parsed.success) return c.json({ error: 'invalid' }, 400);
+    const other = await userByName(parsed.data.name);
+    if (other) {
+      await database.query(
+        `delete from place_friends
+          where (user_id = $1 and other_id = $2) or (user_id = $2 and other_id = $1 and status <> 'blocked')`,
+        [user.id, other.id],
+      );
+    }
+    return c.body(null, 204);
+  });
+
+  app.post('/api/places/friends/block', requireUser, async (c) => {
+    const user = c.get('user');
+    const parsed = placeFriendSchema.safeParse(await c.req.json().catch(() => null));
+    if (!parsed.success) return c.json({ error: 'invalid' }, 400);
+    const other = await userByName(parsed.data.name);
+    if (!other || other.id === user.id) return c.json({ error: 'not-found' }, 404);
+    await database.query(
+      `delete from place_friends where (user_id = $1 and other_id = $2) or (user_id = $2 and other_id = $1 and status <> 'blocked')`,
+      [user.id, other.id],
+    );
+    await database.query(`insert into place_friends (user_id, other_id, status) values ($1, $2, 'blocked') on conflict do nothing`, [
+      user.id,
+      other.id,
+    ]);
+    return c.body(null, 204);
   });
 
   app.get('/api/places/rooms/:roomId/stream', requireUser, (c) => {
@@ -227,7 +404,7 @@ export function registerPlaces(
       return c.json({ error: result.reason }, 409);
     }
     const stateId = roomId.split(':')[0]!;
-    return c.json({ action: action.id, reward: await pay(user, stateId, action.id) });
+    return c.json({ action: action.id, reward: await pay(user, stateId, action.id, result.solo) });
   });
 
   app.post('/api/places/rooms/:roomId/say', requireUser, async (c) => {

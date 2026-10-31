@@ -5133,3 +5133,58 @@ body,
   background: rgba(22, 32, 43, 0.1);
   color: var(--cr-surface-ink);
 }
+
+/* C90: rooms and friends sheets reuse the people list; rows get a small second line and quick buttons. */
+.cr-places-link {
+  min-height: 44px;
+  padding: 0 0.8rem;
+  border-radius: 14px;
+  background: rgba(22, 32, 43, 0.08);
+  margin-left: auto;
+}
+.cr-places-rooms button {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  padding-block: 0.45rem;
+}
+.cr-places-rooms small {
+  margin-left: 0;
+  text-align: left;
+}
+.cr-places-friendrow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 48px;
+  padding: 0 0.4rem 0 0.8rem;
+  border-radius: 14px;
+  background: rgba(22, 32, 43, 0.08);
+}
+.cr-places-friendrow > span {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.cr-places-friendrow small {
+  margin: 0;
+  opacity: 0.7;
+}
+.cr-places-friendrow button {
+  width: auto;
+  flex: none;
+  min-height: 44px;
+  padding: 0 0.8rem;
+  border-radius: 12px;
+  background: rgba(22, 32, 43, 0.1);
+}
+.cr-places-friendrow .is-go {
+  background: var(--cr-green);
+  color: #fff;
+}
+.cr-places-kinds .cr-chip {
+  flex: none;
+  white-space: nowrap;
+}
+

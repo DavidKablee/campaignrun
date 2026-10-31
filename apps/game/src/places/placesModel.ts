@@ -1,4 +1,4 @@
-import { places, stateIndex, stepToward, type PlaceAction } from '@cr/content';
+import { isPlace, placeKey, places, stepToward, type PlaceAction } from '@cr/content';
 
 /** What the server tells everyone in a room. Mirrors `HubEvent` in the API. */
 export type PlaceEvent =
@@ -58,17 +58,33 @@ export function rewardLine(r: { coins: number; supporters: number; capped: boole
   return parts.join(' · ') + (r.capped ? ' · daily limit reached' : '');
 }
 
-/** The address that lands a friend in the same place: `#mobilise=<state>.<kind>`. */
-export function inviteHash(stateId: string, kind: string): string {
-  return `#mobilise=${stateId}.${kind}`;
+/**
+ * The address that lands a friend in the same place: `#mobilise=<state>.<kind>`, or with a room
+ * number, `#mobilise=<state>.<kind>.3`, which asks for that exact room (if it still has space).
+ */
+export function inviteHash(stateId: string, kind: string, roomId?: string | null): string {
+  const n = roomId ? /#(\d{1,6})$/.exec(roomId)?.[1] : undefined;
+  return `#mobilise=${stateId}.${kind}${n ? `.${n}` : ''}`;
 }
 
-/** Reads an invite from an address bar hash. Anything that is not a known state and kind is ignored. */
-export function parseInvite(hash: string): { stateId: string; kind: string } | null {
-  const m = /^#mobilise=([a-z0-9-]+)\.([a-z]+)$/.exec(hash);
+export interface PlaceTarget {
+  stateId: string;
+  kind: string;
+  /** A room to prefer, `kano:market#3`. */
+  roomId?: string;
+}
+
+/** Reads an invite from an address bar hash. Anything that is not a known place is ignored. */
+export function parseInvite(hash: string): PlaceTarget | null {
+  const m = /^#mobilise=([a-z0-9-]+)\.([a-z]+)(?:\.(\d{1,6}))?$/.exec(hash);
   if (!m) return null;
-  const [, stateId, kind] = m as unknown as [string, string, string];
-  if (!stateIndex.some((s) => s.id === stateId)) return null;
-  if (!places.kinds.some((k) => k.id === kind)) return null;
-  return { stateId, kind };
+  const [, stateId, kind, room] = m as unknown as [string, string, string, string | undefined];
+  if (!isPlace(stateId, kind)) return null;
+  return room ? { stateId, kind, roomId: `${placeKey(stateId, kind)}#${room}` } : { stateId, kind };
+}
+
+/** Splits `kano:market#3` into the place it is in. */
+export function roomPlace(roomId: string): { stateId: string; kind: string } | null {
+  const m = /^([a-z0-9-]+):([a-z]+)#\d+$/.exec(roomId);
+  return m && isPlace(m[1]!, m[2]!) ? { stateId: m[1]!, kind: m[2]! } : null;
 }

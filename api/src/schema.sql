@@ -190,3 +190,17 @@ create table if not exists place_reports (
   reason      text        not null,
   created_at  timestamptz not null default now()
 );
+
+-- C90 ----------------------------------------------------------------------
+-- Mobilise friends. A pending request is one row (requester, target). Accepting it makes both
+-- directions 'accepted'. A block is one row (blocker, blocked) and removes any link the other way.
+-- Names are never typed: a request is made by tapping a player in your room.
+create table if not exists place_friends (
+  user_id    uuid        not null references users (id) on delete cascade,
+  other_id   uuid        not null references users (id) on delete cascade,
+  status     text        not null check (status in ('pending', 'accepted', 'blocked')),
+  created_at timestamptz not null default now(),
+  primary key (user_id, other_id),
+  check (user_id <> other_id)
+);
+create index if not exists place_friends_other_idx on place_friends (other_id);

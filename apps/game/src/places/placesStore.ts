@@ -24,10 +24,52 @@ export interface Identity {
 
 interface JoinResponse {
   roomId: string;
+  /** 'assigned' when the room that was asked for was full or gone. */
+  landed: 'requested' | 'assigned';
+  requested: string | null;
   you: string;
   members: PlaceMember[];
   today: Today;
   identity: Identity;
+}
+
+/** A row of the room browser: where, how many, and how many of them are the player's friends. */
+export interface RoomRow {
+  roomId: string;
+  key: string;
+  stateId: string;
+  kind: string;
+  count: number;
+  capacity: number;
+  friends: number;
+}
+
+export interface FriendsState {
+  friends: { name: string; online: boolean; roomId: string | null }[];
+  incoming: { name: string }[];
+  outgoing: { name: string }[];
+  max: number;
+}
+
+const MUTED_KEY = 'cr-places-muted';
+const MUTED_MAX = 200;
+
+/** Mutes are kept by board name, so they hold when the player moves rooms or comes back another day. */
+function loadMuted(): string[] {
+  try {
+    const v: unknown = JSON.parse(localStorage.getItem(MUTED_KEY) ?? '[]');
+    return Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string').slice(0, MUTED_MAX) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveMuted(names: string[]) {
+  try {
+    localStorage.setItem(MUTED_KEY, JSON.stringify(names.slice(-MUTED_MAX)));
+  } catch {
+    /* private mode: the mute holds for this visit only */
+  }
 }
 
 export interface Today {
@@ -51,14 +93,27 @@ interface PlacesState {
   toast: string | null;
   /** Action id -> when it can be used again (ms epoch), for the cooldown rings. */
   ready: Record<string, number>;
-  muted: string[];
+  /** Board names this player muted. Kept on the device. */
+  mutedNames: string[];
+  isMuted: (memberId: string) => boolean;
+  rooms: RoomRow[];
+  roomsBusyAt: number;
+  loadRooms: () => Promise<void>;
+  friends: FriendsState | null;
+  loadFriends: () => Promise<void>;
+  /** Ask the person you tapped to be friends. Returns what came of it. */
+  befriend: (memberId: string) => Promise<'pending' | 'accepted' | 'failed'>;
+  acceptFriend: (name: string) => Promise<void>;
+  /** Decline, cancel, unfriend or unblock: remove the link. */
+  removeFriend: (name: string) => Promise<void>;
+  blockPlayer: (memberId: string) => Promise<void>;
   lang: 'en' | 'pcm';
   identity: Identity | null;
   loadIdentity: () => Promise<void>;
   /** Show this Contender in places, or null to be a plain citizen. Saves to the account. */
   setIdentity: (contenderId: string | null) => Promise<boolean>;
   probe: (stateId: string) => Promise<void>;
-  join: (stateId: string, kind: string) => Promise<void>;
+  join: (stateId: string, kind: string, roomId?: string | null) => Promise<void>;
   leave: () => Promise<void>;
   moveTo: (x: number, z: number) => void;
   act: (action: PlaceAction) => Promise<void>;
@@ -131,7 +186,14 @@ export const usePlacesStore = create<PlacesState>()((set, get) => {
     today: { coins: 0, supporters: 0, actions: 0 },
     toast: null,
     ready: {},
-    muted: [],
+    mutedNames: loadMuted(),
+    isMuted: (memberId) => {
+      const m = get().members[memberId];
+      return !!m && get().mutedNames.includes(m.name);
+    },
+    rooms: [],
+    roomsBusyAt: 10,
+    friends: null,
     lang: 'en',
     identity: null,
 
@@ -170,14 +232,23 @@ export const usePlacesStore = create<PlacesState>()((set, get) => {
       }
     },
 
-    async join(stateId, kind) {
+    async join(stateId, kind, roomId) {
       closeStream();
       set({ phase: 'joining', error: null, stateId, kind });
       try {
-        const res = await apiPost<JoinResponse>('/api/places/join', { stateId, kind });
+        const res = await apiPost<JoinResponse>('/api/places/join', roomId ? { stateId, kind, roomId } : { stateId, kind });
         const members: Members = {};
         for (const m of res.members) members[m.id] = m;
-        set({ phase: 'in', roomId: res.roomId, you: res.you, members, today: res.today, identity: res.identity, availability: 'up' });
+        set({
+          phase: 'in',
+          roomId: res.roomId,
+          you: res.you,
+          members,
+          today: res.today,
+          identity: res.identity,
+          availability: 'up',
+          toast: res.requested && res.landed === 'assigned' ? 'That room was full, so you are in another one.' : null,
+        });
         track('place_join', stateId);
         open(res.roomId);
       } catch (err) {
@@ -239,7 +310,13 @@ export const usePlacesStore = create<PlacesState>()((set, get) => {
       }
     },
 
-    mute: (id) => set((s) => ({ muted: s.muted.includes(id) ? s.muted : [...s.muted, id] })),
+    mute(id) {
+      const m = get().members[id];
+      if (!m || get().mutedNames.includes(m.name)) return;
+      const next = [...get().mutedNames, m.name];
+      saveMuted(next);
+      set({ mutedNames: next });
+    },
 
     async report(id, reason) {
       const { roomId } = get();
@@ -251,6 +328,67 @@ export const usePlacesStore = create<PlacesState>()((set, get) => {
       } catch {
         return false;
       }
+    },
+
+    async loadRooms() {
+      try {
+        const res = await apiGet<{ rooms: RoomRow[]; busyAt: number }>(`/api/places/rooms?state=${encodeURIComponent(get().stateId)}`);
+        set({ rooms: res.rooms, roomsBusyAt: res.busyAt });
+      } catch {
+        /* the sheet shows what it had */
+      }
+    },
+
+    async loadFriends() {
+      try {
+        set({ friends: await apiGet<FriendsState>('/api/places/friends') });
+      } catch {
+        /* the sheet shows what it had */
+      }
+    },
+
+    async befriend(memberId) {
+      const { roomId } = get();
+      if (!roomId) return 'failed';
+      try {
+        const res = await apiPost<{ status: 'pending' | 'accepted' }>(`/api/places/rooms/${encodeURIComponent(roomId)}/friend`, { memberId });
+        set({ toast: res.status === 'accepted' ? 'You are friends now.' : 'Friend request sent.' });
+        void get().loadFriends();
+        return res.status;
+      } catch (err) {
+        const text =
+          err instanceof ApiError && err.code === 'friends-full'
+            ? 'Your friends list is full.'
+            : err instanceof ApiError && err.code === 'blocked'
+              ? 'You blocked this player. Unblock them from Friends first.'
+              : 'Could not send that. Try again.';
+        set({ toast: text });
+        return 'failed';
+      }
+    },
+
+    async acceptFriend(name) {
+      try {
+        await apiPost('/api/places/friends/accept', { name });
+        set({ toast: `You and ${name} are friends.` });
+      } catch (err) {
+        set({ toast: err instanceof ApiError && err.code === 'friends-full' ? 'Your friends list is full.' : 'Could not accept that.' });
+      }
+      await get().loadFriends();
+    },
+
+    async removeFriend(name) {
+      await apiPost('/api/places/friends/remove', { name }).catch(() => undefined);
+      await get().loadFriends();
+    },
+
+    async blockPlayer(memberId) {
+      const m = get().members[memberId];
+      if (!m) return;
+      get().mute(memberId);
+      await apiPost('/api/places/friends/block', { name: m.name }).catch(() => undefined);
+      set({ toast: `${m.name} is blocked and muted.` });
+      await get().loadFriends();
     },
 
     setLang: (lang) => set({ lang }),

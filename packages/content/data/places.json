@@ -41,7 +41,8 @@
       "supporters": 1,
       "activity": 2,
       "needsCompany": false,
-      "short": "Canvass"
+      "short": "Canvass",
+      "soloPercent": 0
     },
     {
       "id": "flyers",
@@ -53,7 +54,8 @@
       "supporters": 0,
       "activity": 1,
       "needsCompany": false,
-      "short": "Flyers"
+      "short": "Flyers",
+      "soloPercent": 0
     },
     {
       "id": "rally",
@@ -65,7 +67,8 @@
       "supporters": 2,
       "activity": 4,
       "needsCompany": true,
-      "short": "Rally"
+      "short": "Rally",
+      "soloPercent": 50
     },
     {
       "id": "wave",
@@ -77,7 +80,8 @@
       "supporters": 0,
       "activity": 0,
       "needsCompany": false,
-      "short": "Wave"
+      "short": "Wave",
+      "soloPercent": 0
     }
   ],
   "phrases": [
@@ -180,5 +184,20 @@
   "locals": {
     "max": 5,
     "min": 2
+  },
+  "square": {
+    "id": "square",
+    "stateId": "naija",
+    "label": "Naija Square",
+    "blurb": "One big square where players from every state meet.",
+    "scenery": "stadium"
+  },
+  "friends": {
+    "max": 50
+  },
+  "rooms": {
+    "listMax": 30,
+    "busyAt": 10,
+    "rejoinSeconds": 120
   }
 }

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { activeContenders, analytics, feedbackTopics, limits, maxUpgradeLevel, places, rides, stateIndex } from '@cr/content';
+import { isPlace, activeContenders, analytics, feedbackTopics, limits, maxUpgradeLevel, places, rides, stateIndex } from '@cr/content';
 
 const stateIds = stateIndex.map((s) => s.id);
 const rideIds = rides.map((r) => r.id);
@@ -145,16 +145,22 @@ export const feedbackSchema = z.object({
 
 // -- Mobilise (C82) ---------------------------------------------------------
 
-const placeKinds = places.kinds.map((k) => k.id);
-
 /**
  * Joining names a place and nothing about the player. How they look is decided on the server: a plain
  * citizen, or their Contender if they opted in (`placeIdentitySchema`). A client cannot send a look.
+ * `roomId` is optional: a room to prefer (a friend's, one from the browser, an invite's), used only if
+ * it is the same place and has space.
  */
-export const placeJoinSchema = z.object({
-  stateId: z.enum(stateIds as [string, ...string[]]),
-  kind: z.enum(placeKinds as [string, ...string[]]),
-});
+export const placeJoinSchema = z
+  .object({
+    stateId: z.string().min(2).max(24),
+    kind: z.string().min(3).max(12),
+    roomId: z.string().regex(/^[a-z-]{2,24}:[a-z]{3,12}#\d{1,6}$/).optional(),
+  })
+  .refine((v) => isPlace(v.stateId, v.kind), { message: 'unknown place' });
+
+export const placeFriendSchema = z.object({ name: z.string().min(2).max(24) });
+export const placeFriendRequestSchema = z.object({ memberId: z.string().min(4).max(24) });
 
 /** The one-time Mobilise question: show my Contender (an id), or stay a plain citizen (null). */
 export const placeIdentitySchema = z.object({

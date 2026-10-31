@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { contenders, places, stateIndex, placeKey, localsFor } from '@cr/content';
+import { contenders, places, stateIndex, placeKey, placeTitle, sceneryKindFor, localsFor } from '@cr/content';
 import { useContenderStore } from '../contenderStore';
 import { useGameStore } from '../state';
 import { goBack } from '../nav';
@@ -7,7 +7,7 @@ import { haptic, motionReduced } from '../prefs';
 import { useOnlineStore } from '../onlineStore';
 import { PlaceRenderer } from '../render/placeRenderer';
 import { track } from '../analytics';
-import { actionById, inviteHash } from './placesModel';
+import { actionById, inviteHash, roomPlace } from './placesModel';
 import { usePlacesStore } from './placesStore';
 
 /**
@@ -54,6 +54,8 @@ function Icon({ name }: { name: string }) {
     share: 'M18 8a3 3 0 100-6 3 3 0 000 6zM6 15a3 3 0 100-6 3 3 0 000 6zM18 22a3 3 0 100-6 3 3 0 000 6zM8.6 10.6l6.8-3.2M8.6 13.4l6.8 3.2',
     back: 'M15 5l-7 7 7 7',
     close: 'M6 6l12 12M18 6L6 18',
+    rooms: 'M4 20V9l8-5 8 5v11zM9 20v-6h6v6',
+    friend: 'M9 11a3 3 0 100-6 3 3 0 000 6zM3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M19 8v6M16 11h6',
     people: 'M9 11a3 3 0 100-6 3 3 0 000 6zM3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M17 8a2.5 2.5 0 010 5M21 20c0-2.4-1.6-4.4-4-5',
   };
   return (
@@ -84,18 +86,28 @@ export function PlacesScreen() {
   const setScreen = useGameStore((s) => s.setScreen);
   const activeStateId = useGameStore((s) => s.activeStateId);
   const target = useGameStore((s) => s.placesTarget);
-  const stateId = target?.stateId ?? activeStateId;
   const reduceMotion = useGameStore((s) => s.reduceMotion);
   const dataSaver = useGameStore((s) => s.dataSaver);
   const status = useOnlineStore((s) => s.status);
   const store = usePlacesStore();
-  const { phase, roomId, you, members, ready, today, toast, lang, muted, identity } = store;
+  const { phase, roomId, you, members, ready, today, toast, lang, mutedNames, identity, rooms, friends } = store;
+  const isMuted = (id: string) => !!members[id] && mutedNames.includes(members[id]!.name);
+  // Where the player asked to go. Once joined, the store says where they actually are, because they
+  // can switch rooms and states from inside.
+  const initial = useRef({
+    stateId: target?.stateId ?? activeStateId,
+    kind: target?.kind ?? places.kinds[0]!.id,
+    roomId: target?.roomId ?? null,
+  }).current;
+  const stateId = phase === 'idle' ? initial.stateId : store.stateId;
+  const kind = phase === 'idle' ? initial.kind : store.kind;
+  // The state the kind chips belong to: the player's own, even while they are in the national square.
+  const homeState = stateId === places.square.stateId ? (initial.stateId === places.square.stateId ? activeStateId : initial.stateId) : stateId;
   const pickedContender = useContenderStore((s) => s.activeContenderId);
   const myContender = contenders.find((c) => c.id === pickedContender);
   // The one-time question: only once someone has actually chosen a Contender, and only if never answered.
   const askIdentity = phase === 'in' && !!myContender && identity !== null && !identity.asked;
-  const [kind, setKind] = useState<string>(target?.kind ?? places.kinds[0]!.id);
-  const [sheet, setSheet] = useState<'say' | 'person' | 'invite' | 'people' | null>(null);
+  const [sheet, setSheet] = useState<'say' | 'person' | 'invite' | 'people' | 'rooms' | 'friends' | null>(null);
   const trayRef = useRef<HTMLElement>(null);
   const trigger = useRef<HTMLElement | null>(null);
   // Focus follows the tray: into it when it opens, back to what opened it when it closes.
@@ -135,15 +147,20 @@ export function PlacesScreen() {
   };
 
   const state = stateIndex.find((s) => s.id === stateId);
-  const stateName = state?.name ?? 'Lagos';
-  const kindInfo = places.kinds.find((k) => k.id === kind)!;
+  const stateName = state?.name ?? 'Naija';
+  const isSquare = stateId === places.square.stateId && kind === places.square.id;
+  const kindInfo = isSquare
+    ? { id: places.square.id, label: places.square.label }
+    : (places.kinds.find((k) => k.id === kind) ?? places.kinds[0]!);
+  const title = placeTitle(stateId, kind);
   const signedIn = status === 'signed-in';
 
-  // Join when signed in, and when the kind changes; leave when the screen closes.
+  // Join when signed in, where the player asked to go. Switching place or room later goes through the
+  // store directly. Leave when the screen closes.
   useEffect(() => {
     if (!signedIn) return;
-    void usePlacesStore.getState().join(stateId, kind);
-  }, [signedIn, stateId, kind]);
+    void usePlacesStore.getState().join(initial.stateId, initial.kind, initial.roomId);
+  }, [signedIn, initial]);
   useEffect(() => () => void usePlacesStore.getState().leave(), []);
 
   // One renderer per room: it owns the canvas, the people and their tags.
@@ -151,7 +168,7 @@ export function PlacesScreen() {
     const host = hostRef.current;
     if (!host || !roomId || !you) return;
     const renderer = new PlaceRenderer(host, {
-      kind,
+      kind: sceneryKindFor(kind),
       zone: state?.zone ?? 'SW',
       seed: hash(placeKey(stateId, kind)),
       reduceMotion: motionReduced(reduceMotion),
@@ -189,7 +206,7 @@ export function PlacesScreen() {
           break;
         }
         case 'say':
-          if (!usePlacesStore.getState().muted.includes(e.id)) renderer.say(e.id, e);
+          if (!usePlacesStore.getState().isMuted(e.id)) renderer.say(e.id, e);
           break;
       }
     });
@@ -219,6 +236,14 @@ export function PlacesScreen() {
     return () => clearTimeout(id);
   }, [toast]);
 
+  // The best room to switch to: the fullest one with space that is not this one.
+  const busiest = rooms
+    .filter((r) => r.roomId !== roomId && r.count < r.capacity && r.count > 0)
+    .sort((a, b) => b.count - a.count)[0];
+  useEffect(() => {
+    if (phase === 'in') void usePlacesStore.getState().loadFriends();
+  }, [phase, roomId]);
+
   const cooling = Object.values(ready).some((t) => t > Date.now());
   const now = useNow(cooling);
   const others = Object.values(members).filter((m) => m.id !== you);
@@ -241,8 +266,8 @@ export function PlacesScreen() {
 
   const back = goBack;
 
-  const inviteUrl = `${location.origin}${location.pathname}${inviteHash(stateId, kind)}`;
-  const inviteLine = `Meet me at ${stateName} ${kindInfo.label} on Campaigner`;
+  const inviteUrl = `${location.origin}${location.pathname}${inviteHash(stateId, kind, roomId)}`;
+  const inviteLine = `Meet me at ${title} on Campaigner`;
 
   function flash(text: string) {
     usePlacesStore.setState({ toast: text });
@@ -286,16 +311,30 @@ export function PlacesScreen() {
           <Icon name="back" />
         </button>
         <div className="cr-places-title">
-          <strong>
-            {stateName} {kindInfo.label}
-          </strong>
+          <strong>{title}</strong>
           <small>{phase === 'in' ? `${others.length + 1} ${others.length ? 'players' : 'player'} · ${localCount(others.length + 1)} locals` : 'Mobilise'}</small>
         </div>
         <span className="cr-places-head-actions">
           <button
             type="button"
             className="cr-places-round"
-            onClick={() => setSheet(sheet === 'people' ? null : 'people')}
+            onClick={() => {
+              void store.loadRooms();
+              setSheet(sheet === 'rooms' ? null : 'rooms');
+            }}
+            aria-label="Rooms"
+            disabled={phase !== 'in'}
+            title={phase !== 'in' ? 'Join a place to see its rooms' : undefined}
+          >
+            <Icon name="rooms" />
+          </button>
+          <button
+            type="button"
+            className="cr-places-round"
+            onClick={() => {
+              void store.loadFriends();
+              setSheet(sheet === 'people' ? null : 'people');
+            }}
             aria-label={`People here (${others.length + 1})`}
             disabled={phase !== 'in'}
             title={phase !== 'in' ? 'Join a place to see who is here' : undefined}
@@ -320,13 +359,21 @@ export function PlacesScreen() {
           <button
             key={k.id}
             type="button"
-            className={`cr-chip${k.id === kind ? ' is-on' : ''}`}
-            aria-pressed={k.id === kind}
-            onClick={() => setKind(k.id)}
+            className={`cr-chip${k.id === kind && !isSquare ? ' is-on' : ''}`}
+            aria-pressed={k.id === kind && !isSquare}
+            onClick={() => void store.join(homeState, k.id)}
           >
             {k.label}
           </button>
         ))}
+        <button
+          type="button"
+          className={`cr-chip${isSquare ? ' is-on' : ''}`}
+          aria-pressed={isSquare}
+          onClick={() => void store.join(places.square.stateId, places.square.id)}
+        >
+          {places.square.label}
+        </button>
       </nav>
 
       <div className="cr-places-stage">
@@ -497,12 +544,34 @@ export function PlacesScreen() {
         <section className="cr-places-tray" aria-label="People here" ref={trayRef}>
           <div className="cr-places-tray-head">
             <b>People here</b>
+            <button
+              type="button"
+              className="cr-places-link"
+              onClick={() => {
+                void store.loadFriends();
+                setSheet('friends');
+              }}
+            >
+              Friends{friends && friends.incoming.length ? ` (${friends.incoming.length})` : ''}
+            </button>
             <button type="button" className="cr-places-x" onClick={() => setSheet(null)} aria-label="Close">
               <Icon name="close" />
             </button>
           </div>
           {others.length === 0 ? (
-            <p className="cr-places-note">Nobody else is here yet. Invite a friend, or try another place.</p>
+            <>
+              <p className="cr-places-note">Nobody else is here yet. Invite a friend, or find a room with people in it.</p>
+              <button
+                type="button"
+                className="cr-btn"
+                onClick={() => {
+                  void store.loadRooms();
+                  setSheet('rooms');
+                }}
+              >
+                Find a busier room
+              </button>
+            </>
           ) : (
             <ul className="cr-places-people">
               {others.map((m) => (
@@ -519,12 +588,152 @@ export function PlacesScreen() {
                       {m.name.slice(0, 1).toUpperCase()}
                     </span>
                     <span>{m.name}</span>
-                    {muted.includes(m.id) ? <small>Muted</small> : null}
+                    {isMuted(m.id) ? <small>Muted</small> : null}
                   </button>
                 </li>
               ))}
             </ul>
           )}
+        </section>
+      ) : null}
+
+      {sheet === 'rooms' ? (
+        <section className="cr-places-tray" aria-label="Rooms" ref={trayRef}>
+          <div className="cr-places-tray-head">
+            <b>Rooms</b>
+            <button type="button" className="cr-places-x" onClick={() => setSheet(null)} aria-label="Close">
+              <Icon name="close" />
+            </button>
+          </div>
+          {busiest ? (
+            <button
+              type="button"
+              className="cr-btn"
+              onClick={() => {
+                void store.join(busiest.stateId, busiest.kind, busiest.roomId);
+                setSheet(null);
+              }}
+            >
+              Quick switch: {placeTitle(busiest.stateId, busiest.kind)} ({busiest.count} here)
+            </button>
+          ) : null}
+          <ul className="cr-places-people cr-places-rooms">
+            {rooms.map((r) => {
+              const here = r.roomId === roomId;
+              const full = r.count >= r.capacity;
+              return (
+                <li key={r.roomId}>
+                  <button
+                    type="button"
+                    disabled={here || full}
+                    onClick={() => {
+                      void store.join(r.stateId, r.kind, r.roomId);
+                      setSheet(null);
+                    }}
+                  >
+                    <span>{placeTitle(r.stateId, r.kind)}</span>
+                    <small>
+                      {here ? 'You are here' : full ? 'Full' : `${r.count}/${r.capacity}`}
+                      {r.friends ? ` · ${r.friends} ${r.friends === 1 ? 'friend' : 'friends'}` : ''}
+                    </small>
+                  </button>
+                </li>
+              );
+            })}
+            {rooms.some((r) => r.key === placeKey(places.square.stateId, places.square.id)) ? null : (
+              <li>
+                <button
+                  type="button"
+                  disabled={isSquare}
+                  onClick={() => {
+                    void store.join(places.square.stateId, places.square.id);
+                    setSheet(null);
+                  }}
+                >
+                  <span>{places.square.label}</span>
+                  <small>{isSquare ? 'You are here' : 'Every state meets here'}</small>
+                </button>
+              </li>
+            )}
+          </ul>
+          {rooms.length === 0 ? <p className="cr-places-note">No rooms are open yet. You are the first one out.</p> : null}
+          <p className="cr-places-note">A room holds {places.roomCapacity} players. Friends in a room show beside it.</p>
+        </section>
+      ) : null}
+
+      {sheet === 'friends' ? (
+        <section className="cr-places-tray" aria-label="Friends" ref={trayRef}>
+          <div className="cr-places-tray-head">
+            <b>Friends</b>
+            <button type="button" className="cr-places-x" onClick={() => setSheet(null)} aria-label="Close">
+              <Icon name="close" />
+            </button>
+          </div>
+          {friends && friends.incoming.length ? (
+            <ul className="cr-places-people">
+              {friends.incoming.map((f) => (
+                <li key={f.name} className="cr-places-friendrow">
+                  <span>
+                    {f.name}
+                    <small>Wants to be friends</small>
+                  </span>
+                  <button type="button" className="is-go" onClick={() => void store.acceptFriend(f.name)}>
+                    Accept
+                  </button>
+                  <button type="button" onClick={() => void store.removeFriend(f.name)}>
+                    Not now
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          {friends && friends.friends.length ? (
+            <ul className="cr-places-people">
+              {friends.friends.map((f) => {
+                const spot = f.roomId ? roomPlace(f.roomId) : null;
+                return (
+                  <li key={f.name} className="cr-places-friendrow">
+                    <span>
+                      {f.name}
+                      <small>{spot ? `In ${placeTitle(spot.stateId, spot.kind)}` : 'Not out right now'}</small>
+                    </span>
+                    {spot && f.roomId && f.roomId !== roomId ? (
+                      <button
+                        type="button"
+                        className="is-go"
+                        onClick={() => {
+                          void store.join(spot.stateId, spot.kind, f.roomId);
+                          setSheet(null);
+                        }}
+                      >
+                        Join
+                      </button>
+                    ) : null}
+                    <button type="button" onClick={() => void store.removeFriend(f.name)} aria-label={`Remove ${f.name}`}>
+                      Remove
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : friends && friends.incoming.length ? null : (
+            <p className="cr-places-note">No friends yet. Tap a player in a room and choose Add friend.</p>
+          )}
+          {friends && friends.outgoing.length ? (
+            <ul className="cr-places-people">
+              {friends.outgoing.map((f) => (
+                <li key={f.name} className="cr-places-friendrow">
+                  <span>
+                    {f.name}
+                    <small>Waiting for them</small>
+                  </span>
+                  <button type="button" onClick={() => void store.removeFriend(f.name)}>
+                    Cancel
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : null}
         </section>
       ) : null}
 
@@ -569,9 +778,34 @@ export function PlacesScreen() {
                     usePlacesStore.getState().mute(person.id);
                     setSheet(null);
                   }}
-                  disabled={muted.includes(person.id)}
+                  disabled={isMuted(person.id)}
                 >
-                  {muted.includes(person.id) ? 'Muted' : 'Mute'}
+                  {isMuted(person.id) ? 'Muted' : 'Mute'}
+                </button>
+              </div>
+              <div className="cr-places-pair">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await usePlacesStore.getState().befriend(person.id);
+                    setSheet(null);
+                  }}
+                  disabled={!!friends?.friends.some((f) => f.name === person.name) || !!friends?.outgoing.some((f) => f.name === person.name)}
+                >
+                  {friends?.friends.some((f) => f.name === person.name)
+                    ? 'Friends'
+                    : friends?.outgoing.some((f) => f.name === person.name)
+                      ? 'Request sent'
+                      : 'Add friend'}
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await usePlacesStore.getState().blockPlayer(person.id);
+                    setSheet(null);
+                  }}
+                >
+                  Block
                 </button>
               </div>
               <p className="cr-places-note">Report this player</p>

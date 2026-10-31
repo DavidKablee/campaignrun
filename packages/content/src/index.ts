@@ -84,6 +84,24 @@ export const analytics = analyticsSchema.parse(analyticsJson);
 export const liveEvents = liveEventsSchema.parse(liveEventsJson);
 /** C82: the Mobilise places, their actions, preset phrases and daily caps. */
 export const places = placesSchema.parse(placesJson);
+
+/** C90: a real place is a state's market, park, lake or stadium, or the national square. */
+export function isPlace(stateId: string, kind: string): boolean {
+  if (stateId === places.square.stateId) return kind === places.square.id;
+  return stateIndex.some((s) => s.id === stateId) && places.kinds.some((k) => k.id === kind);
+}
+
+/** "Kano Market" or "Naija Square". */
+export function placeTitle(stateId: string, kind: string): string {
+  if (stateId === places.square.stateId && kind === places.square.id) return places.square.label;
+  const state = stateIndex.find((s) => s.id === stateId)?.name ?? stateId;
+  return `${state} ${places.kinds.find((k) => k.id === kind)?.label ?? kind}`;
+}
+
+/** The scenery to build for a place kind: the square borrows another kind's look. */
+export function sceneryKindFor(kind: string): string {
+  return kind === places.square.id ? places.square.scenery : kind;
+}
 export const feedbackTopics = feedbackTopicsSchema.parse(feedbackJson).topics;
 /** C46: gesture thresholds for the on-glass controls. */
 export const controlTuning = controlsSchema.parse(controlsJson);

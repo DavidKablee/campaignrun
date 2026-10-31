@@ -111,6 +111,49 @@ test('two players meet in a place, act and talk in presets', async ({ browser, r
   await b.context().close();
 });
 
+test('players can switch to the national square, and become friends by tapping each other (C90)', async ({ browser, request }) => {
+  const health = await request.get(`${API}/api/health`).catch(() => null);
+  test.skip(!health?.ok(), 'API not running on 127.0.0.1:8787');
+
+  const a = await seeded(browser);
+  const b = await seeded(browser);
+  const suffix = Math.random().toString(36).slice(2, 7);
+  for (const [page, name] of [[a, `fa_${suffix}`], [b, `fb_${suffix}`]] as const) {
+    const res = await page.context().request.post(`${API}/api/auth/guest`, { data: { username: name } });
+    expect(res.status()).toBe(201);
+  }
+  // Both open the same quiet place (the parallel project may be in lagos, so use a state it does not).
+  for (const page of [a, b]) {
+    await page.goto('/?debug#mobilise=enugu.park');
+    await expect(page.locator('.cr-places-title strong')).toContainText('Enugu Park');
+  }
+  await expect(a.locator('.cr-places-title')).toContainText(/[2-9] players/, { timeout: 15_000 });
+
+  // A taps B in the People tray and asks to be friends.
+  await a.getByRole('button', { name: /^People here/ }).click();
+  await a.getByRole('region', { name: 'People here' }).getByRole('button', { name: new RegExp(`fb_${suffix}`) }).click();
+  await a.getByRole('button', { name: 'Add friend' }).click();
+  await expect(a.locator('.cr-places-toast')).toContainText('Friend request sent');
+
+  // B sees the request and accepts; both now list each other as friends, online, in this place.
+  await b.getByRole('button', { name: /^People here/ }).click();
+  await b.getByRole('button', { name: /^Friends/ }).click();
+  await expect(b.getByRole('region', { name: 'Friends' })).toContainText(`fa_${suffix}`);
+  await b.getByRole('button', { name: 'Accept' }).click();
+  await expect(b.getByRole('region', { name: 'Friends' })).toContainText('In Enugu Park');
+
+  // A switches rooms: the browser lists this room with the friend badge, and the square is one tap away.
+  await a.getByRole('button', { name: 'Rooms' }).click();
+  await expect(a.getByRole('region', { name: 'Rooms' })).toContainText('Enugu Park');
+  await expect(a.getByRole('region', { name: 'Rooms' })).toContainText('1 friend');
+  await a.getByRole('button', { name: /Naija Square/ }).last().click();
+  await expect(a.locator('.cr-places-title strong')).toContainText('Naija Square');
+  await a.screenshot({ path: `test-results/shots/places-square-${test.info().project.name}.png` });
+
+  await a.context().close();
+  await b.context().close();
+});
+
 test('an invite link opens the same place for a friend', async ({ browser }) => {
   const page = await seeded(browser);
   await page.goto('/#mobilise=kano.stadium');

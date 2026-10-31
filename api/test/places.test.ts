@@ -227,4 +227,145 @@ run('places api (C82)', () => {
       expect((await json('/api/places/identity', '', { contenderId: 'captain-kobo' })).status).toBe(401);
     });
   });
+
+  describe('meeting anyone (C90)', () => {
+    type RoomRow = { roomId: string; key: string; stateId: string; kind: string; count: number; friends: number };
+    const rooms = async (cookie: string, state = '') =>
+      ((await (await json(`/api/places/rooms${state ? `?state=${state}` : ''}`, cookie, undefined, 'GET')).json()) as { rooms: RoomRow[] }).rooms;
+    const friends = async (cookie: string) =>
+      (await (await json('/api/places/friends', cookie, undefined, 'GET')).json()) as {
+        friends: { name: string; online: boolean; roomId: string | null }[];
+        incoming: { name: string }[];
+        outgoing: { name: string }[];
+      };
+    const memberId = async (cookie: string, roomId: string, name: string) => {
+      const res = await json('/api/places/join', cookie, { stateId: roomId.split(':')[0], kind: roomId.split(':')[1]!.split('#')[0] });
+      return (((await res.json()) as { members: { id: string; name: string }[] }).members.find((m) => m.name === name) ?? { id: '' }).id;
+    };
+
+    it('opens the national square and tags it as no state', async () => {
+      const a = await guest('sq1');
+      const res = await json('/api/places/join', a, { stateId: 'naija', kind: 'square' });
+      expect(res.status).toBe(200);
+      const body = (await res.json()) as { roomId: string; square: { label: string } };
+      expect(body.roomId).toMatch(/^naija:square#/);
+      expect(body.square.label).toBe(places.square.label);
+      expect((await json('/api/places/join', a, { stateId: 'naija', kind: 'market' })).status).toBe(400);
+      expect((await json('/api/places/join', a, { stateId: 'kano', kind: 'square' })).status).toBe(400);
+    });
+
+    it('lists rooms with counts, and joins a requested room', async () => {
+      const a = await guest('rb1');
+      const b = await guest('rb2');
+      const first = await join(a, 'stadium', 'ebonyi');
+      const list = await rooms(b, 'ebonyi');
+      const row = list.find((r) => r.roomId === first.body.roomId)!;
+      expect(row).toMatchObject({ key: 'ebonyi:stadium', stateId: 'ebonyi', kind: 'stadium', count: 1 });
+      expect(JSON.stringify(list)).not.toMatch(/rb1|rb2/);
+      const res = await json('/api/places/join', b, { stateId: 'ebonyi', kind: 'stadium', roomId: first.body.roomId });
+      const body = (await res.json()) as { roomId: string; landed: string };
+      expect(body).toMatchObject({ roomId: first.body.roomId, landed: 'requested' });
+    });
+
+    it('says so when the requested room is gone', async () => {
+      const a = await guest('rb3');
+      const res = await json('/api/places/join', a, { stateId: 'ebonyi', kind: 'park', roomId: 'ebonyi:park#9999' });
+      expect(((await res.json()) as { landed: string }).landed).toBe('assigned');
+      expect((await json('/api/places/join', a, { stateId: 'ebonyi', kind: 'park', roomId: 'nonsense' })).status).toBe(400);
+    });
+
+    it('makes friends by tapping a player, and only the accepter turns a request into a friendship', async () => {
+      const a = await guest('fr1');
+      const b = await guest('fr2');
+      const room = (await join(a, 'park', 'abia')).body.roomId;
+      await join(b, 'park', 'abia');
+      const target = await memberId(a, room, 'fr2');
+
+      const asked = await json(`/api/places/rooms/${encodeURIComponent(room)}/friend`, a, { memberId: target });
+      expect(asked.status).toBe(201);
+      expect((await friends(a)).outgoing).toEqual([{ name: 'fr2' }]);
+      expect((await friends(b)).incoming).toEqual([{ name: 'fr1' }]);
+      expect((await friends(b)).friends).toEqual([]);
+
+      expect((await json('/api/places/friends/accept', b, { name: 'fr1' })).status).toBe(200);
+      const mine = await friends(a);
+      expect(mine.friends).toEqual([{ name: 'fr2', online: true, roomId: room }]);
+      expect((await friends(b)).friends[0]).toMatchObject({ name: 'fr1', online: true });
+    });
+
+    it('lets a friend join your room and shows the friend badge in the browser', async () => {
+      const a = await guest('fj1');
+      const b = await guest('fj2');
+      const room = (await join(a, 'lake', 'abia')).body.roomId;
+      await join(b, 'lake', 'abia');
+      const target = await memberId(a, room, 'fj2');
+      await json(`/api/places/rooms/${encodeURIComponent(room)}/friend`, a, { memberId: target });
+      await json('/api/places/friends/accept', b, { name: 'fj1' });
+      const row = (await rooms(a)).find((r) => r.roomId === room)!;
+      expect(row.friends).toBe(1);
+    });
+
+    it('turns a request into a friendship at once when both asked each other', async () => {
+      const a = await guest('mu1');
+      const b = await guest('mu2');
+      const room = (await join(a, 'park', 'abia')).body.roomId;
+      await join(b, 'park', 'abia');
+      await json(`/api/places/rooms/${encodeURIComponent(room)}/friend`, a, { memberId: await memberId(a, room, 'mu2') });
+      const res = await json(`/api/places/rooms/${encodeURIComponent(room)}/friend`, b, { memberId: await memberId(b, room, 'mu1') });
+      expect(await res.json()).toEqual({ status: 'accepted' });
+      expect((await friends(a)).friends).toHaveLength(1);
+    });
+
+    it('removes a friendship both ways, and a block keeps the other person out without telling them', async () => {
+      const a = await guest('bl1');
+      const b = await guest('bl2');
+      const room = (await join(a, 'park', 'abia')).body.roomId;
+      await join(b, 'park', 'abia');
+      await json(`/api/places/rooms/${encodeURIComponent(room)}/friend`, a, { memberId: await memberId(a, room, 'bl2') });
+      await json('/api/places/friends/accept', b, { name: 'bl1' });
+      expect((await json('/api/places/friends/remove', a, { name: 'bl2' })).status).toBe(204);
+      expect((await friends(a)).friends).toEqual([]);
+      expect((await friends(b)).friends).toEqual([]);
+
+      expect((await json('/api/places/friends/block', a, { name: 'bl2' })).status).toBe(204);
+      const res = await json(`/api/places/rooms/${encodeURIComponent(room)}/friend`, b, { memberId: await memberId(b, room, 'bl1') });
+      expect(res.status).toBe(201);
+      expect(await res.json()).toEqual({ status: 'pending' });
+      expect((await friends(a)).incoming).toEqual([]);
+      // The blocker cannot ask the person they blocked either, until they unblock.
+      const mine = await json(`/api/places/rooms/${encodeURIComponent(room)}/friend`, a, { memberId: await memberId(a, room, 'bl2') });
+      expect(mine.status).toBe(409);
+      await json('/api/places/friends/remove', a, { name: 'bl2' });
+      expect((await json(`/api/places/rooms/${encodeURIComponent(room)}/friend`, a, { memberId: await memberId(a, room, 'bl2') })).status).toBe(201);
+    });
+
+    it('refuses to befriend yourself, someone not in your room, or without an account', async () => {
+      const a = await guest('rf1');
+      const room = (await join(a, 'park', 'abia')).body.roomId;
+      const me = await memberId(a, room, 'rf1');
+      expect((await json(`/api/places/rooms/${encodeURIComponent(room)}/friend`, a, { memberId: me })).status).toBe(400);
+      expect((await json(`/api/places/rooms/${encodeURIComponent(room)}/friend`, a, { memberId: 'zzzzzz' })).status).toBe(404);
+      expect((await json(`/api/places/rooms/${encodeURIComponent(room)}/friend`, '', { memberId: me })).status).toBe(401);
+      expect((await json('/api/places/friends', '', undefined, 'GET')).status).toBe(401);
+    });
+
+    it('lets a solo player rally for half, and a rally with company for all of it', async () => {
+      const a = await guest('so1');
+      const { body } = await join(a, 'stadium', 'enugu');
+      const first = await json(`/api/places/rooms/${encodeURIComponent(body.roomId)}/act`, a, { action: 'rally' });
+      expect(first.status).toBe(200);
+      const reward = ((await first.json()) as { reward: { coins: number; supporters: number } }).reward;
+      const rally = places.actions.find((x) => x.id === 'rally')!;
+      expect(reward.coins).toBe(Math.floor((rally.coins * rally.soloPercent) / 100));
+      expect(reward.supporters).toBe(Math.floor((rally.supporters * rally.soloPercent) / 100));
+    });
+
+    it('adds nothing to the Board for the square or a solo rally', async () => {
+      const a = await guest('bd1');
+      const sq = (await (await json('/api/places/join', a, { stateId: 'naija', kind: 'square' })).json()) as { roomId: string };
+      await json(`/api/places/rooms/${encodeURIComponent(sq.roomId)}/act`, a, { action: 'canvass' });
+      const { rows } = await database.query<{ state_id: string }>('select state_id from place_activity');
+      expect(rows.map((r) => r.state_id)).not.toContain('naija');
+    });
+  });
 });

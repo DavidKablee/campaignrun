@@ -613,6 +613,12 @@ export const placeActionSchema = z.object({
   activity: z.number().int().min(0),
   /** True when the action only counts with someone else within `companyRadiusMetres`. */
   needsCompany: z.boolean(),
+  /**
+   * For an action that needs company: the share of the reward (percent) paid when only Locals are
+   * nearby, so a solo player is not locked out. 0 refuses without a real player close by. A reduced
+   * action adds nothing to a state's Board activity.
+   */
+  soloPercent: z.number().int().min(0).max(100).default(0),
 });
 
 export const placePhraseSchema = z.object({
@@ -622,8 +628,28 @@ export const placePhraseSchema = z.object({
   pcm: z.string().min(3).max(60),
 });
 
+/** C90: the one national place, outside any state: `naija:square`. */
+export const placeSquareSchema = z.object({
+  id: z.string().regex(/^[a-z]{3,12}$/),
+  stateId: z.string().regex(/^[a-z]{3,12}$/),
+  label: z.string().min(1),
+  blurb: z.string().min(10),
+  /** Which of `kinds` the scenery borrows. */
+  scenery: z.string().regex(/^[a-z]{3,12}$/),
+});
+
 export const placesSchema = z.object({
   kinds: z.array(placeKindSchema).min(1),
+  square: placeSquareSchema,
+  friends: z.object({ max: z.number().int().positive() }),
+  rooms: z.object({
+    /** Most rooms the room browser lists. */
+    listMax: z.number().int().positive(),
+    /** A room this full is "busy": the nudge for a lone player points at it. */
+    busyAt: z.number().int().positive(),
+    /** How long a player who dropped keeps their spot to walk back into. */
+    rejoinSeconds: z.number().int().nonnegative(),
+  }),
   roomCapacity: z.number().int().min(2),
   /** Supporters (Following) a player needs before Mobilise opens. */
   followingGate: z.number().int().min(0),

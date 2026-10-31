@@ -57,12 +57,12 @@ describe('place hub (C82)', () => {
     expect(hub.act(member, action('canvass'), action('canvass').cooldownSeconds * 1000).ok).toBe(true);
   });
 
-  it('only lets Rally the crowd count when someone is close by', () => {
+  it('counts Rally the crowd as solo until someone is close by (C90)', () => {
     const hub = new PlaceHub(() => 0);
     const a = hub.join(user(1), 'kano', 'market', null, 0).member;
-    expect(hub.act(a, action('rally'), 0)).toMatchObject({ ok: false, reason: 'company' });
+    expect(hub.act(a, action('rally'), 0)).toMatchObject({ ok: true, solo: true });
     hub.join(user(2), 'kano', 'market', null, 0);
-    expect(hub.act(a, action('rally'), 0).ok).toBe(true);
+    expect(hub.act(a, action('rally'), 100_000)).toMatchObject({ ok: true, solo: false });
   });
 
   it('relays actions and phrases to everyone in the room', () => {
@@ -131,5 +131,114 @@ describe('place hub (C82)', () => {
     hub.join(user(1), 'kano', 'market', { contenderId: 'captain-kobo' }, 0);
     const again = hub.join(user(1), 'kano', 'market', null, 5);
     expect(hub.snapshot(again.room.id, 5)[0]!.look).toBeNull();
+  });
+
+  describe('meeting anyone (C90)', () => {
+    it('tops up the fullest room that has space before opening another', () => {
+      const hub = new PlaceHub();
+      for (let i = 0; i < places.roomCapacity; i++) hub.join(user(i), 'kano', 'market', null, 0);
+      const second = hub.join(user(50), 'kano', 'market', null, 0).room;
+      hub.join(user(51), 'kano', 'market', null, 0);
+      // The first room is full; the second is where everyone goes until it fills too.
+      expect(hub.listRooms().map((r) => r.count).sort((a, b) => a - b)).toEqual([2, places.roomCapacity]);
+      // A leaver in the first room makes it the fullest with space.
+      hub.leave(user(0).id);
+      const next = hub.join(user(52), 'kano', 'market', null, 0).room;
+      expect(next.id).not.toBe(second.id);
+    });
+
+    it('lands a player in the room they asked for when it is the same place and has space', () => {
+      const hub = new PlaceHub();
+      for (let i = 0; i < places.roomCapacity; i++) hub.join(user(i), 'kano', 'market', null, 0);
+      const small = hub.join(user(60), 'kano', 'market', null, 0).room;
+      hub.join(user(61), 'kano', 'market', null, 0);
+      const first = hub.listRooms().find((r) => r.roomId !== small.id)!;
+      expect(first.count).toBe(places.roomCapacity);
+      // Leave a seat in the first room, then ask for the small one from outside.
+      hub.leave(user(0).id);
+      const joined = hub.join(user(70), 'kano', 'market', null, 0, small.id);
+      expect(joined.room.id).toBe(small.id);
+      expect(joined.landed).toBe('requested');
+    });
+
+    it('falls back to another room when the requested one is full, gone or a different place', () => {
+      const hub = new PlaceHub();
+      const full = hub.join(user(0), 'kano', 'market', null, 0).room;
+      for (let i = 1; i < places.roomCapacity; i++) hub.join(user(i), 'kano', 'market', null, 0);
+      const full1 = hub.join(user(90), 'kano', 'market', null, 0, full.id);
+      expect(full1.landed).toBe('assigned');
+      expect(full1.room.id).not.toBe(full.id);
+      expect(hub.join(user(91), 'kano', 'market', null, 0, 'kano:market#999').landed).toBe('assigned');
+      expect(hub.join(user(92), 'kano', 'park', null, 0, full.id).room.key).toBe('kano:park');
+    });
+
+    it('moves a player already in a place to another room of it, without a duplicate', () => {
+      const hub = new PlaceHub();
+      for (let i = 0; i < places.roomCapacity; i++) hub.join(user(i), 'kano', 'market', null, 0);
+      const mover = hub.join(user(80), 'kano', 'market', null, 0);
+      const target = hub.join(user(81), 'kano', 'market', null, 0).room;
+      expect(mover.room.id).toBe(target.id);
+      hub.leave(user(0).id);
+      const first = hub.listRooms().find((r) => r.roomId !== target.id)!.roomId;
+      const back = hub.join(user(80), 'kano', 'market', null, 5, first);
+      expect(back.room.id).toBe(first);
+      expect(hub.online()['kano:market']).toBe(places.roomCapacity + 1);
+    });
+
+    it('lists rooms with a place and counts, and never a name or id', () => {
+      const hub = new PlaceHub();
+      hub.join(user(1), 'kano', 'market', null, 0);
+      hub.join(user(2), 'naija', 'square', null, 0);
+      const rooms = hub.listRooms();
+      expect(rooms.map((r) => r.key).sort()).toEqual(['kano:market', 'naija:square']);
+      expect(rooms.every((r) => r.capacity === places.roomCapacity)).toBe(true);
+      expect(JSON.stringify(rooms)).not.toMatch(/player|0000/);
+    });
+
+    it('puts a dropped player back where they were standing, within the window only', () => {
+      const hub = new PlaceHub();
+      const a = hub.join(user(1), 'kano', 'market', null, 0);
+      hub.move(a.member, { x: 9, z: -7 }, 0);
+      hub.sweep(60_000 * 10); // long gone: nobody is attached
+      const window = places.rooms.rejoinSeconds * 1000;
+      expect(hub.online()).toEqual({});
+      const again = hub.join(user(1), 'kano', 'market', null, 60_000 * 10 + window + 1);
+      // Past the window: a fresh spawn near the middle, not the spot they left.
+      expect(Math.hypot(again.member.x - 9, again.member.z + 7)).toBeGreaterThan(1);
+    });
+
+    it('remembers the spot when they come back inside the window', () => {
+      const hub = new PlaceHub();
+      const a = hub.join(user(2), 'kano', 'market', null, 0);
+      hub.move(a.member, { x: 9, z: -7 }, 0);
+      hub.move(a.member, { x: 9, z: -7 }, 10_000); // arrived long since
+      hub.touch(a.member, 10_000);
+      const t = 10_000 + places.presenceTtlSeconds * 1000 + 1;
+      hub.sweep(t);
+      expect(hub.online()).toEqual({});
+      const again = hub.join(user(2), 'kano', 'market', null, t + 1000);
+      expect(again.member.x).toBeCloseTo(9, 0);
+      expect(again.member.z).toBeCloseTo(-7, 0);
+    });
+
+    it('lets a solo player rally for a share, with no Board activity, and still refuses where the share is zero', () => {
+      const hub = new PlaceHub();
+      const a = hub.join(user(1), 'kano', 'market', null, 0);
+      const rally = action('rally');
+      const res = hub.act(a.member, rally, 0);
+      expect(res.ok && res.solo).toBe(true);
+      expect(rally.soloPercent).toBeGreaterThan(0);
+      const refuse = { ...rally, id: 'rally2', soloPercent: 0 };
+      expect(hub.act(a.member, refuse, 1)).toEqual({ ok: false, reason: 'company' });
+    });
+
+    it('is not solo when a real player is close', () => {
+      const hub = new PlaceHub();
+      const a = hub.join(user(1), 'kano', 'market', null, 0);
+      const b = hub.join(user(2), 'kano', 'market', null, 0);
+      hub.move(b.member, { x: a.member.x, z: a.member.z }, 0);
+      const res = hub.act(a.member, action('rally'), 1000);
+      expect(res.ok && res.solo).toBe(false);
+    });
   });
 });

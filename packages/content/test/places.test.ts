@@ -64,4 +64,24 @@ describe('Mobilise places (C82)', () => {
     expect(placesDay(Date.UTC(2026, 9, 30, 22, 59))).toBe('2026-10-30');
     expect(placesDay(Date.UTC(2026, 9, 30, 23, 0))).toBe('2026-10-31');
   });
+
+  it('describes one national square that is not a state or a kind (C90)', async () => {
+    const { stateIndex } = await import('../src');
+    expect(stateIndex.some((s) => s.id === places.square.stateId)).toBe(false);
+    expect(places.kinds.some((k) => k.id === places.square.id)).toBe(false);
+    expect(places.kinds.some((k) => k.id === places.square.scenery)).toBe(true);
+  });
+
+  it('lets only an action that needs company pay a solo share, and never the whole reward (C90)', () => {
+    for (const a of places.actions) {
+      if (!a.needsCompany) expect(a.soloPercent).toBe(0);
+      expect(a.soloPercent).toBeLessThan(100);
+    }
+    expect(places.actions.some((a) => a.needsCompany && a.soloPercent > 0)).toBe(true);
+  });
+
+  it('sizes rooms and friends sensibly (C90)', () => {
+    expect(places.rooms.busyAt).toBeLessThanOrEqual(places.roomCapacity);
+    expect(places.friends.max).toBeGreaterThan(0);
+  });
 });

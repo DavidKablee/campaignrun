@@ -66,8 +66,20 @@ interface Room {
   members: Map<string, Member>;
 }
 
+/** One row of the room browser: counts and a place, never names. */
+export interface RoomInfo {
+  roomId: string;
+  key: string;
+  stateId: string;
+  kind: string;
+  count: number;
+  capacity: number;
+}
+
+export type Landed = 'requested' | 'assigned';
+
 export type ActResult =
-  | { ok: true; action: PlaceAction; withOthers: number }
+  | { ok: true; action: PlaceAction; withOthers: number; /** True when only Locals were near: pay the reduced share. */ solo: boolean }
   | { ok: false; reason: 'not-in-room' | 'cooldown' | 'company'; retryAfter?: number };
 
 const DETACH_GRACE_MS = 8_000;
@@ -83,6 +95,8 @@ export class PlaceHub {
   private byUser = new Map<string, Member>();
   private counters = new Map<string, number>();
   private nextId = 1;
+  /** Where a player who dropped was standing, so coming back puts them there and not somewhere new. */
+  private remembered = new Map<string, { key: string; x: number; z: number; until: number }>();
 
   constructor(private readonly random: () => number = Math.random) {}
 
@@ -99,28 +113,45 @@ export class PlaceHub {
     for (const m of room.members.values()) for (const sink of m.sinks) sink(event);
   }
 
-  /** Puts a player in the roomiest-not-full room of a place, or reconnects them to the one they are in. */
+  /**
+   * Puts a player in a place. A room the player asked for (a friend's, one from the browser) is used if
+   * it is the same place and has space; otherwise the fullest room that still has space, so rooms top
+   * up before a new one opens and people end up together. Rejoining the room they are in just
+   * reconnects them.
+   */
   join(
     user: { id: string; username: string },
     stateId: string,
     kind: string,
     look: Look | null,
     now: number,
-  ): { member: Member; room: Room } {
+    prefer?: string | null,
+  ): { member: Member; room: Room; landed: Landed } {
     const key = placeKey(stateId, kind);
     const existing = this.byUser.get(user.id);
+    const wanted = prefer ? this.rooms.get(prefer) : undefined;
+    const wantedOk = wanted !== undefined && wanted.key === key && (wanted.members.size < places.roomCapacity || existing?.roomId === wanted.id);
     if (existing) {
       const room = this.rooms.get(existing.roomId);
-      if (room && room.key === key) {
+      if (room && room.key === key && (!prefer || prefer === room.id || !wantedOk)) {
         existing.lastSeen = now;
         existing.detachedAt = null;
         existing.look = look;
-        return { member: existing, room };
+        return { member: existing, room, landed: prefer === room.id ? 'requested' : 'assigned' };
       }
       this.leave(user.id);
     }
 
-    let room = [...this.rooms.values()].find((r) => r.key === key && r.members.size < places.roomCapacity);
+    let room: Room | undefined = wantedOk ? wanted : undefined;
+    const landed: Landed = room ? 'requested' : 'assigned';
+    if (!room) {
+      let best: Room | undefined;
+      for (const r of this.rooms.values()) {
+        if (r.key !== key || r.members.size >= places.roomCapacity) continue;
+        if (!best || r.members.size > best.members.size) best = r;
+      }
+      room = best;
+    }
     if (!room) {
       const n = (this.counters.get(key) ?? 0) + 1;
       this.counters.set(key, n);
@@ -128,9 +159,16 @@ export class PlaceHub {
       this.rooms.set(room.id, room);
     }
 
-    const angle = this.random() * Math.PI * 2;
-    const radius = 2 + this.random() * 3;
-    const spawn = clampToBounds({ x: Math.cos(angle) * radius, z: Math.sin(angle) * radius }, places.bounds);
+    const back = this.remembered.get(user.id);
+    this.remembered.delete(user.id);
+    let spawn: Spot;
+    if (back && back.key === key && back.until > now) {
+      spawn = { x: back.x, z: back.z };
+    } else {
+      const angle = this.random() * Math.PI * 2;
+      const radius = 2 + this.random() * 3;
+      spawn = clampToBounds({ x: Math.cos(angle) * radius, z: Math.sin(angle) * radius }, places.bounds);
+    }
     const member: Member = {
       id: `m${(this.nextId++).toString(36)}${Math.floor(this.random() * 1296).toString(36)}`,
       userId: user.id,
@@ -151,7 +189,27 @@ export class PlaceHub {
     this.emit(room, { type: 'join', member: this.view(member, now) });
     room.members.set(member.id, member);
     this.byUser.set(user.id, member);
-    return { member, room };
+    return { member, room, landed };
+  }
+
+  /** Every room with someone in it. Counts and places only. */
+  listRooms(): RoomInfo[] {
+    return [...this.rooms.values()].map((r) => {
+      const [stateId, kind] = r.key.split(':') as [string, string];
+      return { roomId: r.id, key: r.key, stateId, kind, count: r.members.size, capacity: places.roomCapacity };
+    });
+  }
+
+  /** Accounts standing in a room, for the "friends here" badge. Never sent to other players. */
+  userIdsIn(roomId: string): string[] {
+    return [...(this.rooms.get(roomId)?.members.values() ?? [])].map((m) => m.userId);
+  }
+
+  /** The room an account is standing in right now, or null. */
+  whereIs(userId: string): { roomId: string; key: string } | null {
+    const m = this.byUser.get(userId);
+    const room = m && this.rooms.get(m.roomId);
+    return m && room ? { roomId: room.id, key: room.key } : null;
   }
 
   /** Opt in or out while standing in a place: everyone in the room is told, so the avatar changes at once. */
@@ -193,10 +251,17 @@ export class PlaceHub {
     member.lastSeen = now;
   }
 
-  leave(userId: string): void {
+  leave(userId: string, now?: number): void {
     const m = this.byUser.get(userId);
     if (!m) return;
     this.byUser.delete(userId);
+    if (now !== undefined && places.rooms.rejoinSeconds > 0) {
+      const room = this.rooms.get(m.roomId);
+      if (room) {
+        const p = this.position(m, now);
+        this.remembered.set(userId, { key: room.key, x: p.x, z: p.z, until: now + places.rooms.rejoinSeconds * 1000 });
+      }
+    }
     const room = this.rooms.get(m.roomId);
     if (!room) return;
     room.members.delete(m.id);
@@ -228,12 +293,13 @@ export class PlaceHub {
     for (const other of room.members.values()) {
       if (other.id !== member.id && distance(here, this.position(other, now)) <= places.companyRadiusMetres) withOthers += 1;
     }
-    if (action.needsCompany && withOthers === 0) return { ok: false, reason: 'company' };
+    const solo = action.needsCompany && withOthers === 0;
+    if (solo && action.soloPercent === 0) return { ok: false, reason: 'company' };
 
     member.cooldowns.set(action.id, now + action.cooldownSeconds * 1000);
     member.lastSeen = now;
     this.emit(room, { type: 'act', id: member.id, action: action.id });
-    return { ok: true, action, withOthers };
+    return { ok: true, action, withOthers, solo };
   }
 
   say(member: Member, what: { phrase?: string; emoji?: string }, now: number): void {
@@ -250,7 +316,7 @@ export class PlaceHub {
     for (const m of [...this.byUser.values()]) {
       const gone = m.detachedAt !== null ? now - m.detachedAt > DETACH_GRACE_MS : now - m.lastSeen > ttl;
       if (gone || now - m.lastSeen > ttl * 3) {
-        this.leave(m.userId);
+        this.leave(m.userId, now);
         removed += 1;
       }
     }
@@ -271,5 +337,6 @@ export class PlaceHub {
     this.rooms.clear();
     this.byUser.clear();
     this.counters.clear();
+    this.remembered.clear();
   }
 }

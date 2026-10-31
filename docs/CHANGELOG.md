@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-31 — Meet anyone in Mobilise (C90)
+
+You can switch rooms from inside Mobilise (a Rooms list with player counts, a friend badge and Quick switch), go to Naija Square where players from every state meet, and make friends by tapping a player. Invites can name a room. Rooms now top up before a new one opens, a dropped player walks back to where they stood, mutes are kept on the device, and a lone player can Rally for half the reward. Details in `docs/chunks/C90.md`.
+
 ## 2026-10-31 — Contender avatars in Mobilise (C89)
 
 The first time a player with a Contender opens Mobilise they are asked, once, whether to show that Contender (character look and a party-colour sash) to the people in the room. Default is private: everyone else stays a plain citizen. The choice can be changed in Account. It is stored on the server and is separate from the map-colouring consent. Details in `docs/chunks/C89.md`.

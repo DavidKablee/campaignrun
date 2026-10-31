@@ -9,6 +9,7 @@ import { challengeMet, todaysChallenge } from './daily';
 import { submitLocalBoard, type LocalBoardEntry } from './localBoard';
 import { emptyUpgrades, missionDelta, type MissionProgress, runPayout, type StartId, type UpgradeLevels, upgradeCost, watDay, watWeek } from './meta';
 import { tourBonusFor } from './liveEvents';
+import type { PlaceTarget } from './places/placesModel';
 import { canTravel, emptyTravel, noteTravel, type TravelProgress } from './travel';
 import { validateUsername } from './username';
 
@@ -96,11 +97,11 @@ interface GameState {
   placesBack: Screen;
   openPlaces: (from: Screen) => void;
   /** A place a friend invited the player to (not persisted); Mobilise opens here instead of the active state. */
-  placesTarget: { stateId: string; kind: string } | null;
-  setPlacesTarget: (t: { stateId: string; kind: string } | null) => void;
+  placesTarget: PlaceTarget | null;
+  setPlacesTarget: (t: PlaceTarget | null) => void;
   /** An invite that arrived before the 1,000 Following gate: kept for this session and used once Mobilise opens. */
-  lockedInvite: { stateId: string; kind: string } | null;
-  setLockedInvite: (t: { stateId: string; kind: string } | null) => void;
+  lockedInvite: PlaceTarget | null;
+  setLockedInvite: (t: PlaceTarget | null) => void;
   setAuthReturn: (s: Screen | null) => void;
   incomingChallenge: Challenge | null;
   setIncomingChallenge: (c: Challenge | null) => void;

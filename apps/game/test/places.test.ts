@@ -1,6 +1,7 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { places } from '@cr/content';
-import { actionById, applyPlaceEvent, inviteHash, parseInvite, rewardLine, walkedTo, type Members, type PlaceMember } from '../src/places/placesModel';
+import { usePlacesStore } from '../src/places/placesStore';
+import { actionById, applyPlaceEvent, inviteHash, parseInvite, rewardLine, roomPlace, walkedTo, type Members, type PlaceMember } from '../src/places/placesModel';
 
 const member = (id: string, over: Partial<PlaceMember> = {}): PlaceMember => ({
   id,
@@ -62,5 +63,64 @@ describe('Mobilise client model (C82)', () => {
       expect(a.short.length).toBeGreaterThan(0);
       expect(a.short.length).toBeLessThanOrEqual(8);
     }
+  });
+
+  it('carries a room number in an invite, and ignores a malformed one (C90)', () => {
+    expect(inviteHash('kano', 'market', 'kano:market#3')).toBe('#mobilise=kano.market.3');
+    expect(inviteHash('kano', 'market', null)).toBe('#mobilise=kano.market');
+    expect(parseInvite('#mobilise=kano.market.3')).toEqual({ stateId: 'kano', kind: 'market', roomId: 'kano:market#3' });
+    expect(parseInvite('#mobilise=kano.market.x')).toBeNull();
+    expect(parseInvite('#mobilise=kano.market.3.4')).toBeNull();
+  });
+
+  it('knows the national square as a place and no state (C90)', () => {
+    expect(parseInvite(inviteHash('naija', 'square'))).toEqual({ stateId: 'naija', kind: 'square' });
+    expect(parseInvite('#mobilise=naija.market')).toBeNull();
+    expect(parseInvite('#mobilise=kano.square')).toBeNull();
+    expect(roomPlace('naija:square#2')).toEqual({ stateId: 'naija', kind: 'square' });
+    expect(roomPlace('kano:market#12')).toEqual({ stateId: 'kano', kind: 'market' });
+    expect(roomPlace('kano:square#1')).toBeNull();
+    expect(roomPlace('junk')).toBeNull();
+  });
+
+  describe('muting players (C90)', () => {
+    const saved: Record<string, string> = {};
+    afterEach(() => {
+      vi.unstubAllGlobals();
+      usePlacesStore.setState({ members: {}, mutedNames: [] });
+      for (const k of Object.keys(saved)) delete saved[k];
+    });
+
+    it('mutes by board name so it holds in another room, and remembers it on the device', () => {
+      vi.stubGlobal('localStorage', {
+        getItem: (k: string) => saved[k] ?? null,
+        setItem: (k: string, v: string) => {
+          saved[k] = v;
+        },
+      });
+      usePlacesStore.setState({ members: { a: member('a', { name: 'noisy' }), b: member('b', { name: 'kind' }) }, mutedNames: [] });
+      usePlacesStore.getState().mute('a');
+      expect(usePlacesStore.getState().isMuted('a')).toBe(true);
+      expect(usePlacesStore.getState().isMuted('b')).toBe(false);
+      expect(JSON.parse(saved['cr-places-muted']!)).toEqual(['noisy']);
+
+      // Another room, a new member id, the same name: still muted.
+      usePlacesStore.setState({ members: { z: member('z', { name: 'noisy' }) } });
+      expect(usePlacesStore.getState().isMuted('z')).toBe(true);
+    });
+
+    it('does not break when the device will not store anything', () => {
+      vi.stubGlobal('localStorage', {
+        getItem: () => {
+          throw new Error('blocked');
+        },
+        setItem: () => {
+          throw new Error('blocked');
+        },
+      });
+      usePlacesStore.setState({ members: { a: member('a', { name: 'noisy' }) }, mutedNames: [] });
+      usePlacesStore.getState().mute('a');
+      expect(usePlacesStore.getState().isMuted('a')).toBe(true);
+    });
   });
 });
