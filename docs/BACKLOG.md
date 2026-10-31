@@ -20,6 +20,9 @@ Work only the current chunk (`docs/STATUS.md`). Do not start later chunks early.
 | C85 | built | One word per idea, guarded by `vocabulary.test.ts` (`docs/chunks/C85.md`) |
 | C86 | built | Board says it is a game, Practice/Live tag, flat map without WebGL (`docs/chunks/C86.md`) |
 | C87 | built | Integrity explained, Briefing layout, words beside icons, no colour changes (`docs/chunks/C87.md`) |
+| C88 | built | UI/UX fix pass (`docs/chunks/C88.md`) |
+| C89 | built | Contender avatars in Mobilise, opt-in (`docs/chunks/C89.md`) |
+| C89–C93 | planned | Mobilise v2: Contender avatars (opt-in), rooms and friends, Campaign Phone + jobs + streak, preset packs, typed chat after 24 h (dark) |
 | C13–C19 | reviewed | See `docs/research/c13-c19-review.md`. C19-lite, C18-lite and the C14 check are built (C81) and C16 was already closed. Deferred: C15, C17. Skipped: C13, the prize flow |
 
 ## Outside the current chunk

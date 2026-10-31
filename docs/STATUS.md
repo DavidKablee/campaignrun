@@ -1,6 +1,9 @@
 # Status
 
 **Current chunk:** C48 done. C35–C48: parties and the campaign map (C35), the map as a world map (C36), accounts/API/database (C37), the Lagos Life UI chrome (C38), the four menu screens (C39), the roster and result screens (C40), the account layer made safe to expose (C41), two ways to sign in (C42), the look editor (C43), the ride ladder (C44), the road under it (C45), the thumb that drives it (C46), the screens that hold it (C47) and the economy that pays for it (C48). Next: a mail provider, then deploy — or the real-device playtest owed by every track, which C46–C48 have now made overdue rather than merely outstanding.
+**C89 (2026-10-31):** Contender avatars in Mobilise, opt-in and private by default (asked once, changeable in Account, server-decided). Next: C90 rooms you can switch, national square, friends.
+
+**C88 (2026-10-31):** UI/UX fix pass: short-landscape splash and Mobilise, zoom, locked invite banner, one Back button, disabled reasons, focus and sizes, People tray. Next: C89 Contender avatars (opt-in) per the Mobilise v2 plan.
 **C87 (2026-10-30):** wording and layout only, no colour changes: Integrity explained on the coach card, Briefing buttons laid out, words beside Settings/Board glyphs, DESIGN.md matches what ships. Not seen on a real phone.
 **C86 (2026-10-30):** Board: "game board" line, Practice/Live tag, "in front here" instead of a margin, flat SVG map when WebGL is missing. Contender names not touched; their guardrail-3 pass is still owed.
 **C85 (2026-10-30):** one player-facing word per idea: Crowd (score), Supporters (people aboard), Following (unlock currency), Small/Packed/Overflowing (tiers). Guarded by `vocabulary.test.ts`.

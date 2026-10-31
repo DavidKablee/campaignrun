@@ -13,6 +13,8 @@ export interface NavContext {
   settingsBack: Screen;
   authReturn: Screen | null;
   placesBack: Screen;
+  /** The screen the player came from, when the current one can be opened from several places. */
+  previous: Screen | null;
 }
 
 /** The screen a Back press leaves for, or null when there is nowhere to go (the splash). */
@@ -29,7 +31,12 @@ export function backTarget(screen: Screen, ctx: NavContext): Screen | null {
     case 'summary':
       return ctx.picked ? 'briefing' : 'splash';
     case 'map':
-      return ctx.picked ? 'roster' : 'splash';
+      // Opened from the splash, the Briefing, the Roster or a result: Back goes home, not always to the picker.
+      return ctx.previous && ['splash', 'briefing', 'roster', 'summary'].includes(ctx.previous)
+        ? ctx.previous
+        : ctx.picked
+          ? 'roster'
+          : 'splash';
     case 'settings':
       return ctx.settingsBack === 'settings' ? 'splash' : ctx.settingsBack;
     case 'auth':
@@ -48,6 +55,7 @@ function context(): NavContext {
     settingsBack: g.settingsBack,
     authReturn: g.authReturn,
     placesBack: g.placesBack,
+    previous: g.previousScreen,
   };
 }
 

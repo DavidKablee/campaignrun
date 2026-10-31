@@ -57,6 +57,21 @@ export function AuthScreen() {
             (screen === 'login' || (username.trim().length >= 3 && accepted))
   );
 
+  // Why the button is greyed, in words, so a disabled button is never a dead end.
+  const blocker = canSubmit || busy
+    ? ''
+    : (screen === 'signup' || screen === 'login' || screen === 'forgot') && email.trim().length <= 3
+      ? 'Enter your email to continue.'
+      : (screen === 'signup' || screen === 'name') && username.trim().length < 3
+        ? 'Choose a board name of at least 3 characters.'
+        : (screen === 'signup' || screen === 'reset') && password.length < minPassword
+          ? `Your password needs at least ${minPassword} characters.`
+          : screen === 'login' && password.length < 1
+            ? 'Enter your password to continue.'
+            : (screen === 'signup' || screen === 'name') && !accepted
+              ? 'Tick the 18+ box to continue.'
+              : '';
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (screen === 'forgot') {
@@ -85,12 +100,8 @@ export function AuthScreen() {
   return (
     <div className="cr-screen cr-screen--auth">
       <header className="cr-board-ticker">
-        <button
-          type="button"
-          className="cr-link"
-          onClick={goBack}
-        >
-          ← Back
+        <button type="button" className="cr-menu-back" onClick={goBack} aria-label="Back">
+          <span aria-hidden="true">‹</span>
         </button>
         <span className="cr-board-ticker-msg">Your board, on every device</span>
       </header>
@@ -204,6 +215,11 @@ export function AuthScreen() {
           </p>
         ) : null}
 
+        {blocker ? (
+          <p className="cr-fineprint cr-auth-why" role="status">
+            {blocker}
+          </p>
+        ) : null}
         <button className="cr-btn" type="submit" disabled={!canSubmit}>
           {busy
             ? 'Working…'

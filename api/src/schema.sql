@@ -106,6 +106,13 @@ alter table users alter column password_salt drop not null;
 -- said "not now". On the server rather than the device so the ladder cannot be
 -- reset by clearing site data, and so the decision is testable.
 alter table users add column if not exists email_prompt_after timestamptz;
+
+-- C89: the one Mobilise-only opt-in. A player who says yes lets the people in their room see their
+-- Contender's character. It is a separate choice from `contender_consent_at` (the map-colouring consent):
+-- different purpose, different audience. null = plain citizen. `mobilise_asked_at` records that the
+-- one-time question was answered, either way, so it is not asked again.
+alter table users add column if not exists mobilise_contender_id text;
+alter table users add column if not exists mobilise_asked_at timestamptz;
 alter table users add column if not exists email_prompt_dismissals integer not null default 0;
 
 -- One row per device holding a key for a name-only account. Hashed exactly

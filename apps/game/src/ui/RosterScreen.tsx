@@ -7,6 +7,7 @@ import { useContenderStore } from '../contenderStore';
 import { renderPortraits } from '../render/studio';
 import { rosterCommit } from '../roster';
 import { useGameStore } from '../state';
+import { goBack } from '../nav';
 
 const NO_PORTRAITS: Record<string, string> = {};
 
@@ -90,6 +91,9 @@ export function RosterScreen() {
   return (
     <div className="cr-screen cr-screen--pick">
       <div className="cr-chrome-top">
+        <button type="button" className="cr-menu-back" onClick={goBack} aria-label="Back">
+          <span aria-hidden="true">‹</span>
+        </button>
         <div className="cr-pill-row">
           <span className="cr-pill cr-pill--live">{stateName}</span>
           <span className="cr-pill">{following.toLocaleString('en-US')} Following</span>
@@ -118,8 +122,8 @@ export function RosterScreen() {
 
       {!locked && (
         <div className="cr-lock-alert" role="alert">
-          <strong>First full run = permanent lock.</strong>
-          {' '}Your Contender choice is fixed after your first completed campaign run. Quick rallies do not lock it. Pick carefully — you get one switch after, then it&apos;s fixed for the campaign.
+          <strong>Your first full run locks your Contender.</strong>
+          {' '}Quick rallies do not lock it. After the lock you get one switch, then it is fixed for the campaign.
         </div>
       )}
 

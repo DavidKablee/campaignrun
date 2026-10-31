@@ -1,6 +1,6 @@
 import type { Hono, MiddlewareHandler } from 'hono';
 import { streamSSE } from 'hono/streaming';
-import { outfits, places, placesDay, stateIndex } from '@cr/content';
+import { places, placesDay, stateIndex } from '@cr/content';
 import type { Db } from './db.ts';
 import { REQUIRE_VERIFIED_FOR_BOARDS, LIMITS } from './limits.ts';
 import { PlaceHub, type HubEvent } from './placesHub.ts';
@@ -8,6 +8,7 @@ import { hit, rateLimit } from './rateLimit.ts';
 import type { SessionUser } from './auth.ts';
 import {
   placeActSchema,
+  placeIdentitySchema,
   placeJoinSchema,
   placeMoveSchema,
   placeReportSchema,
@@ -91,6 +92,15 @@ export function registerPlaces(
     return { coins, supporters, capped, today: rows[0]! };
   }
 
+  /** What the player chose about showing their Contender here. Only ever read for the player themself. */
+  async function identityOf(userId: string): Promise<{ asked: boolean; contenderId: string | null }> {
+    const { rows } = await database.query<{ mobilise_contender_id: string | null; mobilise_asked_at: Date | null }>(
+      'select mobilise_contender_id, mobilise_asked_at from users where id = $1',
+      [userId],
+    );
+    return { asked: rows[0]?.mobilise_asked_at != null, contenderId: rows[0]?.mobilise_contender_id ?? null };
+  }
+
   /** The player's member in a room, or a ready-made 404. */
   function memberOf(user: SessionUser, roomId: string) {
     return hub.memberFor(user.id, roomId);
@@ -133,13 +143,12 @@ export function registerPlaces(
     if (!parsed.success) return c.json({ error: 'invalid' }, 400);
     const user = c.get('user');
     const t = now();
-    const palette = outfits.options.colors;
-    const color = parsed.data.color ?? null;
+    const identity = await identityOf(user.id);
     const { member, room } = hub.join(
       { id: user.id, username: user.username },
       parsed.data.stateId,
       parsed.data.kind,
-      color && palette.includes(color) ? color : null,
+      identity.contenderId ? { contenderId: identity.contenderId } : null,
       t,
     );
     return c.json({
@@ -147,8 +156,28 @@ export function registerPlaces(
       you: member.id,
       members: hub.snapshot(room.id, t),
       today: await todayTotals(user.id),
+      identity,
       ...catalogue(),
     });
+  });
+
+  app.get('/api/places/identity', requireUser, async (c) => {
+    c.header('cache-control', 'no-store');
+    return c.json(await identityOf(c.get('user').id));
+  });
+
+  // The one-time "show your Contender here?" answer, changeable any time. Null = plain citizen.
+  app.post('/api/places/identity', requireUser, async (c) => {
+    const user = c.get('user');
+    if (!hit(`place-identity:${user.id}`, 20, MINUTE).ok) return c.json({ error: 'rate-limited' }, 429);
+    const parsed = placeIdentitySchema.safeParse(await c.req.json().catch(() => null));
+    if (!parsed.success) return c.json({ error: 'invalid' }, 400);
+    await database.query('update users set mobilise_contender_id = $2, mobilise_asked_at = now() where id = $1', [
+      user.id,
+      parsed.data.contenderId,
+    ]);
+    hub.setLook(user.id, parsed.data.contenderId ? { contenderId: parsed.data.contenderId } : null, now());
+    return c.json({ asked: true, contenderId: parsed.data.contenderId });
   });
 
   app.get('/api/places/rooms/:roomId/stream', requireUser, (c) => {

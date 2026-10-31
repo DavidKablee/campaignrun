@@ -97,4 +97,39 @@ describe('place hub (C82)', () => {
     expect(hub.sweep(2000)).toBe(0);
     expect(hub.sweep(10_000)).toBe(1);
   });
+
+  it('a plain citizen carries exactly the public fields and no Contender (C89)', () => {
+    const hub = new PlaceHub();
+    const { room } = hub.join(user(1), 'kano', 'market', null, 0);
+    const [m] = hub.snapshot(room.id, 0);
+    expect(Object.keys(m!).sort()).toEqual(['id', 'look', 'name', 'seed', 'tx', 'tz', 'x', 'z']);
+    expect(m!.look).toBeNull();
+  });
+
+  it('shows a Contender only for a player who opted in, and tells the room when that changes (C89)', () => {
+    const hub = new PlaceHub();
+    const a = hub.join(user(1), 'kano', 'market', { contenderId: 'captain-kobo' }, 0);
+    const b = hub.join(user(2), 'kano', 'market', null, 0);
+    const seen: HubEvent[] = [];
+    hub.attach(b.member, (e) => seen.push(e), 0);
+
+    const byName = (name: string) => hub.snapshot(a.room.id, 0).find((m) => m.name === name)!;
+    expect(byName('player1').look).toEqual({ contenderId: 'captain-kobo' });
+    expect(byName('player2').look).toBeNull();
+
+    hub.setLook(user(1).id, null, 1);
+    expect(byName('player1').look).toBeNull();
+    const told = seen.find((e) => e.type === 'join' && e.member.name === 'player1');
+    expect(told && told.type === 'join' && told.member.look).toBeNull();
+
+    hub.setLook(user(2).id, { contenderId: 'mama-ankara' }, 2);
+    expect(byName('player2').look).toEqual({ contenderId: 'mama-ankara' });
+  });
+
+  it('rejoining with a different choice replaces the look (C89)', () => {
+    const hub = new PlaceHub();
+    hub.join(user(1), 'kano', 'market', { contenderId: 'captain-kobo' }, 0);
+    const again = hub.join(user(1), 'kano', 'market', null, 5);
+    expect(hub.snapshot(again.room.id, 5)[0]!.look).toBeNull();
+  });
 });

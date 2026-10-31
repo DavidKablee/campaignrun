@@ -21,12 +21,20 @@ export type HubEvent =
 
 export type Sink = (event: HubEvent) => void;
 
+/**
+ * Set only for a player who opted in to show their Contender in Mobilise (C89, guardrail 13). Everyone
+ * else is a plain citizen and carries `null`. The server fills it; a client cannot send it.
+ */
+export interface Look {
+  contenderId: string;
+}
+
 export interface PublicMember {
   id: string;
   name: string;
-  /** Seeds a plain citizen avatar. Never the player's Contender or Studio look (guardrail 10). */
+  /** Seeds a plain citizen avatar. The Studio look is never sent (guardrail 10). */
   seed: number;
-  color: string | null;
+  look: Look | null;
   x: number;
   z: number;
   tx: number;
@@ -38,7 +46,7 @@ interface Member {
   userId: string;
   name: string;
   seed: number;
-  color: string | null;
+  look: Look | null;
   roomId: string;
   x: number;
   z: number;
@@ -84,7 +92,7 @@ export class PlaceHub {
 
   private view(m: Member, now: number): PublicMember {
     const p = this.position(m, now);
-    return { id: m.id, name: m.name, seed: m.seed, color: m.color, x: p.x, z: p.z, tx: m.tx, tz: m.tz };
+    return { id: m.id, name: m.name, seed: m.seed, look: m.look, x: p.x, z: p.z, tx: m.tx, tz: m.tz };
   }
 
   private emit(room: Room, event: HubEvent): void {
@@ -96,7 +104,7 @@ export class PlaceHub {
     user: { id: string; username: string },
     stateId: string,
     kind: string,
-    color: string | null,
+    look: Look | null,
     now: number,
   ): { member: Member; room: Room } {
     const key = placeKey(stateId, kind);
@@ -106,7 +114,7 @@ export class PlaceHub {
       if (room && room.key === key) {
         existing.lastSeen = now;
         existing.detachedAt = null;
-        if (color) existing.color = color;
+        existing.look = look;
         return { member: existing, room };
       }
       this.leave(user.id);
@@ -128,7 +136,7 @@ export class PlaceHub {
       userId: user.id,
       name: user.username,
       seed: hashSeed(user.id),
-      color,
+      look,
       roomId: room.id,
       x: spawn.x,
       z: spawn.z,
@@ -144,6 +152,15 @@ export class PlaceHub {
     room.members.set(member.id, member);
     this.byUser.set(user.id, member);
     return { member, room };
+  }
+
+  /** Opt in or out while standing in a place: everyone in the room is told, so the avatar changes at once. */
+  setLook(userId: string, look: Look | null, now: number): void {
+    const m = this.byUser.get(userId);
+    if (!m) return;
+    m.look = look;
+    const room = this.rooms.get(m.roomId);
+    if (room) this.emit(room, { type: 'join', member: this.view(m, now) });
   }
 
   memberFor(userId: string, roomId: string): Member | null {

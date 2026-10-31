@@ -3574,7 +3574,7 @@ body,
   padding: 0.45rem 0.85rem;
   border-radius: 999px;
   cursor: pointer;
-  min-height: 38px;
+  min-height: 44px;
 }
 
 /* A short phone gives the stage less, because the character is still legible at
@@ -4958,4 +4958,178 @@ body,
   font-size: 0.7rem;
   font-weight: 600;
   opacity: 0.7;
+}
+
+/* ===========================================================================
+   C88: UI/UX fix pass. Layout, reach, size and focus only; no colours change.
+   ========================================================================= */
+
+/* Splash on a short screen (a phone on its side, a small laptop window) used to clip everything below the
+   hero button with overflow hidden, so Mobilise and the nav could not be reached. It scrolls now, the "On
+   air" block steps aside, and the 3D hero stays put behind it. */
+@media (max-height: 700px) and (max-width: 899px) {
+  .cr-splash-side {
+    display: none;
+  }
+}
+@media (max-height: 560px) {
+  .cr-screen--splash {
+    overflow-y: auto;
+    grid-template-rows: none;
+    grid-auto-rows: auto;
+    align-content: start;
+  }
+  .cr-screen--splash > .cr-hero,
+  .cr-screen--splash > .cr-hero-scrim {
+    position: fixed;
+  }
+  .cr-splash-side {
+    display: none;
+  }
+  .cr-splash-nav {
+    flex-wrap: wrap;
+  }
+  .cr-splash-nav button {
+    flex: 1 1 6.5rem;
+  }
+}
+
+/* Readable at arm's length: nothing under 12px. */
+.cr-splash-nav button small {
+  font-size: 0.75rem;
+}
+.cr-fineprint {
+  font-size: 0.78rem;
+  opacity: 0.8;
+}
+.cr-places-today {
+  font-size: 0.8rem;
+}
+.cr-place-action {
+  font-size: 0.78rem;
+}
+.cr-place-tag {
+  font-size: 0.75rem;
+}
+
+/* One visible keyboard focus ring everywhere, in a colour the game already owns. */
+:focus-visible {
+  outline: 3px solid var(--cr-danfo);
+  outline-offset: 2px;
+}
+.cr-places-tray :focus-visible,
+.cr-sheet :focus-visible,
+.cr-card :focus-visible {
+  outline-color: var(--cr-ink);
+}
+
+/* Back is one round 44px button wherever it appears. */
+.cr-chrome-top .cr-menu-back,
+.cr-board-ticker .cr-menu-back {
+  flex: none;
+}
+.cr-brief .cr-chrome-top .cr-kicker {
+  margin-right: auto;
+}
+.cr-board-ticker .cr-link,
+.cr-auth .cr-link {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 0.5rem;
+}
+
+/* Mobilise: touch targets, the new People tray, and a real landscape layout. */
+.cr-places-head-actions {
+  display: flex;
+  gap: 0.4rem;
+}
+.cr-places-emoji button {
+  width: 44px;
+}
+.cr-places-lang button {
+  min-height: 44px;
+}
+.cr-places-people {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.cr-places-people button {
+  width: 100%;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0 0.8rem;
+  border-radius: 14px;
+  background: rgba(22, 32, 43, 0.08);
+  text-align: left;
+}
+.cr-places-people small {
+  margin-left: auto;
+  opacity: 0.7;
+}
+.cr-brief-why,
+.cr-auth-why {
+  text-align: center;
+}
+@media (orientation: landscape) and (min-width: 700px) {
+  .cr-screen--places {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) clamp(280px, 34vw, 380px);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    grid-template-areas:
+      'head head'
+      'kinds side'
+      'stage side';
+    column-gap: 0.75rem;
+    row-gap: 0.5rem;
+  }
+  .cr-screen--places > * {
+    max-width: none;
+    width: auto;
+    margin: 0;
+    min-width: 0;
+  }
+  .cr-places-head {
+    grid-area: head;
+  }
+  .cr-places-kinds {
+    grid-area: kinds;
+  }
+  .cr-places-stage {
+    grid-area: stage;
+  }
+  .cr-places-dock,
+  .cr-places-tray {
+    grid-area: side;
+    align-self: end;
+  }
+  .cr-places-tray {
+    max-height: 100%;
+    align-self: stretch;
+    border-radius: var(--cr-radius-card);
+  }
+  .cr-places-dock .cr-places-actions {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* C89: the one-time "show your Contender here?" card reuses the coach card; two answers side by side. */
+.cr-places-coach-row {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+.cr-places-coach-row button {
+  flex: 1 1 8rem;
+}
+.cr-places-coach-row button:not(.is-go) {
+  background: rgba(22, 32, 43, 0.1);
+  color: var(--cr-surface-ink);
 }

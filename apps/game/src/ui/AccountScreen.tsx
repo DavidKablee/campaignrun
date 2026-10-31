@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { legal, limits } from '@cr/content';
 import { useGameStore } from '../state';
 import { useAccountStore } from '../accountStore';
@@ -6,6 +6,8 @@ import { deleteOnlineAccount, useOnlineStore } from '../onlineStore';
 import { contenderShareAllowed, shareConsentPlan } from '../consent';
 import { buildExportBundle, deleteAllLocalData, downloadExport } from '../dataExport';
 import { MenuHead, Row, Sheet, Toggle } from './MenuChrome';
+import { useContenderStore } from '../contenderStore';
+import { usePlacesStore } from '../places/placesStore';
 
 function initial(name: string): string {
   const ch = name.trim()[0];
@@ -51,6 +53,12 @@ export function AccountScreen() {
   const termsOk = termsVersion === legal.version;
   const privacyOk = privacyVersion === legal.version;
   const shareOk = contenderShareAllowed(consentLog);
+  const contenderPicked = useContenderStore((s) => s.activeContenderId);
+  const identity = usePlacesStore((s) => s.identity);
+  const mobiliseOn = identity?.contenderId != null;
+  useEffect(() => {
+    if (user) void usePlacesStore.getState().loadIdentity();
+  }, [user]);
   const [nameDraft, setNameDraft] = useState(displayName);
   const [note, setNote] = useState('');
   const [currentPw, setCurrentPw] = useState('');
@@ -279,6 +287,20 @@ export function AccountScreen() {
             : `Consent log: ${consentLog.length} ${consentLog.length === 1 ? 'entry' : 'entries'} on this device. A lawyer review of the full notice is still required before public launch.`}
         </p>
       </Sheet>
+
+      {user && contenderPicked ? (
+        <Sheet eyebrow="Mobilise" title="Show my Contender in Mobilise" flush>
+          <p className="cr-sheet-body">
+            Off, you are a plain citizen in every place. On, the people in the same room can see which Contender you picked. This is separate from the
+            map choice above.
+          </p>
+          <Toggle
+            label="Show my Contender to people in my room"
+            checked={mobiliseOn}
+            onChange={(on) => void usePlacesStore.getState().setIdentity(on ? contenderPicked : null)}
+          />
+        </Sheet>
+      ) : null}
 
       <Sheet eyebrow="Your data" flush>
         <Row

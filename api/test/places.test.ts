@@ -182,4 +182,49 @@ run('places api (C82)', () => {
     const { rows } = await database.query('select reason, place_key from place_reports');
     expect(rows).toEqual([{ reason: 'spam', place_key: 'kano:market' }]);
   });
+
+  describe('showing your Contender in a place (C89)', () => {
+    const members = async (cookie: string) =>
+      ((await join(cookie)).body.members as unknown as { name: string; look: { contenderId: string } | null }[]);
+
+    it('starts as a plain citizen, not yet asked', async () => {
+      const a = await guest('c89a0');
+      const { body } = await join(a);
+      expect((body as unknown as { identity: unknown }).identity).toEqual({ asked: false, contenderId: null });
+      expect(body.members.find((m) => m.name === 'c89a0')).toMatchObject({ look: null });
+    });
+
+    it('shows the Contender to the room only after the player says yes, and a client cannot send one at join', async () => {
+      const a = await guest('c89a1');
+      const b = await guest('c89b1');
+      // A look smuggled into the join call is ignored.
+      await json('/api/places/join', a, { stateId: 'kano', kind: 'market', look: { contenderId: 'captain-kobo' }, color: '#ffffff' });
+      expect((await members(b)).find((m) => m.name === 'c89a1')!.look).toBeNull();
+
+      const yes = await json('/api/places/identity', a, { contenderId: 'captain-kobo' });
+      expect(yes.status).toBe(200);
+      expect((await members(b)).find((m) => m.name === 'c89a1')!.look).toEqual({ contenderId: 'captain-kobo' });
+      expect((await (await json('/api/places/identity', a, undefined, 'GET')).json())).toEqual({ asked: true, contenderId: 'captain-kobo' });
+    });
+
+    it('withdrawing clears it for everyone, and it is remembered as answered', async () => {
+      const a = await guest('c89a2');
+      const b = await guest('c89b2');
+      await join(a);
+      await json('/api/places/identity', a, { contenderId: 'mama-ankara' });
+      await json('/api/places/identity', a, { contenderId: null });
+      expect((await members(b)).find((m) => m.name === 'c89a2')!.look).toBeNull();
+      const { body } = await join(a);
+      expect((body as unknown as { identity: unknown }).identity).toEqual({ asked: true, contenderId: null });
+    });
+
+    it('never puts a Contender into the map-colouring consent, and refuses a made-up one', async () => {
+      const a = await guest('c89a3');
+      await json('/api/places/identity', a, { contenderId: 'captain-kobo' });
+      const me = await (await json('/api/auth/me', a, undefined, 'GET')).json();
+      expect((me as { user: { shareContender: boolean } }).user.shareContender).toBe(false);
+      expect((await json('/api/places/identity', a, { contenderId: 'not-a-contender' })).status).toBe(400);
+      expect((await json('/api/places/identity', '', { contenderId: 'captain-kobo' })).status).toBe(401);
+    });
+  });
 });

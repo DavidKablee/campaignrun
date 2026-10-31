@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-31 — Contender avatars in Mobilise (C89)
+
+The first time a player with a Contender opens Mobilise they are asked, once, whether to show that Contender (character look and a party-colour sash) to the people in the room. Default is private: everyone else stays a plain citizen. The choice can be changed in Account. It is stored on the server and is separate from the map-colouring consent. Details in `docs/chunks/C89.md`.
+
+## 2026-10-31 — UI/UX fix pass (C88)
+
+Splash and Mobilise work on a short landscape screen; zoom is allowed; a locked invite is explained; Back is one 44 px button everywhere and the Board returns to where it was opened; disabled buttons say why; focus is visible; touch targets and text sizes meet the minimum; a People tray makes mute and report reachable. No colour changes. Details in `docs/chunks/C88.md`.
+
 ## 2026-10-30 — Wording and layout pass (C87)
 
 From a review that the run and the menus read as two apps. Colours and the run's own chrome were left exactly as they are (the HUD and pause card were tried in white and put back).

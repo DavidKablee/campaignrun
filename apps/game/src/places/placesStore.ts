@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { places, type PlaceAction } from '@cr/content';
-import { ApiError, API_BASE, apiPost } from '../api/client';
+import { ApiError, API_BASE, apiGet, apiPost } from '../api/client';
 import { track } from '../analytics';
 import { useGameStore } from '../state';
 import { applyPlaceEvent, rewardLine, type Members, type PlaceEvent, type PlaceMember } from './placesModel';
@@ -16,11 +16,18 @@ type Phase = 'idle' | 'joining' | 'in' | 'error';
 
 type Listener = (e: PlaceEvent) => void;
 
+export interface Identity {
+  /** The one-time "show your Contender here?" question has been answered. */
+  asked: boolean;
+  contenderId: string | null;
+}
+
 interface JoinResponse {
   roomId: string;
   you: string;
   members: PlaceMember[];
   today: Today;
+  identity: Identity;
 }
 
 export interface Today {
@@ -46,6 +53,10 @@ interface PlacesState {
   ready: Record<string, number>;
   muted: string[];
   lang: 'en' | 'pcm';
+  identity: Identity | null;
+  loadIdentity: () => Promise<void>;
+  /** Show this Contender in places, or null to be a plain citizen. Saves to the account. */
+  setIdentity: (contenderId: string | null) => Promise<boolean>;
   probe: (stateId: string) => Promise<void>;
   join: (stateId: string, kind: string) => Promise<void>;
   leave: () => Promise<void>;
@@ -122,6 +133,25 @@ export const usePlacesStore = create<PlacesState>()((set, get) => {
     ready: {},
     muted: [],
     lang: 'en',
+    identity: null,
+
+    async loadIdentity() {
+      try {
+        set({ identity: await apiGet<Identity>('/api/places/identity') });
+      } catch {
+        /* not signed in or offline: the toggle just stays hidden */
+      }
+    },
+
+    async setIdentity(contenderId) {
+      try {
+        set({ identity: await apiPost<Identity>('/api/places/identity', { contenderId }) });
+        return true;
+      } catch {
+        set({ toast: 'Could not save that. Try again.' });
+        return false;
+      }
+    },
 
     async probe(stateId) {
       // Cheap and cached: the Briefing screen asks every time it opens.
@@ -147,7 +177,7 @@ export const usePlacesStore = create<PlacesState>()((set, get) => {
         const res = await apiPost<JoinResponse>('/api/places/join', { stateId, kind });
         const members: Members = {};
         for (const m of res.members) members[m.id] = m;
-        set({ phase: 'in', roomId: res.roomId, you: res.you, members, today: res.today, availability: 'up' });
+        set({ phase: 'in', roomId: res.roomId, you: res.you, members, today: res.today, identity: res.identity, availability: 'up' });
         track('place_join', stateId);
         open(res.roomId);
       } catch (err) {

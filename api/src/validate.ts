@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { activeContenders, analytics, feedbackTopics, limits, maxUpgradeLevel, outfits, places, rides, stateIndex } from '@cr/content';
+import { activeContenders, analytics, feedbackTopics, limits, maxUpgradeLevel, places, rides, stateIndex } from '@cr/content';
 
 const stateIds = stateIndex.map((s) => s.id);
 const rideIds = rides.map((r) => r.id);
@@ -147,11 +147,18 @@ export const feedbackSchema = z.object({
 
 const placeKinds = places.kinds.map((k) => k.id);
 
-/** The shirt colour is the only thing a player picks about their avatar, and only from the game's own palette. */
+/**
+ * Joining names a place and nothing about the player. How they look is decided on the server: a plain
+ * citizen, or their Contender if they opted in (`placeIdentitySchema`). A client cannot send a look.
+ */
 export const placeJoinSchema = z.object({
   stateId: z.enum(stateIds as [string, ...string[]]),
   kind: z.enum(placeKinds as [string, ...string[]]),
-  color: z.enum(outfits.options.colors as unknown as [string, ...string[]]).optional(),
+});
+
+/** The one-time Mobilise question: show my Contender (an id), or stay a plain citizen (null). */
+export const placeIdentitySchema = z.object({
+  contenderId: z.enum(contenderIds as [string, ...string[]]).nullable(),
 });
 
 export const placeMoveSchema = z.object({

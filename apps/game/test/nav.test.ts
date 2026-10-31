@@ -7,6 +7,7 @@ const ctx = (over: Partial<NavContext> = {}): NavContext => ({
   settingsBack: 'splash',
   authReturn: null,
   placesBack: 'briefing',
+  previous: null,
   ...over,
 });
 
@@ -39,6 +40,14 @@ describe('backTarget', () => {
   it('leaves a result for the Briefing only once a Contender is chosen', () => {
     expect(backTarget('summary', ctx())).toBe('splash');
     expect(backTarget('summary', ctx({ picked: true }))).toBe('briefing');
+  });
+
+  it('returns the Board to where it was opened from', () => {
+    expect(backTarget('map', ctx({ previous: 'splash', picked: true }))).toBe('splash');
+    expect(backTarget('map', ctx({ previous: 'briefing', picked: true }))).toBe('briefing');
+    expect(backTarget('map', ctx({ previous: 'summary' }))).toBe('summary');
+    expect(backTarget('map', ctx({ previous: null, picked: true }))).toBe('roster');
+    expect(backTarget('map', ctx({ previous: 'yard' }))).toBe('splash');
   });
 
   it('treats the run as a toggle between playing and paused', () => {

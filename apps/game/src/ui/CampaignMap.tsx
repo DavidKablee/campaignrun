@@ -173,8 +173,8 @@ export function CampaignMap() {
   return (
     <div className="cr-screen cr-screen--map">
       <header className="cr-board-ticker">
-        <button type="button" className="cr-link" onClick={goBack}>
-          ← Back
+        <button type="button" className="cr-menu-back" onClick={goBack} aria-label="Back">
+          <span aria-hidden="true">‹</span>
         </button>
         <span className="cr-pill cr-pill--live">{liveCount > 0 ? `Live · ${liveCount}` : 'Practice board'}</span>
         {onlineUser ? (

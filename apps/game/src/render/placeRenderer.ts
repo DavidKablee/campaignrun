@@ -1,5 +1,6 @@
 import * as THREE from 'three';
-import { outfits, places, stepToward, type PlacePhrase } from '@cr/content';
+import { outfits, partyForContender, places, stepToward, type PlacePhrase } from '@cr/content';
+import { getCharacter } from '../characters';
 import { mulberry } from './geo';
 import { buildCharacter, disposeRig, poseCharacter, randomPerson, type CharacterRig, type Pose } from './character';
 import { bend, glowMat } from './materials';
@@ -19,7 +20,7 @@ export interface AvatarState {
   id: string;
   name: string;
   seed: number;
-  color: string | null;
+  look: { contenderId: string } | null;
   x: number;
   z: number;
   tx: number;
@@ -56,6 +57,7 @@ export interface PlaceRendererOptions {
 }
 
 const FACE_UP = 1.5;
+const sashMats = new Map<string, THREE.MeshBasicMaterial>();
 
 export class PlaceRenderer {
   readonly canvas: HTMLCanvasElement;
@@ -153,7 +155,7 @@ export class PlaceRenderer {
       const r = mulberry(this.opts.seed * 31 + i * 977);
       const x = r.range(-places.bounds.halfX * 0.8, places.bounds.halfX * 0.8);
       const z = r.range(-places.bounds.halfZ * 0.6, places.bounds.halfZ * 0.8);
-      this.upsert({ id: `local-${i}`, name: 'Local', seed: 4000 + this.opts.seed % 997 + i * 13, color: null, x, z, tx: x, tz: z }, true);
+      this.upsert({ id: `local-${i}`, name: 'Local', seed: 4000 + this.opts.seed % 997 + i * 13, look: null, x, z, tx: x, tz: z }, true);
     }
     for (let i = have - 1; i >= count; i--) this.remove(`local-${i}`);
   }
@@ -161,13 +163,18 @@ export class PlaceRenderer {
   upsert(m: AvatarState, local = false) {
     const existing = this.avatars.get(m.id);
     if (existing) {
-      existing.state = { ...m };
-      return;
+      // Someone opted in or out while standing here: rebuild them so the room sees it at once.
+      if (existing.state.look?.contenderId === m.look?.contenderId) {
+        existing.state = { ...m };
+        return;
+      }
+      this.remove(m.id);
     }
     const self = !local && m.id === this.selfId;
-    const { look, outfit } = randomPerson(m.seed, { colors: outfits.options.colors });
-    if (m.color) outfit.topColor = m.color;
+    // A plain citizen from the seed, unless this player chose to show their Contender (C89).
+    const { look, outfit } = m.look ? getCharacter(m.look.contenderId, undefined) : randomPerson(m.seed, { colors: outfits.options.colors });
     const rig = buildCharacter(look, outfit, self ? 'hi' : 'lo');
+    if (m.look) this.addSash(rig, m.look.contenderId);
     rig.group.position.set(m.x, 0, m.z);
     this.scene.add(rig.group);
     const shadow = new THREE.Mesh(new THREE.CircleGeometry(0.34, 14), glowMat('blob', '#000000', { transparent: true, opacity: 0.3 }));
@@ -192,6 +199,23 @@ export class PlaceRenderer {
       local,
       nextMoveAt: this.clock + 1 + Math.random() * 3,
     });
+  }
+
+  /** A plain band across the chest in the Contender's party colour. No emblem, symbol or slogan (guardrail 3). */
+  private addSash(rig: CharacterRig, contenderId: string) {
+    const colour = partyForContender(contenderId)?.color;
+    if (!colour) return;
+    const geo = new THREE.BoxGeometry(0.64, 0.1, 0.36);
+    let mat = sashMats.get(colour);
+    if (!mat) {
+      mat = new THREE.MeshBasicMaterial({ color: new THREE.Color(colour) });
+      sashMats.set(colour, mat);
+    }
+    const sash = new THREE.Mesh(geo, mat);
+    sash.position.set(0, 1.02, 0);
+    sash.rotation.z = -0.75;
+    rig.group.add(sash);
+    rig.geometries.push(geo);
   }
 
   remove(id: string) {

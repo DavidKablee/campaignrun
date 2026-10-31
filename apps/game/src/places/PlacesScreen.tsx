@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { places, stateIndex, placeKey, localsFor } from '@cr/content';
+import { contenders, places, stateIndex, placeKey, localsFor } from '@cr/content';
+import { useContenderStore } from '../contenderStore';
 import { useGameStore } from '../state';
 import { goBack } from '../nav';
 import { haptic, motionReduced } from '../prefs';
@@ -53,6 +54,7 @@ function Icon({ name }: { name: string }) {
     share: 'M18 8a3 3 0 100-6 3 3 0 000 6zM6 15a3 3 0 100-6 3 3 0 000 6zM18 22a3 3 0 100-6 3 3 0 000 6zM8.6 10.6l6.8-3.2M8.6 13.4l6.8 3.2',
     back: 'M15 5l-7 7 7 7',
     close: 'M6 6l12 12M18 6L6 18',
+    people: 'M9 11a3 3 0 100-6 3 3 0 000 6zM3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M17 8a2.5 2.5 0 010 5M21 20c0-2.4-1.6-4.4-4-5',
   };
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -87,9 +89,26 @@ export function PlacesScreen() {
   const dataSaver = useGameStore((s) => s.dataSaver);
   const status = useOnlineStore((s) => s.status);
   const store = usePlacesStore();
-  const { phase, roomId, you, members, ready, today, toast, lang, muted } = store;
+  const { phase, roomId, you, members, ready, today, toast, lang, muted, identity } = store;
+  const pickedContender = useContenderStore((s) => s.activeContenderId);
+  const myContender = contenders.find((c) => c.id === pickedContender);
+  // The one-time question: only once someone has actually chosen a Contender, and only if never answered.
+  const askIdentity = phase === 'in' && !!myContender && identity !== null && !identity.asked;
   const [kind, setKind] = useState<string>(target?.kind ?? places.kinds[0]!.id);
-  const [sheet, setSheet] = useState<'say' | 'person' | 'invite' | null>(null);
+  const [sheet, setSheet] = useState<'say' | 'person' | 'invite' | 'people' | null>(null);
+  const trayRef = useRef<HTMLElement>(null);
+  const trigger = useRef<HTMLElement | null>(null);
+  // Focus follows the tray: into it when it opens, back to what opened it when it closes.
+  useEffect(() => {
+    if (sheet) {
+      trigger.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      trayRef.current?.querySelector<HTMLElement>('button:not(:disabled)')?.focus();
+      return;
+    }
+    const back = trigger.current;
+    trigger.current = null;
+    if (back && document.contains(back)) back.focus();
+  }, [sheet]);
   // Esc closes an open sheet first; only with none open does it fall through to Back.
   useEffect(() => {
     if (!sheet) return;
@@ -272,15 +291,28 @@ export function PlacesScreen() {
           </strong>
           <small>{phase === 'in' ? `${others.length + 1} ${others.length ? 'players' : 'player'} · ${localCount(others.length + 1)} locals` : 'Mobilise'}</small>
         </div>
-        <button
-          type="button"
-          className="cr-places-round cr-places-round--gold"
-          onClick={() => setSheet(sheet === 'invite' ? null : 'invite')}
-          aria-label="Invite a friend here"
-          disabled={phase !== 'in'}
-        >
-          <Icon name="share" />
-        </button>
+        <span className="cr-places-head-actions">
+          <button
+            type="button"
+            className="cr-places-round"
+            onClick={() => setSheet(sheet === 'people' ? null : 'people')}
+            aria-label={`People here (${others.length + 1})`}
+            disabled={phase !== 'in'}
+            title={phase !== 'in' ? 'Join a place to see who is here' : undefined}
+          >
+            <Icon name="people" />
+          </button>
+          <button
+            type="button"
+            className="cr-places-round cr-places-round--gold"
+            onClick={() => setSheet(sheet === 'invite' ? null : 'invite')}
+            aria-label="Invite a friend here"
+            disabled={phase !== 'in'}
+            title={phase !== 'in' ? 'Join a place to invite a friend' : undefined}
+          >
+            <Icon name="share" />
+          </button>
+        </span>
       </header>
 
       <nav className="cr-places-kinds" aria-label="Place">
@@ -299,7 +331,19 @@ export function PlacesScreen() {
 
       <div className="cr-places-stage">
         <div ref={hostRef} className="cr-places-host" data-testid="place-host" />
-        {!signedIn ? (
+        {status === 'unknown' ? (
+          <div className="cr-places-gate" role="status">
+            <p>Checking your board name…</p>
+          </div>
+        ) : status === 'offline' ? (
+          <div className="cr-places-gate" role="alert">
+            <h2>Opening soon</h2>
+            <p>The field is not reachable right now.</p>
+            <button type="button" className="cr-btn" onClick={() => void useOnlineStore.getState().refresh()}>
+              Try again
+            </button>
+          </div>
+        ) : !signedIn ? (
           <div className="cr-places-gate">
             <h2>Join the campaign trail</h2>
             <p>Pick a board name to meet other players in {stateName}. Chat is presets and emoji only.</p>
@@ -325,6 +369,21 @@ export function PlacesScreen() {
             <button type="button" className="cr-btn" onClick={() => void store.join(stateId, kind)}>
               Try again
             </button>
+          </div>
+        ) : askIdentity && !sheet ? (
+          <div className="cr-places-coach" role="dialog" aria-label="Show your Contender here?">
+            <p>
+              <b>Show your Contender here?</b> If you say yes, everyone in this room can see you as {myContender!.name}. If not, you stay a plain citizen.
+              Change it any time in Account.
+            </p>
+            <div className="cr-places-coach-row">
+              <button type="button" onClick={() => void usePlacesStore.getState().setIdentity(null)}>
+                Keep me anonymous
+              </button>
+              <button type="button" className="is-go" onClick={() => void usePlacesStore.getState().setIdentity(myContender!.id)}>
+                Yes, show {myContender!.name}
+              </button>
+            </div>
           </div>
         ) : phase === 'in' && !coached && !sheet ? (
           <div className="cr-places-coach" role="note">
@@ -374,7 +433,6 @@ export function PlacesScreen() {
                   type="button"
                   className="cr-place-action"
                   disabled={left > 0}
-                  aria-label={a.label}
                   onClick={() => {
                     haptic(12);
                     void usePlacesStore.getState().act(a);
@@ -396,7 +454,7 @@ export function PlacesScreen() {
       ) : null}
 
       {sheet === 'say' ? (
-        <section className="cr-places-tray" aria-label="Say something">
+        <section className="cr-places-tray" aria-label="Say something" ref={trayRef}>
           <div className="cr-places-tray-head">
             <b>Say something</b>
             <div className="cr-places-lang" role="group" aria-label="Language">
@@ -435,8 +493,43 @@ export function PlacesScreen() {
         </section>
       ) : null}
 
+      {sheet === 'people' ? (
+        <section className="cr-places-tray" aria-label="People here" ref={trayRef}>
+          <div className="cr-places-tray-head">
+            <b>People here</b>
+            <button type="button" className="cr-places-x" onClick={() => setSheet(null)} aria-label="Close">
+              <Icon name="close" />
+            </button>
+          </div>
+          {others.length === 0 ? (
+            <p className="cr-places-note">Nobody else is here yet. Invite a friend, or try another place.</p>
+          ) : (
+            <ul className="cr-places-people">
+              {others.map((m) => (
+                <li key={m.id}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPicked(m.id);
+                      setReported(false);
+                      setSheet('person');
+                    }}
+                  >
+                    <span className="cr-places-initial" aria-hidden="true">
+                      {m.name.slice(0, 1).toUpperCase()}
+                    </span>
+                    <span>{m.name}</span>
+                    {muted.includes(m.id) ? <small>Muted</small> : null}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      ) : null}
+
       {sheet === 'person' && person ? (
-        <section className="cr-places-tray" aria-label={person.name}>
+        <section className="cr-places-tray" aria-label={person.name} ref={trayRef}>
           <div className="cr-places-who">
             <span className="cr-places-initial" aria-hidden="true">
               {person.name.slice(0, 1).toUpperCase()}
@@ -500,7 +593,7 @@ export function PlacesScreen() {
       ) : null}
 
       {sheet === 'invite' ? (
-        <section className="cr-places-tray" aria-label="Invite a friend">
+        <section className="cr-places-tray" aria-label="Invite a friend" ref={trayRef}>
           <div className="cr-places-tray-head">
             <b>Bring a friend to the {kindInfo.label.toLowerCase()}</b>
             <button type="button" className="cr-places-x" onClick={() => setSheet(null)} aria-label="Close">

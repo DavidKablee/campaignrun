@@ -78,6 +78,9 @@ export function App() {
           g.setPlacesTarget(invite);
           track('mobilise_open', invite.stateId);
           if (g.screen === 'splash') g.openPlaces('splash');
+        } else {
+          // Not unlocked yet: say so on the splash instead of dropping the invite without a word.
+          g.setLockedInvite(invite);
         }
         window.history.replaceState(null, '', window.location.pathname + window.location.search);
         return;
@@ -192,6 +195,10 @@ function Splash() {
   const incomingOpen = incoming ? openStates.some((r) => r.id === incoming.stateId) : false;
   const incomingRide = incoming ? rides.find((r) => r.id === incoming.rideId) : undefined;
   const incomingState = incoming ? stateIndex.find((r) => r.id === incoming.stateId) : undefined;
+  const lockedInvite = useGameStore((s) => s.lockedInvite);
+  const inviteWhere = lockedInvite
+    ? `${stateIndex.find((r) => r.id === lockedInvite.stateId)?.name ?? 'A place'} ${places.kinds.find((k) => k.id === lockedInvite.kind)?.label ?? ''}`.trim()
+    : '';
   const takeChallenge = () => {
     if (!incoming) return;
     void audio.unlock();
@@ -272,6 +279,12 @@ function Splash() {
         {isClosed() ? (
           <p className="cr-notice" role="status">
             The campaign has closed. Every road is open for practice.
+          </p>
+        ) : null}
+        {lockedInvite && following < places.followingGate ? (
+          <p className="cr-notice" role="status">
+            <b>{inviteWhere}</b> is waiting for you. Reach {places.followingGate.toLocaleString('en-US')} Following to join (
+            {(places.followingGate - following).toLocaleString('en-US')} to go).
           </p>
         ) : null}
         {liveBanners(Date.now(), tourClaimedKey).map((b) => (
@@ -396,6 +409,9 @@ function Briefing() {
     <div className="cr-screen cr-screen--briefing">
       <div className="cr-brief">
         <div className="cr-chrome-top">
+          <button type="button" className="cr-menu-back" onClick={goBack} aria-label="Back">
+            <span aria-hidden="true">‹</span>
+          </button>
           <p className="cr-kicker">{pack?.name ?? 'Lagos'} open</p>
           <button
             type="button"
@@ -517,7 +533,7 @@ function Briefing() {
           {travelCaps.maxStatesPerDay}
         </p>
         {!gate.ok && (
-          <p className="cr-fineprint">
+          <p className="cr-fineprint cr-brief-why" role="status">
             Travel cap hit ({gate.reason === 'states' ? 'too many states' : gate.reason === 'state-runs' ? 'this state' : 'daily runs'}). Back tomorrow.
           </p>
         )}

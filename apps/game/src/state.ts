@@ -40,6 +40,8 @@ const STORE_VERSION = 12;
 interface GameState {
   screen: Screen;
   setScreen: (s: Screen) => void;
+  /** The screen before the current one, so Back from a shared screen (the Board) returns to where the player was. */
+  previousScreen: Screen | null;
   /** Where Settings returns when closed (not persisted). */
   settingsBack: Screen;
   openSettings: () => void;
@@ -96,6 +98,9 @@ interface GameState {
   /** A place a friend invited the player to (not persisted); Mobilise opens here instead of the active state. */
   placesTarget: { stateId: string; kind: string } | null;
   setPlacesTarget: (t: { stateId: string; kind: string } | null) => void;
+  /** An invite that arrived before the 1,000 Following gate: kept for this session and used once Mobilise opens. */
+  lockedInvite: { stateId: string; kind: string } | null;
+  setLockedInvite: (t: { stateId: string; kind: string } | null) => void;
   setAuthReturn: (s: Screen | null) => void;
   incomingChallenge: Challenge | null;
   setIncomingChallenge: (c: Challenge | null) => void;
@@ -165,7 +170,8 @@ export const useGameStore = create<GameState>()(
   persist(
     (set) => ({
       screen: 'splash',
-      setScreen: (s) => set({ screen: s }),
+      setScreen: (s) => set((st) => (st.screen === s ? {} : { screen: s, previousScreen: st.screen })),
+      previousScreen: null,
       settingsBack: 'splash',
       openSettings: () => set((st) => ({ settingsBack: st.screen === 'settings' ? st.settingsBack : st.screen, screen: 'settings' })),
 
@@ -223,9 +229,16 @@ export const useGameStore = create<GameState>()(
       setQuickRun: (v) => set({ quickRun: v }),
       authReturn: null,
       placesBack: 'briefing',
-      openPlaces: (from) => set((s) => (s.following < places.followingGate ? {} : { placesBack: from, screen: 'places' })),
+      openPlaces: (from) =>
+        set((s) =>
+          s.following < places.followingGate
+            ? {}
+            : { placesBack: from, screen: 'places', placesTarget: s.placesTarget ?? s.lockedInvite, lockedInvite: null },
+        ),
       placesTarget: null,
       setPlacesTarget: (t) => set({ placesTarget: t }),
+      lockedInvite: null,
+      setLockedInvite: (t) => set({ lockedInvite: t }),
       setAuthReturn: (s) => set({ authReturn: s }),
       incomingChallenge: null,
       setIncomingChallenge: (c) => set({ incomingChallenge: c }),

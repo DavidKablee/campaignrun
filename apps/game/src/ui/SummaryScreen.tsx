@@ -478,7 +478,7 @@ export function SummaryScreen() {
           onClick={() => useGameStore.getState().openPlaces('summary')}
         >
           <span aria-hidden="true">⚑</span>
-          <small>Mobilise</small>
+          <small>{following < places.followingGate ? `Mobilise · ${(places.followingGate - following).toLocaleString('en-US')} to go` : 'Mobilise'}</small>
         </button>
         <button type="button" onClick={() => setScreen('map')}>
           <span aria-hidden="true">⊙</span>
